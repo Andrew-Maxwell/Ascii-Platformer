@@ -1,0 +1,4 @@
+b_room1_collider.txt 0 0 0 255 1
+L 0 0 175 175 175 255 0.95 b_room1_collider.txt
+L 0 0 200 200 200 255 1 b_room1_collider.txt
+L 0 0 175 175 175 255 1.05 b_room1_collider.txt

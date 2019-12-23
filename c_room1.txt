@@ -1,0 +1,6 @@
+c_room1_collider.txt        245 195 150 255
+L   -40   0   094 020 024 130 0.65    c_room1_layer3.txt
+L   -40   0   060 010 045 100 0.65    c_room1_layer4.txt
+L   0   0   094 020 024 255 1       c_room1_layer1.txt
+L   0   0   060 010 045 255 1       c_room1_layer2.txt
+

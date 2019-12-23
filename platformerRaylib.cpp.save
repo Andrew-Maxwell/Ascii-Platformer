@@ -1,0 +1,760 @@
+/* IDEAS/TODO:
+Fix ASCII rendering (Will probably have to create an ASCII texture... On hold for now.)
+
+Fix particles getting stuck in walls
+Fix particles moving right under the bottom of the screen
+Add color!
+Fix jumping
+
+*/
+
+#include <thread>
+#include <math.h>
+#include <stdio.h>
+#include <raylib.h>
+#include <chrono>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <list>
+#include <vector>
+#include <sstream>
+#include <string.h>
+
+#define SCREENWIDTH 1280
+#define SCREENHEIGHT 720
+#define FONTSIZE 16
+#define ROWS SCREENHEIGHT / FONTSIZE
+#define COLS SCREENWIDTH / FONTSIZE
+
+//#define PLAYERSPEED 0.3
+//#define JUMPSPEED 0.05
+//#define JPMAX 6
+#define PARTICLELIFESPAN 50
+#define COLLIDERTILESIZE 10
+//#define GRAVITY 0.03
+//#define FRICTION 0.5
+
+Font FONT;
+float PLAYERSPEED = 0.3;
+float JUMPSPEED = 0.05;
+int JPMAX = 6;
+float GRAVITY = 0.03;
+float FRICTION = 0.5;
+
+using namespace std;
+
+//Forward declaration, not sure why this fixes things but it does.
+
+class playerEntity;
+
+/******************************************************************************/
+/*Collision*/
+/*Used for handling interactions between entities within Collider object
+/******************************************************************************/
+
+struct collision {
+    float x;
+    float y;
+    uint8_t damage;
+
+    collision(float newX, float newY, uint8_t newDamage) {
+        x = newX;
+        y = newY;
+        damage = newDamage;
+    }
+
+};
+
+/******************************************************************************/
+/*Collidor*/
+/******************************************************************************/
+
+class collider {
+
+    list<collision> global;
+    list<collision>** local;
+    vector<string> tileMap;
+    int rows;
+    int cols;
+
+    public:
+
+    collider(string fileName) {
+        ifstream colliderFile;
+        colliderFile.open(fileName);
+        if (!colliderFile) {
+            cerr << "Error opening collider file.";
+            exit(EXIT_FAILURE);
+        }
+        colliderFile >> rows >> cols;
+    //Support reading in preexisting collision entities from file?
+        colliderFile.ignore(10000, '\n');
+
+    //Read basic, static tiles into 'tileMap'
+
+        string line;
+        while (getline(colliderFile, line)) {
+            tileMap.push_back(line);
+        }
+
+    //Create local collision set
+
+//      local = new list<collision>[rows / COLLIDERTILESIZE + 1][cols / COLLIDERTILESIZE + 1];
+    }
+
+    bool isSolid(int row, int col) {
+        if (row > 0 && row < tileMap.size() && col > 0 && col < tileMap[row].size()) {
+            return tileMap[row][col] == 's';
+        }
+        return true;
+    }
+
+    bool isLiquid(int row, int col) {
+        return tileMap[row][col] == 'w';
+    }
+};
+
+/******************************************************************************/
+//Virtual entity parent class.
+/******************************************************************************/
+
+class entity {
+
+    public:
+
+    int type;
+    int id;
+    float x;
+    float y;
+
+    entity(float newx, float newy) {
+        x = newx;
+        y = newy;
+    }
+
+    virtual ~entity() = default;
+
+    //Move entities. Update collision field.
+
+    virtual void tickSet(collider& col) = 0;
+
+    //Update entities based on new collision field values.
+
+    virtual void tickGet(collider& col) = 0;
+
+    //perform additional cleanup. If this function returns true, then the entity is deleted by the entityList.
+
+    virtual bool finalize() = 0;
+
+    //Display the entity.
+
+    virtual void print(float playerX, float playerY) = 0;
+};
+
+/******************************************************************************/
+//A list for containing entities. Every tick, every entity in the list has its four functions called
+//once. Also, entities can contain entityLists (e.g. an entity containing the bullets it's fired) as
+//long as the four functions are called by that entity's four functions.
+/******************************************************************************/
+
+class entityList {
+
+    list<entity*> entities;
+    playerEntity* player;
+
+    public:
+
+    void tickSet(collider& col) {
+        list<entity*>::iterator e = entities.begin();
+        while (e != entities.end()) {
+            (*e) -> tickSet(col);
+            e++;
+        }
+    }
+
+    void tickGet(collider& col) {
+        list<entity*>::iterator e = entities.begin();
+        while (e != entities.end()) {
+            (*e) -> tickGet(col);
+            e++;
+        }
+    }
+
+    void finalize() {
+        list<entity*>::iterator e = entities.begin();
+        while (e != entities.end()) {
+            if ((*e) -> finalize()) {
+                delete *e;
+                e = entities.erase(e);
+            }
+            else {
+                e++;
+            }
+        }
+    }
+
+    void print(float playerX, float playerY) {
+        list<entity*>::iterator e = entities.begin();
+        while (e != entities.end()) {
+            (*e) -> print(playerX, playerY);
+            e++;
+        }
+    }
+
+    void addEntity(entity* toAdd) {
+        entities.push_back(toAdd);
+    }
+};
+
+/******************************************************************************/
+//lightPhysicalEntity
+//An entity to which physics (gravity and not travelling through solid objects)
+//applies -- loosely.
+/******************************************************************************/
+
+class lightPhysicalEntity : virtual public entity {
+
+public:
+
+    float elasticity;
+    float xMomentum, yMomentum;
+    int xSign = 1, ySign = 1;
+
+    explicit lightPhysicalEntity(float newx = 0, float newy = 0, float elasticity = 0, float newXMomentum = 0, float newYMomentum = 0) : entity(newx, newy) {
+        xMomentum = newXMomentum;
+        yMomentum = newYMomentum;
+    }
+
+    void tickSet(collider& col) {
+        yMomentum += GRAVITY;
+
+        if (col.isSolid((int)y, (int)(x + xMomentum) + (xMomentum > 0))) {
+            x = floor(x + xMomentum) + (xMomentum < 0);
+            xMomentum *= (-1 * elasticity);
+        }
+        else {
+            x += xMomentum;
+        }
+
+        if (col.isSolid((int)(y + yMomentum) + (yMomentum > 0), (int)x)) {
+            y = floor(y + yMomentum) + (yMomentum < 0);
+            yMomentum *= (-1 * elasticity);
+            xMomentum *= FRICTION;
+        }
+        else {
+            y += yMomentum;
+        }
+    }
+
+    void tickGet(collider& col) {}
+
+    bool finalize() {return false;}
+
+    void print() {}
+
+};
+
+/******************************************************************************/
+//realPhysicalEntity
+//An entity to which physics (gravity and not travelling through solid objects)
+//applies, more rigorously.
+/******************************************************************************/
+
+class realPhysicalEntity : virtual public entity {
+
+public:
+
+    float elasticity;
+    float xMomentum, yMomentum;
+    int xSign = 1, ySign = 1;
+
+    explicit realPhysicalEntity(float newx = 0, float newy = 0, float elasticity = 0, float newXMomentum = 0, float newYMomentum = 0) : entity(newx, newy) {
+        xMomentum = newXMomentum;
+        yMomentum = newYMomentum;
+    }
+
+    void tickSet(collider& col) {
+        yMomentum += GRAVITY;
+
+        if (xMomentum > 0) {
+            xSign = 1;
+        }
+        else {
+            xSign = 0;
+        }
+        bool hitX = false;
+        if (xMomentum > 0) {
+            for (int i = x + 1; i < x + xMomentum + 1; i++) {
+                if (col.isSolid(y, i) || col.isSolid(y - 0.8, i)) {
+                    x = i - 1;
+                    xMomentum *= (-1 * elasticity);
+                    hitX = true;
+                    break;
+                }
+            }
+        }
+        else {
+            for (int i = x; i > x + xMomentum; i--) {
+                if (col.isSolid(y, i) || col.isSolid(y - 0.8, i)) {
+                    x = i + 1;
+                    xMomentum *= (-1 * elasticity);
+                    hitX = true;
+                    break;
+                }
+            }
+        }
+        if (!hitX) {
+            x += xMomentum;
+        }
+
+        bool hitY = false;
+        if (yMomentum > 0) {
+            for (int i = y + 1; i < y + yMomentum + 1; i++) {
+                if (col.isSolid(i, x) || col.isSolid(i, x - 0.8)) {
+                    y = i - 1;
+                    yMomentum *= (-1 * elasticity);
+                    hitY = true;
+                    break;
+                }
+            }
+        }
+        else {
+            for (int i = y; i > y + yMomentum; i--) {
+                if (col.isSolid(i, x) || col.isSolid(i, x - 0.8)) {
+                    y = i + 1;
+                    yMomentum *= (-1 * elasticity);
+                    hitY = true;
+                    break;
+                }
+            }
+        }
+        if (!hitY) {
+            y += yMomentum;
+        }
+    }
+
+    void tickGet(collider& col) {}
+
+    bool finalize() {return false;}
+
+    void print() {}
+
+};
+
+/******************************************************************************/
+//layer
+//Static multi-character entities read in from file.
+//Designed to be the visual part of the level.
+/******************************************************************************/
+
+class layer : virtual public entity {
+
+    vector<string> canvas;
+
+    public:
+
+    explicit layer(float newx = 0, float newy = 0) : entity(newx, newy) {}
+
+    void readLayer(string filename) {
+        ifstream worldFile;
+        worldFile.open(filename);
+        if (!worldFile) {
+            cerr << "Error opening layer file.";
+            exit(EXIT_FAILURE);
+        }
+        worldFile >> x >> y;
+        worldFile.ignore(10000, '\n');
+        string line;
+        while (getline(worldFile, line)) {
+            canvas.push_back(line);
+        }
+    }
+
+    void tickSet(collider& col) {}
+
+    void tickGet(collider& col) {}
+
+    bool finalize() override {
+        return false;
+    }
+
+    void print(float playerX, float playerY) {
+        for (int i = max((int)(playerY - ROWS / 2), 0); i < min((int)(playerY + ROWS / 2) + 1, (int)canvas.size()); i++) {
+            DrawTextEx(FONT, canvas[i].c_str(), (Vector2){ (COLS / 2 - playerX - x) * FONTSIZE, (ROWS / 2 - playerY - y + i) * FONTSIZE }, FONTSIZE, 0, GRAY);
+        }
+    }
+
+};
+
+/******************************************************************************/
+//Particle
+//Entity represented by any char that moves in a predefined direction until its lifetime runs out.
+//If the character passed to constructor is 0, then a character is chosen based on direction.
+/******************************************************************************/
+
+class particle : virtual public entity {
+
+    public:
+
+    float xSpeed, ySpeed;
+    int lifetime;
+    char* toPrint;
+
+    void setDirection() {
+        if (xSpeed == 0) {
+            toPrint[0] = '|';
+        }
+        else {
+            if (ySpeed / xSpeed < -1.09) {
+                toPrint[0] = '|';
+            }
+            else if (ySpeed / xSpeed < -0.383) {
+                toPrint[0] = '/';
+            }
+            else if (ySpeed / xSpeed < 0.383) {
+                toPrint[0] = '-';
+            }
+            else if (ySpeed / xSpeed < 1.09) {
+                toPrint[0] = '\\';
+            }
+            else {
+                toPrint[0] = '|';
+            }
+        }
+    }
+
+    explicit particle(float newX, float newY, float newXSpeed, float newYSpeed, char c, int newLifetime) : entity(newX, newY) {
+        toPrint = new char[2];
+        xSpeed = newXSpeed;
+        ySpeed = newYSpeed;
+        lifetime = newLifetime;
+        if (c == 0) {
+            setDirection();
+        }
+        else {
+            toPrint[0] = c;
+        }
+        toPrint[1] = '\0';
+    }
+
+    void tickSet(collider& col) override {
+        x += xSpeed;
+        y += ySpeed;
+    }
+
+    void tickGet(collider& col) {}
+
+    bool finalize() {
+        if (lifetime-- == 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    void print(float playerX, float playerY) override {
+        DrawTextEx(FONT, toPrint, (Vector2){ (COLS / 2 - playerX + x) * FONTSIZE, (ROWS / 2 - playerY + y) * FONTSIZE }, FONTSIZE, 1, WHITE);
+    }
+};
+
+/******************************************************************************/
+//physicalParticle
+//A particle to which physics applies.
+/******************************************************************************/
+
+class physicalParticle : public particle, public lightPhysicalEntity {
+
+    bool shouldDelete = false;
+
+    public:
+
+    physicalParticle(float newX, float newY, float newXSpeed, float newYSpeed, char c, int newLifetime, float newElasticity) :
+        entity(newX, newY),
+        particle(newX, newY, 0, 0, c, newLifetime),
+        lightPhysicalEntity(newX, newY, newElasticity, newXSpeed, newYSpeed) {
+
+        elasticity = newElasticity;
+        lifetime = newLifetime;
+    }
+
+    void tickSet(collider& col) {
+        lightPhysicalEntity::tickSet(col);
+        if (col.isSolid(y, x)) {
+            shouldDelete = true;
+        }
+    }
+
+    void tickGet(collider& col) {
+        lightPhysicalEntity::tickGet(col);
+    }
+
+    bool finalize() {
+        return (xMomentum < 0.1 && xMomentum > -0.1 && yMomentum < 0.1 && yMomentum > -0.1) || shouldDelete;
+    }
+
+    void print(float playerX, float playerY) override {
+        if (xMomentum + yMomentum > 0.1) {
+            xSpeed = xMomentum;
+            ySpeed = yMomentum;
+            particle::setDirection();
+        }
+        else {
+            toPrint[0] = '.';
+        }
+        DrawTextEx(FONT, toPrint, (Vector2){ (COLS / 2 - playerX + x) * FONTSIZE, (ROWS / 2 - playerY + y) * FONTSIZE }, FONTSIZE, 1, WHITE);
+    }
+};
+
+/******************************************************************************/
+//Explosion()
+//Spawn particles moving outwards in a circle
+/******************************************************************************/
+
+void explosion(entityList& entities, int count, float x, float y, float speed, char c, int lifespan, float elasticity) {
+    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / count)) {
+        entities.addEntity(new physicalParticle(x, y, cos(angle) * speed, sin(angle) * speed, c, lifespan, elasticity));
+    }
+}
+
+/******************************************************************************/
+//PlayerEntity
+//what it sounds like, I guess.
+/******************************************************************************/
+
+class playerEntity : public lightPhysicalEntity {
+
+    bool shot = false;
+    bool shotz = false;
+    bool jumped = false;
+    char direction, oldDirection;
+    bool shouldDelete;
+    entityList localEntities;
+    int lastMovedX, lastMovedY;
+    float bulletSpeed = 1;
+    int jp = 0;
+
+    public:
+
+    explicit playerEntity(float newX, float newY) : lightPhysicalEntity(newX, newY, 1.0),
+                                                    entity(newX, newY)
+    {
+        yMomentum = 0;
+        elasticity = 0;
+    }
+
+    void tickSet(collider& col) override {
+        lastMovedY = 0;
+        xMomentum *= 0.5;
+        if (xMomentum > 1) {
+            xMomentum = 1;
+        }
+        if (yMomentum > 1) {
+            yMomentum = 1;
+        }
+        if (IsKeyDown(KEY_RIGHT)) {
+            xMomentum += PLAYERSPEED;
+            lastMovedX = 1;
+        }
+        if (IsKeyDown(KEY_LEFT)) {
+            xMomentum -= PLAYERSPEED;
+            lastMovedX = -1;
+        }
+        if (IsKeyDown(KEY_UP)) {
+            lastMovedY += -1;
+        }
+        if (IsKeyDown(KEY_DOWN)) {
+            lastMovedY += 1;
+        }
+
+        //Boollets
+
+        if (IsKeyDown(KEY_X) && !shot) {
+            particle* p;
+            if (lastMovedY) {
+                p = new particle(x, y, 0, lastMovedY * bulletSpeed, 0, 20);
+            }
+            else {
+                p = new particle(x, y, lastMovedX * bulletSpeed, 0, 0, 20);
+            }
+            localEntities.addEntity(p);
+            shot = true;
+        }
+        else if (IsKeyUp(KEY_X)) {
+            shot = false;
+        }
+
+        //Splosions
+
+        if (IsKeyDown(KEY_Z) && !shotz) {
+            explosion(localEntities, 50, x, y, 3, 0, 20, 0.5);
+            shotz = true;
+        }
+        else if (IsKeyUp(KEY_Z)) {
+            shotz = false;
+        }
+
+        //Jomping
+
+        if (IsKeyDown(KEY_C) && !jumped && col.isSolid(y + 1, x)) {
+            cout << "Jumping" << endl;
+            yMomentum -= 1;
+            jumped = true;
+        }
+        else if (IsKeyUp(KEY_C)) {
+            jumped = false;
+            yMomentum = max(0.0f, yMomentum);
+        }
+
+        /*
+        if (IsKeyDown(KEY_SPACE) && jp) {
+            if (jp == JPMAX) {
+                yMomentum -= JUMPSPEED;
+            }
+            yMomentum -= JUMPSPEED;
+            jp--;
+        }
+        else {
+            jp = 0;
+        }
+        if (col.isSolid(y + 1, x)) {
+            jp = JPMAX;
+        }
+        */
+
+        lightPhysicalEntity::tickSet(col);
+        shouldDelete = false;
+        localEntities.tickSet(col);
+    }
+
+    void tickGet(collider& col) {
+        localEntities.tickGet(col);
+    }
+
+    bool finalize() {
+        localEntities.finalize();
+        return shouldDelete;
+    }
+
+    void print(float playerX, float playerY) {
+        DrawTextEx(FONT, "@", (Vector2){ (SCREENWIDTH - FONTSIZE) / 2.0, (SCREENHEIGHT - FONTSIZE) / 2.0 }, FONTSIZE, 1, WHITE);
+        localEntities.print(playerX, playerY);
+    }
+
+};
+
+/******************************************************************************/
+//Read in a list of entities from a file
+/******************************************************************************/
+
+playerEntity* readEntities(entityList& el, string fileName) {
+    ifstream entityFile;
+    entityFile.open(fileName);
+    if (!entityFile) {
+        cerr << "Error opening entity file.";
+        exit(EXIT_FAILURE);
+    }
+    char c;
+    entityFile >> c;
+    while (c != '@') {
+        switch(c) {
+            case 'L': {
+                string fileName;
+                entityFile >> fileName;
+                float x, y;
+                entityFile >> x >> y;
+                layer * L = new layer(x, y);
+                L -> readLayer(fileName);
+                el.addEntity(L);
+                break;
+            }
+            default: {
+                cerr << "Error: Bad entity when reading entity list.";
+                break;
+            }
+        }
+        entityFile >> c;
+    }
+    float x, y;
+    entityFile >> x >> y;
+    playerEntity* player = new playerEntity(x, y);
+    el.addEntity(player);
+    return player;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+
+
+int main() {
+
+//Initialize raylib
+
+    InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer");
+    SetTargetFPS(60);
+    int fontChars[256];
+    for (int i = 0; i < 256; i++) {
+        fontChars[i] = i;
+    }
+    FONT = LoadFontEx("PxPlus_IBM_BIOS.ttf", 8, fontChars, 256);
+
+//Read in collider
+
+    collider col("collider.txt");
+
+//Read in entities
+
+    entityList entities;
+    playerEntity* player;
+    player = readEntities(entities, "entities.txt");
+
+//misc initializations
+
+    int won = 0;
+    chrono::steady_clock::time_point tickStart, tickEnd;
+    long total = 0, tickCount = 0;
+
+//main loop
+
+    while (!(won || WindowShouldClose())) {
+        tickStart = chrono::steady_clock::now();
+
+//Update entities
+
+        entities.tickSet(col);
+        entities.tickGet(col);
+        entities.finalize();
+
+//Display the world
+        
+        BeginDrawing();
+        ClearBackground(BLACK);
+        entities.print(player -> x, player -> y);
+        EndDrawing();
+
+//sleep for the remainder of the 60th of the second
+
+        tickEnd = chrono::steady_clock::now();
+        int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
+        if (tickLength > 16666) {
+            cout << "Warning: Bogged down. Tick length: " << tickLength << endl;
+        }
+        total += tickLength;
+        tickCount++;
+        this_thread::sleep_for(chrono::microseconds(16666) - (tickEnd - tickStart));
+    }
+
+//final clean up
+
+    CloseWindow();
+    cout << "Average tick length: " << total / tickCount << endl;
+    if (won == -1) {
+        cout << "You lose.";
+    }
+    else {
+        cout << "You win! your score is: " << won;
+    }
+}
+

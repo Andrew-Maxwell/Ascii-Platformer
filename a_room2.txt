@@ -1,0 +1,10 @@
+a_room2_collider.txt 100 100 100 255
+@ 0.0 0.0 100 200 200 255 2
+L 0.0 0.0 200 100 100 255 2 a_room2_collider.txt
+L 0.0 0.0 200 100 100 255 2.05 a_room2_layer.txt
+L 0.0 0.0 200 100 100 255 2.1 a_room2_layer.txt
+L 0.0 0.0 200 100 100 255 2.15 a_room2_layer.txt
+L 0.0 0.0 200 100 100 255 2.2 a_room2_layer.txt
+L 0.0 0.0 200 100 100 255 2.25 a_room2_layer.txt
+D 14 14 255 255 255 255 2 a_room1.txt 37 91
+S 2 14 100 255 175 255 2
