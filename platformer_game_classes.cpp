@@ -138,12 +138,13 @@ using namespace std;
     void particle::tickSet(collider& col) {
         x += xSpeed;
         y += ySpeed;
+        lifetime--;
     }
 
     void particle::tickGet(collider& col) {}
 
     bool particle::finalize() {
-        if (lifetime-- == 0) {
+        if (lifetime == 0) {
             return true;
         }
         else {
@@ -220,7 +221,7 @@ using namespace std;
     void savePoint::tickGet(collider& col) {
         if (savedGame) {;
             savedGame = false;
-            explosion(myParticles, 16, x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, 0.3, '*', 100, 0.5);
+            explosion(col, myParticles, 16, x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, 0.3, '*', 100, 0.5);
         }
         myParticles.tickGet(col);
     }
@@ -276,14 +277,14 @@ using namespace std;
     void forceField::tickSet(collider& col) {
         if (IsKeyDown(KEY_LEFT_SHIFT)) {
             isOn = true;
-            if (++particleCount % 200 * power == 0) {
+            if (++particleCount % (int)(400 * power) == 0) {
                 if (power > 0) { //Attractor force field
-                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 40)) {
+                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
                         myParticles.addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint.r, tint.g, tint.b, tint.a, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
                     }
                 }
                 else {  //repeller force field
-                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 40)) {
+                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
                         cout << "Spawning particle." << range / power / 40 << "\n";
                         myParticles.addEntity(new particle(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
                     }
@@ -390,7 +391,7 @@ using namespace std;
         if (col.isSolid((int)(y + yMomentum) + (yMomentum > 0), (int)x)) {
             y = floor(y + yMomentum) + (yMomentum < 0);
             yMomentum *= (-1 * elasticity);
-            xMomentum *= FRICTION;
+            xMomentum *= FRICTION / 2;
         }
         else {
             y += yMomentum;
@@ -469,7 +470,20 @@ using namespace std;
         lifetime = newLifetime;
     }
 
+    bool physicalParticle::doesCollide(float otherX, float otherY, int otherType) {
+        return false;
+    }
+
+    collision physicalParticle::getCollision() {
+        return collision(0);
+    }
+
+    bool physicalParticle::stopColliding() {
+        return finalize();
+    }
+
     void physicalParticle::tickSet(collider& col) {
+        lifetime--;
         lightPhysicalEntity::tickSet(col);
         if (col.isSolid(y, x)) {
             shouldDelete = true;
@@ -477,11 +491,16 @@ using namespace std;
     }
 
     void physicalParticle::tickGet(collider& col) {
+        for (collision thisCollision : collisions) {
+            xMomentum += thisCollision.xVal;
+            yMomentum += thisCollision.yVal;
+        }
         lightPhysicalEntity::tickGet(col);
     }
 
     bool physicalParticle::finalize() {
-        return (xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01) || shouldDelete || particle::finalize();
+        cout << lifetime << " " << xMomentum << ' ' << yMomentum << endl;
+        return ((xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01) || shouldDelete || particle::finalize());
     }
 
     void physicalParticle::print(float cameraX, float cameraY, Font displayFont) {
@@ -503,10 +522,12 @@ using namespace std;
 //Spawn particles moving outwards in a circle
 /******************************************************************************/
 
-    void explosion( entityList& entities, int count, float x, float y, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    void explosion( collider& col, entityList& entities, int count, float x, float y, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
                     float newSizeFactor, float speed, char c, int lifespan, float elasticity) {
         for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / count)) {
-            entities.addEntity(new physicalParticle(x, y, R, G, B, A, newSizeFactor, cos(angle) * speed, sin(angle) * speed, c, lifespan, elasticity));
+            physicalParticle* p = new physicalParticle(x, y, R, G, B, A, newSizeFactor, cos(angle) * speed, sin(angle) * speed, c, lifespan, elasticity);
+            entities.addEntity(p);
+            col.addCollideable(p);
         }
     }
 
@@ -631,7 +652,7 @@ using namespace std;
         //Splosions
 
         if (IsKeyPressed(KEY_C)) {
-            explosion(localEntities, 50, x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, 1, 0, PARTICLELIFESPAN, 0.2);
+            explosion(col, localEntities, 50, x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, 1, 0, PARTICLELIFESPAN, 0.2);
         }
 
         //Jomping

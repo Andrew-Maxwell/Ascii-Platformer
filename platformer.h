@@ -29,7 +29,7 @@
 #define PLAYERMAXSPEED 0.7
 #define JUMPSPEED 0.35
 #define JPMAX 6
-#define PARTICLELIFESPAN 100
+#define PARTICLELIFESPAN 240
 #define COLLIDERTILESIZE 10
 #define GRAVITY 0.01
 #define FRICTION 0.95
@@ -456,7 +456,7 @@ class realPhysicalEntity : virtual public entity {
 //A particle to which physics applies.
 /******************************************************************************/
 
-class physicalParticle : public particle, public lightPhysicalEntity {
+class physicalParticle : public particle, public lightPhysicalEntity, public collideable {
 
     bool shouldDelete = false;
     bool dynamicChar;
@@ -466,6 +466,12 @@ class physicalParticle : public particle, public lightPhysicalEntity {
     physicalParticle(   float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
                         float newSizeFactor, float newXSpeed, float newYSpeed, char c, int newLifetime,
                         float newElasticity);
+
+    bool doesCollide(float otherX, float otherY, int otherType);
+
+    collision getCollision();
+
+    bool stopColliding();
 
     void tickSet(collider& col);
 
@@ -481,7 +487,7 @@ class physicalParticle : public particle, public lightPhysicalEntity {
 //Spawn particles moving outwards in a circle
 /******************************************************************************/
 
-void explosion( entityList& entities, int count, float x, float y, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+void explosion(collider& col, entityList& entities, int count, float x, float y, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
                 float newSizeFactor, float speed, char c, int lifespan, float elasticity);
 
 /******************************************************************************/
