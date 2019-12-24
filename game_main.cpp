@@ -1,4 +1,6 @@
-#include "platformer.h"
+#include "meta.hpp"
+#include "game_meta_classes.hpp"
+#include "game_classes.hpp"
 
 using namespace std;
 
