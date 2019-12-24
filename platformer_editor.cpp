@@ -15,16 +15,11 @@ struct charFill {
     int codepoint;
 
     charFill(int newCodepoint) {
-        cout << "charFill created with codepoint " << newCodepoint << endl;
         codepoint = newCodepoint;
     }
 
     int get(int x, int y) {
         return codepoint;
-    }
-
-    void print(int i, Font displayFont) { //Used for displaying brush in charFill selector screen
-        DrawTextEx(displayFont, TextToUtf8(&codepoint, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
     }
 };
 
@@ -34,10 +29,6 @@ struct randomCharFill : public charFill {
 
     int get(int x, int y) {
         return codepoints[GetRandomValue(0, codepoints.size() - 1)];
-    }
-
-    void print(int i, Font displayFont) { //Used for displaying brush in charFill selector screen
-        DrawTextEx(displayFont, TextToUtf8(&codepoints[GetRandomValue(0, codepoints.size() - 1)], 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
     }
 };
 
@@ -387,7 +378,7 @@ void readEntities(entityList& el, list<editableLayer*>& layers, editableLayer*& 
 }
 
 /******************************************************************************/
-/******************************************************************************/
+//Main loop
 /******************************************************************************/
 
 int main(int argc, char** argv) {
@@ -416,7 +407,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < NUMCHARS; i++) {  //Populate all single-character charFills
         charFills.push_back(charFill(FONTCHARS[i]));
     }
-    int palette[44] = {48, };
+    int palette[44] = {767, 768, 769, 770, 771, 772, 773, 774,775, 776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 115, 46, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57};
     int paletteSelection = 0;
     int paletteSwitch = 0;
 
@@ -459,10 +450,11 @@ int main(int argc, char** argv) {
                 BeginDrawing();
                 ClearBackground(DARKGRAY);
 
-                //Print out all available characters
+                //Print out all available charFills
 
                 for (int i = 0; i < charFills.size(); i++) {
-                    charFills[i].print(i, displayFont);
+                    int codePointToDisplay =  charFills[i].get(-1, -1);
+                    DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
                 }
 
                 //Print out currently selected brush
@@ -741,20 +733,22 @@ int main(int argc, char** argv) {
                 //display brush palette
 
                 for (int i = 0; i < 12; i++) {
+                    int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]].get(-1, -1);
                     if (i == paletteSelection) {
-                        DrawTextEx(displayFont, TextToUtf8(&palette[i + 22 * paletteSwitch], 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
+                        DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
                     else {
-                        DrawTextEx(displayFont, TextToUtf8(&palette[i + 22 * paletteSwitch], 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
+                        DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
                     }
                 }
 
                 for (int i = 12; i < 22; i++) {
+                    int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]].get(-1, -1);
                     if (i == paletteSelection) {
-                        DrawTextEx(displayFont, TextToUtf8(&palette[i + 22 * paletteSwitch], 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
+                        DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
                     else {
-                        DrawTextEx(displayFont, TextToUtf8(&palette[i + 22 * paletteSwitch], 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
+                        DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
                     }
                 }
 

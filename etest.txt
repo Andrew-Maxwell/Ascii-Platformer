@@ -1,0 +1,2 @@
+etest_collider.txt 255 255 255 255
+L	0	0	0	0	0	255	1		etest_layer0.txt
