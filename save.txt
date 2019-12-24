@@ -1,1 +1,1 @@
-a_room1.txt 18.0973 91
+steelgarden.txt 25 25

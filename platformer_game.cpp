@@ -89,7 +89,7 @@ int main() {
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer");
     SetTargetFPS(60);
 
-    Font displayFont = LoadFontEx("PxPlus_IBM_BIOS_extended.ttf", 8, FONTCHARS, NUMCHARS);
+    Font displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
 
 
 //misc initializations
@@ -146,18 +146,18 @@ int main() {
 
                 if (moveCameraX) {
                     if (player -> x > cameraX + CAMERALAGX) {
-                        cameraX = player -> x - CAMERALAGX;
+                        cameraX = min(player -> x - CAMERALAGX, col -> getCols() - SCREENCOLS / 2.0f);
                     }
                     else if (player -> x < cameraX - CAMERALAGX) {
-                        cameraX = player -> x + CAMERALAGX;
+                        cameraX = max(player -> x + CAMERALAGX, SCREENCOLS / 2.0f);
                     }
                 }
                 if (moveCameraY) {
                     if (player -> y > cameraY + CAMERALAGY) {
-                        cameraY = player -> y - CAMERALAGY;
+                        cameraY = min(player -> y - CAMERALAGY, col -> getRows() - SCREENROWS / 2.0f);
                     }
                     else if (player -> y < cameraY - CAMERALAGY) {
-                        cameraY = player -> y + CAMERALAGY;
+                        cameraY = max(player -> y + CAMERALAGY, SCREENROWS / 2.0f);
                     }
                 }
 

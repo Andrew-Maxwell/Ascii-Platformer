@@ -5,6 +5,43 @@
 using namespace std;
 
 /*****************************************************************************/
+//charFill
+//Brush defines shape, charFill defines "color": what characters the brush area should be
+//filled with.
+/*****************************************************************************/
+
+struct charFill {
+
+    int codepoint;
+
+    charFill(int newCodepoint) {
+        cout << "charFill created with codepoint " << newCodepoint << endl;
+        codepoint = newCodepoint;
+    }
+
+    int get(int x, int y) {
+        return codepoint;
+    }
+
+    void print(int i, Font displayFont) { //Used for displaying brush in charFill selector screen
+        DrawTextEx(displayFont, TextToUtf8(&codepoint, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
+    }
+};
+
+struct randomCharFill : public charFill {
+
+    vector<int> codepoints;
+
+    int get(int x, int y) {
+        return codepoints[GetRandomValue(0, codepoints.size() - 1)];
+    }
+
+    void print(int i, Font displayFont) { //Used for displaying brush in charFill selector screen
+        DrawTextEx(displayFont, TextToUtf8(&codepoints[GetRandomValue(0, codepoints.size() - 1)], 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
+    }
+};
+
+/*****************************************************************************/
 //dummyEntity
 //An entity that doesn't do anything. Used to display locations of actual entities in the editor.
 /*****************************************************************************/
@@ -32,50 +69,9 @@ class dummyEntity : public entity {
     }
 };
 
-
-/*****************************************************************************/
-//cursor
-//Used to show the first location clicked.
-/*****************************************************************************/
-
-class cursor : public entity {
-
-    char toPrint[2] = "X";
-    bool visible = false;
-
-    public:
-
-    cursor(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                    float newSizeFactor) :
-        entity(newX, newY, R, G, B, A, newSizeFactor) {}
-
-    void show(int tileX1, int tileY1, float newSizeFactor) {
-        x = tileX1;
-        y = tileY1;
-        sizeFactor = newSizeFactor;
-        visible = true;
-    }
-
-    void hide() {
-        visible = false;
-    }
-
-    void tickSet(collider& col) {}
-
-    void tickGet(collider& col) {}
-
-    bool finalize() {return false;}
-
-    void print(float cameraX, float cameraY, Font displayFont)  {
-        if (visible) {
-            DrawTextEx(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
-        }
-    }
-};
-
 /*****************************************************************************/
 //editableLayer
-//A layer designed to be modified, then saved.
+//A layer designed to be modified, then mayNeedToSave.
 /*****************************************************************************/
 
 class editableLayer : public layer {
@@ -94,7 +90,14 @@ class editableLayer : public layer {
         layer(newX, newY, R, G, B, A, newSizeFactor, newFileName),
         entity(newX, newY, R, G, B, A, newSizeFactor) {
 
+        //Set original color to reset to after flashing
+
         original = {R, G, B, A};
+
+        //Read in canvas information. Canvas stores the layer in UTF-8; intCanvas is in UTF-32 (?)
+        //Anyway, intCanvas is much easier to edit, and changes are propogated to canvas to display using update()
+        //intCanvas is stored in "frames" for undoing/redoing. Complete state is saved in each frame.
+
         canvas.clear();
         ifstream worldFile;
         worldFile.open(fileName);
@@ -102,7 +105,6 @@ class editableLayer : public layer {
             cerr << "Error opening layer file.";
             exit(EXIT_FAILURE);
         }
-
         string line;
         getline(worldFile, line);
         canvas.push_back(line);
@@ -145,6 +147,16 @@ class editableLayer : public layer {
         return sizeFactor;
     }
 
+    Color getColor() {
+        return tint;
+    }
+
+    void setColor(Color newColor) {
+        tint = newColor;
+        original = newColor;
+        cout << fileName << " color set to " << (int)tint.r << " " << (int)tint.g << " " << (int)tint.b << " " << (int)tint.a << endl;
+    }
+
     //Propogate changes from intCanvas to the ordinary canvas (which is only used for display.)
 
     void update() {
@@ -156,11 +168,11 @@ class editableLayer : public layer {
         }
     }
 
-    //Set the variable to be displayed in red for a brief period.
+    //Set the layer to be displayed in red for a brief period.
 
     void flash() {
         tint = {255, 0, 0, 255};
-        flashCount = 15;
+        flashCount = 10;
     }
 
     //Toggle hiding.
@@ -195,7 +207,10 @@ class editableLayer : public layer {
 
     //Apply changes using left mouse button.
 
-    void leftBrush(int tileX1, int tileY1, int tileX2, int tileY2, int brush) {
+    void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill F) {
+
+        //Create a new frame in undo history (deep copy)
+
         vector<int*> intCanvas;
         for (int* line : frames[currentFrame]) {
             int* newLine = new int[knownWidth];
@@ -204,16 +219,86 @@ class editableLayer : public layer {
             }
             intCanvas.push_back(newLine);
         }
-        for (int i = max(0, min(tileY1, tileY2)); i != min((int)intCanvas.size() - 1, max(tileY1, tileY2)) + 1; i++) {
-            for (int j = max(0, min(tileX1, tileX2)); j != min(knownWidth, max(tileX1, tileX2)) + 1; j++) {
-                intCanvas[i][j] = brush;
+
+        //Apply the brush to the new frame
+
+        switch(brushID) {
+            case 0: {   //Pencil
+                intCanvas[get<1>(mousePos[0])][get<0>(mousePos[0])] = F.get(get<0>(mousePos[0]), get<1>(mousePos[0]));
+                break;
+            }
+            case 1: {   //Square brush
+                int tileX1 = get<0>(mousePos[0]);
+                int tileY1 = get<1>(mousePos[0]);
+                int tileX2 = get<0>(mousePos[1]);
+                int tileY2 = get<1>(mousePos[1]);
+                for (int i = max(0, min(tileY1, tileY2)); i != min((int)intCanvas.size() - 1, max(tileY1, tileY2)) + 1; i++) {
+                    for (int j = max(0, min(tileX1, tileX2)); j != min(knownWidth, max(tileX1, tileX2)) + 1; j++) {
+                        intCanvas[i][j] = F.get(j, i);
+                    }
+                }
+                break;
+            }
+            case 2: {   //Diamond brush (Corners are always 90 degrees - so it's a rectangle rotated 45 degrees)
+                int tileX1, tileY1, tileX2, tileY2;
+                if (abs(get<0>(mousePos[0]) - get<0>(mousePos[1])) < abs(get<1>(mousePos[0]) - get<1>(mousePos[1]))) {
+                    if (get<1>(mousePos[0]) < get<1>(mousePos[1])) {
+                        tileX1 = get<0>(mousePos[0]);
+                        tileY1 = get<1>(mousePos[0]);
+                        tileX2 = get<0>(mousePos[1]);
+                        tileY2 = get<1>(mousePos[1]);
+                    }
+                    else {
+                        tileX1 = get<0>(mousePos[1]);
+                        tileY1 = get<1>(mousePos[1]);
+                        tileX2 = get<0>(mousePos[0]);
+                        tileY2 = get<1>(mousePos[0]);
+                    }
+                    for (int i = 0; i <= tileY2 - tileY1; i++) {
+                        for (int j = max(0, max(tileX1 - i, tileX2 - (tileY2 - tileY1 - i))); j <=  min(knownWidth, min(tileX1 + i, tileX2 + (tileY2 - tileY1 - i))); j++) {
+                            intCanvas[tileY1 + i][j] = F.get(j, tileY1 + i);
+                        }
+                    }
+                }
+                else {
+                    if (get<0>(mousePos[0]) < get<0>(mousePos[1])) {
+                        tileX1 = get<0>(mousePos[0]);
+                        tileY1 = get<1>(mousePos[0]);
+                        tileX2 = get<0>(mousePos[1]);
+                        tileY2 = get<1>(mousePos[1]);
+                    }
+                    else {
+                        tileX1 = get<0>(mousePos[1]);
+                        tileY1 = get<1>(mousePos[1]);
+                        tileX2 = get<0>(mousePos[0]);
+                        tileY2 = get<1>(mousePos[0]);
+                    }
+                    for (int i = 0; i <= tileX2 - tileX1; i++) {
+                        for (int j = max(0, max(tileY1 - i, tileY2 - (tileX2 - tileX1 - i))); j <= min(getRows(), min(tileY1 + i, tileY2 + (tileX2 - tileX1 - i))); j++) {
+                            intCanvas[j][tileX1 + i] = F.get(tileX1 + i, j);
+                        }
+                    }
+                }
+                break;
+            }
+            default: {
+                cerr << "leftBrush called with invalid brush selection.";
             }
         }
+
+        //Discard any frames more recent than the new one (any redo frames)
+
         while (frames.size() > currentFrame + 1) {
             frames.pop_back();
         }
+
+        //Push the new frame
+
         currentFrame++;
         frames.push_back(intCanvas);
+
+        //Update the visible canvas
+
         update();
     }
 
@@ -311,8 +396,9 @@ int main(int argc, char** argv) {
 
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer - level editor");
     SetTargetFPS(60);
+    SetExitKey(KEY_RIGHT_CONTROL);
 
-    Font displayFont = LoadFontEx("PxPlus_IBM_BIOS_extended.ttf", 8, FONTCHARS, NUMCHARS);
+    Font displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
 
     //Camera initializations
 
@@ -321,44 +407,98 @@ int main(int argc, char** argv) {
 
     //Mouse interface variables
 
-    int tileX1, tileY1, tileX2, tileY2;
-    bool mouseLeftDown = false;
-    cursor* marker = new cursor(0, 0, 255, 0, 0, 255, 1);
-    int brushChar[44] = {0x2581, 0x2582, 0x2583, 0x2584, 0x2585, 0x2586, 0x2587, 0x2588, 0x2591, 0x2592, 0x2593, 0x25e2, 0x25e3, 0x25e4, 0x25e5, 0x2215, 0x007c, 0x005b, 0x005c, 0x005d, 0x0, 0x0, 's', 'w', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '1', '2', '3', '4', '5', '6', '7', '8', ' ', ' '};
-    int selectedBrush = 0;
-    int selectedPalette = 0;
+    vector<tuple<int, int>> mousePos;
+    entityList markers;
 
-    while (!WindowShouldClose()) {
+    //charFill variables - analogous to color in an image editor
 
-        list<editableLayer*> layers;
-        entityList entities;
-        editableLayer* col;
-        Color background;
-        string fileName(argv[1]);
-        readEntities(entities, layers, col, background, fileName);
-        entities.addEntity(marker);
-        list<editableLayer*>::iterator thisLayer = layers.begin();
-        float speedMult;
+    vector<charFill> charFills;
+    for (int i = 0; i < NUMCHARS; i++) {  //Populate all single-character charFills
+        charFills.push_back(charFill(FONTCHARS[i]));
+    }
+    int palette[44] = {48, };
+    int paletteSelection = 0;
+    int paletteSwitch = 0;
 
-        while (!WindowShouldClose() || IsKeyPressed(KEY_R)) {
+    //Brush variables - analogous to brush shape, size, etc. in an image editor
+
+    int brushID = 0;
+    int brushClickCount = 1;
+    string brushName = "Pencil";
+
+    //mayNeedToSave?
+
+    bool mayNeedToSave = false;
+    bool exit = false;
+
+    //Level data
+
+    list<editableLayer*> layers;
+    entityList entities;
+    editableLayer* col;
+    Color background;
+    string fileName(argv[1]);
+    readEntities(entities, layers, col, background, fileName);
+    list<editableLayer*>::iterator thisLayer = layers.begin();
+    float speedMult;
+
+    //Main loop
+
+    while (!WindowShouldClose() || mayNeedToSave) {
+
+
+        while (!(WindowShouldClose() || exit)) {
+
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                exit = true;
+            }
 
             //Character selector
 
             if (IsKeyDown(KEY_TAB)) {
                 BeginDrawing();
                 ClearBackground(DARKGRAY);
-                int j = 0;
-                for (int i = 0; i < NUMCHARS; i++) {
-                    DrawTextEx(displayFont, TextToUtf8(&FONTCHARS[i], 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
+
+                //Print out all available characters
+
+                for (int i = 0; i < charFills.size(); i++) {
+                    charFills[i].print(i, displayFont);
                 }
+
+                //Print out currently selected brush
+
+                DrawTextEx(displayFont, brushName.c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, WHITE);
+
                 EndDrawing();
+
+                //If a character is clicked, add it to the palette
+
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mouse = GetMousePosition();
                     int selection = (int)mouse.y / (2 * FONTSIZE) * (SCREENCOLS / 2) + (int)mouse.x / (2 * FONTSIZE);
-                    if (selection < NUMCHARS) {
-                        brushChar[selectedBrush + 22 * selectedPalette] = FONTCHARS[selection];
+                    if (selection > 0 && selection < charFills.size()) {
+                        palette[paletteSelection + 22 * paletteSwitch] = selection;
                     }
                 }
+
+                //Switch brush
+
+                if (IsKeyPressed(KEY_P)) {
+                    brushName = "Pencil";
+                    brushID = 0;
+                    brushClickCount = 1;
+                }
+                if (IsKeyPressed(KEY_S)) {
+                    brushName = "Square";
+                    brushID = 1;
+                    brushClickCount = 2;
+                }
+                if (IsKeyPressed(KEY_D)) {
+                    brushName = "Diamond";
+                    brushID = 2;
+                    brushClickCount = 2;
+                }
+
             }
             else {
 
@@ -366,7 +506,13 @@ int main(int argc, char** argv) {
 
                 if (IsKeyDown(KEY_LEFT_CONTROL)) {
                     if (IsKeyPressed(KEY_Z)) {
-                        (*thisLayer) -> undo();
+                        if (mousePos.size() > 0) {
+                            mousePos.clear();
+                            markers.clear();
+                        }
+                        else {
+                            (*thisLayer) -> undo();
+                        }
                     }
                     if (IsKeyPressed(KEY_Y)) {
                         (*thisLayer) -> redo();
@@ -377,6 +523,7 @@ int main(int argc, char** argv) {
                             (*saveIter) -> save();
                             saveIter++;
                         }
+                        mayNeedToSave = false;
                     }
                 }
                 else {
@@ -409,7 +556,9 @@ int main(int argc, char** argv) {
                             thisLayer--;
                         }
                         (*thisLayer) -> flash();
-                        selectedPalette = 0;
+                        paletteSwitch = 0;
+                        markers.clear();
+                        mousePos.clear();
                     }
 
                     //flash current layer
@@ -425,10 +574,12 @@ int main(int argc, char** argv) {
                             thisLayer--;
                         }
                         if (++thisLayer == layers.end()) {
-                            selectedPalette = 1;
+                            paletteSwitch = 1;
                         }
                         thisLayer--;
                         (*thisLayer) -> flash();
+                        markers.clear();
+                        mousePos.clear();
                     }
 
                     //hide layer
@@ -437,97 +588,147 @@ int main(int argc, char** argv) {
                         (*thisLayer) -> toggleHide();
                     }
 
-                    //select brushes
+                    //select brush character
 
                     if (IsKeyPressed(KEY_F1)) {
-                        selectedBrush = 0;
+                        paletteSelection = 0;
                     }
                     if (IsKeyPressed(KEY_F2)) {
-                        selectedBrush = 1;
+                        paletteSelection = 1;
                     }
                     if (IsKeyPressed(KEY_F3)) {
-                        selectedBrush = 2;
+                        paletteSelection = 2;
                     }
                     if (IsKeyPressed(KEY_F4)) {
-                        selectedBrush = 3;
+                        paletteSelection = 3;
                     }
                     if (IsKeyPressed(KEY_F5)) {
-                        selectedBrush = 4;
+                        paletteSelection = 4;
                     }
                     if (IsKeyPressed(KEY_F6)) {
-                        selectedBrush = 5;
+                        paletteSelection = 5;
                     }
                     if (IsKeyPressed(KEY_F7)) {
-                        selectedBrush = 6;
+                        paletteSelection = 6;
                     }
                     if (IsKeyPressed(KEY_F8)) {
-                        selectedBrush = 7;
+                        paletteSelection = 7;
                     }
                     if (IsKeyPressed(KEY_F9)) {
-                        selectedBrush = 8;
+                        paletteSelection = 8;
                     }
                     if (IsKeyPressed(KEY_F10)) {
-                        selectedBrush = 9;
+                        paletteSelection = 9;
                     }
                     if (IsKeyPressed(KEY_F11)) {
-                        selectedBrush = 10;
+                        paletteSelection = 10;
                     }
                     if (IsKeyPressed(KEY_F12)) {
-                        selectedBrush = 11;
+                        paletteSelection = 11;
                     }
                     if (IsKeyPressed(KEY_ONE)) {
-                        selectedBrush = 12;
+                        paletteSelection = 12;
                     }
                     if (IsKeyPressed(KEY_TWO)) {
-                        selectedBrush = 13;
+                        paletteSelection = 13;
                     }
                     if (IsKeyPressed(KEY_THREE)) {
-                        selectedBrush = 14;
+                        paletteSelection = 14;
                     }
                     if (IsKeyPressed(KEY_FOUR)) {
-                        selectedBrush = 15;
+                        paletteSelection = 15;
                     }
                     if (IsKeyPressed(KEY_FIVE)) {
-                        selectedBrush = 16;
+                        paletteSelection = 16;
                     }
                     if (IsKeyPressed(KEY_SIX)) {
-                        selectedBrush = 17;
+                        paletteSelection = 17;
                     }
                     if (IsKeyPressed(KEY_SEVEN)) {
-                        selectedBrush = 18;
+                        paletteSelection = 18;
                     }
                     if (IsKeyPressed(KEY_EIGHT)) {
-                        selectedBrush = 19;
+                        paletteSelection = 19;
                     }
                     if (IsKeyPressed(KEY_NINE)) {
-                        selectedBrush = 20;
+                        paletteSelection = 20;
                     }
                     if (IsKeyPressed(KEY_ZERO)) {
-                        selectedBrush = 21;
+                        paletteSelection = 21;
                     }
 
-                    //mouse input
+                    //Adjusting color
+
+                    if (IsKeyPressed(KEY_R)) {
+                        Color newTint = (*thisLayer) -> getColor();
+                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                            newTint.r++;
+                        }
+                        else {
+                            newTint.r--;
+                        }
+                        (*thisLayer) -> setColor(newTint);
+                    }
+
+                    if (IsKeyPressed(KEY_G)) {
+                        Color newTint = (*thisLayer) -> getColor();
+                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                            newTint.g++;
+                        }
+                        else {
+                            newTint.g--;
+                        }
+                        (*thisLayer) -> setColor(newTint);
+                    }
+
+                    if (IsKeyPressed(KEY_B)) {
+                        Color newTint = (*thisLayer) -> getColor();
+                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                            newTint.b++;
+                        }
+                        else {
+                            newTint.b--;
+                        }
+                        (*thisLayer) -> setColor(newTint);
+                    }
+
+                    if (IsKeyPressed(KEY_A)) {
+                        Color newTint = (*thisLayer) -> getColor();
+                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                            newTint.a++;
+                        }
+                        else {
+                            newTint.a--;
+                        }
+                        (*thisLayer) -> setColor(newTint);
+                    }
+
+                    //mouse input: Right click to sample character
 
                     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
                         Vector2 mouse = GetMousePosition();
-                        tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
-                        tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
-                        brushChar[selectedBrush + 22 * selectedPalette] = (*thisLayer) -> sample(tileX1, tileY1);
+                        int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
+                        int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
+                        palette[paletteSelection + 22 * paletteSwitch] = (*thisLayer) -> sample(tileX1, tileY1);
                     }
+
+                    //Left click to add a brush input point
 
                     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         Vector2 mouse = GetMousePosition();
-                        tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
-                        tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
-                        marker -> show(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), (*thisLayer) -> getSizeFactor());
+                        int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
+                        int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
+                        mousePos.push_back(make_tuple(tileX1, tileY1));
+                        markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), 255, 0, 0, 255, (*thisLayer) -> getSizeFactor(), 'X'));
                     }
 
-                    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-                        Vector2 mouse = GetMousePosition();
-                        tileX2 = (*thisLayer) -> getTileX(cameraX, mouse.x);
-                        tileY2 = (*thisLayer) -> getTileY(cameraY, mouse.y);
-                        marker -> hide();
-                        (*thisLayer) -> leftBrush(tileX1, tileY1, tileX2, tileY2, brushChar[selectedBrush + 22 * selectedPalette]);
+                    //If the current stroke is complete
+
+                    if (mousePos.size() >= brushClickCount) {
+                        (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]]);
+                        markers.clear();
+                        mousePos.clear();
+                        mayNeedToSave = true;
                     }
                 }
 
@@ -540,29 +741,51 @@ int main(int argc, char** argv) {
                 //display brush palette
 
                 for (int i = 0; i < 12; i++) {
-                    if (i == selectedBrush) {
-                        DrawTextEx(displayFont, TextToUtf8(&brushChar[i + 22 * selectedPalette], 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
+                    if (i == paletteSelection) {
+                        DrawTextEx(displayFont, TextToUtf8(&palette[i + 22 * paletteSwitch], 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
                     else {
-                        DrawTextEx(displayFont, TextToUtf8(&brushChar[i + 22 * selectedPalette], 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
+                        DrawTextEx(displayFont, TextToUtf8(&palette[i + 22 * paletteSwitch], 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
                     }
                 }
 
                 for (int i = 12; i < 22; i++) {
-                    if (i == selectedBrush) {
-                        DrawTextEx(displayFont, TextToUtf8(&brushChar[i + 22 * selectedPalette], 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
+                    if (i == paletteSelection) {
+                        DrawTextEx(displayFont, TextToUtf8(&palette[i + 22 * paletteSwitch], 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
                     else {
-                        DrawTextEx(displayFont, TextToUtf8(&brushChar[i + 22 * selectedPalette], 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
+                        DrawTextEx(displayFont, TextToUtf8(&palette[i + 22 * paletteSwitch], 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
                     }
                 }
+
+                //display cursor markers
+
+                markers.print(cameraX, cameraY, displayFont);
 
                 EndDrawing();
             }
         }
+        if (mayNeedToSave) {
+            BeginDrawing();
+            ClearBackground(BLACK);
+            DrawTextEx(displayFont, "You didn't save the level. Do you want to save? Y/S or N/ESC.", (Vector2){FONTSIZE, FONTSIZE}, FONTSIZE, 0, WHITE);
+            EndDrawing();
+            if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
+                list<editableLayer*>::iterator saveIter = layers.begin();
+                while (saveIter != layers.end()) {
+                    (*saveIter) -> save();
+                    saveIter++;
+                }
+                mayNeedToSave = false;
+            }
+            if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_N)) {
+                mayNeedToSave = false;
+            }
+        }
+        else {
+            break;
+        }
     }
-
-    //final clean up
 
     CloseWindow();
 }

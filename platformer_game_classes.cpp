@@ -258,15 +258,12 @@ using namespace std;
         if (pow(pow(x - otherX, 2) + pow(y - otherY, 2), 0.5) > range) {
             return false;
         }
-        cout << "Forcefield activated, entity within range.\n";
         nextCollision.xVal = copysign(pow(pow(power, 2) / (1 + pow((y - otherY) / (x - otherX), 2)), 0.5), x - otherX) * copysign(1, power);
         nextCollision.yVal = copysign(pow(pow(power, 2) / (1 + pow((x - otherX) / (y - otherY), 2)), 0.5), y - otherY) * copysign(1, power);
-        cout << nextCollision.xVal << "\t" <<  nextCollision.yVal << endl;
         return true;
     }
 
     collision forceField::getCollision() {
-        cout << "Collision transmitted.\n";
         return nextCollision;
     }
 
@@ -285,7 +282,6 @@ using namespace std;
                 }
                 else {  //repeller force field
                     for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
-                        cout << "Spawning particle." << range / power / 40 << "\n";
                         myParticles.addEntity(new particle(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
                     }
                 }
@@ -499,7 +495,6 @@ using namespace std;
     }
 
     bool physicalParticle::finalize() {
-        cout << lifetime << " " << xMomentum << ' ' << yMomentum << endl;
         return ((xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01) || shouldDelete || particle::finalize());
     }
 
