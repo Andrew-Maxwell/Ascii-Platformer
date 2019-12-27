@@ -7,6 +7,7 @@
 
 using namespace std;
 
+
 /*****************************************************************************/
 //charFill
 //Brush defines shape, charFill defines "color": what characters the brush area should be
@@ -17,11 +18,13 @@ struct charFill {
 
     int codepoint;
 
+    charFill() {}
+
     charFill(int newCodepoint) {
         codepoint = newCodepoint;
     }
 
-    int get(int x, int y) {
+    virtual int get(int x, int y) {
         return codepoint;
     }
 };
@@ -30,8 +33,99 @@ struct randomCharFill : public charFill {
 
     vector<int> codepoints;
 
-    int get(int x, int y) {
+    randomCharFill() {}
+
+    randomCharFill(vector<int> newCodepoints) {
+        codepoints = newCodepoints;
+    }
+
+    int get(int x, int y) override {
         return codepoints[GetRandomValue(0, codepoints.size() - 1)];
+    }
+};
+
+struct pipeCharFill : public charFill {
+
+    int get(int x, int y) {
+        uint8_t up, down, left, right;
+        up = (int)(sin((float)x * (y % 4)) * 1000) % 3;
+        left = (int)(cos((float)y * (x % 5)) * 100) % 3;
+        down = (int)(sin((float)x * ((y + 1) % 4)) * 1000) % 3;
+        right = (int)(cos((float)y * ((x + 1) % 5)) * 100) % 3;
+
+        return 0;
+    }
+};
+
+struct gridCharFill : public charFill {
+
+    int size, horiz, vert, cross, displayCount = 0;
+
+    gridCharFill(int newSize, int newHoriz, int newVert, int newCross) :
+        size(newSize),
+        horiz(newHoriz),
+        vert(newVert),
+        cross(newCross) {}
+
+    int get(int x, int y) {
+        if (x == -1 && y == -1) {
+            if (displayCount++ % 60 < 30) {
+                return cross;
+            }
+            else {
+                return 48 + size;
+            }
+        }
+        else {
+            if (x % size == 0) {
+                if (y % size == 0) {
+                    return cross;
+                }
+                return vert;
+            }
+            else if (y % size == 0) {
+                return horiz;
+            }
+            else {
+                return ' ';
+            }
+        }
+    }
+};
+
+struct diagGridCharFill : public charFill {
+
+    int size, upRight, downRight, cross, displayCount = 0;
+
+    diagGridCharFill(int newSize, int newUpRight, int newDownRight, int newCross) :
+        size(newSize),
+        upRight(newUpRight),
+        downRight(newDownRight),
+        cross(newCross) {}
+
+    int get(int x, int y) {
+        if (x == -1 && y == -1) {
+            if (displayCount++ % 60 < 30) {
+                return cross;
+            }
+            else {
+                return 48 + size;
+            }
+        }
+        else {
+            if ((x + y) % size == 0) {
+                if ((x -y) % size == 0) {
+                    return cross;
+                }
+                return upRight;
+            }
+            else if ((x - y) % size == 0) {
+                return downRight;
+            }
+            else {
+                return ' ';
+            }
+        }
     }
 };
 
@@ -109,7 +203,7 @@ class editableLayer : public layer {
 
     //Apply changes using left mouse button.
 
-    void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill F);
+    void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F);
 
     //Select a tile to the palette (using right mouse button.
 

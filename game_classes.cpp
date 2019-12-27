@@ -94,8 +94,6 @@ using namespace std;
         range(newRange),
         isOn(false) {
             nextCollision.type = 5;
-            //nextCollision.xVal = 0.2;
-            //nextCollision.yVal = 0.2;
         }
 
     bool forceField::doesCollide(float otherX, float otherY, int otherType) {
@@ -121,7 +119,7 @@ using namespace std;
     void forceField::tickSet(collider& col) {
         if (IsKeyDown(KEY_LEFT_SHIFT)) {
             isOn = true;
-            if (++particleCount % (int)(400 * power) == 0) {
+            if (++tickCount % (int)(1 / power) == 0) {
                 if (power > 0) { //Attractor force field
                     for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
                         myParticles.addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint.r, tint.g, tint.b, tint.a, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
@@ -136,7 +134,7 @@ using namespace std;
         }
         else {
             isOn = false;
-            particleCount = -1;
+            tickCount = -1;
         }
         myParticles.tickSet(col);
     }
@@ -249,6 +247,7 @@ using namespace std;
             yMomentum += thisCollision.yVal;
         }
         lightPhysicalEntity::tickGet(col);
+        collisions.clear();
     }
 
     bool physicalParticle::finalize() {
@@ -268,6 +267,57 @@ using namespace std;
         }
         DrawTextEx(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
     }
+
+/******************************************************************************/
+//Rain
+//Constantly spawns particles above the top of the screen
+/******************************************************************************/
+
+    rain::rain(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newDropsPerTick) :
+        entity(newX, newY, R, G, B, A, newSizeFactor),
+        dropsPerTick(newDropsPerTick),
+        firstTick(true) {}
+
+    void rain::tickSet(collider& col) {
+    {
+        //Do rain for a bit on first tick so that raindrops appear to already have been falling when the room is loaded
+        //Note that since collider can't be run this way, interactions with other entities won't work properly
+        //in these preloaded raindrops. Probably not an issue
+
+        if (firstTick) {
+            firstTick = false;
+            for (int i = 0; i < 50; i++) {
+                tickSet(col);
+                tickGet(col);
+                finalize();
+            }
+        }
+    }
+
+
+        dropBuffer += dropsPerTick;
+        while (dropBuffer > 1) {
+            dropBuffer--;
+            physicalParticle* raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint.r, tint.g, tint.b, tint.a, sizeFactor, 0, 1, 0, 200, 0);
+            col.addCollideable(raindrop);
+            raindrops.addEntity(raindrop);
+        }
+        raindrops.tickSet(col);
+    }
+
+    void rain::tickGet(collider& col) {
+        raindrops.tickGet(col);
+    }
+
+    bool rain::finalize() {
+        raindrops.finalize();
+        return false;
+    }
+
+    void rain::print(float cameraX, float cameraY, Font displayFont) {
+        raindrops.print(cameraX, cameraY, displayFont);
+    }
+
 
 /******************************************************************************/
 //Explosion()
@@ -390,15 +440,15 @@ using namespace std;
 
         //Boollets
 
-        if (IsKeyPressed(KEY_X)) {
-            particle* p;
-            if (lastMovedY) {
-                p = new particle(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, 0, lastMovedY * bulletSpeed, 0, 20);
-            }
-            else {
-                p = new particle(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, lastMovedX * bulletSpeed, 0, 0, 20);
-            }
-            localEntities.addEntity(p);
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Vector2 mouse = GetMousePosition();
+            float xMomentum = copysign(pow(pow(bulletSpeed, 2) / (1 + pow((mouse.y - y) / (mouse.x - x), 2)), 0.5), mouse.x - x) * copysign(1, bulletSpeed);
+            float yMomentum = copysign(pow(pow(bulletSpeed, 2) / (1 + pow((mouse.x - x) / (mouse.y - y), 2)), 0.5), mouse.y - y) * copysign(1, bulletSpeed);
+            bullet* b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, xMomentum, yMomentum, bulletDamage);
+            b -> tickSet(col);
+            b -> tickSet(col);
+            localEntities.addEntity(b);
+            col.addCollideable(b);
         }
 
         //Splosions
@@ -454,9 +504,13 @@ using namespace std;
                     break;
                 }
                 case 5:         //Forcefield
-                    cout << "Received forcefield collision.\n";
                     xMomentum += colIter -> xVal;
                     yMomentum += colIter -> yVal;
+                    break;
+                case 6:         //Bullet
+                    yMomentum += colIter -> yVal * 0.3;
+                    xMomentum += colIter -> xVal * 0.3;
+                    //Health?
                     break;
             }
             colIter = collisions.erase(colIter);
@@ -472,4 +526,88 @@ using namespace std;
         DrawTextEx(displayFont, "@", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
         localEntities.print(cameraX, cameraY, displayFont);
     }
+
+/*****************************************************************************/    
+//Bullet
+//Also self-explanatory
+/*****************************************************************************/
+
+    bullet::bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newXMomentum, float newYMomentum, int newDamage) :
+        particle(newX, newY, R, G, B, A, newSizeFactor, 0, 0, 0, 1000),
+        entity(newX, newY, R, G, B, A, newSizeFactor),
+        xMomentum(newXMomentum),
+        yMomentum(newYMomentum),
+        damage(newDamage)
+    {
+        type = 6;
+    }
+
+    bool bullet::doesCollide(float otherX, float otherY, int type) {
+        if (!hit && otherX > x - width && otherX < x + width && otherY > y - width && otherY < y + width) {
+            hit = true;
+            return true;
+        }
+        return false;
+    }
+
+    collision bullet::getCollision() {
+        return collision(6, damage, xMomentum, yMomentum);
+    }
+
+    bool bullet::stopColliding() {
+        return hit;
+    }
+
+    void bullet::tickSet(collider& col) {
+        yMomentum += GRAVITY;
+
+        float xDist = xMomentum / (abs(xMomentum) + 1);
+        for (int i = 0; i < abs(xMomentum) + 1; i++) {
+            if (col.isSolid((int)y, (int)(x + xDist) + (xDist > 0))) {
+                x = floor(x + xDist) + (xDist < 0);
+                xMomentum = 0;
+                hit = true;
+                break;
+            }
+            else {
+                x += xDist;
+            }
+        }
+
+        float yDist = yMomentum / (abs(yMomentum) + 1);
+        for (int i = 0; i < abs(yMomentum) + 1; i++) {
+            if (col.isSolid((int)(y + yDist) + (yDist > 0), (int)(x + 0.5 - width / 2)) || col.isSolid((int)(y + yDist) + (yDist > 0), (int)(x + 0.5 + width / 2))) {
+                y = floor(y + yDist) + (yDist < 0);
+                yMomentum = 0;
+                xMomentum = 0;
+                break;
+            }
+            else {
+                y += yDist;
+            }
+        }
+
+        if (hit & !exploded) {
+            exploded = true;
+            explosion(col, collisionParticles, 10, x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, 0.5, 0, 60, 0.3);
+        }
+
+        collisionParticles.tickSet(col);
+    }
+
+    void bullet::tickGet(collider& col) {
+        collisionParticles.tickGet(col);
+    }
+
+    bool bullet::finalize() {
+        return --lifetime == 0;
+    }
+
+    void bullet::print(float cameraX, float cameraY, Font displayFont) {
+        xSpeed = xMomentum;
+        ySpeed = yMomentum;
+        particle::setDirection();
+        particle::print(cameraX, cameraY, displayFont);
+    }
+
 

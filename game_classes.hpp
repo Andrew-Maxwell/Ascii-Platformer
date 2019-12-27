@@ -75,7 +75,7 @@ class forceField : public collideable {
     float power, range;
     entityList myParticles;
     collision nextCollision;
-    int particleCount;
+    int tickCount;
 
     public:
 
@@ -158,6 +158,32 @@ class physicalParticle : public particle, public lightPhysicalEntity, public col
     void print(float cameraX, float cameraY, Font displayFont);
 };
 
+
+/******************************************************************************/
+//rain
+//Constantly spawns particles above the top of the screen
+/******************************************************************************/
+
+class rain : public entity {
+
+    entityList raindrops;
+    float dropsPerTick, dropBuffer = 0;
+    bool firstTick;
+
+    public:
+
+    rain(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newDropsPerTick);
+
+    void tickSet(collider& col);
+
+    void tickGet(collider& col);
+
+    bool finalize();
+
+    void print(float cameraX, float cameraY, Font displayFont);
+
+};
+
 /******************************************************************************/
 //Explosion()
 //Spawn particles moving outwards in a circle
@@ -176,6 +202,7 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
     entityList localEntities;
     int lastMovedX, lastMovedY;
     float bulletSpeed = 1;
+    float bulletDamage = 1;
 
     public:
 
@@ -205,6 +232,40 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
     bool stopColliding();
 
     //Tick functions
+
+    void tickSet(collider& col);
+
+    void tickGet(collider& col);
+
+    bool finalize();
+
+    void print(float cameraX, float cameraY, Font displayFont);
+
+};
+
+/*****************************************************************************/
+//Bullet
+//Also self-explanatory
+/*****************************************************************************/
+
+class bullet : public collideable, public particle {
+
+    int damage;
+    float xMomentum, yMomentum;
+    float width = 0.8;
+    bool hit = false;
+    bool exploded = false;
+    entityList collisionParticles;
+
+    public:
+
+    explicit bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newXMomentum, float newYMomentum, int newDamage);
+
+    bool doesCollide(float otherX, float otherY, int type);
+
+    collision getCollision();
+
+    bool stopColliding();
 
     void tickSet(collider& col);
 

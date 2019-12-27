@@ -67,10 +67,45 @@ int main(int argc, char** argv) {
 
     //charFill variables - analogous to color in an image editor
 
-    vector<charFill> charFills;
+    vector<charFill*> charFills;
     for (int i = 0; i < NUMCHARS; i++) {  //Populate all single-character charFills
-        charFills.push_back(charFill(FONTCHARS[i]));
+        charFills.push_back(new charFill(FONTCHARS[i]));
     }
+
+    //Special charFills
+
+    randomCharFill* randomPipes = new randomCharFill;
+    randomCharFill* singlePipes = new randomCharFill;
+    randomCharFill* doublePipes = new randomCharFill;
+    for (int i = 0x2500; i < 0x2504; i++) {
+        randomPipes -> codepoints.push_back(i);
+        singlePipes -> codepoints.push_back(i);
+    }
+    for (int i = 0x250c; i < 0x254c; i++) {
+        randomPipes -> codepoints.push_back(i);
+        singlePipes -> codepoints.push_back(i);
+    }
+    for (int i = 0x2550; i < 0x256c; i++) {
+        randomPipes -> codepoints.push_back(i);
+        doublePipes -> codepoints.push_back(i);
+    }
+    for (int i = 0x2574; i < 0x2580; i++) {
+        randomPipes -> codepoints.push_back(i);
+        singlePipes -> codepoints.push_back(i);
+    }
+    charFills.push_back(randomPipes);
+    charFills.push_back(singlePipes);
+    charFills.push_back(doublePipes);
+
+    for (int i = 1; i < 10; i++) {
+        charFills.push_back(new gridCharFill(i, 0x2500, 0x2502, 0x253c));
+        charFills.push_back(new gridCharFill(i, 0x2501, 0x2503, 0x254b));
+        charFills.push_back(new gridCharFill(i, 0x2550, 0x2551, 0x256c));
+        charFills.push_back(new diagGridCharFill(i, 0x2571, 0x2572, 0x2573));
+    }
+
+    //charFill selector
+
     int palette[44] = {767, 768, 769, 770, 771, 772, 773, 774,775, 776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 115, 46, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57};
     int paletteSelection = 0;
     int paletteSwitch = 0;
@@ -117,7 +152,7 @@ int main(int argc, char** argv) {
                 //Print out all available charFills
 
                 for (int i = 0; i < charFills.size(); i++) {
-                    int codePointToDisplay =  charFills[i].get(-1, -1);
+                    int codePointToDisplay =  charFills[i] -> get(-1, -1);
                     DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
                 }
 
@@ -153,6 +188,11 @@ int main(int argc, char** argv) {
                     brushName = "Diamond";
                     brushID = 2;
                     brushClickCount = 2;
+                }
+                if (IsKeyPressed(KEY_E)) {
+                    brushName = "Entity placeholder";
+                    brushID = 3;
+                    brushClickCount = 1;
                 }
 
             }
@@ -361,11 +401,11 @@ int main(int argc, char** argv) {
 
                     //mouse input: Right click to sample character
 
-                    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+                    if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON)) {
                         Vector2 mouse = GetMousePosition();
                         int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
                         int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
-                        palette[paletteSelection + 22 * paletteSwitch] = (*thisLayer) -> sample(tileX1, tileY1);
+                        palette[paletteSelection + 22 * paletteSwitch] = GetGlyphIndex(displayFont, (*thisLayer) -> sample(tileX1, tileY1));
                     }
 
                     //Left click to add a brush input point
@@ -374,8 +414,17 @@ int main(int argc, char** argv) {
                         Vector2 mouse = GetMousePosition();
                         int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
                         int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
-                        mousePos.push_back(make_tuple(tileX1, tileY1));
-                        markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), 255, 0, 0, 255, (*thisLayer) -> getSizeFactor(), 'X'));
+                        if (brushID != 3) {
+                            mousePos.push_back(make_tuple(tileX1, tileY1));
+                            markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), 255, 0, 0, 255, (*thisLayer) -> getSizeFactor(), 'X'));
+                        }
+                        else {      //If placing a placeholder entity
+                            ofstream levelFile;
+                            levelFile.open(fileName, ios::app);
+                            levelFile << "?\t" << tileX1 - (*thisLayer) -> getX() << " " << tileY1 - (*thisLayer) -> getY() << "\t255\t0\t0\t255\t" << (*thisLayer) -> getSizeFactor() << endl;
+                            levelFile.close();
+                            entities.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), 255, 0, 0, 255, (*thisLayer) -> getSizeFactor(), '?'));
+                        }
                     }
 
                     //If the current stroke is complete
@@ -397,7 +446,7 @@ int main(int argc, char** argv) {
                 //display brush palette
 
                 for (int i = 0; i < 12; i++) {
-                    int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]].get(-1, -1);
+                    int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
                     if (i == paletteSelection) {
                         DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
@@ -407,7 +456,7 @@ int main(int argc, char** argv) {
                 }
 
                 for (int i = 12; i < 22; i++) {
-                    int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]].get(-1, -1);
+                    int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
                     if (i == paletteSelection) {
                         DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
                     }

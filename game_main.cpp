@@ -2,6 +2,8 @@
 #include "game_meta_classes.hpp"
 #include "game_classes.hpp"
 
+#define DRAWFPS true
+
 using namespace std;
 
 /******************************************************************************/
@@ -70,6 +72,13 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
                 col -> addCollideable(F);
                 break;
             }
+            case 'R': {
+                float dropsPerTick;
+                entityFile >> dropsPerTick;
+                rain * newRain = new rain(x, y, R, G, B, A, sizeFactor, dropsPerTick);
+                el.addEntity(newRain);
+                break;
+            }
             default: {
                 cerr << "Error: Bad entity when reading entity list.";
                 break;
@@ -88,6 +97,7 @@ int main() {
 
 //Initialize raylib
 
+    SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer");
     SetTargetFPS(60);
 
@@ -141,6 +151,9 @@ int main() {
             shouldChangeRooms = false;
 
             while (!(won || WindowShouldClose() || shouldChangeRooms)) {        //While we're in the same room
+
+                //Begin the tick
+
                 won = player -> won;
                 tickStart = chrono::steady_clock::now();
 
@@ -177,7 +190,9 @@ int main() {
                 BeginDrawing();
                 ClearBackground(background);
                 entities.print(cameraX, cameraY, displayFont);
-                tickEnd = chrono::steady_clock::now();
+                if (DRAWFPS) {
+                    DrawTextEx(displayFont, to_string(GetFPS()).c_str(), (Vector2){10, 10}, 16, 0, WHITE);
+                }
                 EndDrawing();
 
                 //Handle room changing
@@ -188,11 +203,17 @@ int main() {
                     delete col;
                 }
 
-                //Performance heuristics
+                //End the tick
 
+                tickEnd = chrono::steady_clock::now();
                 int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
                 total += tickLength;
                 tickCount++;
+
+                //Sleep until the next frame
+
+//                this_thread::sleep_for(16666000ns - chrono::duration_cast<chrono::nanoseconds>(tickEnd - tickStart));
+
             }
         }
         delete player;

@@ -1,6 +1,5 @@
 #include "editor_classes.hpp"
 
-#define CAMERASPEED 1
 
 using namespace std;
 
@@ -151,7 +150,7 @@ using namespace std;
 
     //Apply changes using left mouse button.
 
-    void editableLayer::leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill F) {
+    void editableLayer::leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F) {
 
         //Create a new frame in undo history (deep copy)
 
@@ -168,7 +167,7 @@ using namespace std;
 
         switch(brushID) {
             case 0: {   //Pencil
-                intCanvas[get<1>(mousePos[0])][get<0>(mousePos[0])] = F.get(get<0>(mousePos[0]), get<1>(mousePos[0]));
+                intCanvas[get<1>(mousePos[0])][get<0>(mousePos[0])] = F -> get(get<0>(mousePos[0]), get<1>(mousePos[0]));
                 break;
             }
             case 1: {   //Square brush
@@ -178,7 +177,7 @@ using namespace std;
                 int tileY2 = get<1>(mousePos[1]);
                 for (int i = max(0, min(tileY1, tileY2)); i != min((int)intCanvas.size() - 1, max(tileY1, tileY2)) + 1; i++) {
                     for (int j = max(0, min(tileX1, tileX2)); j != min(knownWidth, max(tileX1, tileX2)) + 1; j++) {
-                        intCanvas[i][j] = F.get(j, i);
+                        intCanvas[i][j] = F -> get(j, i);
                     }
                 }
                 break;
@@ -200,7 +199,7 @@ using namespace std;
                     }
                     for (int i = 0; i <= tileY2 - tileY1; i++) {
                         for (int j = max(0, max(tileX1 - i, tileX2 - (tileY2 - tileY1 - i))); j <=  min(knownWidth, min(tileX1 + i, tileX2 + (tileY2 - tileY1 - i))); j++) {
-                            intCanvas[tileY1 + i][j] = F.get(j, tileY1 + i);
+                            intCanvas[tileY1 + i][j] = F -> get(j, tileY1 + i);
                         }
                     }
                 }
@@ -219,7 +218,7 @@ using namespace std;
                     }
                     for (int i = 0; i <= tileX2 - tileX1; i++) {
                         for (int j = max(0, max(tileY1 - i, tileY2 - (tileX2 - tileX1 - i))); j <= min(getRows(), min(tileY1 + i, tileY2 + (tileX2 - tileX1 - i))); j++) {
-                            intCanvas[j][tileX1 + i] = F.get(tileX1 + i, j);
+                            intCanvas[j][tileX1 + i] = F -> get(tileX1 + i, j);
                         }
                     }
                 }
