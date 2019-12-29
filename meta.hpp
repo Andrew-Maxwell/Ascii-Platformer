@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <raylib.h>
+#include <raymath.h>
 #include <chrono>
 #include <iostream>
 #include <string>

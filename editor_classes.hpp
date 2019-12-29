@@ -129,6 +129,18 @@ struct diagGridCharFill : public charFill {
     }
 };
 
+struct textureCharFill : public charFill {
+
+    vector<vector<int>> texture;
+
+    textureCharFill(vector<vector<int>> newTexture) :
+        texture(newTexture) {}
+
+    int get(int x, int y) {
+        return texture[y % texture.size()][x % texture[0].size()];
+    }
+};
+
 /*****************************************************************************/
 //dummyEntity
 //An entity that doesn't do anything. Used to display locations of actual entities in the editor.
@@ -203,7 +215,15 @@ class editableLayer : public layer {
 
     //Apply changes using left mouse button.
 
-    void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F);
+    void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F, float density);
+
+    //Cut, copy, and paste
+
+    vector<vector<int>> cut(vector<tuple<int, int>> mousePos);
+
+    vector<vector<int>> copy(vector<tuple<int, int>> mousePos);
+
+    void paste(vector<tuple<int, int>> mousePos, vector<vector<int>> toPaste);
 
     //Select a tile to the palette (using right mouse button.
 

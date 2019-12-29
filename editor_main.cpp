@@ -64,6 +64,12 @@ int main(int argc, char** argv) {
 
     vector<tuple<int, int>> mousePos;
     entityList markers;
+    float oldMouseX, oldMouseY, oldCameraX, oldCameraY;
+
+    //Clipboard
+
+    vector<vector<int>> clipboard({{}});
+
 
     //charFill variables - analogous to color in an image editor
 
@@ -72,7 +78,32 @@ int main(int argc, char** argv) {
         charFills.push_back(new charFill(FONTCHARS[i]));
     }
 
-    //Special charFills
+    //Random charFills
+
+    randomCharFill* allRandom = new randomCharFill;
+    allRandom -> codepoints = vector<int>(FONTCHARS, FONTCHARS + NUMCHARS);
+    charFills.push_back(allRandom);
+
+    randomCharFill* sparse = new randomCharFill({0x27, 0x2c, 0x2d, 0x2e, 0x60, 0x7e, 0xa8, 0xaf, 0xb0, 0xb4, 0xb7, 0xb8, 0xba, 0x2c6, 0x2c7, 0x2d9, 0x2db, 0x2dd, 0x384, 0x385, 0x387, 0x2018, 0x2019, 0x201a, 0x201b, 0x2022, 0x203f, 0x2040, 0x2054, 0x207b, 0x20aa, 0x2219, 0x256d, 0x256e, 0x256f, 0x2570, 0x2574, 0x2575, 0x2576, 0x2577, 0x2578, 0x2579, 0x257a, 0x257b, 0x25aa, 0x25ab, 0x25ac});
+    charFills.push_back(sparse);
+
+    randomCharFill* heavy = new randomCharFill({0x3, 0x4, 0x5, 0x6, 0x8, 0xe, 0xf, 0x13, 0x14, 0x15, 0x17, 0x23, 0xb6, 0xbc, 0x110, 0x132, 0x13d, 0x142, 0x158, 0x162, 0x17d, 0x1fd, 0x1fe, 0x278, 0x39b, 0x39e, 0x3a0, 0x3f4, 0x428, 0x2116, 0x2580, 0x2593, 0x25e2, 0x25e3, 0x25e4, 0x25e5, 0x25d8, 0x2587, 0x2588, 0x2590, 0x258c, 0x254b, 0x2549, 0x254a, 0x2548, 0x2547});
+    charFills.push_back(heavy);
+
+    randomCharFill* organic = new randomCharFill({0x0015, 0x001c, 0x0024, 0x7c, 0x7c, 0x7e, 0xa5, 0xa4, 0xa8, 0xaa, 0xb4, 0xca, 0xd4, 0x115, 0x15e, 0x15c, 0x15d, 0x175, 0x173, 0x01a1, 0x017f, 0x0192, 0x0251, 0x0278, 0x02c6, 0x2c7, 0x2c9, 0x2d8, 0x2d9, 0x2da, 0x2db, 0x2dc, 0x2dd, 0x37e, 0x384, 0x393, 0x390, 0x3ad, 0x3af, 0x3c3, 0x3f4, 0x431, 0x453, 0x452, 0x459, 0x20aa, 0x20ac, 0x25cb, 0x256d, 0x256e, 0x256f, 0x2570});
+    charFills.push_back(organic);
+
+    randomCharFill* mechanical = new randomCharFill({0x7, 0x8, 0x9, 0xf, 0x23, 0x5b, 0x5d, 0xa9, 0xae, 0x2c6, 0x2c9, 0x2dd, 0x29e, 0x394, 0x3c0, 0x415, 0x428, 0x448, 0x2020, 0x2021, 0x203c, 0x2026, 0x20aa, 0x2195, 0x2229, 0x2260, 0x2261});
+    charFills.push_back(mechanical);
+
+    randomCharFill* groundPlants = new randomCharFill({0x5, 0x12, 0x15, 0x17, 0x18, 0x19, 0x1c, 0x26, 0x2c, 0x2e, 0x49, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0xc7, 0xd5, 0xe6, 0x132, 0x17f, 0x17f, 0x192, 0x21b, 0x278, 0x3be, 0x3c8, 0x3b6, 0x3f4, 0x424, 0x444, 0x490, 0x491, 0x1d1b, 0x1d26, 0x1e9f, 0x2020, 0x2021, 0x20a4, 0x2113, 0x2126, 0x2195, 0x21a8, 0x222b, 0x2320});
+    charFills.push_back(groundPlants);
+
+    randomCharFill* solidGeometry = new randomCharFill({0x250f, 0x2513, 0x2517, 0x251b, 0x2501, 0x2503, 0x2523, 0x252b, 0x2533, 0x253b, 0x254b, 0x2580, 0x2581, 0x2582, 0x2583, 0x2584, 0x2585, 0x2586, 0x2587, 0x2588, 0x2588, 0x2588, 0x2590, 0x2590, 0x2590,0x2580, 0x2580, 0x258c, 0x258c, 0x258c, 0x25d8, 0x25d8, 0x25d8, 0x25d9, 0x25d9, 0x25e2, 0x25e2, 0x25e3, 0x25e3, 0x25e4, 0x25e4});
+    charFills.push_back(solidGeometry);
+
+    randomCharFill* shading = new randomCharFill({' ', 0x2591, 0x2592, 0x2593, 0x2588});
+    charFills.push_back(shading);
 
     randomCharFill* randomPipes = new randomCharFill;
     randomCharFill* singlePipes = new randomCharFill;
@@ -97,6 +128,8 @@ int main(int argc, char** argv) {
     charFills.push_back(singlePipes);
     charFills.push_back(doublePipes);
 
+    //Grid charfills
+
     for (int i = 1; i < 10; i++) {
         charFills.push_back(new gridCharFill(i, 0x2500, 0x2502, 0x253c));
         charFills.push_back(new gridCharFill(i, 0x2501, 0x2503, 0x254b));
@@ -115,6 +148,7 @@ int main(int argc, char** argv) {
     int brushID = 0;
     int brushClickCount = 1;
     string brushName = "Pencil";
+    float density = 1;
 
     //mayNeedToSave?
 
@@ -158,7 +192,7 @@ int main(int argc, char** argv) {
 
                 //Print out currently selected brush
 
-                DrawTextEx(displayFont, brushName.c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, WHITE);
+                DrawTextEx(displayFont, (brushName + "Density: " + to_string(density)).c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, WHITE);
 
                 EndDrawing();
 
@@ -179,8 +213,8 @@ int main(int argc, char** argv) {
                     brushID = 0;
                     brushClickCount = 1;
                 }
-                if (IsKeyPressed(KEY_S)) {
-                    brushName = "Square";
+                if (IsKeyPressed(KEY_B)) {
+                    brushName = "Box";
                     brushID = 1;
                     brushClickCount = 2;
                 }
@@ -194,7 +228,60 @@ int main(int argc, char** argv) {
                     brushID = 3;
                     brushClickCount = 1;
                 }
-
+                if (IsKeyPressed(KEY_Q)) {
+                    brushName = "Quadrilateral";
+                    brushID = 4;
+                    brushClickCount = 3;
+                }
+                if (IsKeyPressed(KEY_G)) {
+                    brushName = "Fine Gradient";
+                    brushID = 5;
+                    brushClickCount = 3;
+                }
+                if (IsKeyPressed(KEY_F)) {
+                    brushName = "Coarse Gradient";
+                    brushID = 6;
+                    brushClickCount = 3;
+                }
+                if (IsKeyPressed(KEY_R)) {
+                    brushName = "Ragged";
+                    brushID = 7;
+                    brushClickCount = 3;
+                }
+                if (IsKeyPressed(KEY_S)) {
+                    brushName = "Select";
+                    brushID = 8;
+                    brushClickCount = 100000;
+                }
+                if (IsKeyPressed(KEY_T)) {
+                    brushName = "Replace (\"Transition\")";
+                    brushID = 9;
+                    brushClickCount = 1;
+                }
+                if (IsKeyPressed(KEY_X) && density > 0) {
+                    if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                        density -= 0.05;
+                    }
+                    else {
+                        density -= 0.005;
+                    }
+                }
+                if (IsKeyPressed(KEY_C) && density < 1) {
+                     if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                        density += 0.05;
+                    }
+                    else {
+                        density += 0.005;
+                    }
+                }
+                if (IsKeyPressed(KEY_Z)) {
+                    if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                        density = 0;
+                    }
+                    else {
+                        density = 1;
+                    }
+                }
             }
             else {
 
@@ -221,6 +308,33 @@ int main(int argc, char** argv) {
                         }
                         mayNeedToSave = false;
                     }
+                    if (IsKeyPressed(KEY_X) && mousePos.size() > 1) {
+                        clipboard = (*thisLayer) -> cut(mousePos);
+                        markers.clear();
+                        mousePos.clear();
+                        mayNeedToSave = true;
+                    }
+                    if (IsKeyPressed(KEY_C) && mousePos.size() > 1) {
+                        clipboard = (*thisLayer) -> copy(mousePos);
+                        markers.clear();
+                        mousePos.clear();
+                    }
+                    if (IsKeyPressed(KEY_V)) {
+                        if (mousePos.size() == 0) {
+                            mousePos.push_back(make_tuple(0, 0));    //Paste in upper right by default
+                        }
+                        (*thisLayer) -> paste(mousePos, clipboard);
+                        markers.clear();
+                        mousePos.clear();
+                        mayNeedToSave = true;
+                    }
+                    if (IsKeyPressed(KEY_A)) {
+                        brushName = "Select";
+                        brushID = 8;
+                        brushClickCount = 100000;
+                        mousePos.push_back(make_tuple(0, 0));
+                        mousePos.push_back(make_tuple((*thisLayer) -> getCols() - 1, (*thisLayer) -> getRows() - 1));
+                    }
                 }
                 else {
 
@@ -243,6 +357,22 @@ int main(int argc, char** argv) {
                     }
                     if (IsKeyDown(KEY_DOWN)) {
                         cameraY += CAMERASPEED * speedMult;
+                    }
+
+                    //Click and drag camera movement
+
+                    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {     //When the drag begins
+                        oldCameraX = cameraX;
+                        oldCameraY = cameraY;
+                        Vector2 mouse = GetMousePosition();
+                        oldMouseX = mouse.x;
+                        oldMouseY = mouse.y;
+                    }
+
+                    if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {        //While dragging
+                        Vector2 mouse = GetMousePosition();
+                        cameraX = oldCameraX - (mouse.x - oldMouseX) / FONTSIZE;
+                        cameraY = oldCameraY - (mouse.y - oldMouseY) / FONTSIZE;
                     }
 
                     //switch to prev layer, then flash
@@ -399,6 +529,21 @@ int main(int argc, char** argv) {
                         (*thisLayer) -> setColor(newTint);
                     }
 
+                    //Output clipboard in format to be added to a textureCharFill, and create new texture
+
+                    if (IsKeyPressed(KEY_ENTER)) {
+                        cout << "{\n";
+                        for (vector<int> row : clipboard) {
+                            cout << "{";
+                            for(int i = 0; i < row.size() - 1; i++) {
+                                cout << hex << row[i] << ", ";
+                            }
+                            cout << hex << row[row.size() - 1] << "}\n";
+                        }
+                        cout << "}";
+                        charFills.push_back(new textureCharFill(clipboard));
+                    }
+
                     //mouse input: Right click to sample character
 
                     if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON)) {
@@ -430,7 +575,7 @@ int main(int argc, char** argv) {
                     //If the current stroke is complete
 
                     if (mousePos.size() >= brushClickCount) {
-                        (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]]);
+                        (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]], density);
                         markers.clear();
                         mousePos.clear();
                         mayNeedToSave = true;
