@@ -1,0 +1,99 @@
+File format:
+
+The level editor does not have the capability to manage files. In order to modify level parameters,
+add additional layers, or add interactive entities, editing the text file directly is necessary.
+
+newlevel.cpp can be used to generate a simple empty level, but it must be modified to add color.
+
+Each room consists of an entity file, a collider file, and multiple layer files.
+The entity file is typically named with the level name, e.g. level.txt It contains a
+    list of all of the information required for every entity, including the layers.
+The collider file is typically named e.g. level_collider.txt. It provides information
+    on which blocks are solid, which blocks are zero- gravity (WIP), etc.
+The layer files are typically named e.g. level_layer0.txt, level_layer1.txt, ... (but
+    can have a more informative name if desired) just store a bunch of utf-8 characters
+    to be displayed as a layer.
+
+Entity file format:
+The first line is the collider file name, followed by R, G, B, A values for the background.
+Each following line specifies an entity. Entities lower on the list will be displayed in front
+    of entities higher on the list. Each entity has the same first eight info fields:
+     [Character indicator] [x position] [y position] [R] [G] [B] [A] [size multiplier]
+
+Some entities have fields with additional information:
+    Layer: L [x position] [y position] [R] [G] [B] [A] [size multiplier] [layer file name]
+    Ending gate: E [x position] [y position] [R] [G] [B] [A] [size multiplier] [width*] [height*] *currently ignored
+    Door: D [x position] [y position] [R] [G] [B] [A] [size multiplier] [Destination room's entity file] [destination x] [destination y]
+    Save point: S [x position] [y position] [R] [G] [B] [A] [size multiplier]
+    Player: @ [x position] [y position] [R] [G] [B] [A] [size multiplier]
+    Force field: F [x position] [y position] [R] [G] [B] [A] [size multipler] [power, in tiles^2/tick] [range, in tiles]
+    Rain spawner: R [x position] [y position] [R] [G] [B] [A] [drops per tick]
+
+Editor features:
+
+The editor is modeled somewhat after an image editor, but with more keyboard shortcuts and less GUI.
+
+Basic navigation:
+    Press c to select the next layer, x to select the previous layer. The collider layer is always
+        at the very front, and is filled with dots by default.
+    Press h to show/hide the current layer.
+    Arrow keys or right click and drag to navigate.
+
+Brushes and fills:
+    Editing revolves around "brushes", which define a shape, and "fills", which define a pattern
+    or set of characters to fill that shape.
+
+    In the upper right hand of the screen is a palette of currently selected fills. Swap fills using
+    the f1-f12 or 9-0 keys.  The collider layer has a separate palette. Middle click to fill the current
+    palette slot with a fill containing only the character you middle-clicked on in the selected layer.
+
+    Left click on the level to apply a brush with that fill. Some brushes require multiple clicks to apply.
+    Press CTRL+Z to clear an incomplete brush selection.
+
+    In order to swap fills, hold down "tab" to see a selection of all available fills. Click on a fill
+    to swap the currently selected palette swap to that fill. Fills take three forms: static
+    fills that only have a single character, random fills that randomly select from a predefined
+    set of characters, and patterned fills such as grids or textures. Patterned fills flash the
+    number of the grid size or pattern.
+
+    While holding tab, you can also increase or decrease the density of the brush by pressing x or c.
+    The current density appears in the bottom left. Hold shift to adjust more quickly. Z will reset
+    density to 1; shift-z will set it to 0.
+
+    While holding tab, you can swap brushes by pressing an appropriate keyboard shortcut. The current
+    brush appears in the bottom left. The following brushes are available:
+
+    (P)encil: Changes a single character at a time.
+    (B)ox: Change an area shaped like a rectangle, aligned to the grid. Click twice to define opposite
+        corners of the box.
+    (D)iamond: Like the Box, only the box's sides are at a 45 degree angle to the grid.
+    (E)ntity placeholder: Click to add a placeholder entity to the entity file. These entities must be
+        changed to match a real entity before the level can be played.
+    (Q)uadrilateral: Allows for drawing (messy) parallelograms with arbitrary-angles in the corners.
+    (G)radient: Draws a parallelogram filled with a gradient using Unicode shade characters
+    (F) Coarse gradient: Draws a parallelogram filled with a gradient using rectangular characters.
+    (R)agged: Draws a line with spikes coming off at an angle. Good for e.g. icicles.
+    (S)elect: Used to cut and paste.
+    (T)ransfer (or replace): Click once to replace every character matching the clicked one with the
+        selected fill.
+    
+Color tweaks:
+    Press R, G, B, or A while not in the tab screen to decrease the level of that color in the current
+    layer's color. Press SHIFT+R, G, B, or A to increase it. If you modify the colors, then a modified
+    layer entity entry will be entered to the end of entity file with the new color values. It must be
+    copy-pasted over the old layer entity in order to finish the change.
+
+Undo, Redo, and Save:
+    Press CTRL+Z to undo the last change to the current layer.
+    Press CTRL+Y to redo the last change to the current layer.
+    Press CTRL+S to save ALL layers. If you do not save changes, you will be asked if you want to
+        when you quit.
+
+Selection, copying and pasting:
+    Press Tab+S to enter Selection mode. This selects a rectangular area between two clicks, similar
+    to the box brush. If you click more than twice, then the 
+    Press CTRL+A to automatically switch to the Selection brush and select the entire layer.
+    Press CTRL+C to copy, CTRL+X to cut from a selected box.
+    CTRL+V will paste with the upper-right hand corner of the clipboard box at the selected point.
+    If no point is selected, then it will paste starting in the upper right hand corner of the layer. 
+    Press "Enter" to create a new texture fill from the clipboard (WIP)
