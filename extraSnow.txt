@@ -1,0 +1,5 @@
+extraSnow_collider.txt 255 255 255 255
+L	0	0	0	0	0	255	1		extraSnow_layer0.txt
+L	0	0	0	0	0	255	1		extraSnow_layer1.txt
+L	0	0	0	0	0	255	1		extraSnow_layer2.txt
+L	0	0	0	0	0	255	1		extraSnow_layer3.txt

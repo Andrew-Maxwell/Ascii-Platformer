@@ -70,7 +70,6 @@ int main(int argc, char** argv) {
 
     vector<vector<int>> clipboard({{}});
 
-
     //charFill variables - analogous to color in an image editor
 
     vector<charFill*> charFills;
@@ -164,6 +163,7 @@ int main(int argc, char** argv) {
     string fileName(argv[1]);
     readEntities(entities, layers, col, background, fileName);
     list<editableLayer*>::iterator thisLayer = layers.begin();
+    (*thisLayer) -> select();
     float speedMult;
 
     //Main loop
@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
 
                 //Print out currently selected brush
 
-                DrawTextEx(displayFont, (brushName + "Density: " + to_string(density)).c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, WHITE);
+                DrawTextEx(displayFont, (brushName + " Density: " + to_string(density)).c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, WHITE);
 
                 EndDrawing();
 
@@ -303,7 +303,7 @@ int main(int argc, char** argv) {
                     if (IsKeyPressed(KEY_S)) {
                         list<editableLayer*>::iterator saveIter = layers.begin();
                         while (saveIter != layers.end()) {
-                            (*saveIter) -> save();
+                            (*saveIter) -> save(fileName);
                             saveIter++;
                         }
                         mayNeedToSave = false;
@@ -378,9 +378,11 @@ int main(int argc, char** argv) {
                     //switch to prev layer, then flash
 
                     if (IsKeyPressed(KEY_X)) {
+                        (*thisLayer) -> deselect();
                         if (thisLayer != layers.begin()) {
                             thisLayer--;
                         }
+                        (*thisLayer) -> select();
                         (*thisLayer) -> flash();
                         paletteSwitch = 0;
                         markers.clear();
@@ -396,6 +398,7 @@ int main(int argc, char** argv) {
                     //switch to next layer, then flash
 
                     if (IsKeyPressed(KEY_C)) {
+                        (*thisLayer) -> deselect();
                         if (++thisLayer == layers.end()) {
                             thisLayer--;
                         }
@@ -403,6 +406,7 @@ int main(int argc, char** argv) {
                             paletteSwitch = 1;
                         }
                         thisLayer--;
+                        (*thisLayer) -> select();
                         (*thisLayer) -> flash();
                         markers.clear();
                         mousePos.clear();
@@ -625,7 +629,7 @@ int main(int argc, char** argv) {
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
                 list<editableLayer*>::iterator saveIter = layers.begin();
                 while (saveIter != layers.end()) {
-                    (*saveIter) -> save();
+                    (*saveIter) -> save(fileName);
                     saveIter++;
                 }
                 mayNeedToSave = false;

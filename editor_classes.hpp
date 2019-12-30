@@ -178,6 +178,7 @@ class editableLayer : public layer {
     int width, knownWidth;
     int tileX1, tileY1, tileX2, tileY2;
     int currentFrame = 0, lastFrame = 0;
+    bool isColorChanged = false, selected = false;
 
     public:
 
@@ -194,6 +195,10 @@ class editableLayer : public layer {
     Color getColor();
 
     void setColor(Color newColor);
+
+    void select();
+
+    void deselect();
 
     //Propogate changes from intCanvas to the ordinary canvas (which is only used for display.)
 
@@ -237,7 +242,7 @@ class editableLayer : public layer {
 
     //Save
 
-    void save();
+    void save(string fileName);
 
     //Display
 

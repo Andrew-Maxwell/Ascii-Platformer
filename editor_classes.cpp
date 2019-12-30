@@ -98,7 +98,17 @@ using namespace std;
     void editableLayer::setColor(Color newColor) {
         tint = newColor;
         original = newColor;
-        cout << fileName << " color set to " << (int)tint.r << " " << (int)tint.g << " " << (int)tint.b << " " << (int)tint.a << endl;
+        isColorChanged = true;
+    }
+
+    //Used to display boundary around selected layer
+
+    void editableLayer::select() {
+        selected = true;
+    }
+
+    void editableLayer::deselect() {
+        selected = false;
     }
 
 /*****************************************************************************/
@@ -138,25 +148,11 @@ using namespace std;
 /*****************************************************************************/
 
     float editableLayer::getTileX(float cameraX, float mouseX) {
-        int tileX = mouseX / FONTSIZE / sizeFactor + cameraX - SCREENCOLS / sizeFactor / 2 + x;
-        if (tileX < 0) {
-            return 0;
-        }
-        if (tileX > knownWidth - 1) {
-            return knownWidth - 1;
-        }
-        return tileX;
+        return mouseX / FONTSIZE / sizeFactor + cameraX - SCREENCOLS / sizeFactor / 2 + x;
     }
 
     float editableLayer::getTileY(float cameraY, float mouseY) {
-        int tileY = mouseY / FONTSIZE / sizeFactor + cameraY - SCREENROWS / sizeFactor / 2 + y;
-        if (tileY < 0) {
-            return 0;
-        }
-        if (tileY > frames[0].size() - 1) {
-            return frames[0].size() - 1;
-        }
-        return tileY;
+        return mouseY / FONTSIZE / sizeFactor + cameraY - SCREENROWS / sizeFactor / 2 + y;
     }
 
 /*****************************************************************************/
@@ -180,9 +176,14 @@ using namespace std;
 
         switch(brushID) {
             case 0: {   //Pencil
-                intCanvas[get<1>(mousePos[0])][get<0>(mousePos[0])] = F -> get(get<0>(mousePos[0]), get<1>(mousePos[0]));
+                int tileX = get<0>(mousePos[0]);
+                int tileY = get<1>(mousePos[0]);
+                if (tileX >= 0 && tileX < knownWidth && tileY >= 0 && tileY < intCanvas.size()) {
+                    intCanvas[tileY][tileX] = F -> get(tileX, tileY);
+                }
                 break;
             }
+
             case 1: {   //Square brush
                 int tileX1 = get<0>(mousePos[0]);
                 int tileY1 = get<1>(mousePos[0]);
@@ -197,6 +198,7 @@ using namespace std;
                 }
                 break;
             }
+
             case 2: {   //Diamond brush (Corners are always 90 degrees - so it's a rectangle rotated 45 degrees)
                 int tileX1, tileY1, tileX2, tileY2;
                 if (abs(get<0>(mousePos[0]) - get<0>(mousePos[1])) < abs(get<1>(mousePos[0]) - get<1>(mousePos[1]))) {
@@ -213,9 +215,11 @@ using namespace std;
                         tileY2 = get<1>(mousePos[0]);
                     }
                     for (int i = 0; i <= tileY2 - tileY1; i++) {
-                        for (int j = max(0, max(tileX1 - i, tileX2 - (tileY2 - tileY1 - i))); j <=  min(knownWidth, min(tileX1 + i, tileX2 + (tileY2 - tileY1 - i))); j++) {
-                            if (GetRandomValue(0, 1000) / 1000.0 < density) {
-                                intCanvas[tileY1 + i][j] = F -> get(j, tileY1 + i);
+                        if (tileY1 + i >= 0 && tileY1 + i < getRows()) {
+                            for (int j = max(0, max(tileX1 - i, tileX2 - (tileY2 - tileY1 - i))); j <=  min(knownWidth, min(tileX1 + i, tileX2 + (tileY2 - tileY1 - i))); j++) {
+                                if (GetRandomValue(0, 1000) / 1000.0 < density) {
+                                    intCanvas[tileY1 + i][j] = F -> get(j, tileY1 + i);
+                                }
                             }
                         }
                     }
@@ -234,9 +238,11 @@ using namespace std;
                         tileY2 = get<1>(mousePos[0]);
                     }
                     for (int i = 0; i <= tileX2 - tileX1; i++) {
-                        for (int j = max(0, max(tileY1 - i, tileY2 - (tileX2 - tileX1 - i))); j <= min(getRows(), min(tileY1 + i, tileY2 + (tileX2 - tileX1 - i))); j++) {
-                            if (GetRandomValue(0, 1000) / 1000.0 < density) {
-                                intCanvas[j][tileX1 + i] = F -> get(tileX1 + i, j);
+                        if (tileX1 + i >= 0 && tileX1 + i < knownWidth) {
+                            for (int j = max(0, max(tileY1 - i, tileY2 - (tileX2 - tileX1 - i))); j <= min(getRows() - 1, min(tileY1 + i, tileY2 + (tileX2 - tileX1 - i))); j++) {
+                                if (GetRandomValue(0, 1000) / 1000.0 < density) {
+                                    intCanvas[j][tileX1 + i] = F -> get(j, tileY1 + i);
+                                }
                             }
                         }
                     }
@@ -359,12 +365,13 @@ using namespace std;
             }
 
             case 9: {   //Replace
-
-                int toReplace = intCanvas[get<1>(mousePos[0])][get<0>(mousePos[0])];
-                for (int i = 0; i < intCanvas.size(); i++) {
-                    for (int j = 0; j < knownWidth; j++) {
-                        if (intCanvas[i][j] == toReplace) {
-                            intCanvas[i][j] = F -> get(j, i);
+                if (get<1>(mousePos[0]) >= 0 && get<1>(mousePos[0]) < intCanvas.size() && get<0>(mousePos[0]) >= 0 && get<0>(mousePos[0]) < knownWidth) {
+                    int toReplace = intCanvas[get<1>(mousePos[0])][get<0>(mousePos[0])];
+                    for (int i = 0; i < intCanvas.size(); i++) {
+                        for (int j = 0; j < knownWidth; j++) {
+                            if (intCanvas[i][j] == toReplace) {
+                                intCanvas[i][j] = F -> get(j, i);
+                            }
                         }
                     }
                 }
@@ -540,14 +547,20 @@ using namespace std;
 //Save
 /*****************************************************************************/
 
-    void editableLayer::save() {
+    void editableLayer::save(string levelFileName) {
         cout << "Saving layer " << fileName << endl;
-        ofstream outfile;
-        outfile.open(fileName);
+        ofstream layerOut;
+        layerOut.open(fileName);
         for (string line : canvas) {
-            outfile << line << endl;
+            layerOut << line << endl;
         }
-        outfile.close();
+        layerOut.close();
+        if (isColorChanged) {           //Output a new entity entry with updated colors. User must copy-paste into position.
+            ofstream entityOut;
+            entityOut.open(levelFileName, ios::app);
+            entityOut << "\nL\t" << x << "\t" << y << "\t" << (int)tint.r << "\t" << (int)tint.g << "\t" << (int)tint.b << "\t" << (int)tint.a << "\t" << sizeFactor << "\t" << fileName;
+            entityOut.close();
+        }
     }
 
 /*****************************************************************************/
@@ -559,6 +572,15 @@ using namespace std;
             tint = original;
         }
         if (visible) {
-            layer::print(cameraX, cameraY, displayFont);
+            if (!selected) {
+                layer::print(cameraX, cameraY, displayFont);
+            }
+            else {
+                for (int i = max((int)(cameraY + y - SCREENROWS / sizeFactor / 2), 0); i < min((int)(cameraY + y + SCREENROWS / sizeFactor / 2) + 1, (int)canvas.size()); i++) {
+                    DrawTextEx(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x - 1) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
+                    DrawTextEx(displayFont, canvas[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
+                    DrawTextEx(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x + knownWidth) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
+                }
+            }
         }
     }

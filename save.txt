@@ -1,1 +1,1 @@
-steelgarden.txt 25 25
+snow.txt 45 82
