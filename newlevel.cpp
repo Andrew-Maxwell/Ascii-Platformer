@@ -17,13 +17,13 @@ int main(int argc, char** argv) {
     mainFileOut.open(levelName + ".txt");
     mainFileOut << levelName << "_collider.txt 255 255 255 255\n";
     for (int i = 0; i < layers; i++) {
-        mainFileOut << "L\t0\t0\t0\t0\t0\t255\t1\t\t" << levelName << "_layer" << i << ".txt\n";
+        mainFileOut << "L\t0\t0\t0\t0\t0\t255\t1\t\t" << levelName << "_layer" << (int)i << ".txt\n";
     }
     mainFileOut.close();
 
-    for (char i = '0'; i < '0' + layers; i++) {
+    for (int i = 0; i < layers; i++) {
         ofstream layerFileOut;
-        layerFileOut.open(levelName + "_layer" + i + ".txt");
+        layerFileOut.open(levelName + "_layer" + to_string(i) + ".txt");
         for (int rowNo = 0; rowNo < rows; rowNo++) {
             for (int colNo = 0; colNo < cols; colNo++) {
                 layerFileOut << ' ';

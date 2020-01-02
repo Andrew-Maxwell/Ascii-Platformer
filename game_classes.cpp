@@ -36,7 +36,7 @@ using namespace std;
     bool door::finalize() {return false;}
 
     void door::print(float cameraX, float cameraY, Font displayFont) {
-        DrawTextEx(displayFont, "D", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+        myDrawText(displayFont, "D", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
     }
 
 
@@ -79,7 +79,7 @@ using namespace std;
     }
 
     void savePoint::print(float cameraX, float cameraY, Font displayFont) {
-        DrawTextEx(displayFont, "S", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+        myDrawText(displayFont, "S", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
         myParticles.print(cameraX, cameraY, displayFont);
     }
 
@@ -149,7 +149,7 @@ using namespace std;
     }
 
     void forceField::print(float cameraX, float cameraY, Font displayFont) {
-        DrawTextEx(displayFont, "F", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+        myDrawText(displayFont, "F", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
         myParticles.print(cameraX, cameraY, displayFont);
     }
 
@@ -199,7 +199,7 @@ using namespace std;
 
     void endingGate::print(float cameraX, float cameraY, Font displayFont) {
         for (int i = 0; i < height; i++) {
-            DrawTextEx(displayFont, toPrint[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
+            myDrawText(displayFont, toPrint[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
         }
         myParticles.print(cameraX, cameraY, displayFont);
     }
@@ -210,16 +210,12 @@ using namespace std;
 /******************************************************************************/
 
     physicalParticle::physicalParticle(   float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, char c, int newLifetime,
-                        float newElasticity) :
+                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
+                        float newElasticity, float newMaxSpeed, float newGravity, float newFriction) :
                         entity(newX, newY, R, G, B, A, newSizeFactor),
                         particle(newX, newY, R, G, B, A, newSizeFactor, 0, 0, c, newLifetime),
-                        lightPhysicalEntity(newX, newY, R, G, B, A, newSizeFactor, newElasticity, newXSpeed, newYSpeed) {
-
-        dynamicChar = (c == 0);
-        elasticity = newElasticity;
-        lifetime = newLifetime;
-    }
+                        lightPhysicalEntity(newX, newY, R, G, B, A, newSizeFactor, newElasticity, newXSpeed, newYSpeed, newMaxSpeed, newGravity, newFriction),
+                        dynamicChar(c == 0) {}
 
     bool physicalParticle::doesCollide(float otherX, float otherY, int otherType) {
         return false;
@@ -256,16 +252,16 @@ using namespace std;
 
     void physicalParticle::print(float cameraX, float cameraY, Font displayFont) {
         if (dynamicChar) {
-            if (abs(xMomentum) + abs(yMomentum) > 0.1) {
+            if (abs(xMomentum) + abs(yMomentum) > 0.2) {
                 xSpeed = xMomentum;
                 ySpeed = yMomentum;
                 particle::setDirection();
             }
             else {
-                toPrint[0] = '.';
+                toPrint = '.';
             }
         }
-        DrawTextEx(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+        myDrawText(displayFont, TextToUtf8(&toPrint, 1), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
     }
 
 /******************************************************************************/
@@ -273,34 +269,70 @@ using namespace std;
 //Constantly spawns particles above the top of the screen
 /******************************************************************************/
 
-    rain::rain(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newDropsPerTick) :
+    rain::rain(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newDropsPerTick, float newXMomentum, bool newIsSnow) :
         entity(newX, newY, R, G, B, A, newSizeFactor),
         dropsPerTick(newDropsPerTick),
+        xMomentum(newXMomentum),
+        isSnow(newIsSnow),
         firstTick(true) {}
 
     void rain::tickSet(collider& col) {
-    {
         //Do rain for a bit on first tick so that raindrops appear to already have been falling when the room is loaded
         //Note that since collider can't be run this way, interactions with other entities won't work properly
         //in these preloaded raindrops. Probably not an issue
 
-        if (firstTick) {
+        if(firstTick) {
             firstTick = false;
-            for (int i = 0; i < 50; i++) {
-                tickSet(col);
-                tickGet(col);
-                finalize();
+            if (isSnow) {
+                for (int i = 0; i < 500; i++) {
+                    tickSet(col);
+                    tickGet(col);
+                }
+            }
+            else {
+                for (int i = 0; i < 50; i++) {
+                    tickSet(col);
+                    tickGet(col);
+                }
             }
         }
-    }
-
 
         dropBuffer += dropsPerTick;
         while (dropBuffer > 1) {
             dropBuffer--;
-            physicalParticle* raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint.r, tint.g, tint.b, tint.a, sizeFactor, 0, 1, 0, 200, 0);
-            col.addCollideable(raindrop);
+            physicalParticle* raindrop;
+            if (isSnow) {
+                int snowflake;
+                switch(GetRandomValue(1, 5)) {
+                    case 1:
+                        snowflake = '.';
+                        break;
+                    case 2:
+                        snowflake = '*';
+                        break;
+                    case 3:
+                        snowflake = 0x00a4;
+                        break;
+                    case 4:
+                        snowflake = 0x02da;
+                        break;
+                    case 5:
+                        snowflake = 0x263c;
+                        break;
+                }
+
+/*  physicalParticle constructor:
+                        float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
+                        float newElasticity, float newMaxSpeed, float newGravity, float newFriction) :*/
+
+                raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint.r, tint.g, tint.b, tint.a, sizeFactor, xMomentum, 0.2, snowflake, 1000, 0, 0.2, GRAVITY, 0);
+            }
+            else {
+                raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint.r, tint.g, tint.b, tint.a, sizeFactor, xMomentum, 1, 0, 200, 0, 1, GRAVITY, 0.88);
+            }
             raindrops.addEntity(raindrop);
+            col.addParticle(raindrop);
         }
         raindrops.tickSet(col);
     }
@@ -318,7 +350,6 @@ using namespace std;
         raindrops.print(cameraX, cameraY, displayFont);
     }
 
-
 /******************************************************************************/
 //Explosion()
 //Spawn particles moving outwards in a circle
@@ -329,7 +360,7 @@ using namespace std;
         for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / count)) {
             physicalParticle* p = new physicalParticle(x, y, R, G, B, A, newSizeFactor, cos(angle) * speed, sin(angle) * speed, c, lifespan, elasticity);
             entities.addEntity(p);
-            col.addCollideable(p);
+            col.addParticle(p);
         }
     }
 
@@ -344,10 +375,12 @@ using namespace std;
                             realPhysicalEntity(newX, newY, R, G, B, A, newSizeFactor, 1.0, 0.0, 0.0),
                             entity(newX, newY, R, G, B, A, newSizeFactor)
     {
+        shouldChangeRooms = false;
         nextRoom = newNextRoom;
         yMomentum = 0;
         elasticity = 0;
         type = 1;
+        health = maxHealth = 8;
     }
 
 //Special accessors used when loading a room
@@ -407,7 +440,7 @@ using namespace std;
 
         //Movement
 
-        if (IsKeyDown(KEY_RIGHT)) {
+        if (IsKeyDown(KEY_D)) {
             if (xMomentum < 0) {
                 xMomentum /= 2;
                 xMomentum += PLAYERSPEED;
@@ -417,7 +450,7 @@ using namespace std;
             }
             lastMovedX = 1;
         }
-        if (IsKeyDown(KEY_LEFT)) {
+        if (IsKeyDown(KEY_A)) {
             if (xMomentum > 0) {
                 xMomentum /= 2;
                 xMomentum -= PLAYERSPEED;
@@ -427,48 +460,73 @@ using namespace std;
             }
             lastMovedX = -1;
         }
-        else if (IsKeyUp(KEY_LEFT) && IsKeyUp(KEY_RIGHT)) {
+        else if (IsKeyUp(KEY_A) && IsKeyUp(KEY_D)) {
             xMomentum *= 0.75;
         }
 
-        if (IsKeyDown(KEY_UP)) {
+        if (IsKeyDown(KEY_W)) {
             lastMovedY += -1;
         }
-        if (IsKeyDown(KEY_DOWN)) {
+        if (IsKeyDown(KEY_S)) {
             lastMovedY += 1;
         }
 
         //Boollets
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            Vector2 mouse = GetMousePosition();
-            float xMomentum = copysign(pow(pow(bulletSpeed, 2) / (1 + pow((mouse.y - y) / (mouse.x - x), 2)), 0.5), mouse.x - x) * copysign(1, bulletSpeed);
-            float yMomentum = copysign(pow(pow(bulletSpeed, 2) / (1 + pow((mouse.x - x) / (mouse.y - y), 2)), 0.5), mouse.y - y) * copysign(1, bulletSpeed);
-            bullet* b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, xMomentum, yMomentum, bulletDamage);
-            b -> tickSet(col);
-            b -> tickSet(col);
-            localEntities.addEntity(b);
-            col.addCollideable(b);
+        //Switching guns
+
+        if (IsKeyPressed(KEY_Q)) {
+            gunSelect--;
+        }
+        if (IsKeyPressed(KEY_E)) {
+            gunSelect++;
         }
 
-        //Splosions
+        //Cooldown
 
-        if (IsKeyPressed(KEY_C)) {
-            explosion(col, localEntities, 50, x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, 1, 0, PARTICLELIFESPAN, 0.2);
+        for (int i = 0; i < gunCoolDowns.size(); i++) {
+            gunCoolDowns[i]--;
         }
 
+        //Shootin'
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && unlockedGunIDs.size() > 0) {
+            gunSelect = gunSelect % unlockedGunIDs.size();
+            if (gunAmmos[gunSelect] > 0 && gunCoolDowns[gunSelect] < 0) {
+                Vector2 aim = Vector2Subtract(GetMousePosition(), positionOnScreen);
+                bullet* b;
+                switch(unlockedGunIDs[gunSelect]) {
+                    case 0:
+                        aim = Vector2Scale(Vector2Normalize(aim), 0.5);
+                        b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, aim.x, aim.y, 0, 600, 0, 10, GRAVITY, 0, 3);
+                        gunCoolDowns[gunSelect] = 60;
+                        gunAmmos[gunSelect]--;
+                        break;
+                    default:
+                        cerr << "Fired bullet with invalid gun\n";
+                        break;
+                }
+                b -> tickSet(col);
+                b -> tickSet(col);
+                localEntities.addEntity(b);
+                col.addCollideable(b);
+            }
+        }
         //Jomping
 
-        if (IsKeyPressed(KEY_Z) && (col.isSolid(y + 1, x + (1 - width) / 2) || col.isSolid(y + 1, x + (1 + width) / 2)))  {
+        if (IsKeyPressed(KEY_W) && (col.isSolid(y + 1, x + (1 - width) / 2) || col.isSolid(y + 1, x + (1 + width) / 2)))  {
             yMomentum -= JUMPSPEED;
         }
-        if (IsKeyReleased(KEY_Z)) {
+        if (IsKeyReleased(KEY_W)) {
             yMomentum = max(0.0f, yMomentum);
         }
 
         //Death
 
         if (y > col.getRows() + 25) {
+            health = 0;
+        }
+        if (health <= 0) {
             won = -1;
         }
 
@@ -512,6 +570,31 @@ using namespace std;
                     xMomentum += colIter -> xVal * 0.3;
                     //Health?
                     break;
+                case 7:         //gun pickup
+                    unlockedGunIDs.push_back(colIter -> damage);    //Actually the gunID
+                    gunCoolDowns.push_back(0);
+                    switch(colIter -> damage) {
+                        case 0:
+                            gunAmmos.push_back(3);
+                            gunMaxAmmos.push_back(3);
+                            gunDisplayChars.push_back('1');
+                            break;
+                    }
+                case 8:         //Ammo pickup
+                    for (int i = 0; i < unlockedGunIDs.size(); i++) {
+                        if (unlockedGunIDs[i] == colIter -> damage) {       //damage is actually gunID again
+                            gunAmmos[i] = min(gunMaxAmmos[i], gunAmmos[i] + (int) (colIter -> xVal));
+                            break;
+                        }
+                    }
+                    break;
+                case 9:         //Health pickup
+                    health = min(maxHealth, health + colIter -> damage);
+                    break;
+                case 10:
+                    health += (colIter -> damage);
+                    maxHealth += (colIter -> damage);
+                    break;
             }
             colIter = collisions.erase(colIter);
         }
@@ -523,8 +606,49 @@ using namespace std;
     }
 
     void playerEntity::print(float cameraX, float cameraY, Font displayFont) {
-        DrawTextEx(displayFont, "@", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+        positionOnScreen = (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor };   //Used for mouse aiming
+        myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, tint);
         localEntities.print(cameraX, cameraY, displayFont);
+
+        //Print HUD
+
+        for (int i = 0; i < unlockedGunIDs.size(); i++) {
+            if (gunSelect == i) {
+                myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (i + 2) * FONTSIZE}, FONTSIZE, 0, GREEN);
+            }
+            else {
+                myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (i + 2) * FONTSIZE}, FONTSIZE, 0, WHITE);
+            }
+            if (gunCoolDowns[i] > 0) {
+                myDrawText(displayFont, "X", {FONTSIZE, (i + 2) * FONTSIZE}, FONTSIZE, 0, RED);
+            }
+            myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (i + 2) * FONTSIZE}, FONTSIZE, 0, WHITE);
+        }
+
+        //Health background bar
+
+        int fullBlock = 0x2588;
+        int partBlock = ' ';
+        if (maxHealth % 8 != 0) {
+            partBlock = 0x2590 - maxHealth % 8;
+        }
+        for (int i = 0; i < maxHealth / 8; i++) {
+            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, { 15, 15, 30, 255});
+        }
+        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (maxHealth + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, {15, 15, 30, 255});
+
+        //Health bar
+
+        partBlock = ' ';
+        if (health % 8 != 0) {
+            partBlock = 0x2590 - health % 8;
+        }
+        for (int i = 0; i < health / 8; i++) {
+            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, { 15, 15, 30, 255});
+        }
+        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, {15, 15, 30, 255});
+
+
     }
 
 /*****************************************************************************/    
@@ -532,11 +656,12 @@ using namespace std;
 //Also self-explanatory
 /*****************************************************************************/
 
-    bullet::bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newXMomentum, float newYMomentum, int newDamage) :
-        particle(newX, newY, R, G, B, A, newSizeFactor, 0, 0, 0, 1000),
+    bullet::bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor,
+                   float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
+                   float newMaxSpeed, float newGravity, float newFriction, int newDamage) :
+        physicalParticle(newX, newY, R, G, B, A, newSizeFactor, newXMomentum, newYMomentum, c, newLifeTime, newElasticity,
+                         newMaxSpeed, newGravity, newFriction),
         entity(newX, newY, R, G, B, A, newSizeFactor),
-        xMomentum(newXMomentum),
-        yMomentum(newYMomentum),
         damage(newDamage)
     {
         type = 6;
@@ -544,7 +669,6 @@ using namespace std;
 
     bool bullet::doesCollide(float otherX, float otherY, int type) {
         if (!hit && otherX > x - width && otherX < x + width && otherY > y - width && otherY < y + width) {
-            hit = true;
             return true;
         }
         return false;
@@ -555,59 +679,112 @@ using namespace std;
     }
 
     bool bullet::stopColliding() {
-        return hit;
+        return hit || physicalParticle::stopColliding();
     }
 
     void bullet::tickSet(collider& col) {
-        yMomentum += GRAVITY;
+        physicalParticle::tickSet(col);
 
-        float xDist = xMomentum / (abs(xMomentum) + 1);
-        for (int i = 0; i < abs(xMomentum) + 1; i++) {
-            if (col.isSolid((int)y, (int)(x + xDist) + (xDist > 0))) {
-                x = floor(x + xDist) + (xDist < 0);
-                xMomentum = 0;
-                hit = true;
-                break;
-            }
-            else {
-                x += xDist;
-            }
-        }
-
-        float yDist = yMomentum / (abs(yMomentum) + 1);
-        for (int i = 0; i < abs(yMomentum) + 1; i++) {
-            if (col.isSolid((int)(y + yDist) + (yDist > 0), (int)(x + 0.5 - width / 2)) || col.isSolid((int)(y + yDist) + (yDist > 0), (int)(x + 0.5 + width / 2))) {
-                y = floor(y + yDist) + (yDist < 0);
-                yMomentum = 0;
-                xMomentum = 0;
-                break;
-            }
-            else {
-                y += yDist;
-            }
+        if (xMomentum == 0) {   //If hit a wall during physicalParticle::tickSet()
+            hit = true;
         }
 
         if (hit & !exploded) {
             exploded = true;
-            explosion(col, collisionParticles, 10, x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, 0.5, 0, 60, 0.3);
+            explosion(col, collisionParticles, 6, x, y, tint.r, tint.g, tint.b, tint.a / 2, sizeFactor, 0.25, 0, 60, 0.3);
         }
 
         collisionParticles.tickSet(col);
     }
 
     void bullet::tickGet(collider& col) {
+        physicalParticle::tickGet(col);
+
+        for (collision c : collisions) {
+            if (c.type == 5) {   //forcefield
+                xMomentum += c.xVal;
+                yMomentum += c.yVal;
+            }
+            else {
+                hit = true;
+            }
+        }
+
         collisionParticles.tickGet(col);
     }
 
     bool bullet::finalize() {
-        return --lifetime == 0;
+        collisionParticles.finalize();  //Need to finalize collision particles so they have a chance to return true to stopColliding before they/this object are deleted
+        return ((physicalParticle::finalize() || hit) && collisionParticles.size() == 0);
     }
 
     void bullet::print(float cameraX, float cameraY, Font displayFont) {
-        xSpeed = xMomentum;
-        ySpeed = yMomentum;
-        particle::setDirection();
-        particle::print(cameraX, cameraY, displayFont);
+         if (!hit) {
+            if (dynamicChar) {
+                xSpeed = xMomentum;
+                ySpeed = yMomentum;
+                particle::setDirection();
+            }
+            particle::print(cameraX, cameraY, displayFont);
+        }
+        else {
+            collisionParticles.print(cameraX, cameraY, displayFont);
+        }
     }
 
+/*****************************************************************************/
+//gunPickUp
+//Unlocks a new gun
+/*****************************************************************************/
 
+    gunPickUp::gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID) :
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        entity(newX, newY, R, G, B, A, newSizeFactor),
+                        gunID(newGunID) {}
+
+    collision gunPickUp::getCollision() {
+        return collision(7, gunID);
+    }
+
+/*****************************************************************************/
+//ammoPickUp
+//Adds ammo to a given gun
+/*****************************************************************************/
+
+    ammoPickUp::ammoPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID, int newAmmoCount) :
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        entity(newX, newY, R, G, B, A, newSizeFactor),
+                        gunID(newGunID),
+                        ammoCount(newAmmoCount) {}
+
+    collision ammoPickUp::getCollision() {
+        return collision(8, gunID, ammoCount);      //ammoCount in xVal
+    }
+
+/*****************************************************************************/
+//healthPickUp
+//Adds health back
+/*****************************************************************************/
+
+    healthPickUp::healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        entity(newX, newY, R, G, B, A, newSizeFactor),
+                        healthCount(newHealthCount) {}
+
+    collision healthPickUp::getCollision() {
+        return collision(9, healthCount);
+    }
+
+/*****************************************************************************/
+//maxHealthPickUp
+//Adds to max health
+/*****************************************************************************/
+
+    maxHealthPickUp::maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        entity(newX, newY, R, G, B, A, newSizeFactor),
+                        healthCount(newHealthCount) {}
+
+    collision maxHealthPickUp::getCollision() {
+        return collision(10, healthCount);
+    }

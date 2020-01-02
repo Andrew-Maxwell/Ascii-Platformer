@@ -3,8 +3,6 @@
 
 using namespace std;
 
-//Forward declarations, not sure why this fixes things but it does.
-
 /*****************************************************************************/
 //Door
 //Triggers a transition to another room when interacted with.
@@ -135,13 +133,14 @@ class endingGate : public collideable {
 class physicalParticle : public particle, public lightPhysicalEntity, public collideable {
 
     bool shouldDelete = false;
-    bool dynamicChar;
 
     public:
 
+    bool dynamicChar;
+
     physicalParticle(   float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, char c, int newLifetime,
-                        float newElasticity);
+                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
+                        float newElasticity, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 
@@ -167,12 +166,13 @@ class physicalParticle : public particle, public lightPhysicalEntity, public col
 class rain : public entity {
 
     entityList raindrops;
-    float dropsPerTick, dropBuffer = 0;
+    float dropsPerTick, dropBuffer = 0, xMomentum;
     bool firstTick;
+    bool isSnow;
 
     public:
 
-    rain(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newDropsPerTick);
+    rain(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newDropsPerTick, float newXMomentum, bool isSnow);
 
     void tickSet(collider& col);
 
@@ -199,10 +199,18 @@ void explosion(collider& col, entityList& entities, int count, float x, float y,
 
 class playerEntity : public realPhysicalEntity, virtual public collideable {
 
+    int health, maxHealth;
+
+    vector<int> unlockedGunIDs;
+    vector<int> gunAmmos;
+    vector<int> gunMaxAmmos;
+    vector<int> gunCoolDowns;
+    vector<int> gunDisplayChars;
+    int gunSelect = 0;
+
     entityList localEntities;
     int lastMovedX, lastMovedY;
-    float bulletSpeed = 1;
-    float bulletDamage = 1;
+    Vector2 positionOnScreen = {0, 0};
 
     public:
 
@@ -248,18 +256,19 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
 //Also self-explanatory
 /*****************************************************************************/
 
-class bullet : public collideable, public particle {
+class bullet : public physicalParticle {
 
     int damage;
-    float xMomentum, yMomentum;
-    float width = 0.8;
     bool hit = false;
     bool exploded = false;
     entityList collisionParticles;
+    float width = 0.8;
 
     public:
 
-    explicit bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newXMomentum, float newYMomentum, int newDamage);
+    bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor,
+                   float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
+                   float newMaxSpeed, float newGravity, float newFriction, int newDamage);
 
     bool doesCollide(float otherX, float otherY, int type);
 
@@ -278,3 +287,74 @@ class bullet : public collideable, public particle {
 };
 
 #endif //GAME_CLASSES_HPP
+
+/*****************************************************************************/
+//Gun pickup
+//Unlocks a gun
+/*****************************************************************************/
+
+class gunPickUp : public pickUp {
+
+    int gunID;
+
+    public:
+
+    explicit gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID);
+
+    collision getCollision();
+
+};
+
+/*****************************************************************************/
+//Ammo pickup
+//Adds ammo to a gun
+/*****************************************************************************/
+
+class ammoPickUp : public pickUp {
+
+    int gunID;
+    int ammoCount;
+
+    public:
+
+    explicit ammoPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID, int newAmmoCount);
+
+    collision getCollision();
+
+};
+
+
+/*****************************************************************************/
+//healthPickUp
+//Adds health back
+/*****************************************************************************/
+
+class healthPickUp : public pickUp {
+
+    int healthCount;
+
+    public:
+
+    explicit healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID);
+
+    collision getCollision();
+
+};
+
+
+/*****************************************************************************/
+//max health pickup
+//Increases max health
+/*****************************************************************************/
+
+class maxHealthPickUp : public pickUp {
+
+    int healthCount;
+
+    public:
+
+    explicit maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID);
+
+    collision getCollision();
+
+};

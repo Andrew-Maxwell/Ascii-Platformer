@@ -27,14 +27,14 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
     while (entityFile >> c >> x >> y >> R >> G >> B >> A >> sizeFactor) {
         cout << "Read in a " << c << endl;
         switch(c) {
-            case 'L': {
+            case 'L': {     //Layer
                 string fileName;
                 entityFile >> fileName;
                 layer * L = new layer(x, y, R, G, B, A, sizeFactor, fileName);
                 el.addEntity(L);
                 break;
             }
-            case 'E': {
+            case 'E': {     //EndingGate
                 int width, height;
                 entityFile >> width >> height;
                 endingGate * E = new endingGate(x, y, R, G, B, A, sizeFactor, width, height);
@@ -42,7 +42,7 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
                 col -> addCollideable(E);
                 break;
             }
-            case 'D': {
+            case 'D': {     //Door
                 string nextRoom;
                 float destinationX, destinationY;
                 entityFile >> nextRoom >> destinationX >> destinationY;
@@ -51,20 +51,20 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
                 col -> addCollideable(D);
                 break;
             }
-            case 'S': {
+            case 'S': {     //Save point
                 savePoint * S = new savePoint(x, y, R, G, B, A, sizeFactor);
                 el.addEntity(S);
                 col -> addCollideable(S);
                 break;
             }
-            case '@': {
+            case '@': {     //Player
                 player -> setColor(R, G, B, A);
                 player -> setSizeFactor(sizeFactor);
                 el.addEntity(player);
                 col -> addCollideable(player);
                 break;
             }
-            case 'F': {
+            case 'F': {     //Forcefield
                 float power, range;
                 entityFile >> power >> range;
                 forceField * F = new forceField(x, y, R, G, B, A, sizeFactor, power, range);
@@ -72,15 +72,50 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
                 col -> addCollideable(F);
                 break;
             }
-            case 'R': {
-                float dropsPerTick;
-                entityFile >> dropsPerTick;
-                rain * newRain = new rain(x, y, R, G, B, A, sizeFactor, dropsPerTick);
+            case 'R': {     //Weather (rain, or snow)
+                float dropsPerTick, xMomentum;
+                char snow;
+                entityFile >> dropsPerTick >> xMomentum >> snow;
+                bool isSnow = snow == 's';
+                rain * newRain = new rain(x, y, R, G, B, A, sizeFactor, dropsPerTick, xMomentum, isSnow);
                 el.addEntity(newRain);
+                break;
+            }
+            case 'G': {     //gun pickup
+                int displayChar, lifetime, gunID;
+                entityFile >> displayChar >> lifetime >> gunID;
+                gunPickUp * newGunPickUp = new gunPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, gunID);
+                el.addEntity(newGunPickUp);
+                col -> addCollideable(newGunPickUp);
+                break;
+            }
+            case 'A': {      //ammo pickup
+                int displayChar, lifetime, gunID, ammoCount;
+                entityFile >> displayChar >> lifetime >> gunID >> ammoCount;
+                ammoPickUp * newAmmoPickUp = new ammoPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, gunID, ammoCount);
+                el.addEntity(newAmmoPickUp);
+                col -> addCollideable(newAmmoPickUp);
+                break;
+            }
+            case 'H': {      //health pickup
+                int displayChar, lifetime, healthCount;
+                entityFile >> displayChar >> lifetime >> healthCount;
+                healthPickUp * newHealthPickUp = new healthPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, healthCount);
+                el.addEntity(newHealthPickUp);
+                col -> addCollideable(newHealthPickUp);
+                break;
+            }
+            case 'M': {      //max health pickup
+                int displayChar, lifetime, healthCount;
+                entityFile >> displayChar >> lifetime >> healthCount;
+                maxHealthPickUp * newMaxHealthPickUp = new maxHealthPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, healthCount);
+                el.addEntity(newMaxHealthPickUp);
+                col -> addCollideable(newMaxHealthPickUp);
                 break;
             }
             default: {
                 cerr << "Error: Bad entity when reading entity list.";
+                entityFile.ignore(1000, '\n');
                 break;
             }
         }
@@ -191,7 +226,7 @@ int main() {
                 ClearBackground(background);
                 entities.print(cameraX, cameraY, displayFont);
                 if (DRAWFPS) {
-                    DrawTextEx(displayFont, to_string(GetFPS()).c_str(), (Vector2){10, 10}, 16, 0, WHITE);
+                    myDrawText(displayFont, to_string(GetFPS()).c_str(), (Vector2){10, 10}, 16, 0, WHITE);
                 }
                 EndDrawing();
 

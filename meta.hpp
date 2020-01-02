@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <rlgl.h>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -47,6 +48,17 @@ using namespace std;
 class playerEntity;
 class collider;
 
+
+/******************************************************************************/
+//Raylib functions I optimized to run faster in my use case
+/******************************************************************************/
+
+int myGetGlyphIndex(int codepoint);
+
+void myDrawTexture(Texture2D texture, Rectangle sourceRec, Rectangle destRec, Vector2 origin, float rotation, Color tint);
+
+void myDrawText(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint);
+
 /******************************************************************************/
 //Virtual entity parent class.
 /******************************************************************************/
@@ -69,24 +81,26 @@ class entity {
 
     entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor);
 
+    entity() {}
+
     virtual ~entity() = default;
 
     //Tick functions
     //Move entities. Update collider
 
-    virtual void tickSet(collider& col) = 0;
+    virtual void tickSet(collider& col) {cerr << "Entity tickset called illegally. This function should be overridden!";}
 
     //Update entities based on new collider values
 
-    virtual void tickGet(collider& col) = 0;
+    virtual void tickGet(collider& col) {cerr << "Entity tickGet() called illegally. This function should be overridden!";}
 
     //perform additional cleanup. If this function returns true, then the entity is deleted by the entityList.
 
-    virtual bool finalize() = 0;
+    virtual bool finalize() {cerr << "Entity finalize() called illegally. This function should be overridden!";}
 
     //Display the entity.
 
-    virtual void print(float cameraX, float cameraY, Font displayFont) = 0;
+    virtual void print(float cameraX, float cameraY, Font displayFont) {cerr << "Entity print() called illegally. This function should be overridden!";}
 };
 
 /******************************************************************************/
@@ -104,6 +118,8 @@ class entityList {
     ~entityList();
 
     void clear();
+
+    int size();
 
     void tickSet(collider& col);
 

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-#define HASHSIZE 501
+#define HASHSIZE 999
 
 int main(int argc, char** argv) {
     ifstream in(argv[1]);

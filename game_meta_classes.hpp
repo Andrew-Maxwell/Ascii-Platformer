@@ -38,16 +38,18 @@ class collideable : virtual public entity {
 
     public:
 
+    collideable() {}
+
     //Collision function
     //If entity A "initiates" a collision with entity B, then the following functions are called during tickSet:
 
     //B's doesCollide() is called with A's data to check if A is close enough to collide
 
-    virtual bool doesCollide(float otherX, float otherY, int otherType) = 0;
+    virtual bool doesCollide(float otherX, float otherY, int otherType) {cerr << "collideable::doesCollide() called. This function should be overridden."; return false;}
 
     //B's getCollision is used to get a collision object containing how A should respond to colliding with B
 
-    virtual collision getCollision() = 0;
+    virtual collision getCollision() {cerr << "collideable::getCollision() called. This function should be overridden."; return collision();}
 
     //This function is called to add the collision object from B to A's collision list. Then, A responds during tickGet.
 
@@ -57,7 +59,7 @@ class collideable : virtual public entity {
 
     //Return true when the collideable should be removed from collision list.
 
-    virtual bool stopColliding() = 0;
+    virtual bool stopColliding() {cerr << "collideable::stopCollision called. This function should be overridden."; return false;}
 };
 
 /******************************************************************************/
@@ -66,7 +68,11 @@ class collideable : virtual public entity {
 
 class collider : public layer {
 
+    //Collideables can exchange collisions and pass collisions to particles
+    //Particles can't pass collisions to anything
+
     vector<collideable*> collideables;
+    vector<collideable*> particles;
 
     public:
 
@@ -77,6 +83,8 @@ class collider : public layer {
     //Accessors
 
     void addCollideable(collideable* newCollideable);
+
+    void addParticle(collideable* newParticle);
 
     bool isSolid(int row, int col);
 
@@ -107,14 +115,14 @@ class particle : virtual public entity {
 
     float xSpeed, ySpeed;
     int lifetime;
-    char toPrint[2];
+    int toPrint;
 
     void setDirection();
 
     public:
 
     particle(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, char c, int newLifetime);
+                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime);
 
     void tickSet(collider& col);
 
@@ -136,7 +144,7 @@ class lightPhysicalEntity : virtual public entity {
 
     protected:
 
-    float elasticity;
+    float elasticity, maxSpeed, gravity, friction;
     float xMomentum, yMomentum;
     int xSign = 1, ySign = 1;
 
@@ -144,7 +152,7 @@ class lightPhysicalEntity : virtual public entity {
 
     explicit lightPhysicalEntity( float newx, float newy, uint8_t R, uint8_t G, uint8_t B,
                                   uint8_t A, float newSizeFactor, float elasticity, float newXMomentum,
-                                  float newYMomentum);
+                                  float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     void tickSet(collider& col);
 
@@ -165,7 +173,7 @@ class realPhysicalEntity : virtual public entity {
 
     protected:
 
-    float elasticity;
+    float elasticity, maxSpeed, gravity, friction;
     float xMomentum, yMomentum;
     int xSign = 1, ySign = 1;
     float width = 0.8;
@@ -174,7 +182,7 @@ class realPhysicalEntity : virtual public entity {
 
     explicit realPhysicalEntity(float newx, float newy,  uint8_t R, uint8_t G, uint8_t B,
                                 uint8_t A, float newSizeFactor, float elasticity, float newXMomentum,
-                                float newYMomentum);
+                                float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     void tickSet(collider& col);
 
@@ -185,4 +193,40 @@ class realPhysicalEntity : virtual public entity {
     void print();
 };
 
+/*****************************************************************************/
+//pickUp
+//Any sort of collectable bonus
+/*****************************************************************************/
+
+class pickUp : public collideable {
+
+    bool collected = false;
+    bool exploded = false;
+    int displayChar;
+    int lifetime;
+    entityList myParticles;
+
+    public:
+
+    explicit pickUp(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+                    float newSizeFactor, int newDisplayChar, int newLifetime);
+
+    bool doesCollide(float otherX, float otherY, int otherType);
+
+    virtual collision getCollision();
+
+    bool stopColliding();
+
+    void tickSet(collider& col);
+
+    void tickGet(collider& col);
+
+    bool finalize();
+
+    void print(float cameraX, float cameraY, Font displayFont);
+};
+
+
 #endif //GAME_META_CLASSES_HPP
+
+

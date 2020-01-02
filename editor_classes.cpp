@@ -20,7 +20,7 @@ using namespace std;
     bool dummyEntity::finalize() {return false;}
 
     void dummyEntity::print(float cameraX, float cameraY, Font displayFont)  {
-        DrawTextEx(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+        myDrawText(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
     }
 
 /*****************************************************************************/
@@ -577,9 +577,9 @@ using namespace std;
             }
             else {
                 for (int i = max((int)(cameraY + y - SCREENROWS / sizeFactor / 2), 0); i < min((int)(cameraY + y + SCREENROWS / sizeFactor / 2) + 1, (int)canvas.size()); i++) {
-                    DrawTextEx(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x - 1) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
-                    DrawTextEx(displayFont, canvas[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
-                    DrawTextEx(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x + knownWidth) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
+                    myDrawText(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x - 1) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
+                    myDrawText(displayFont, canvas[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
+                    myDrawText(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x + knownWidth) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
                 }
             }
         }

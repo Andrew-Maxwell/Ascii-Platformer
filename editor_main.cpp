@@ -50,6 +50,7 @@ int main(int argc, char** argv) {
     //Initialize raylib
 
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer - level editor");
+    SetConfigFlags(FLAG_FULLSCREEN_MODE);
     SetTargetFPS(60);
     SetExitKey(KEY_RIGHT_CONTROL);
 
@@ -187,12 +188,12 @@ int main(int argc, char** argv) {
 
                 for (int i = 0; i < charFills.size(); i++) {
                     int codePointToDisplay =  charFills[i] -> get(-1, -1);
-                    DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
+                    myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
                 }
 
                 //Print out currently selected brush
 
-                DrawTextEx(displayFont, (brushName + " Density: " + to_string(density)).c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, WHITE);
+                myDrawText(displayFont, (brushName + " Density: " + to_string(density)).c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, WHITE);
 
                 EndDrawing();
 
@@ -597,20 +598,20 @@ int main(int argc, char** argv) {
                 for (int i = 0; i < 12; i++) {
                     int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
                     if (i == paletteSelection) {
-                        DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
+                        myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
                     else {
-                        DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
+                        myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
                     }
                 }
 
                 for (int i = 12; i < 22; i++) {
                     int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
                     if (i == paletteSelection) {
-                        DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
+                        myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
                     else {
-                        DrawTextEx(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
+                        myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
                     }
                 }
 
@@ -624,7 +625,7 @@ int main(int argc, char** argv) {
         if (mayNeedToSave) {
             BeginDrawing();
             ClearBackground(BLACK);
-            DrawTextEx(displayFont, "You didn't save the level. Do you want to save? Y/S or N/ESC.", (Vector2){FONTSIZE, FONTSIZE}, FONTSIZE, 0, WHITE);
+            myDrawText(displayFont, "You didn't save the level. Do you want to save? Y/S or N/ESC.", (Vector2){FONTSIZE, FONTSIZE}, FONTSIZE, 0, WHITE);
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
                 list<editableLayer*>::iterator saveIter = layers.begin();
