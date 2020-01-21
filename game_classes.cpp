@@ -635,7 +635,7 @@ using namespace std;
         for (int i = 0; i < maxHealth / 8; i++) {
             myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, { 15, 15, 30, 255});
         }
-        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (maxHealth + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, {15, 15, 30, 255});
+        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (maxHealth / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, {15, 15, 30, 255});
 
         //Health bar
 
@@ -644,9 +644,9 @@ using namespace std;
             partBlock = 0x2590 - health % 8;
         }
         for (int i = 0; i < health / 8; i++) {
-            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, { 15, 15, 30, 255});
+            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, { 255, 0, 0, 255});
         }
-        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, {15, 15, 30, 255});
+        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, {255, 0, 0, 255});
 
 
     }
