@@ -1,9 +1,0 @@
-garden_collider.txt 175 200 255 255
-L	0	0	0	0	0	255	1		garden_layer0.txt
-L	0	0	0	0	0	255	1		garden_layer1.txt
-L	0	0	0	0	0	255	1		garden_layer2.txt
-L	0	0	0	0	0	255	1		garden_layer3.txt
-L	0	0	0	0	0	255	1		garden_layer4.txt
-L	0	0	0	0	0	255	1		garden_layer5.txt
-L	0	0	0	0	0	255	1		garden_layer6.txt
-L	0	0	0	0	0	255	1		garden_layer7.txt
