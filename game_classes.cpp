@@ -579,7 +579,13 @@ using namespace std;
                             gunMaxAmmos.push_back(3);
                             gunDisplayChars.push_back('1');
                             break;
+                        default:
+                            unlockedGunIDs.pop_back();    //Actually the gunID
+                            gunCoolDowns.pop_back();
+                            cerr << "Error: Gun Pickup contains invalid gunID.";
+                            break;
                     }
+                    break;
                 case 8:         //Ammo pickup
                     for (int i = 0; i < unlockedGunIDs.size(); i++) {
                         if (unlockedGunIDs[i] == colIter -> damage) {       //damage is actually gunID again
