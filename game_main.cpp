@@ -65,9 +65,10 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
                 break;
             }
             case 'F': {     //Forcefield
+                int channel;
                 float power, range;
-                entityFile >> power >> range;
-                forceField * F = new forceField(x, y, R, G, B, A, sizeFactor, power, range);
+                entityFile >> channel >> power >> range;
+                forceField * F = new forceField(x, y, R, G, B, A, sizeFactor, channel, power, range);
                 el.addEntity(F);
                 col -> addCollideable(F);
                 break;
@@ -113,6 +114,20 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
                 col -> addCollideable(newMaxHealthPickUp);
                 break;
             }
+            case 'O': {     //op pickup
+                int displayChar, lifetime, count, op, arg;
+                string message = "";
+                entityFile >> displayChar >> lifetime >> count;
+                for (int i = 0; i < count; i++) {
+                    entityFile >> op >> arg;
+                    message.append(1, (char)op);
+                    message.append(1, (char)arg);
+                }
+                opPickUp * newOpPickUp = new opPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, message);
+                el.addEntity(newOpPickUp);
+                col -> addCollideable(newOpPickUp);
+                break;
+            }
             default: {
                 cerr << "Error: Bad entity when reading entity list.";
                 entityFile.ignore(1000, '\n');
@@ -149,6 +164,7 @@ int main() {
     string savedNextRoom;
     float savedX, savedY;
     bool shouldChangeRooms = false;
+    bool showInventory = false;
 
     while (!(won > 0 || WindowShouldClose())) {      //While we don't want to stop playing, and haven't won
 
@@ -192,50 +208,68 @@ int main() {
                 won = player -> won;
                 tickStart = chrono::steady_clock::now();
 
-                //Update camera
+                //Inventory screen?
 
-                if (moveCameraX) {
-                    if (player -> x > cameraX + CAMERALAGX) {
-                        cameraX = min(player -> x - CAMERALAGX, col -> getCols() - SCREENCOLS / 2.0f);
-                    }
-                    else if (player -> x < cameraX - CAMERALAGX) {
-                        cameraX = max(player -> x + CAMERALAGX, SCREENCOLS / 2.0f);
-                    }
-                }
-                if (moveCameraY) {
-                    if (player -> y > cameraY + CAMERALAGY) {
-                        cameraY = min(player -> y - CAMERALAGY, col -> getRows() - SCREENROWS / 2.0f);
-                    }
-                    else if (player -> y < cameraY - CAMERALAGY) {
-                        cameraY = max(player -> y + CAMERALAGY, SCREENROWS / 2.0f);
-                    }
+                if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_I)) {
+                    showInventory = !showInventory;
                 }
 
-                //Update entities
-
-                entities.tickSet(*col);
-                col -> tickSet(*col);
-                entities.tickGet(*col);
-                col -> tickGet(*col);
-                entities.finalize();
-                col -> finalize();
-
-                //Display the world
-
-                BeginDrawing();
-                ClearBackground(background);
-                entities.print(cameraX, cameraY, displayFont);
-                if (DRAWFPS) {
-                    myDrawText(displayFont, to_string(GetFPS()).c_str(), (Vector2){10, 10}, 16, 0, WHITE);
+                if (showInventory) {
+                    BeginDrawing();
+                    ClearBackground(UIBACKGROUND);
+                    player -> drawTabScreen(displayFont);
+                    EndDrawing();
                 }
-                EndDrawing();
 
-                //Handle room changing
+                //Otherwise, just show normally
 
-                if (player -> shouldChangeRooms) {
-                    shouldChangeRooms = true;
-                    player -> shouldChangeRooms = false;
-                    delete col;
+                else {
+
+                    //Update camera
+
+                    if (moveCameraX) {
+                        if (player -> x > cameraX + CAMERALAGX) {
+                            cameraX = min(player -> x - CAMERALAGX, col -> getCols() - SCREENCOLS / 2.0f);
+                        }
+                        else if (player -> x < cameraX - CAMERALAGX) {
+                            cameraX = max(player -> x + CAMERALAGX, SCREENCOLS / 2.0f);
+                        }
+                    }
+                    if (moveCameraY) {
+                        if (player -> y > cameraY + CAMERALAGY) {
+                            cameraY = min(player -> y - CAMERALAGY, col -> getRows() - SCREENROWS / 2.0f);
+                        }
+                        else if (player -> y < cameraY - CAMERALAGY) {
+                            cameraY = max(player -> y + CAMERALAGY, SCREENROWS / 2.0f);
+                        }
+                    }
+
+                    //Update entities
+
+                    entities.tickSet(*col);
+                    col -> tickSet(*col);
+                    entities.tickGet(*col);
+                    col -> tickGet(*col);
+                    entities.finalize();
+                    col -> finalize();
+
+                    //Display the world
+
+                    BeginDrawing();
+                    ClearBackground(background);
+                    entities.print(cameraX, cameraY, displayFont);
+                    if (DRAWFPS) {
+                        myDrawText(displayFont, to_string(GetFPS()).c_str(), (Vector2){10, 10}, 16, 0, WHITE);
+                    }
+                    EndDrawing();
+
+                    //Handle room changing
+
+                    if (player -> shouldChangeRooms) {
+                        shouldChangeRooms = true;
+                        player -> shouldChangeRooms = false;
+                        delete col;
+                    }
                 }
 
                 //End the tick

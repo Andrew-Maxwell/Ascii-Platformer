@@ -69,6 +69,7 @@ class savePoint : public collideable {
 
 class forceField : public collideable {
 
+    int channel;
     bool isOn;
     float power, range;
     entityList myParticles;
@@ -77,7 +78,7 @@ class forceField : public collideable {
 
     public:
 
-    explicit forceField(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newPower, float newRange);
+    explicit forceField(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newChannel, float newPower, float newRange);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 
@@ -208,6 +209,12 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
     vector<int> gunDisplayChars;
     int gunSelect = 0;
 
+    //Used in bit manipulation
+
+    vector<vector<int>> ops;
+    vector<vector<int>> args;
+    vector<bitset<8>> channels;
+
     entityList localEntities;
     int lastMovedX, lastMovedY;
     Vector2 positionOnScreen = {0, 0};
@@ -248,6 +255,14 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
     bool finalize();
 
     void print(float cameraX, float cameraY, Font displayFont);
+
+    //Draw the HUD
+
+    void drawHUD(Font displayFont);
+
+    //Draw a GUI inventory/byte editor screen
+
+    void drawTabScreen(Font displayFont);
 
 };
 
@@ -354,6 +369,24 @@ class maxHealthPickUp : public pickUp {
     public:
 
     explicit maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID);
+
+    collision getCollision();
+
+};
+
+
+/*****************************************************************************/
+//Op pickup
+//Gives the player another bitwise op to play with
+/*****************************************************************************/
+
+class opPickUp : public pickUp {
+
+    string message;
+
+    public:
+
+    explicit opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, string newMessage);
 
     collision getCollision();
 

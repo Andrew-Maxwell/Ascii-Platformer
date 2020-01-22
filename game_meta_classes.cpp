@@ -33,6 +33,16 @@ using namespace std;
         return canvas[row][col] == 'w';
     }
 
+    //Broadcasts
+
+    void collider::setChannel(int freq) {
+        channel[freq] = true;
+    }
+
+    bool collider::getChannel(int freq) {
+        return channel[freq];
+    }
+
     //Stairs/ramps currently on hold.
 
     //Helper function for getFloorLevel. Used to check multiple points along the bottom of the entity.
@@ -111,6 +121,13 @@ using namespace std;
                 p++;
             }
         }
+
+        //Clear the channel bus
+
+        for (int i = 0; i < 512; i++) {
+            channel[i] = false;
+        }
+
     }
 
     bool collider::finalize() {}

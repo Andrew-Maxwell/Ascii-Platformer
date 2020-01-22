@@ -48,7 +48,7 @@ using namespace std;
     savePoint::savePoint(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor) : entity(newX, newY, R, G, B, A, newSizeFactor) {type = 4;}
 
     bool savePoint::doesCollide(float otherX, float otherY, int otherType) {
-        bool collided = (IsKeyPressed(KEY_DOWN) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == 1);
+        bool collided = (IsKeyPressed(KEY_S) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == 1);
         savedGame |= collided;
         return collided;
     }
@@ -85,11 +85,12 @@ using namespace std;
 
 /*****************************************************************************/
 //forceField
-//Attracts or repels physical entities within its influende
+//Attracts or repels physical entities within its influence
 /*****************************************************************************/
 
-    forceField::forceField(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newPower, float newRange) :
+    forceField::forceField(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newChannel, float newPower, float newRange) :
         entity(newX, newY, R, G, B, A, newSizeFactor),
+        channel(newChannel),
         power(newPower),
         range(newRange),
         isOn(false) {
@@ -117,7 +118,7 @@ using namespace std;
     }
 
     void forceField::tickSet(collider& col) {
-        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+        if (col.getChannel(channel)) {
             isOn = true;
             if (++tickCount % (int)(1 / power) == 0) {
                 if (power > 0) { //Attractor force field
@@ -381,6 +382,13 @@ using namespace std;
         elasticity = 0;
         type = 1;
         health = maxHealth = 8;
+
+        for (int i = 0; i < 10; i++) {
+            channels.push_back(bitset<8>("00000000"));
+        }
+
+        ops = {{0}, {1}, {2}, {3}, {4}, {5}, {1, 3}, {3, 4}};
+        args = {{0}, {1}, {1}, {1}, {1}, {1}, {1, 1}, {1, 1}};
     }
 
 //Special accessors used when loading a room
@@ -471,6 +479,38 @@ using namespace std;
             lastMovedY += 1;
         }
 
+        //Channels
+
+        if (IsKeyDown(KEY_ONE)) {
+            col.setChannel(channels[1].to_ulong());
+        }
+        if (IsKeyDown(KEY_TWO)) {
+            col.setChannel(channels[2].to_ulong());
+        }
+        if (IsKeyDown(KEY_THREE)) {
+            col.setChannel(channels[3].to_ulong());
+        }
+        if (IsKeyDown(KEY_FOUR)) {
+            col.setChannel(channels[4].to_ulong());
+        }
+        if (IsKeyDown(KEY_FIVE)) {
+            col.setChannel(channels[5].to_ulong());
+        }
+        if (IsKeyDown(KEY_SIX)) {
+            col.setChannel(channels[6].to_ulong());
+        }
+        if (IsKeyDown(KEY_SEVEN)) {
+            col.setChannel(channels[7].to_ulong());
+        }
+        if (IsKeyDown(KEY_EIGHT)) {
+            col.setChannel(channels[8].to_ulong());
+        }
+        if (IsKeyDown(KEY_NINE)) {
+            col.setChannel(channels[9].to_ulong());
+        }
+        if (IsKeyDown(KEY_ZERO)) {
+            col.setChannel(channels[0].to_ulong());
+        }
         //Boollets
 
         //Switching guns
@@ -597,10 +637,21 @@ using namespace std;
                 case 9:         //Health pickup
                     health = min(maxHealth, health + colIter -> damage);
                     break;
-                case 10:
+                case 10:        //max health pickup
                     health += (colIter -> damage);
                     maxHealth += (colIter -> damage);
                     break;
+                case 11: {        //op pickup
+                    vector<int> op, arg;
+                    string message = colIter -> message;
+                    for (int i = 0; i < message.length(); i+= 2) {
+                        op.push_back(message[i]);
+                        arg.push_back(message[i + 1]);
+                    }
+                    ops.push_back(op);
+                    args.push_back(arg);
+                    break;
+                }
             }
             colIter = collisions.erase(colIter);
         }
@@ -615,8 +666,12 @@ using namespace std;
         positionOnScreen = (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor };   //Used for mouse aiming
         myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, tint);
         localEntities.print(cameraX, cameraY, displayFont);
+        drawHUD(displayFont);
+    }
 
-        //Print HUD
+    void playerEntity::drawHUD(Font displayFont) {
+
+        //Print gun info
 
         for (int i = 0; i < unlockedGunIDs.size(); i++) {
             if (gunSelect == i) {
@@ -639,9 +694,9 @@ using namespace std;
             partBlock = 0x2590 - maxHealth % 8;
         }
         for (int i = 0; i < maxHealth / 8; i++) {
-            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, { 15, 15, 30, 255});
+            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, UIBACKGROUND);
         }
-        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (maxHealth / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, {15, 15, 30, 255});
+        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (maxHealth / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, UIBACKGROUND);
 
         //Health bar
 
@@ -650,11 +705,104 @@ using namespace std;
             partBlock = 0x2590 - health % 8;
         }
         for (int i = 0; i < health / 8; i++) {
-            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, { 255, 0, 0, 255});
+            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HEALTHCOLOR);
         }
-        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, {255, 0, 0, 255});
+        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HEALTHCOLOR);
+    }
+
+    //Used in bitset handling
+
+    void apply(bitset<8>* current, int op, int arg) {
+        switch(op) {
+            case 0: {   //Load
+                bitset<8> toReturn(arg);
+                *current = toReturn;
+                break;
+            }
+            case 1: {   //Rotate
+                bitset<8> toReturn;
+                for (int i = 0; i < 8; i++) {
+                    toReturn[i] = (*current)[(i + arg)&7];
+                }
+                for (int i = 0; i < 8; i++) {
+                    (*current)[i] = toReturn[i];
+                }
+                break;
+            }
+            case 2: {   //Shift
+                if (arg > 0) {
+                    *current >>= arg;
+                }
+                else {
+                    *current <<= (-1 * arg);
+                }
+                break;
+            }
+            case 3: {   //Set (OR 1)
+                bitset<8> bs(arg);
+                *current |= bs;
+                break;
+            }
+            case 4: {   //Reset (AND 0)
+                bitset<8> bs(arg);
+                *current &= bs;
+                break;
+            }
+            case 5: {   //Flip (XOR 1);
+                bitset<8> bs(arg);
+                *current ^= bs;
+                break;
+            }
+            default: {
+                cerr << "Not a valid choice!";
+            }
+        }
+    }
 
 
+    void playerEntity::drawTabScreen(Font displayFont) {
+
+        int keys[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+        int icons[] = {'L', 0xab, '<', 0x25a3, 0x2610, 'X'};
+
+        drawHUD(displayFont);
+        string listNum = "0: ";
+
+        //Print out all of the channel bitsets + all available ops, one per row.
+
+        for (int i = 0; i < 10; i++) {
+            listNum[0] = '0' + keys[i];
+            myDrawText(displayFont, listNum.c_str(), { FONTSIZE, FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+            for (int j = 0; j < 8; j++) {
+                if (channels[keys[i]][j]) {
+                    myDrawText(displayFont, "1", { FONTSIZE * (j + 4), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                }
+                else {
+                    myDrawText(displayFont, "0", { FONTSIZE * (j + 4), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                }
+            }
+            for (int j = 0; j < ops.size(); j++) {
+                myDrawText(displayFont, TextToUtf8(&icons[ops[j][0]], 1), { FONTSIZE * (j * 3 + 15), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                if (ops[j].size() > 1) {
+                    myDrawText(displayFont, "+", {FONTSIZE * (j * 3 + 16), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                }
+            }
+        }
+
+        //Click on an op to apply it to the bitset.
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Vector2 mouse = GetMousePosition();
+            int lineSelect = (mouse.y / FONTSIZE - 10) / 2;
+            if (0 <= lineSelect && lineSelect <= 9) {
+                int opSelect = (mouse.x / FONTSIZE - 15) / 3;
+                if (0 <= opSelect && opSelect < ops.size()) {
+                    for (int i = 0; i < ops[opSelect].size(); i++) {
+                        apply(&channels[keys[lineSelect]], ops[opSelect][i], args[opSelect][i]);
+                    }
+                }
+            }
+        }
     }
 
 /*****************************************************************************/    
@@ -746,7 +894,12 @@ using namespace std;
     gunPickUp::gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID) :
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        gunID(newGunID) {}
+                        gunID(newGunID) {
+
+                            if (newDisplayChar == 0) {
+                                displayChar = 0x250f;
+                            }
+                        }
 
     collision gunPickUp::getCollision() {
         return collision(7, gunID);
@@ -761,7 +914,12 @@ using namespace std;
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
                         gunID(newGunID),
-                        ammoCount(newAmmoCount) {}
+                        ammoCount(newAmmoCount) {
+
+                            if (newDisplayChar == 0) {
+                                displayChar = 0x25af;
+                            }
+                        }
 
     collision ammoPickUp::getCollision() {
         return collision(8, gunID, ammoCount);      //ammoCount in xVal
@@ -775,7 +933,12 @@ using namespace std;
     healthPickUp::healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        healthCount(newHealthCount) {}
+                        healthCount(newHealthCount) {
+
+                            if (newDisplayChar == 0) {
+                                displayChar = 0x2665;
+                            }
+                        }
 
     collision healthPickUp::getCollision() {
         return collision(9, healthCount);
@@ -789,8 +952,32 @@ using namespace std;
     maxHealthPickUp::maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        healthCount(newHealthCount) {}
+                        healthCount(newHealthCount) {
+
+                            if (newDisplayChar == 0) {
+                                displayChar = '+';
+                            }
+                        }
 
     collision maxHealthPickUp::getCollision() {
         return collision(10, healthCount);
+    }
+
+/*****************************************************************************/
+//Op pickup
+//Gives the player another bitwise op to play with
+/*****************************************************************************/
+
+    opPickUp::opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, string newMessage) :
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        entity(newX, newY, R, G, B, A, newSizeFactor),
+                        message(newMessage) {
+
+                            if (newDisplayChar == 0) {
+                                displayChar = 'X';
+                            }
+                        }
+
+    collision opPickUp::getCollision() {
+        return collision(11, 0, 0.0, 0.0, message);
     }
