@@ -170,16 +170,9 @@ int main() {
 
         //Initialize
 
-        ifstream saveFile;
-        saveFile.open("save.txt");
-        if (saveFile) {
-            saveFile >> savedNextRoom >> savedX >> savedY;
-            player = new playerEntity(savedX, savedY, 255, 255, 255, 255, 1, savedNextRoom);
-            saveFile.close();
-        }
-        else {
-            cout << "No save file found.";
-            player = new playerEntity(0.0, 0.0, 255, 255, 255, 255, 1, "a_room1.txt");
+        player = new playerEntity(0.0, 0.0, 255, 255, 255, 255, 1, "test.txt");
+        if (player -> load("save")) {
+            cout << "Loaded save.";
         }
 
         while (!(won || WindowShouldClose())) {         //While we're still alive

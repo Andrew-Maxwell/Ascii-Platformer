@@ -366,6 +366,27 @@ using namespace std;
     }
 
 /******************************************************************************/
+//Save
+//Used as a hack for saving player data.
+/******************************************************************************/
+
+struct saveData {
+
+    float x, y;
+    int health, maxHealth;
+    bool gunUnlocked[16] = {false};
+    int gunAmmos[16] {0};
+    int gunMaxAmmos[16] = {0};
+    int gunDisplayChars[16] = {'E'};
+    int ops[16][4] = {{6}, {1}, {2}, {3}, {4}, {5}, {1, 3}, {3, 4}};
+    int args[16][4] = {{0}, {1}, {1}, {1}, {1}, {1}, {1, 1}, {1, 1}};
+    int opCount = 0;
+    bitset<8> channels[10];
+    char nextRoom[64] = "test.txt";
+};
+
+
+/******************************************************************************/
 //PlayerEntity
 //what it sounds like, I guess.
 /******************************************************************************/
@@ -384,21 +405,68 @@ using namespace std;
         health = maxHealth = 8;
 
         for (int i = 0; i < 10; i++) {
-            channels.push_back(bitset<8>("00000000"));
+            channels[i] = bitset<8>("00000000");
+        }
+    }
+
+    bool playerEntity::save(string fileName) {
+        saveData s;
+        s.x = x;
+        s.y = y;
+        s.health = health;
+        s.maxHealth = maxHealth;
+        copy(gunUnlocked, gunUnlocked + 16, s.gunUnlocked);
+        copy(gunAmmos, gunAmmos + 16, s.gunAmmos);
+        copy(gunMaxAmmos, gunMaxAmmos + 16, s.gunMaxAmmos);
+        copy(gunDisplayChars, gunDisplayChars + 16, s.gunDisplayChars);
+        copy(&ops[0][0], &ops[0][0] + 64, &s.ops[0][0]);
+        copy(&args[0][0], &args[0][0] + 64, &s.args[0][0]);
+        s.opCount = opCount;
+        copy(channels, channels + 10, s.channels);
+        copy(nextRoom.begin(), nextRoom.end(), s.nextRoom);
+
+        fstream saveOut;
+        saveOut.open(fileName, ios::out|ios::binary);
+        if (!saveOut) {
+            cerr << "Error writing save file.\n";
+            return false;
+        }
+        else {
+            saveOut.write((char*)&s, sizeof(s));
+            saveOut.close();
+            return true;
+        }
+    }
+
+    bool playerEntity::load(string fileName) {
+        saveData s;
+        fstream saveIn;
+        saveIn.open(fileName, ios::in|ios::binary);
+        if (!saveIn) {
+            cerr << "No save file found.\n";
+            return false;
+        }
+        else {
+            saveIn.read((char*)&s, sizeof(s));
+            saveIn.close();
+            x = s.x;
+            y = s.y;
+            health = s.health;
+            maxHealth = s.maxHealth;
+            copy(s.gunUnlocked, s.gunUnlocked + 16, gunUnlocked);
+            copy(s.gunAmmos, s.gunAmmos + 16, gunAmmos);
+            copy(s.gunMaxAmmos, s.gunMaxAmmos + 16, gunMaxAmmos);
+            copy(s.gunDisplayChars, s.gunDisplayChars + 16, gunDisplayChars);
+            copy(&s.ops[0][0], &s.ops[0][0] + 64, &ops[0][0]);
+            copy(&s.args[0][0], &s.args[0][0] + 64, &args[0][0]);
+            opCount = s.opCount;
+            copy(s.channels, s.channels + 10, channels);
+            nextRoom = s.nextRoom;
+            return true;
         }
 
-        ops = {{0}, {1}, {2}, {3}, {4}, {5}, {1, 3}, {3, 4}};
-        args = {{0}, {1}, {1}, {1}, {1}, {1}, {1, 1}, {1, 1}};
     }
 
-//Special accessors used when loading a room
-/*
-    void playerEntity::loadSave(string savedNextRoom, float savedX, float savedY) {
-        x = savedX;
-        y = savedY;
-        nextRoom = savedNextRoom;
-    }
-*/
     void playerEntity::setColor(uint8_t R, uint8_t G, uint8_t B, uint8_t A) {
         tint = {R, G, B, A};
     }
@@ -516,31 +584,41 @@ using namespace std;
         //Switching guns
 
         if (IsKeyPressed(KEY_Q)) {
-            gunSelect--;
+            for (int i = 0; i < 16; i++) {
+                gunSelect--;
+                if (gunUnlocked[gunSelect % 16]) {
+                    break;
+                }
+            }
         }
         if (IsKeyPressed(KEY_E)) {
-            gunSelect++;
+            for (int i = 0; i < 16; i++) {
+                gunSelect++;
+                if (gunUnlocked[gunSelect % 16]) {
+                    break;
+                }
+            }
         }
 
         //Cooldown
 
-        for (int i = 0; i < gunCoolDowns.size(); i++) {
+        for (int i = 0; i < 16; i++) {
             gunCoolDowns[i]--;
         }
 
         //Shootin'
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && unlockedGunIDs.size() > 0) {
-            gunSelect = gunSelect % unlockedGunIDs.size();
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && gunUnlocked[gunSelect]) {
+            gunSelect = gunSelect % 16;
             if (gunAmmos[gunSelect] > 0 && gunCoolDowns[gunSelect] < 0) {
                 Vector2 aim = Vector2Subtract(GetMousePosition(), positionOnScreen);
                 bullet* b;
-                switch(unlockedGunIDs[gunSelect]) {
+                switch(gunSelect) {
                     case 0:
                         aim = Vector2Scale(Vector2Normalize(aim), 0.5);
                         b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, 3);
-                        gunCoolDowns[gunSelect] = 60;
-                        gunAmmos[gunSelect]--;
+                        gunCoolDowns[0] = 60;
+                        gunAmmos[0]--;
                         break;
                     default:
                         cerr << "Fired bullet with invalid gun\n";
@@ -595,10 +673,7 @@ using namespace std;
                     localEntities.clear();
                     break;
                 case 4: {       //Savepoint
-                    ofstream saveOut;
-                    saveOut.open("save.txt");
-                    saveOut << nextRoom << " " << x << " " << y;
-                    saveOut.close();
+                    save("save");
                     break;
                 }
                 case 5:         //Forcefield
@@ -608,31 +683,25 @@ using namespace std;
                 case 6:         //Bullet
                     yMomentum += colIter -> yVal * 0.3;
                     xMomentum += colIter -> xVal * 0.3;
-                    //Health?
+                    health -= colIter -> damage;
                     break;
-                case 7:         //gun pickup
-                    unlockedGunIDs.push_back(colIter -> damage);    //Actually the gunID
-                    gunCoolDowns.push_back(0);
-                    switch(colIter -> damage) {
-                        case 0:
-                            gunAmmos.push_back(3);
-                            gunMaxAmmos.push_back(3);
-                            gunDisplayChars.push_back('1');
-                            break;
-                        default:
-                            unlockedGunIDs.pop_back();    //Actually the gunID
-                            gunCoolDowns.pop_back();
-                            cerr << "Error: Gun Pickup contains invalid gunID.";
-                            break;
-                    }
-                    break;
-                case 8:         //Ammo pickup
-                    for (int i = 0; i < unlockedGunIDs.size(); i++) {
-                        if (unlockedGunIDs[i] == colIter -> damage) {       //damage is actually gunID again
-                            gunAmmos[i] = min(gunMaxAmmos[i], gunAmmos[i] + (int) (colIter -> xVal));
-                            break;
+                case 7: {         //gun pickup
+                        int gunID = colIter -> damage;
+                        gunUnlocked[gunID] = true;  // damage is actually the gunID
+                        switch(gunID) {
+                            case 0:
+                                gunAmmos[gunID] = 3;
+                                gunMaxAmmos[gunID] = 6;
+                                gunDisplayChars[gunID] = '1';
+                                break;
+                            default:
+                                cerr << "Error: Gun Pickup contains invalid gunID.";
+                                break;
                         }
+                        break;
                     }
+                case 8:         //Ammo pickup
+                    gunAmmos[colIter -> damage] = min(gunMaxAmmos[colIter -> damage], (int)(gunAmmos[colIter -> damage] + colIter -> xVal));
                     break;
                 case 9:         //Health pickup
                     health = min(maxHealth, health + colIter -> damage);
@@ -642,14 +711,12 @@ using namespace std;
                     maxHealth += (colIter -> damage);
                     break;
                 case 11: {        //op pickup
-                    vector<int> op, arg;
                     string message = colIter -> message;
-                    for (int i = 0; i < message.length(); i+= 2) {
-                        op.push_back(message[i]);
-                        arg.push_back(message[i + 1]);
+                    for (int i = 0; i < 8; i+= 2) {
+                        ops[opCount][i / 2] = message[i];
+                        args[opCount][i / 2] = message[i + 1];
                     }
-                    ops.push_back(op);
-                    args.push_back(arg);
+                    opCount++;
                     break;
                 }
             }
@@ -673,17 +740,15 @@ using namespace std;
 
         //Print gun info
 
-        for (int i = 0; i < unlockedGunIDs.size(); i++) {
-            if (gunSelect == i) {
-                myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (i + 2) * FONTSIZE}, FONTSIZE, 0, GREEN);
+        int rowCount = 0;
+        for (int i = 0; i < 16; i++) {
+            if (gunUnlocked[i]) {
+                myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (++rowCount + 2) * FONTSIZE}, FONTSIZE, 0, GREEN);
+                if (gunCoolDowns[i] > 0 || gunAmmos[i] == 0) {
+                    myDrawText(displayFont, "X", {FONTSIZE, (rowCount + 2) * FONTSIZE}, FONTSIZE, 0, RED);
+                }
+                myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 2) * FONTSIZE}, FONTSIZE, 0, WHITE);
             }
-            else {
-                myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (i + 2) * FONTSIZE}, FONTSIZE, 0, WHITE);
-            }
-            if (gunCoolDowns[i] > 0) {
-                myDrawText(displayFont, "X", {FONTSIZE, (i + 2) * FONTSIZE}, FONTSIZE, 0, RED);
-            }
-            myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (i + 2) * FONTSIZE}, FONTSIZE, 0, WHITE);
         }
 
         //Health background bar
@@ -714,7 +779,10 @@ using namespace std;
 
     void apply(bitset<8>* current, int op, int arg) {
         switch(op) {
-            case 0: {   //Load
+            case 0: {   //do nothing
+                break;
+            }
+            case 6: {   //Load
                 bitset<8> toReturn(arg);
                 *current = toReturn;
                 break;
@@ -763,7 +831,7 @@ using namespace std;
     void playerEntity::drawTabScreen(Font displayFont) {
 
         int keys[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
-        int icons[] = {'L', 0xab, '<', 0x25a3, 0x2610, 'X'};
+        int icons[] = {' ', 0xab, '<', 0x25a3, 0x2610, 'X', 'L'};
 
         drawHUD(displayFont);
         string listNum = "0: ";
@@ -781,10 +849,10 @@ using namespace std;
                     myDrawText(displayFont, "0", { FONTSIZE * (j + 4), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
                 }
             }
-            for (int j = 0; j < ops.size(); j++) {
-                myDrawText(displayFont, TextToUtf8(&icons[ops[j][0]], 1), { FONTSIZE * (j * 3 + 15), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
-                if (ops[j].size() > 1) {
-                    myDrawText(displayFont, "+", {FONTSIZE * (j * 3 + 16), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+            for (int k = 0; k < 16; k++) {
+                myDrawText(displayFont, TextToUtf8(&icons[ops[k][0]], 1), { FONTSIZE * (k * 3 + 15), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                if (ops[k][1] != 0) {
+                    myDrawText(displayFont, "+", {FONTSIZE * (k * 3 + 16), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
                 }
             }
         }
@@ -796,8 +864,8 @@ using namespace std;
             int lineSelect = (mouse.y / FONTSIZE - 10) / 2;
             if (0 <= lineSelect && lineSelect <= 9) {
                 int opSelect = (mouse.x / FONTSIZE - 15) / 3;
-                if (0 <= opSelect && opSelect < ops.size()) {
-                    for (int i = 0; i < ops[opSelect].size(); i++) {
+                if (0 <= opSelect && opSelect < 16) {
+                    for (int i = 0; i < 4; i++) {
                         apply(&channels[keys[lineSelect]], ops[opSelect][i], args[opSelect][i]);
                     }
                 }

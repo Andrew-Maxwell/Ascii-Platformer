@@ -122,7 +122,7 @@ class entityList {
 
     ~entityList();
 
-    void clear();
+    void clear(); //Has the potential to cause big issues with collideables. should ONLY be called in one place - by player when changing rooms.
 
     int size();
 

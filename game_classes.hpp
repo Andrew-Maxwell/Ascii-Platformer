@@ -202,18 +202,20 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
 
     int health, maxHealth;
 
-    vector<int> unlockedGunIDs;
-    vector<int> gunAmmos;
-    vector<int> gunMaxAmmos;
-    vector<int> gunCoolDowns;
-    vector<int> gunDisplayChars;
+    bool gunUnlocked[16] = {false};
+    int gunAmmos[16] {0};
+    int gunMaxAmmos[16] = {0};
+    int gunCoolDowns[16] = {0};
+    int gunDisplayChars[16] = {'E'};
+
     int gunSelect = 0;
 
     //Used in bit manipulation
 
-    vector<vector<int>> ops;
-    vector<vector<int>> args;
-    vector<bitset<8>> channels;
+    int ops[16][4] = {{6}, {1}, {2}, {3}, {4}, {5}, {1, 3}, {3, 4}};
+    int args[16][4] = {{0}, {1}, {1}, {1}, {1}, {1}, {1, 1}, {1, 1}};
+    int opCount = 0;
+    bitset<8> channels[10];
 
     entityList localEntities;
     int lastMovedX, lastMovedY;
@@ -226,9 +228,13 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
 
     int won = 0;
 
-    //Constructor
+    //Constructor + save and load functions
 
     explicit playerEntity(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newNextRoom);
+
+    bool save(string fileName);
+
+    bool load(string fileName);
 
     //Special accessors because playerEntity must read data from save file as well
 
