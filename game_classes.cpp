@@ -498,7 +498,7 @@ using namespace std;
                 switch(unlockedGunIDs[gunSelect]) {
                     case 0:
                         aim = Vector2Scale(Vector2Normalize(aim), 0.5);
-                        b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, aim.x, aim.y, 0, 600, 0, 10, GRAVITY, 0, 3);
+                        b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, 3);
                         gunCoolDowns[gunSelect] = 60;
                         gunAmmos[gunSelect]--;
                         break;

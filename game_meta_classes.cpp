@@ -310,10 +310,11 @@ using namespace std;
     }
 
     bool pickUp::stopColliding() {
-        return collected || lifetime-- < 0;
+        return collected || lifetime < 0;
     }
 
     void pickUp::tickSet(collider& col) {
+	lifetime--;
         myParticles.tickSet(col);
     }
 
@@ -328,7 +329,7 @@ using namespace std;
 
     bool pickUp::finalize() {
         myParticles.finalize();
-        return (collected && myParticles.size() == 0) || lifetime-- < 0;
+        return (collected && myParticles.size() == 0) || (!(collected) && lifetime < 0);
     }
 
     void pickUp::print(float cameraX, float cameraY, Font displayFont) {
