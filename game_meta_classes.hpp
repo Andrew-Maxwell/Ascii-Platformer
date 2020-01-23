@@ -73,6 +73,7 @@ class collider : public layer {
 
     vector<collideable*> collideables;
     vector<collideable*> particles;
+    bool channel[512] = {false};
 
     public:
 
@@ -93,6 +94,10 @@ class collider : public layer {
     float checkHeight(float checkX, float checkY);
 
     float getFloorLevel(float entityX, float entityY);
+
+    void setChannel(int freq);
+
+    bool getChannel(int freq);
 
     //tickSet, tickGet, and finalize are each called here AFTER they have been called on all other entities.
 
@@ -202,11 +207,12 @@ class pickUp : public collideable {
 
     bool collected = false;
     bool exploded = false;
-    int displayChar;
     int lifetime;
     entityList myParticles;
 
     public:
+
+    int displayChar;
 
     explicit pickUp(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
                     float newSizeFactor, int newDisplayChar, int newLifetime);

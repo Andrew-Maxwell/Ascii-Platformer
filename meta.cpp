@@ -137,6 +137,7 @@ entity::entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t 
             delete (*entities.begin());
             entities.erase(entities.begin());
         }
+        entities.clear();
     }
 
     int entityList::size() {

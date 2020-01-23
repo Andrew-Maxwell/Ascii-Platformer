@@ -69,6 +69,7 @@ class savePoint : public collideable {
 
 class forceField : public collideable {
 
+    int channel;
     bool isOn;
     float power, range;
     entityList myParticles;
@@ -77,7 +78,7 @@ class forceField : public collideable {
 
     public:
 
-    explicit forceField(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newPower, float newRange);
+    explicit forceField(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newChannel, float newPower, float newRange);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 
@@ -201,12 +202,20 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
 
     int health, maxHealth;
 
-    vector<int> unlockedGunIDs;
-    vector<int> gunAmmos;
-    vector<int> gunMaxAmmos;
-    vector<int> gunCoolDowns;
-    vector<int> gunDisplayChars;
+    bool gunUnlocked[16] = {false};
+    int gunAmmos[16] {0};
+    int gunMaxAmmos[16] = {0};
+    int gunCoolDowns[16] = {0};
+    int gunDisplayChars[16] = {'E'};
+
     int gunSelect = 0;
+
+    //Used in bit manipulation
+
+    int ops[16][4] = {{0}};
+    int args[16][4] = {{0}};
+    int opCount = 0;
+    bitset<8> channels[10];
 
     entityList localEntities;
     int lastMovedX, lastMovedY;
@@ -219,9 +228,13 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
 
     int won = 0;
 
-    //Constructor
+    //Constructor + save and load functions
 
     explicit playerEntity(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newNextRoom);
+
+    bool save(string fileName);
+
+    bool load(string fileName);
 
     //Special accessors because playerEntity must read data from save file as well
 
@@ -248,6 +261,14 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
     bool finalize();
 
     void print(float cameraX, float cameraY, Font displayFont);
+
+    //Draw the HUD
+
+    void drawHUD(Font displayFont);
+
+    //Draw a GUI inventory/byte editor screen
+
+    void drawTabScreen(Font displayFont);
 
 };
 
@@ -354,6 +375,24 @@ class maxHealthPickUp : public pickUp {
     public:
 
     explicit maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID);
+
+    collision getCollision();
+
+};
+
+
+/*****************************************************************************/
+//Op pickup
+//Gives the player another bitwise op to play with
+/*****************************************************************************/
+
+class opPickUp : public pickUp {
+
+    string message;
+
+    public:
+
+    explicit opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, string newMessage);
 
     collision getCollision();
 

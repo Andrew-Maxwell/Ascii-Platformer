@@ -1,1 +1,1 @@
-snow.txt 45 82
+test.txt 29 20
