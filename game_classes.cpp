@@ -371,15 +371,14 @@ using namespace std;
 /******************************************************************************/
 
 struct saveData {
-
     float x, y;
     int health, maxHealth;
     bool gunUnlocked[16] = {false};
     int gunAmmos[16] {0};
     int gunMaxAmmos[16] = {0};
     int gunDisplayChars[16] = {'E'};
-    int ops[16][4] = {{6}, {1}, {2}, {3}, {4}, {5}, {1, 3}, {3, 4}};
-    int args[16][4] = {{0}, {1}, {1}, {1}, {1}, {1}, {1, 1}, {1, 1}};
+    int ops[16][4] = {{0}};
+    int args[16][4] = {{0}};
     int opCount = 0;
     bitset<8> channels[10];
     char nextRoom[64] = "test.txt";
@@ -962,12 +961,7 @@ struct saveData {
     gunPickUp::gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID) :
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        gunID(newGunID) {
-
-                            if (newDisplayChar == 0) {
-                                displayChar = 0x250f;
-                            }
-                        }
+                        gunID(newGunID) {}
 
     collision gunPickUp::getCollision() {
         return collision(7, gunID);
@@ -982,12 +976,7 @@ struct saveData {
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
                         gunID(newGunID),
-                        ammoCount(newAmmoCount) {
-
-                            if (newDisplayChar == 0) {
-                                displayChar = 0x25af;
-                            }
-                        }
+                        ammoCount(newAmmoCount) {}
 
     collision ammoPickUp::getCollision() {
         return collision(8, gunID, ammoCount);      //ammoCount in xVal
@@ -1001,12 +990,7 @@ struct saveData {
     healthPickUp::healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        healthCount(newHealthCount) {
-
-                            if (newDisplayChar == 0) {
-                                displayChar = 0x2665;
-                            }
-                        }
+                        healthCount(newHealthCount) {}
 
     collision healthPickUp::getCollision() {
         return collision(9, healthCount);
@@ -1020,12 +1004,7 @@ struct saveData {
     maxHealthPickUp::maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        healthCount(newHealthCount) {
-
-                            if (newDisplayChar == 0) {
-                                displayChar = '+';
-                            }
-                        }
+                        healthCount(newHealthCount) {}
 
     collision maxHealthPickUp::getCollision() {
         return collision(10, healthCount);
@@ -1039,12 +1018,7 @@ struct saveData {
     opPickUp::opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, string newMessage) :
                         pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        message(newMessage) {
-
-                            if (newDisplayChar == 0) {
-                                displayChar = 'X';
-                            }
-                        }
+                        message(newMessage) {}
 
     collision opPickUp::getCollision() {
         return collision(11, 0, 0.0, 0.0, message);

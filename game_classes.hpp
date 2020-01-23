@@ -212,8 +212,8 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
 
     //Used in bit manipulation
 
-    int ops[16][4] = {{6}, {1}, {2}, {3}, {4}, {5}, {1, 3}, {3, 4}};
-    int args[16][4] = {{0}, {1}, {1}, {1}, {1}, {1}, {1, 1}, {1, 1}};
+    int ops[16][4] = {{0}};
+    int args[16][4] = {{0}};
     int opCount = 0;
     bitset<8> channels[10];
 
