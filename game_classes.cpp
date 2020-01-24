@@ -510,7 +510,7 @@ struct saveData {
         //Reload room
 
         if (IsKeyPressed(KEY_R)) {
-            shouldChangeRooms = true;
+            explosion (col, localEntities, 60, x, y, tint.r, tint.g, tint.b, tint.a, 1, 1, 0, 100, 0.5);
         }
 
         //Movement
