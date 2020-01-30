@@ -5,7 +5,7 @@
 
 #define CAMERASPEED 1
 
-using namespace std;
+using namespace rapidjson;
 
 
 /*****************************************************************************/
@@ -143,7 +143,7 @@ struct textureCharFill : public charFill {
 
 /*****************************************************************************/
 //dummyEntity
-//An entity that doesn't do anything. Used to display locations of actual entities in the editor.
+//An entity that doesn't do anything. Used in mouse interface, mostly.
 /*****************************************************************************/
 
 class dummyEntity : public entity {
@@ -171,26 +171,33 @@ class dummyEntity : public entity {
 
 class editableLayer : public layer {
 
+    Value* json;
     int flashCount = -1;
     bool visible = true;
+    bool isLayer;
     Color original;
     vector<vector<int*>> frames;
     int width, knownWidth;
     int tileX1, tileY1, tileX2, tileY2;
     int currentFrame = 0, lastFrame = 0;
     bool isColorChanged = false, selected = false;
+    
 
     public:
 
-    editableLayer( float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newFileName);
+    editableLayer( float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson);
 
     //Accessors
+    
+    bool getIsLayer();
 
     float getX();
 
     float getY();
 
     float getSizeFactor();
+    
+    void setSizeFactor(float newSizeFactor);
 
     Color getColor();
 
@@ -219,6 +226,8 @@ class editableLayer : public layer {
     float getTileY(float cameraY, float mouseY);
 
     //Apply changes using left mouse button.
+    
+    void move(vector<tuple<int, int>> mousePos);
 
     void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F, float density);
 
@@ -242,7 +251,7 @@ class editableLayer : public layer {
 
     //Save
 
-    void save(string fileName);
+    void save();
 
     //Display
 

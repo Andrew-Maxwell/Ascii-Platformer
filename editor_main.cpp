@@ -1,44 +1,95 @@
 #include "meta.hpp"
 #include "editor_classes.hpp"
 
-using namespace std;
+using namespace rapidjson;
 
 /******************************************************************************/
 //Read in a list of entities from a file
 /******************************************************************************/
 
-void readEntities(entityList& el, list<editableLayer*>& layers, editableLayer*& col, Color& background, string fileName) {
-    ifstream entityFile;
-    entityFile.open(fileName);
+void readEntities(entityList& el, list<editableLayer*>& layers, editableLayer*& col, Color& background, const string fileName, Document& doc) {
+
+    //Read into a json object
+
+    FILE* entityFile = fopen(fileName.c_str(), "rb");
+    char* buffer = NULL;
     if (!entityFile) {
         cerr << "Error opening entity file. Attempting to open" << fileName;
         exit(EXIT_FAILURE);
     }
-    char c;
-    float x, y, sizeFactor;
-    int R, G, B, A;
-    string colliderFileName;
-    entityFile >> colliderFileName >> R >> G >> B >> A;
-    background = {R, G, B, A};
-    while (entityFile >> c >> x >> y >> R >> G >> B >> A >> sizeFactor) {
-        cout << "Read in a " << c << endl;
-        if (c == 'L') {
-            string fileName;
-            entityFile >> fileName;
-            editableLayer * L = new editableLayer(x, y, R, G, B, A, sizeFactor, fileName);
-            el.addEntity(L);
-            layers.push_back(L);
-        }
-        else {
-            dummyEntity* e = new dummyEntity(x, y, R, G, B, A, sizeFactor, c);
-            el.addEntity(e);
-        }
-        entityFile.ignore(10000, '\n');
+    fseek (entityFile, 0, SEEK_END);
+    buffer = new char[ftell (entityFile)];
+    fseek (entityFile, 0, SEEK_SET);
+    FileReadStream entityReadStream(entityFile, buffer, sizeof(buffer));
+    if (doc.ParseStream(entityReadStream).HasParseError()) {
+        cerr << "Error parsing json.\n" << endl;
     }
-    col = new editableLayer(0.0, 0.0, 0, 0, 0, 80, 1, colliderFileName);
+    fclose(entityFile);
+
+    //Read level background color
+
+    int backgroundR = doc.HasMember("R") ? doc["R"].GetInt() : 255;
+    int backgroundG = doc.HasMember("G") ? doc["G"].GetInt() : 255;
+    int backgroundB = doc.HasMember("B") ? doc["B"].GetInt() : 255;
+    int backgroundA = doc.HasMember("A") ? doc["A"].GetInt() : 255;
+    string colFileName = doc.HasMember("collider") ? doc["collider"].GetString() : "test_collider.txt";
+    background = {backgroundR, backgroundG, backgroundB, backgroundA};
+
+    //Get the list of entities
+
+    Value& entities = doc["entities"];
+    assert(entities.IsArray());
+
+    for (SizeType i = 0; i < entities.Size(); i++) {
+
+        Value& entity = entities[i];
+        assert(entity.IsObject());
+
+        //Read in generic data values (almost all entities will have these)
+
+        string type = entity.HasMember("type") ? entity["type"].GetString() : "?";
+        cout << "Reading entity " << type << endl;
+        float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
+        float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
+        int R = entity.HasMember("R") ? entity["R"].GetInt() : 0;
+        int G = entity.HasMember("G") ? entity["G"].GetInt() : 0;
+        int B = entity.HasMember("B") ? entity["B"].GetInt() : 0;
+        int A = entity.HasMember("A") ? entity["A"].GetInt() : 0;
+        float sizeFactor = entity.HasMember("sizeFactor") ? entity["sizeFactor"].GetFloat() : 1.0;
+
+        string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "No filename found.";
+        editableLayer * L = new editableLayer(x, y, R, G, B, A, sizeFactor, (type == "layer"), fileName, toupper(type[0]), &entity);
+        layers.push_back(L);
+        el.addEntity(L);
+    }
+    col = new editableLayer(0.0, 0.0, 0, 0, 0, 80, 1, true, colFileName, '!', &entities[0]); //JSON for collider is junk, not used, since collider has no color.
     el.addEntity(col);
     layers.push_back(col);
-    entityFile.close();
+}
+
+//Save all the data
+
+void writeEntities(entityList& el, list<editableLayer*>& layers, const string fileName, Document& doc) {
+    cout << "Saving file...\n";
+    
+    //Save layer files
+    
+    Value& entities = doc["entities"];
+    assert(entities.IsArray());
+    list<editableLayer*>::iterator saveIter = layers.begin();
+    while (saveIter != layers.end()) {
+        (*saveIter) -> save();
+        saveIter++;
+    }
+    
+    //Save entity metadata (to json)
+    
+    FILE* entityFile = fopen(fileName.c_str(), "wb");
+    char buffer[65536];
+    FileWriteStream entityWriteStream(entityFile, buffer, sizeof(buffer));
+    PrettyWriter<FileWriteStream> writer(entityWriteStream);
+    doc.Accept(writer);
+    fclose(entityFile);
 }
 
 /******************************************************************************/
@@ -147,7 +198,7 @@ int main(int argc, char** argv) {
 
     int brushID = 0;
     int brushClickCount = 1;
-    string brushName = "Pencil";
+    string brushName = "(P)encil";
     float density = 1;
 
     //mayNeedToSave?
@@ -162,10 +213,16 @@ int main(int argc, char** argv) {
     editableLayer* col;
     Color background;
     string fileName(argv[1]);
-    readEntities(entities, layers, col, background, fileName);
+    Document json;
+    
+    cout << "Starting loading entities...\n";
+    
+    readEntities(entities, layers, col, background, fileName, json);
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
     float speedMult;
+    
+    cout << "Finished loading.\n";
 
     //Main loop
 
@@ -181,6 +238,7 @@ int main(int argc, char** argv) {
             //Character selector
 
             if (IsKeyDown(KEY_TAB)) {
+                mousePos.clear();
                 BeginDrawing();
                 ClearBackground(DARKGRAY);
 
@@ -210,52 +268,52 @@ int main(int argc, char** argv) {
                 //Switch brush
 
                 if (IsKeyPressed(KEY_P)) {
-                    brushName = "Pencil";
+                    brushName = "(P)encil";
                     brushID = 0;
                     brushClickCount = 1;
                 }
                 if (IsKeyPressed(KEY_B)) {
-                    brushName = "Box";
+                    brushName = "(B)ox";
                     brushID = 1;
                     brushClickCount = 2;
                 }
                 if (IsKeyPressed(KEY_D)) {
-                    brushName = "Diamond";
+                    brushName = "(D)iamond";
                     brushID = 2;
                     brushClickCount = 2;
                 }
                 if (IsKeyPressed(KEY_E)) {
-                    brushName = "Entity placeholder";
+                    brushName = "(E)ntity move";
                     brushID = 3;
-                    brushClickCount = 1;
+                    brushClickCount = 2;
                 }
                 if (IsKeyPressed(KEY_Q)) {
-                    brushName = "Quadrilateral";
+                    brushName = "(Q)uadrilateral";
                     brushID = 4;
                     brushClickCount = 3;
                 }
-                if (IsKeyPressed(KEY_G)) {
-                    brushName = "Fine Gradient";
+                if (IsKeyPressed(KEY_F)) {
+                    brushName = "(F)ine Gradient";
                     brushID = 5;
                     brushClickCount = 3;
                 }
-                if (IsKeyPressed(KEY_F)) {
-                    brushName = "Coarse Gradient";
+                if (IsKeyPressed(KEY_G)) {
+                    brushName = "Coarse (G)radient";
                     brushID = 6;
                     brushClickCount = 3;
                 }
                 if (IsKeyPressed(KEY_R)) {
-                    brushName = "Ragged";
+                    brushName = "(R)agged";
                     brushID = 7;
                     brushClickCount = 3;
                 }
                 if (IsKeyPressed(KEY_S)) {
-                    brushName = "Select";
+                    brushName = "(S)elect";
                     brushID = 8;
                     brushClickCount = 100000;
                 }
                 if (IsKeyPressed(KEY_T)) {
-                    brushName = "Replace (\"Transition\")";
+                    brushName = "Replace / (T)ransition";
                     brushID = 9;
                     brushClickCount = 1;
                 }
@@ -294,33 +352,31 @@ int main(int argc, char** argv) {
                             mousePos.clear();
                             markers.clear();
                         }
-                        else {
+                        else if ((*thisLayer) -> getIsLayer()) {
                             (*thisLayer) -> undo();
+                            mayNeedToSave = true;
                         }
                     }
-                    if (IsKeyPressed(KEY_Y)) {
+                    if (IsKeyPressed(KEY_Y) && (*thisLayer) -> getIsLayer()) {
                         (*thisLayer) -> redo();
+                        mayNeedToSave = true;
                     }
                     if (IsKeyPressed(KEY_S)) {
-                        list<editableLayer*>::iterator saveIter = layers.begin();
-                        while (saveIter != layers.end()) {
-                            (*saveIter) -> save(fileName);
-                            saveIter++;
-                        }
+                        writeEntities(entities, layers, fileName, json);
                         mayNeedToSave = false;
                     }
-                    if (IsKeyPressed(KEY_X) && mousePos.size() > 1) {
+                    if (IsKeyPressed(KEY_X) && (*thisLayer) -> getIsLayer() && mousePos.size() > 1) {
                         clipboard = (*thisLayer) -> cut(mousePos);
                         markers.clear();
                         mousePos.clear();
                         mayNeedToSave = true;
                     }
-                    if (IsKeyPressed(KEY_C) && mousePos.size() > 1) {
+                    if (IsKeyPressed(KEY_C) && (*thisLayer) -> getIsLayer() && mousePos.size() > 1) {
                         clipboard = (*thisLayer) -> copy(mousePos);
                         markers.clear();
                         mousePos.clear();
                     }
-                    if (IsKeyPressed(KEY_V)) {
+                    if (IsKeyPressed(KEY_V) && (*thisLayer) -> getIsLayer()) {
                         if (mousePos.size() == 0) {
                             mousePos.push_back(make_tuple(0, 0));    //Paste in upper right by default
                         }
@@ -329,7 +385,7 @@ int main(int argc, char** argv) {
                         mousePos.clear();
                         mayNeedToSave = true;
                     }
-                    if (IsKeyPressed(KEY_A)) {
+                    if (IsKeyPressed(KEY_A) && (*thisLayer) -> getIsLayer()) {
                         brushName = "Select";
                         brushID = 8;
                         brushClickCount = 100000;
@@ -337,7 +393,8 @@ int main(int argc, char** argv) {
                         mousePos.push_back(make_tuple((*thisLayer) -> getCols() - 1, (*thisLayer) -> getRows() - 1));
                     }
                 }
-                else {
+                
+                else {  //Control is not down
 
                     //Camera movement
 
@@ -347,16 +404,16 @@ int main(int argc, char** argv) {
                     else {
                         speedMult = 1;
                     }
-                    if (IsKeyDown(KEY_RIGHT)) {
+                    if (IsKeyDown(KEY_D)) {
                         cameraX += CAMERASPEED * speedMult;
                     }
-                    if (IsKeyDown(KEY_LEFT)) {
+                    if (IsKeyDown(KEY_A)) {
                         cameraX -= CAMERASPEED * speedMult;
                     }
-                    if (IsKeyDown(KEY_UP)) {
+                    if (IsKeyDown(KEY_W)) {
                         cameraY -= CAMERASPEED * speedMult;
                     }
-                    if (IsKeyDown(KEY_DOWN)) {
+                    if (IsKeyDown(KEY_S)) {
                         cameraY += CAMERASPEED * speedMult;
                     }
 
@@ -390,12 +447,6 @@ int main(int argc, char** argv) {
                         mousePos.clear();
                     }
 
-                    //flash current layer
-            /*
-                    if (IsKeyPressed(KEY_X)) {
-                        (*thisLayer) -> flash();
-                    }
-            */
                     //switch to next layer, then flash
 
                     if (IsKeyPressed(KEY_C)) {
@@ -490,52 +541,68 @@ int main(int argc, char** argv) {
 
                     //Adjusting color
 
-                    if (IsKeyPressed(KEY_R)) {
+                    if (IsKeyDown(KEY_R)) {
                         Color newTint = (*thisLayer) -> getColor();
-                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                        if (IsKeyDown(KEY_LEFT_SHIFT) && newTint.r < 255) {
                             newTint.r++;
                         }
-                        else {
+                        else if (newTint.r > 0){
                             newTint.r--;
                         }
                         (*thisLayer) -> setColor(newTint);
+                        mayNeedToSave = true;
                     }
 
-                    if (IsKeyPressed(KEY_G)) {
+                    if (IsKeyDown(KEY_G)) {
                         Color newTint = (*thisLayer) -> getColor();
-                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                        if (IsKeyDown(KEY_LEFT_SHIFT) && newTint.g < 255) {
                             newTint.g++;
                         }
-                        else {
+                        else if (newTint.g > 0){
                             newTint.g--;
                         }
                         (*thisLayer) -> setColor(newTint);
+                        mayNeedToSave = true;
                     }
 
-                    if (IsKeyPressed(KEY_B)) {
+                    if (IsKeyDown(KEY_B)) {
                         Color newTint = (*thisLayer) -> getColor();
-                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                        if (IsKeyDown(KEY_LEFT_SHIFT) && newTint.b < 255) {
                             newTint.b++;
                         }
-                        else {
+                        else if (newTint.b > 0) {
                             newTint.b--;
                         }
                         (*thisLayer) -> setColor(newTint);
+                        mayNeedToSave = true;
                     }
 
-                    if (IsKeyPressed(KEY_A)) {
+                    if (IsKeyDown(KEY_T)) {
                         Color newTint = (*thisLayer) -> getColor();
-                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                        if (IsKeyDown(KEY_LEFT_SHIFT) && newTint.a < 255) {
                             newTint.a++;
                         }
-                        else {
+                        else if (newTint.a > 0) {
                             newTint.a--;
                         }
                         (*thisLayer) -> setColor(newTint);
+                        mayNeedToSave = true;
+                    }
+                    
+                    //Adjusting size
+                    
+                    if (IsKeyPressed(KEY_V)) {
+                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                            (*thisLayer) -> setSizeFactor((*thisLayer) -> getSizeFactor() + 0.05);
+                        }
+                        else {
+                            (*thisLayer) -> setSizeFactor((*thisLayer) -> getSizeFactor() - 0.05d);
+                        }
+                        mayNeedToSave = true;
                     }
 
                     //Output clipboard in format to be added to a textureCharFill, and create new texture
-
+                    /*
                     if (IsKeyPressed(KEY_ENTER)) {
                         cout << "{\n";
                         for (vector<int> row : clipboard) {
@@ -548,10 +615,10 @@ int main(int argc, char** argv) {
                         cout << "}";
                         charFills.push_back(new textureCharFill(clipboard));
                     }
-
+                    */
                     //mouse input: Right click to sample character
 
-                    if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON)) {
+                    if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) && (*thisLayer) -> getIsLayer()) {
                         Vector2 mouse = GetMousePosition();
                         int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
                         int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
@@ -560,30 +627,27 @@ int main(int argc, char** argv) {
 
                     //Left click to add a brush input point
 
-                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && ((*thisLayer) -> getIsLayer() || brushID == 3)) {
                         Vector2 mouse = GetMousePosition();
                         int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
                         int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
-                        if (brushID != 3) {
-                            mousePos.push_back(make_tuple(tileX1, tileY1));
-                            markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), 255, 0, 0, 255, (*thisLayer) -> getSizeFactor(), 'X'));
-                        }
-                        else {      //If placing a placeholder entity
-                            ofstream levelFile;
-                            levelFile.open(fileName, ios::app);
-                            levelFile << "?\t" << tileX1 - (*thisLayer) -> getX() << " " << tileY1 - (*thisLayer) -> getY() << "\t255\t0\t0\t255\t" << (*thisLayer) -> getSizeFactor() << endl;
-                            levelFile.close();
-                            entities.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), 255, 0, 0, 255, (*thisLayer) -> getSizeFactor(), '?'));
-                        }
+                        mousePos.push_back(make_tuple(tileX1, tileY1));
+                        markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), 255, 0, 0, 255, (*thisLayer) -> getSizeFactor(), 'X'));
                     }
 
                     //If the current stroke is complete
 
                     if (mousePos.size() >= brushClickCount) {
-                        (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]], density);
+                        if (brushID == 3) {
+                            (*thisLayer) -> move(mousePos);
+                            mayNeedToSave = true;
+                        }
+                        else if ((*thisLayer) -> getIsLayer()) {
+                            (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]], density);
+                            mayNeedToSave = true;
+                        }
                         markers.clear();
                         mousePos.clear();
-                        mayNeedToSave = true;
                     }
                 }
 
@@ -628,11 +692,7 @@ int main(int argc, char** argv) {
             myDrawText(displayFont, "You didn't save the level. Do you want to save? Y/S or N/ESC.", (Vector2){FONTSIZE, FONTSIZE}, FONTSIZE, 0, WHITE);
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
-                list<editableLayer*>::iterator saveIter = layers.begin();
-                while (saveIter != layers.end()) {
-                    (*saveIter) -> save(fileName);
-                    saveIter++;
-                }
+                writeEntities(entities, layers, fileName, json);
                 mayNeedToSave = false;
             }
             if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_N)) {

@@ -16,6 +16,14 @@
 #include <sstream>
 #include <string.h>
 #include <bitset>
+#include <cstdio>
+
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/prettywriter.h"
 
 #define SCREENWIDTH 1600
 #define SCREENHEIGHT 900
@@ -145,12 +153,11 @@ class entityList {
 
 class layer : virtual public entity {
 
-    protected:
+    public:
 
     vector<string> canvas;
+    
     string fileName;
-
-    public:
 
     explicit layer( float newx, float newy, uint8_t R, uint8_t G,
                     uint8_t B, uint8_t A, float newSizeFactor,

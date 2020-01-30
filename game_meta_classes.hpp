@@ -6,6 +6,19 @@
 using namespace std;
 
 /******************************************************************************/
+/*gameLayer
+Implements layer functionality (e.g. animations) which the editor doesn't use.*/
+/******************************************************************************/
+
+class gameLayer : public layer {
+    
+    public:
+    
+    gameLayer(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newFileName);
+  
+};
+
+/******************************************************************************/
 //Collision
 //A sort of message between entities
 /******************************************************************************/

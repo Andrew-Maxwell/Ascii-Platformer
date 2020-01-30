@@ -204,10 +204,7 @@ entity::entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t 
 
     layer::layer( float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newFileName) :
         entity(newx, newy, R, G, B, A, newSizeFactor),
-        fileName(newFileName)
-        {
-            readLayer();
-        }
+        fileName(newFileName) {}
 
     void layer::readLayer() {
         canvas.clear();
@@ -242,8 +239,8 @@ entity::entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t 
     }
 
     void layer::print(float cameraX, float cameraY, Font displayFont) {
-        for (int i = max((int)(cameraY + y - SCREENROWS / sizeFactor / 2), 0); i < min((int)(cameraY + y + SCREENROWS / 2.0 / sizeFactor) + 1, (int)canvas.size()); i++) {
-            myDrawText(displayFont, canvas[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
+        for (int i = max((int)(cameraY - y - SCREENROWS / sizeFactor / 2), 0); i < min((int)(cameraY - y + SCREENROWS / 2.0 / sizeFactor) + 1, (int)canvas.size()); i++) {
+            myDrawText(displayFont, canvas[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
         }
     }
 

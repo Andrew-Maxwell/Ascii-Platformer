@@ -2,12 +2,6 @@
 #include "game_meta_classes.hpp"
 #include "game_classes.hpp"
 
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-#include <assert.h>
-#include <streambuf>
-
 #define DRAWFPS false
 
 using namespace rapidjson;
@@ -20,22 +14,21 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
 
     //Read into a json object
 
-    ifstream entityFile;
-    entityFile.open(fileName);
+    Document json;
+    FILE* entityFile = fopen(fileName.c_str(), "rb");
+    char* buffer = NULL;
     if (!entityFile) {
         cerr << "Error opening entity file. Attempting to open" << fileName;
         exit(EXIT_FAILURE);
     }
-    string jsonString;
-    entityFile.seekg(0, ios::end);
-    jsonString.reserve(entityFile.tellg());
-    entityFile.seekg(0, ios::beg);
-    jsonString.assign((istreambuf_iterator<char>(entityFile)), istreambuf_iterator<char>());
-    entityFile.close();
-    Document json;
-    if (json.Parse(jsonString.c_str()).HasParseError()) {
+    fseek (entityFile, 0, SEEK_END);
+    buffer = new char[ftell (entityFile)];
+    fseek (entityFile, 0, SEEK_SET);
+    FileReadStream entityReadStream(entityFile, buffer, sizeof(buffer));
+    if (json.ParseStream(entityReadStream).HasParseError()) {
         cerr << "Error parsing json.\n" << endl;
     }
+    fclose(entityFile);
 
     //Read level meta information: background color and collider file name
 
@@ -58,7 +51,9 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
 
         //Read in generic data values (almost all entities will have these)
 
-        string type = entity.HasMember("type") ? entity["type"].GetString() : "dummyEntity";
+        string type = entity.HasMember("type") ? entity["type"].GetString() : "unknown entity";
+        cout << "Read in a " << type << endl;
+        
         float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
         float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
         int R = entity.HasMember("R") ? entity["R"].GetInt() : 0;
@@ -69,7 +64,7 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
 
         if (type == "layer") {
             string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "Error: No layer filename specified.";
-            layer * L = new layer(x, y, R, G, B, A, sizeFactor, fileName);
+            gameLayer * L = new gameLayer(x, y, R, G, B, A, sizeFactor, fileName);
             el.addEntity(L);
         }
         else if (type == "endingGate") {
@@ -219,11 +214,10 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
         }
         else {
             cerr << "Bad entity type: " << type << endl;
-            entityFile.ignore(1000, '\n');
             break;
         }
     }
-    entityFile.close();
+    cout << "That's it!" << endl;
 }
 
 /******************************************************************************/
@@ -272,6 +266,7 @@ int main() {
             Color background;
 
             readEntities(entities, col, background, player, player -> nextRoom);
+            cout << "Read in entities\n";
 
             //Camera initializations
 
@@ -279,6 +274,8 @@ int main() {
             float cameraY = col -> getRows() / 2;
             bool moveCameraX = (col -> getCols() > SCREENCOLS * player -> getSizeFactor());
             bool moveCameraY = (col -> getRows() > SCREENROWS * player -> getSizeFactor());
+
+            cout << "Camera initialized.\n";
 
             shouldChangeRooms = false;
 
