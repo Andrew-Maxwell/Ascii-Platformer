@@ -4,7 +4,7 @@ using namespace std;
 
 /*****************************************************************************/
 //dummyEntity
-//An entity that doesn't do anything. Used to display locations of actual entities in the editor.
+//An entity that doesn't do anything. Used in mouse interface, mostly.
 /*****************************************************************************/
 
     dummyEntity::dummyEntity(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
@@ -25,59 +25,75 @@ using namespace std;
 
 /*****************************************************************************/
 //editableLayer
-//A layer designed to be modified, then mayNeedToSave.
+//A layer designed to be modified, then mayNeedToSave. (if isLayer = true)
+//Also used to represent other entities (isLayer = false.) Not all of the same editing functions apply.
 /*****************************************************************************/
 
-    editableLayer::editableLayer( float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newFileName) :
+    editableLayer::editableLayer( float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson) :
         layer(newX, newY, R, G, B, A, newSizeFactor, newFileName),
-        entity(newX, newY, R, G, B, A, newSizeFactor) {
+        entity(newX, newY, R, G, B, A, newSizeFactor),
+        isLayer(newIsLayer)
+    {
 
         //Set original color to reset to after flashing
 
         original = {R, G, B, A};
+        json = newJson;
+        assert(json -> IsObject());
 
-        //Read in canvas information. Canvas stores the layer in UTF-8; intCanvas is in UTF-32 (?)
+        //If layer Read in canvas information. Canvas stores the layer in UTF-8; intCanvas is in UTF-32 (?)
         //Anyway, intCanvas is much easier to edit, and changes are propogated to canvas to display using update()
         //intCanvas is stored in "frames" for undoing/redoing. Complete state is saved in each frame.
 
-        canvas.clear();
-        ifstream worldFile;
-        worldFile.open(fileName);
-        if (!worldFile) {
-            cerr << "Error opening layer file.";
-            exit(EXIT_FAILURE);
-        }
-        string line;
-        getline(worldFile, line);
-        canvas.push_back(line);
-        vector<int*> intCanvas;
-        int* codepoints = GetCodepoints(line.c_str(), &knownWidth);
-        int* newCodepoints = new int[knownWidth];
-        for (int i = 0; i < knownWidth; i++) {
-            newCodepoints[i] = codepoints[i];
-        }
-        intCanvas.push_back(newCodepoints);
+        if (isLayer) {
 
-        while (getline(worldFile, line)) {
-            canvas.push_back(line);
-            vector<int> intLine;
-            int* codepoints = GetCodepoints(line.c_str(), &width);
-            if (width != knownWidth) {
-                cerr << "Error: width mismatch in file " << fileName << ", line" << intCanvas.size() + 1 << ". Make sure every line has the same number of utf-8 characters.";
+            canvas.clear();
+            ifstream worldFile;
+            worldFile.open(fileName);
+            if (!worldFile) {
+                cerr << "Error opening editable layer file.";
+                exit(EXIT_FAILURE);
             }
-            int* newCodepoints = new int[width];
-            for (int i = 0; i < width; i++) {
+            string line;
+            getline(worldFile, line);
+            canvas.push_back(line);
+            vector<int*> intCanvas;
+            int* codepoints = GetCodepoints(line.c_str(), &knownWidth);
+            int* newCodepoints = new int[knownWidth];
+            for (int i = 0; i < knownWidth; i++) {
                 newCodepoints[i] = codepoints[i];
             }
             intCanvas.push_back(newCodepoints);
+
+            while (getline(worldFile, line)) {
+                canvas.push_back(line);
+                vector<int> intLine;
+                int* codepoints = GetCodepoints(line.c_str(), &width);
+                if (width != knownWidth) {
+                    cerr << "Error: width mismatch in file " << fileName << ", line" << intCanvas.size() + 1 << ". Make sure every line has the same number of utf-8 characters.";
+                }
+                int* newCodepoints = new int[width];
+                for (int i = 0; i < width; i++) {
+                    newCodepoints[i] = codepoints[i];
+                }
+                intCanvas.push_back(newCodepoints);
+            }
+            frames.push_back(intCanvas);
+            worldFile.close();
         }
-        frames.push_back(intCanvas);
-        worldFile.close();
+        
+        else {
+            canvas.push_back(string(1, display));
+        }
     }
 
 /*****************************************************************************/
 //Accessors
 /*****************************************************************************/
+
+    bool editableLayer::getIsLayer() {
+        return isLayer;
+    }
 
     float editableLayer::getX() {
         return x;
@@ -90,6 +106,10 @@ using namespace std;
     float editableLayer::getSizeFactor() {
         return sizeFactor;
     }
+    
+    void editableLayer::setSizeFactor(float newSizeFactor) {
+        sizeFactor = newSizeFactor;
+    }
 
     Color editableLayer::getColor() {
         return tint;
@@ -98,7 +118,6 @@ using namespace std;
     void editableLayer::setColor(Color newColor) {
         tint = newColor;
         original = newColor;
-        isColorChanged = true;
     }
 
     //Used to display boundary around selected layer
@@ -155,8 +174,18 @@ using namespace std;
         return mouseY / FONTSIZE / sizeFactor + cameraY - SCREENROWS / sizeFactor / 2 + y;
     }
 
+
 /*****************************************************************************/
-//Apply changes using left mouse button.
+//move entity using left mouse button (for all entities.)
+/*****************************************************************************/
+
+    void editableLayer::move(vector<tuple<int, int>> mousePos) {
+        x += get<0>(mousePos[1]) - get<0>(mousePos[0]);
+        y += get<1>(mousePos[1]) - get<1>(mousePos[0]);
+    }
+
+/*****************************************************************************/
+//Apply changes using left mouse button (for layers only, not other entities)
 /*****************************************************************************/
 
     void editableLayer::leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F, float density) {
@@ -382,7 +411,6 @@ using namespace std;
                 cerr << "leftBrush called with invalid brush selection.";
             }
         }
-
         //Discard any frames more recent than the new one (any redo frames)
 
         while (frames.size() > currentFrame + 1) {
@@ -398,6 +426,7 @@ using namespace std;
 
         update();
     }
+
 
 /*****************************************************************************/
     //Cut
@@ -547,20 +576,23 @@ using namespace std;
 //Save
 /*****************************************************************************/
 
-    void editableLayer::save(string levelFileName) {
-        cout << "Saving layer " << fileName << endl;
-        ofstream layerOut;
-        layerOut.open(fileName);
-        for (string line : canvas) {
-            layerOut << line << endl;
+    void editableLayer::save() {
+        if (isLayer) {
+            cout << "Saving layer " << fileName << endl;
+            ofstream layerOut;
+            layerOut.open(fileName);
+            for (string line : canvas) {
+                layerOut << line << endl;
+            }
+            layerOut.close();
         }
-        layerOut.close();
-        if (isColorChanged) {           //Output a new entity entry with updated colors. User must copy-paste into position.
-            ofstream entityOut;
-            entityOut.open(levelFileName, ios::app);
-            entityOut << "\nL\t" << x << "\t" << y << "\t" << (int)tint.r << "\t" << (int)tint.g << "\t" << (int)tint.b << "\t" << (int)tint.a << "\t" << sizeFactor << "\t" << fileName;
-            entityOut.close();
-        }
+        (*json)["R"] = tint.r;
+        (*json)["G"] = tint.g;
+        (*json)["B"] = tint.b;
+        (*json)["A"] = tint.a;
+        (*json)["x"] = x;
+        (*json)["y"] = y;
+        (*json)["sizeFactor"] = sizeFactor;
     }
 
 /*****************************************************************************/
@@ -572,14 +604,11 @@ using namespace std;
             tint = original;
         }
         if (visible) {
-            if (!selected) {
-                layer::print(cameraX, cameraY, displayFont);
-            }
-            else {
-                for (int i = max((int)(cameraY + y - SCREENROWS / sizeFactor / 2), 0); i < min((int)(cameraY + y + SCREENROWS / sizeFactor / 2) + 1, (int)canvas.size()); i++) {
-                    myDrawText(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x - 1) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
-                    myDrawText(displayFont, canvas[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
-                    myDrawText(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX - x + knownWidth) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY - y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
+            layer::print(cameraX, cameraY, displayFont);
+            if (selected && isLayer) {  //Boundary indicators (helps with editing)
+                for (int i = max((int)(cameraY - y - SCREENROWS / sizeFactor / 2), 0); i < min((int)(cameraY - y + SCREENROWS / sizeFactor / 2) + 1, (int)canvas.size()); i++) {
+                    myDrawText(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x - 1) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
+                    myDrawText(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x + knownWidth) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
                 }
             }
         }

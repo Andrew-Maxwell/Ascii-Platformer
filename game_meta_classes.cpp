@@ -5,6 +5,17 @@
 using namespace std;
 
 /******************************************************************************/
+/*gameLayer
+Implements layer functionality (e.g. animations) which the editor doesn't use.*/
+/******************************************************************************/
+
+    gameLayer::gameLayer( float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newFileName) :
+        layer(newx, newy, R, G, B, A, newSizeFactor, newFileName),
+        entity(newx, newy, R, G, B, A, newSizeFactor) {
+            layer::readLayer();
+        }
+
+/******************************************************************************/
 /*Collidor*/
 /******************************************************************************/
 
@@ -12,7 +23,9 @@ using namespace std;
 
     collider::collider(float newX, float newY, string fileName) :
         layer(newX, newY, 0, 0, 0, 0, 1, fileName),
-        entity(newX, newY, 0, 0, 0, 0, 1) {}
+        entity(newX, newY, 0, 0, 0, 0, 1) {
+            layer::readLayer();
+        }
 
     void collider::addCollideable(collideable* newCollideable) {
         collideables.push_back(newCollideable);
