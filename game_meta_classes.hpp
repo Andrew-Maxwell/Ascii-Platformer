@@ -162,8 +162,7 @@ class lightPhysicalEntity : virtual public entity {
 
     protected:
 
-    float elasticity, maxSpeed, gravity, friction;
-    float xMomentum, yMomentum;
+    float elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction;
     int xSign = 1, ySign = 1;
 
     public:
@@ -191,8 +190,7 @@ class realPhysicalEntity : virtual public entity {
 
     protected:
 
-    float elasticity, maxSpeed, gravity, friction;
-    float xMomentum, yMomentum;
+    float elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction;
     int xSign = 1, ySign = 1;
     float width = 0.8;
 

@@ -109,7 +109,7 @@ class entity {
 
     //perform additional cleanup. If this function returns true, then the entity is deleted by the entityList.
 
-    virtual bool finalize() {cerr << "Entity finalize() called illegally. This function should be overridden!";}
+    virtual bool finalize() {cerr << "Entity finalize() called illegally. This function should be overridden!"; return false;}
 
     //Display the entity.
 
@@ -163,7 +163,7 @@ class layer : virtual public entity {
                     uint8_t B, uint8_t A, float newSizeFactor,
                     string newFileName);
 
-    void readLayer();
+    bool readLayer();
 
     int getRows();
 

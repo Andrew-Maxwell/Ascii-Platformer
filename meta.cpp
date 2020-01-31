@@ -206,13 +206,13 @@ entity::entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t 
         entity(newx, newy, R, G, B, A, newSizeFactor),
         fileName(newFileName) {}
 
-    void layer::readLayer() {
+    bool layer::readLayer() {
         canvas.clear();
         ifstream worldFile;
-        worldFile.open(fileName);
+        string filePath = "levels\\";
+        worldFile.open(filePath.append(fileName));
         if (!worldFile) {
-            cerr << "Error opening layer file.";
-            exit(EXIT_FAILURE);
+            return false;
         }
 
         string line;
@@ -220,6 +220,7 @@ entity::entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t 
             canvas.push_back(line);
         }
         worldFile.close();
+        return true;
     }
 
     int layer::getRows() {

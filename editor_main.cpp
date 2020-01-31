@@ -11,14 +11,17 @@ void readEntities(entityList& el, list<editableLayer*>& layers, editableLayer*& 
 
     //Read into a json object
 
-    FILE* entityFile = fopen(fileName.c_str(), "rb");
-    char* buffer = NULL;
+    FILE* entityFile = NULL;
+    entityFile = fopen(fileName.c_str(), "rb");
     if (!entityFile) {
-        cerr << "Error opening entity file. Attempting to open" << fileName;
+        entityFile = fopen(string("levels\\").append(fileName).c_str(), "rb");
+    }
+    if (!entityFile) {
+        cerr << "Level file " << fileName << " not found in this dir or /level.\n";
         exit(EXIT_FAILURE);
     }
     fseek (entityFile, 0, SEEK_END);
-    buffer = new char[ftell (entityFile)];
+    char * buffer = new char[ftell (entityFile)];
     fseek (entityFile, 0, SEEK_SET);
     FileReadStream entityReadStream(entityFile, buffer, sizeof(buffer));
     if (doc.ParseStream(entityReadStream).HasParseError()) {

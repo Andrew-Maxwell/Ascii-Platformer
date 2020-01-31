@@ -18,13 +18,13 @@
         },
         {
             "type": "player",
-            "x": 15.0,
+            "x": 26.0,
             "y": 19.0,
             "R": 254,
             "G": 1,
             "B": 254,
             "A": 254,
-            "sizeFactor": 1.0
+            "sizeFactor": 1
         },
         {
             "type": "rain",
