@@ -10,9 +10,18 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
 /******************************************************************************/
 
     gameLayer::gameLayer( float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newFileName) :
-        layer(newx, newy, R, G, B, A, newSizeFactor, newFileName),
-        entity(newx, newy, R, G, B, A, newSizeFactor) {
-            layer::readLayer();
+        entity(newx, newy, R, G, B, A, newSizeFactor),
+        layer(newx, newy, R, G, B, A, newSizeFactor, newFileName) {
+ 
+            if (!layer::readLayer()) {
+                cout << "layer file " << fileName << " not found. Checking \\levels...\n";
+                fileName = string("levels\\").append(fileName);
+                if (!layer::readLayer()) {
+                    cerr << "Error: layer file " << fileName << " not found.\n";
+                    exit(EXIT_FAILURE);
+                }
+                cout << "Found!\n";
+            }
         }
 
 /******************************************************************************/
@@ -22,9 +31,18 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
     //Accessors
 
     collider::collider(float newX, float newY, string fileName) :
-        layer(newX, newY, 0, 0, 0, 0, 1, fileName),
-        entity(newX, newY, 0, 0, 0, 0, 1) {
-            layer::readLayer();
+        entity(newX, newY, 0, 0, 0, 0, 1),
+        layer(newX, newY, 0, 0, 0, 0, 1, fileName)
+        {
+            if (!layer::readLayer()) {
+                cout << "collider file " << fileName << " not found. Checking \\levels...\n";
+                fileName = string("levels\\").append(fileName);
+                if (!layer::readLayer()) {
+                    cerr << "Error: collider file " << fileName << " not found.\n";
+                    exit(EXIT_FAILURE);
+                }
+                cout << "Found!\n";
+            }
         }
 
     void collider::addCollideable(collideable* newCollideable) {
@@ -89,8 +107,8 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
 
         //Check for collisions between any two pairs of collideables.
 
-        for (int i = 0; i < collideables.size(); i++) {
-            for (int j = i + 1; j < collideables.size(); j++) {
+        for (unsigned int i = 0; i < collideables.size(); i++) {
+            for (unsigned int j = i + 1; j < collideables.size(); j++) {
                 if (collideables[i] -> doesCollide(collideables[j] -> x, collideables[j] -> y, collideables[j] -> type)) {
                     collideables[j] -> addCollision(collideables[i] -> getCollision());
                 }
@@ -102,8 +120,8 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
 
         //Check for collideables affecting particles
 
-        for (int i = 0; i < collideables.size(); i++) {
-            for (int j = 0; j < particles.size(); j++) {
+        for (unsigned int i = 0; i < collideables.size(); i++) {
+            for (unsigned int j = 0; j < particles.size(); j++) {
                 if (collideables[i] -> doesCollide(particles[j] -> x, particles[j] -> y, particles[j] -> type)) {
                     particles[j] -> addCollision(collideables[i] -> getCollision());
                 }
@@ -143,13 +161,29 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
 
     }
 
-    bool collider::finalize() {}
+    bool collider::finalize() {
+        return false;
+    }
 
 /******************************************************************************/
 //Particle
 //Entity represented by any char that moves in a predefined direction until its lifetime runs out.
 //If the character passed to constructor is 0, then a character is chosen based on direction.
 /******************************************************************************/
+
+    particle::particle(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime) :
+                        entity(newX, newY, R, G, B, A, newSizeFactor),
+                        xSpeed(newXSpeed),
+                        ySpeed(newYSpeed),
+                        lifetime(newLifetime) {
+        if (c == 0) {
+            setDirection();
+        }
+        else {
+            toPrint = c;
+        }
+    }
 
     void particle::setDirection() {
         if (xSpeed == 0) {
@@ -171,20 +205,6 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
             else {
                 toPrint = '|';
             }
-        }
-    }
-
-    particle::particle(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor) {
-        xSpeed = newXSpeed;
-        ySpeed = newYSpeed;
-        lifetime = newLifetime;
-        if (c == 0) {
-            setDirection();
-        }
-        else {
-            toPrint = c;
         }
     }
 

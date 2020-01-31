@@ -15,14 +15,17 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
     //Read into a json object
 
     Document json;
-    FILE* entityFile = fopen(fileName.c_str(), "rb");
-    char* buffer = NULL;
+    FILE* entityFile = NULL;
+    entityFile = fopen(fileName.c_str(), "rb");
     if (!entityFile) {
-        cerr << "Error opening entity file. Attempting to open" << fileName;
+        entityFile = fopen(string("levels\\").append(fileName).c_str(), "rb");
+    }
+    if (!entityFile) {
+        cerr << "Level file " << fileName << " not found in this dir or /level.\n";
         exit(EXIT_FAILURE);
     }
     fseek (entityFile, 0, SEEK_END);
-    buffer = new char[ftell (entityFile)];
+    char * buffer = new char[ftell (entityFile)];
     fseek (entityFile, 0, SEEK_SET);
     FileReadStream entityReadStream(entityFile, buffer, sizeof(buffer));
     if (json.ParseStream(entityReadStream).HasParseError()) {
@@ -217,7 +220,6 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
             break;
         }
     }
-    cout << "That's it!" << endl;
 }
 
 /******************************************************************************/
@@ -225,7 +227,7 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
 /******************************************************************************/
 
 
-int main() {
+int main(int argc, char** argv) {
 
 //Initialize raylib
 
@@ -235,7 +237,6 @@ int main() {
 
     Font displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
 
-
 //misc initializations
 
     chrono::steady_clock::time_point tickStart, tickEnd;
@@ -244,7 +245,6 @@ int main() {
     int won = 0;
     playerEntity* player;
     string savedNextRoom;
-    float savedX, savedY;
     bool shouldChangeRooms = false;
     bool showInventory = false;
 
@@ -253,8 +253,16 @@ int main() {
         //Initialize
 
         player = new playerEntity(0.0, 0.0, 255, 255, 255, 255, 1, "test.txt");
-        if (player -> load("save")) {
-            cout << "Loaded save.";
+        if (argc == 1) {
+            if (player -> load("save")) {
+                cout << "Loaded save.\n";
+            }
+            else {
+                player -> nextRoom = "test.txt";
+            }
+        }
+        else {
+            player -> nextRoom = argv[1];
         }
 
         while (!(won || WindowShouldClose())) {         //While we're still alive
@@ -266,7 +274,7 @@ int main() {
             Color background;
 
             readEntities(entities, col, background, player, player -> nextRoom);
-            cout << "Read in entities\n";
+            cout << "Finished reading in entities\n";
 
             //Camera initializations
 
@@ -274,8 +282,6 @@ int main() {
             float cameraY = col -> getRows() / 2;
             bool moveCameraX = (col -> getCols() > SCREENCOLS * player -> getSizeFactor());
             bool moveCameraY = (col -> getRows() > SCREENROWS * player -> getSizeFactor());
-
-            cout << "Camera initialized.\n";
 
             shouldChangeRooms = false;
 

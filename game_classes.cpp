@@ -303,7 +303,7 @@ using namespace std;
             dropBuffer--;
             physicalParticle* raindrop;
             if (isSnow) {
-                int snowflake;
+                int snowflake = 0;
                 switch(GetRandomValue(1, 5)) {
                     case 1:
                         snowflake = '.';
@@ -393,8 +393,8 @@ struct saveData {
 //Constructor
 
     playerEntity::playerEntity(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newNextRoom) :
-                            realPhysicalEntity(newX, newY, R, G, B, A, newSizeFactor, 1.0, 0.0, 0.0),
-                            entity(newX, newY, R, G, B, A, newSizeFactor)
+                            entity(newX, newY, R, G, B, A, newSizeFactor),
+                            realPhysicalEntity(newX, newY, R, G, B, A, newSizeFactor, 1.0, 0.0, 0.0)
     {
         shouldChangeRooms = false;
         nextRoom = newNextRoom;
@@ -880,9 +880,9 @@ struct saveData {
     bullet::bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor,
                    float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage) :
+        entity(newX, newY, R, G, B, A, newSizeFactor),
         physicalParticle(newX, newY, R, G, B, A, newSizeFactor, newXMomentum, newYMomentum, c, newLifeTime, newElasticity,
                          newMaxSpeed, newGravity, newFriction),
-        entity(newX, newY, R, G, B, A, newSizeFactor),
         damage(newDamage)
     {
         type = 6;
@@ -959,8 +959,8 @@ struct saveData {
 /*****************************************************************************/
 
     gunPickUp::gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID) :
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         gunID(newGunID) {}
 
     collision gunPickUp::getCollision() {
@@ -973,8 +973,8 @@ struct saveData {
 /*****************************************************************************/
 
     ammoPickUp::ammoPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID, int newAmmoCount) :
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         gunID(newGunID),
                         ammoCount(newAmmoCount) {}
 
@@ -988,8 +988,8 @@ struct saveData {
 /*****************************************************************************/
 
     healthPickUp::healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         healthCount(newHealthCount) {}
 
     collision healthPickUp::getCollision() {
@@ -1002,8 +1002,8 @@ struct saveData {
 /*****************************************************************************/
 
     maxHealthPickUp::maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         healthCount(newHealthCount) {}
 
     collision maxHealthPickUp::getCollision() {
@@ -1016,8 +1016,8 @@ struct saveData {
 /*****************************************************************************/
 
     opPickUp::opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, string newMessage) :
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         entity(newX, newY, R, G, B, A, newSizeFactor),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
                         message(newMessage) {}
 
     collision opPickUp::getCollision() {

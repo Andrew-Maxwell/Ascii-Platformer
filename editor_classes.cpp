@@ -51,8 +51,11 @@ using namespace std;
             ifstream worldFile;
             worldFile.open(fileName);
             if (!worldFile) {
-                cerr << "Error opening editable layer file.";
-                exit(EXIT_FAILURE);
+                worldFile.open(string("levels\\").append(fileName));
+                if (!worldFile) {
+                    cerr << "Error opening editable layer file.";
+                    exit(EXIT_FAILURE);
+                }
             }
             string line;
             getline(worldFile, line);
