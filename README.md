@@ -1,7 +1,9 @@
 # Ascii-Platformer
-WIP ASCII platformer using Raylib. Design emphasis on beatiful, atmospheric levels using simple, minimalistic elements,
+WIP ASCII platformer using Raylib. Trying to make atmospheric levels (inspired by Rain World) out of text.
 
-Here's how I (Andrew) explained the technical side of it to Mark. Writing a more polished readme takes a back seat to actually implementing more features.
+I'll make more detailed documentation later.
+
+Here's how I (Andrew) explained the technical side of it to Mark.
 
 So basically I wrote this almost from scratch
 it's not using an engine
