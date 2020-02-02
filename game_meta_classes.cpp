@@ -13,15 +13,7 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
         entity(newx, newy, R, G, B, A, newSizeFactor),
         layer(newx, newy, R, G, B, A, newSizeFactor, newFileName) {
  
-            if (!layer::readLayer()) {
-                cout << "layer file " << fileName << " not found. Checking \\levels...\n";
-                fileName = string("levels\\").append(fileName);
-                if (!layer::readLayer()) {
-                    cerr << "Error: layer file " << fileName << " not found.\n";
-                    exit(EXIT_FAILURE);
-                }
-                cout << "Found!\n";
-            }
+            layer::readLayer();
         }
 
 /******************************************************************************/
@@ -34,15 +26,7 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
         entity(newX, newY, 0, 0, 0, 0, 1),
         layer(newX, newY, 0, 0, 0, 0, 1, fileName)
         {
-            if (!layer::readLayer()) {
-                cout << "collider file " << fileName << " not found. Checking \\levels...\n";
-                fileName = string("levels\\").append(fileName);
-                if (!layer::readLayer()) {
-                    cerr << "Error: collider file " << fileName << " not found.\n";
-                    exit(EXIT_FAILURE);
-                }
-                cout << "Found!\n";
-            }
+            layer::readLayer();
         }
 
     void collider::addCollideable(collideable* newCollideable) {
@@ -61,7 +45,40 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
     }
 
     bool collider::isLiquid(int row, int col) {
-        return canvas[row][col] == 'w';
+        if (row >= 0 && row < canvas.size() && col >= 0 && col < canvas[row].size()) {
+            return canvas[row][col] == 'w';
+        }
+        return false;
+    }
+
+    int collider::getPlayerDamage(int row, int col) {
+        if (row >= 0 && row < canvas.size() && col >= 0 && col < canvas[row].size()) {
+            if (canvas[row][col] == 'x' || canvas[row][col] == 'y') {
+                return -2;
+            }
+            else if (canvas[row][col] == 'X' || canvas[row][col] == 'Y') {
+                return -10;
+            }
+            else if (canvas[row][col] == 'Z') {
+                return -500;
+            }
+        }
+        return 0;
+    }
+    
+    int collider::getDamage(int row, int col) {
+        if (row >= 0 && row < canvas.size() && col >= 0 && col < canvas[row].size()) {
+            if (canvas[row][col] == 'x') {
+                return -2;
+            }
+            else if (canvas[row][col] == 'X') {
+                return -10;
+            }
+            else if (canvas[row][col] == 'Z') {
+                return -500;
+            }
+        }
+        return 0;
     }
 
     //Broadcasts
@@ -341,14 +358,15 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
 /*****************************************************************************/
 
     pickUp::pickUp(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                    float newSizeFactor, int newDisplayChar, int newLifetime) :
+                    float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch) :
         entity(newX, newY, R, G, B, A, newSizeFactor),
         displayChar(newDisplayChar),
-        lifetime(newLifetime) {
-    }
+        lifetime(newLifetime),
+        ID(newID),
+        touch(newTouch) {}
 
     bool pickUp::doesCollide(float otherX, float otherY, int otherType) {
-        if (!collected && IsKeyPressed(KEY_S) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == 1) {
+        if (!collected && (IsKeyPressed(KEY_S) || touch) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == 1) {
             collected = true;
             return true;
         }

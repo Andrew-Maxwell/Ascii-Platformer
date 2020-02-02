@@ -366,6 +366,19 @@ using namespace std;
     }
 
 /******************************************************************************/
+//DamageIndicator()
+//Spawns a little number that floats up when damage is taken/dealt
+/******************************************************************************/
+
+void damageIndicator(entityList& entities, int damage, float x, float y, Color tint, float newSizeFactor) {
+    float leftEnd = x - 1 - floor(log10(abs(damage))) / 2;
+    string digits = to_string(damage);
+    for (int i = 0; i < digits.length(); i++) {
+        entities.addEntity (new particle (leftEnd + i, y, tint.r, tint.g, tint.b, tint.a, newSizeFactor, 0, -0.1, digits[i], 60));
+    }
+}
+
+/******************************************************************************/
 //Save
 //Used as a hack for saving player data.
 /******************************************************************************/
@@ -382,6 +395,7 @@ struct saveData {
     int opCount = 0;
     bitset<8> channels[10];
     char nextRoom[64] = "test.txt";
+    bool pickUpsCollected[512] = {false};
 };
 
 
@@ -421,6 +435,7 @@ struct saveData {
         copy(&ops[0][0], &ops[0][0] + 64, &s.ops[0][0]);
         copy(&args[0][0], &args[0][0] + 64, &s.args[0][0]);
         s.opCount = opCount;
+        copy(pickUpsCollected, pickUpsCollected + 512, s.pickUpsCollected);
         copy(channels, channels + 10, s.channels);
         copy(nextRoom.begin(), nextRoom.end(), s.nextRoom);
 
@@ -458,12 +473,22 @@ struct saveData {
             copy(s.gunDisplayChars, s.gunDisplayChars + 16, gunDisplayChars);
             copy(&s.ops[0][0], &s.ops[0][0] + 64, &ops[0][0]);
             copy(&s.args[0][0], &s.args[0][0] + 64, &args[0][0]);
+            copy(s.pickUpsCollected, s.pickUpsCollected + 512, pickUpsCollected);
             opCount = s.opCount;
             copy(s.channels, s.channels + 10, channels);
             nextRoom = s.nextRoom;
             return true;
         }
 
+    }
+
+//Accessors
+
+    bool playerEntity::isCollected(int pickUpID) {
+        if (pickUpID >= 0 && pickUpID < 512) {
+            return pickUpsCollected[pickUpID];
+        }
+        return false;
     }
 
     void playerEntity::setColor(uint8_t R, uint8_t G, uint8_t B, uint8_t A) {
@@ -615,7 +640,7 @@ struct saveData {
                 switch(gunSelect) {
                     case 0:
                         aim = Vector2Scale(Vector2Normalize(aim), 0.5);
-                        b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, 3);
+                        b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10);
                         gunCoolDowns[0] = 60;
                         gunAmmos[0]--;
                         break;
@@ -638,13 +663,25 @@ struct saveData {
             yMomentum = max(0.0f, yMomentum);
         }
 
-        //Death
-
+        //Spikes, falling, and death
+        
+        hurtTimer--;
         if (y > col.getRows() + 25) {
             health = 0;
         }
         if (health <= 0) {
             won = -1;
+        }
+        
+        //spikes
+        
+        int spikeDamage = col.getPlayerDamage((int)(y + 0.5), (int)(x + 0.5));
+        if (hurtTimer < 0 && spikeDamage) {
+            health += spikeDamage;
+            hurtTimer = 60;
+            xMomentum *= -3;
+            yMomentum *= -0.7;
+            damageIndicator(localEntities, spikeDamage, x, y, HURTCOLOR, sizeFactor);
         }
 
         //Apply physics
@@ -680,34 +717,52 @@ struct saveData {
                     yMomentum += colIter -> yVal;
                     break;
                 case 6:         //Bullet
-                    yMomentum += colIter -> yVal * 0.3;
-                    xMomentum += colIter -> xVal * 0.3;
-                    health -= colIter -> damage;
+                    if ((hurtTimer < 0)) {
+                        yMomentum += colIter -> yVal * 0.3;
+                        xMomentum += colIter -> xVal * 0.3;
+                        health += (colIter -> damage);
+                        hurtTimer = 60;
+                        damageIndicator(localEntities, colIter -> damage, x, y, HURTCOLOR, sizeFactor);
+                    }
                     break;
                 case 7: {         //gun pickup
-                        int gunID = colIter -> damage;
-                        gunUnlocked[gunID] = true;  // damage is actually the gunID
-                        switch(gunID) {
-                            case 0:
-                                gunAmmos[gunID] = 3;
-                                gunMaxAmmos[gunID] = 6;
-                                gunDisplayChars[gunID] = '1';
-                                break;
-                            default:
-                                cerr << "Error: Gun Pickup contains invalid gunID.";
-                                break;
-                        }
-                        break;
+                    int gunID = colIter -> damage;
+                    gunUnlocked[gunID] = true;  // damage is actually the gunID
+                    switch(gunID) {
+                        case 0:
+                            gunAmmos[gunID] = 3;
+                            gunMaxAmmos[gunID] = 6;
+                            gunDisplayChars[gunID] = '1';
+                            break;
+                        default:
+                            cerr << "Error: Gun Pickup contains invalid gunID.";
+                            break;
+                    }
+                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
+                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    }
+                    break;
                     }
                 case 8:         //Ammo pickup
                     gunAmmos[colIter -> damage] = min(gunMaxAmmos[colIter -> damage], (int)(gunAmmos[colIter -> damage] + colIter -> xVal));
+                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
+                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    }
                     break;
                 case 9:         //Health pickup
                     health = min(maxHealth, health + colIter -> damage);
+                    damageIndicator(localEntities, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
+                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
+                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    }
                     break;
                 case 10:        //max health pickup
                     health += (colIter -> damage);
+                    damageIndicator(localEntities, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
                     maxHealth += (colIter -> damage);
+                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
+                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    }
                     break;
                 case 11: {        //op pickup
                     string message = colIter -> message;
@@ -716,6 +771,9 @@ struct saveData {
                         args[opCount][i / 2] = message[i + 1];
                     }
                     opCount++;
+                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
+                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    }
                     break;
                 }
             }
@@ -730,7 +788,12 @@ struct saveData {
 
     void playerEntity::print(float cameraX, float cameraY, Font displayFont) {
         positionOnScreen = (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor };   //Used for mouse aiming
-        myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, tint);
+        if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
+            myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, HURTCOLOR);
+        }
+        else {
+            myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, tint);
+        }
         localEntities.print(cameraX, cameraY, displayFont);
         drawHUD(displayFont);
     }
@@ -742,11 +805,14 @@ struct saveData {
         int rowCount = 0;
         for (int i = 0; i < 16; i++) {
             if (gunUnlocked[i]) {
-                myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (++rowCount + 2) * FONTSIZE}, FONTSIZE, 0, GREEN);
-                if (gunCoolDowns[i] > 0 || gunAmmos[i] == 0) {
-                    myDrawText(displayFont, "X", {FONTSIZE, (rowCount + 2) * FONTSIZE}, FONTSIZE, 0, RED);
+                if (gunCoolDowns[i] > 0 || gunAmmos[i] < 1) {
+                    myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (++rowCount + 2) * FONTSIZE}, FONTSIZE, 0, gunColorsFaded[i]);
+                    myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 2) * FONTSIZE}, FONTSIZE, 0, gunColorsFaded[i]);
                 }
-                myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 2) * FONTSIZE}, FONTSIZE, 0, WHITE);
+                else {
+                    myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (++rowCount + 2) * FONTSIZE}, FONTSIZE, 0, gunColors[i]);
+                    myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 2) * FONTSIZE}, FONTSIZE, 0, gunColors[i]);
+                }
             }
         }
 
@@ -768,10 +834,18 @@ struct saveData {
         if (health % 8 != 0) {
             partBlock = 0x2590 - health % 8;
         }
-        for (int i = 0; i < health / 8; i++) {
-            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HEALTHCOLOR);
+        if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //If hurt, flash
+            for (int i = 0; i < health / 8; i++) {
+                myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HURTCOLOR);
+            }
+            myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HURTCOLOR);
         }
-        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HEALTHCOLOR);
+        else {
+            for (int i = 0; i < health / 8; i++) {
+                myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HEALTHCOLOR);
+            }
+            myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HEALTHCOLOR);
+        }
     }
 
     //Used in bitset handling
@@ -958,13 +1032,13 @@ struct saveData {
 //Unlocks a new gun
 /*****************************************************************************/
 
-    gunPickUp::gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID) :
+    gunPickUp::gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID) {}
 
     collision gunPickUp::getCollision() {
-        return collision(7, gunID);
+        return collision(7, gunID, 0.0, ID);
     }
 
 /*****************************************************************************/
@@ -972,14 +1046,14 @@ struct saveData {
 //Adds ammo to a given gun
 /*****************************************************************************/
 
-    ammoPickUp::ammoPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID, int newAmmoCount) :
+    ammoPickUp::ammoPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID),
                         ammoCount(newAmmoCount) {}
 
     collision ammoPickUp::getCollision() {
-        return collision(8, gunID, ammoCount);      //ammoCount in xVal
+        return collision(8, gunID, ammoCount, ID);      //ammoCount in xVal
     }
 
 /*****************************************************************************/
@@ -987,13 +1061,13 @@ struct saveData {
 //Adds health back
 /*****************************************************************************/
 
-    healthPickUp::healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
+    healthPickUp::healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         healthCount(newHealthCount) {}
 
     collision healthPickUp::getCollision() {
-        return collision(9, healthCount);
+        return collision(9, healthCount, 0.0, ID);
     }
 
 /*****************************************************************************/
@@ -1001,13 +1075,13 @@ struct saveData {
 //Adds to max health
 /*****************************************************************************/
 
-    maxHealthPickUp::maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newHealthCount) :
+    maxHealthPickUp::maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         healthCount(newHealthCount) {}
 
     collision maxHealthPickUp::getCollision() {
-        return collision(10, healthCount);
+        return collision(10, healthCount, 0.0, ID);
     }
 
 /*****************************************************************************/
@@ -1015,11 +1089,11 @@ struct saveData {
 //Gives the player another bitwise op to play with
 /*****************************************************************************/
 
-    opPickUp::opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, string newMessage) :
+    opPickUp::opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage) :
                         entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifetime),
+                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         message(newMessage) {}
 
     collision opPickUp::getCollision() {
-        return collision(11, 0, 0.0, 0.0, message);
+        return collision(11, 0, 0.0, ID, message);
     }

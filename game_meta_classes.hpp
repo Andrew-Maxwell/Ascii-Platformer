@@ -103,6 +103,10 @@ class collider : public layer {
     bool isSolid(int row, int col);
 
     bool isLiquid(int row, int col);
+    
+    int getPlayerDamage(int row, int col);
+    
+    int getDamage(int row, int col);
 
     float checkHeight(float checkX, float checkY);
 
@@ -216,9 +220,12 @@ class realPhysicalEntity : virtual public entity {
 
 class pickUp : public collideable {
 
+    protected:
+
     bool collected = false;
     bool exploded = false;
-    int lifetime;
+    bool touch;
+    int lifetime, ID;
     entityList myParticles;
 
     public:
@@ -226,7 +233,7 @@ class pickUp : public collideable {
     int displayChar;
 
     explicit pickUp(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                    float newSizeFactor, int newDisplayChar, int newLifetime);
+                    float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 

@@ -70,7 +70,8 @@
             "B": 255,
             "A": 255,
             "sizeFactor": 1.0,
-            "gunID": 0
+            "gunID": 0,
+            "pickUpID": 1
         },
         {
             "type": "ammoPickUp",
@@ -115,6 +116,7 @@
             "B": 255,
             "A": 255,
             "sizeFactor": 1.0,
+            "touch": true,
             "ops": [
                 "rotate"
             ],
@@ -131,6 +133,7 @@
             "B": 255,
             "A": 255,
             "sizeFactor": 1.0,
+            "touch": true,
             "ops": [
                 "set",
                 "rotate"

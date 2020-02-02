@@ -194,19 +194,28 @@ void explosion(collider& col, entityList& entities, int count, float x, float y,
                 float newSizeFactor, float speed, char c, int lifespan, float elasticity);
 
 /******************************************************************************/
+//DamageIndicator()
+//Spawns a little number that floats up when damage is taken/dealt
+/******************************************************************************/
+
+void damageIndicator(entityList& entities, int damage, float x, float y, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor);
+
+/******************************************************************************/
 //PlayerEntity
 //what it sounds like, I guess.
 /******************************************************************************/
 
 class playerEntity : public realPhysicalEntity, virtual public collideable {
 
-    int health, maxHealth;
+    int health, maxHealth, hurtTimer = 0;
 
     bool gunUnlocked[16] = {false};
     int gunAmmos[16] {0};
     int gunMaxAmmos[16] = {0};
     int gunCoolDowns[16] = {0};
     int gunDisplayChars[16] = {'E'};
+    Color gunColors[16] = {{255, 0, 255, 255}};
+    Color gunColorsFaded[16] = {{127, 0, 127, 127}};
 
     int gunSelect = 0;
 
@@ -216,6 +225,8 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
     int args[16][4] = {{0}, {0}};
     int opCount = 1;
     bitset<8> channels[10];
+
+    bool pickUpsCollected[512] = { false };
 
     entityList localEntities;
     int lastMovedX, lastMovedY;
@@ -235,6 +246,10 @@ class playerEntity : public realPhysicalEntity, virtual public collideable {
     bool save(string fileName);
 
     bool load(string fileName);
+    
+    //Access whether pickup is collected. Saved here so that it can go in the same savefile.
+    
+    bool isCollected(int pickUpID);
 
     //Special accessors because playerEntity must read data from save file as well
 
@@ -320,7 +335,7 @@ class gunPickUp : public pickUp {
 
     public:
 
-    explicit gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID);
+    explicit gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     collision getCollision();
 
@@ -338,7 +353,7 @@ class ammoPickUp : public pickUp {
 
     public:
 
-    explicit ammoPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID, int newAmmoCount);
+    explicit ammoPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
 
     collision getCollision();
 
@@ -356,7 +371,7 @@ class healthPickUp : public pickUp {
 
     public:
 
-    explicit healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID);
+    explicit healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     collision getCollision();
 
@@ -374,7 +389,7 @@ class maxHealthPickUp : public pickUp {
 
     public:
 
-    explicit maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newGunID);
+    explicit maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     collision getCollision();
 
@@ -392,7 +407,7 @@ class opPickUp : public pickUp {
 
     public:
 
-    explicit opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, string newMessage);
+    explicit opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage);
 
     collision getCollision();
 

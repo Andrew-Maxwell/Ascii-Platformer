@@ -112,108 +112,128 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
             el.addEntity(newRain);
         }
         else if (type == "gunPickUp") {
-            int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
-            int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-            int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
-            gunPickUp * newGunPickUp = new gunPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, gunID);
-            el.addEntity(newGunPickUp);
-            col -> addCollideable(newGunPickUp);
+            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
+            if (!player -> isCollected(pickUpID)) {
+                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
+                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
+                int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
+                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
+                gunPickUp * newGunPickUp = new gunPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID);
+                el.addEntity(newGunPickUp);
+                col -> addCollideable(newGunPickUp);
+            }
         }
         else if (type == "ammoPickUp") {
-            int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x25a7;
-            int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-            int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
-            int ammoCount = entity.HasMember("ammoCount") ? entity["ammoCount"].GetInt() : 1;
-            ammoPickUp * newAmmoPickUp = new ammoPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, gunID, ammoCount);
-            el.addEntity(newAmmoPickUp);
-            col -> addCollideable(newAmmoPickUp);
+            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
+            if (!player -> isCollected(pickUpID)) {
+                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x25a7;
+                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
+                int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
+                int ammoCount = entity.HasMember("ammoCount") ? entity["ammoCount"].GetInt() : 1;
+                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
+                ammoPickUp * newAmmoPickUp = new ammoPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID, ammoCount);
+                el.addEntity(newAmmoPickUp);
+                col -> addCollideable(newAmmoPickUp);
+            }
         }
         else if (type == "healthPickUp") {
-            int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
-            int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-            int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
-            healthPickUp * newHealthPickUp = new healthPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, healthCount);
-            el.addEntity(newHealthPickUp);
-            col -> addCollideable(newHealthPickUp);
+            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
+            if (!player -> isCollected(pickUpID)) {
+                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
+                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
+                int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
+                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
+                healthPickUp * newHealthPickUp = new healthPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
+                el.addEntity(newHealthPickUp);
+                col -> addCollideable(newHealthPickUp);
+            }
         }
         else if (type == "maxHealthPickUp") {
-            int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
-            int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-            int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
-            maxHealthPickUp * newMaxHealthPickUp = new maxHealthPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, healthCount);
-            el.addEntity(newMaxHealthPickUp);
-            col -> addCollideable(newMaxHealthPickUp);
+            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
+            if (!player -> isCollected(pickUpID)) {
+                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
+                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
+                int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
+                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
+                maxHealthPickUp * newMaxHealthPickUp = new maxHealthPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
+                el.addEntity(newMaxHealthPickUp);
+                col -> addCollideable(newMaxHealthPickUp);
+            }
         }
         else if (type == "opPickUp") {
-            int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0;
-            int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
+            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
+            if (!player -> isCollected(pickUpID)) {
+                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0;
+                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
+                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
 
-            //Really hacky: Pass bitwise op and argument data via the "message" field in the collision
+                //Really hacky: Pass bitwise op and argument data via the "message" field in the collision
 
-            const Value& ops = entity["ops"];
-            const Value& args = entity["args"];
-            assert(ops.IsArray());
-            assert(args.IsArray());
-            string message;
-            for (SizeType i = 0; i < ops.Size(); i++) {
-                string op = ops[i].GetString();
-                if (op == "rotate") {
-                    message.append(1, 1);
-                    if (!displayChar) {
-                        if (args[i].GetInt() > 0) {
-                            displayChar = 0xab;
-                        }
-                        else {
-                            displayChar = 0xbb;
-                        }
-                    }
-                }
-                else if (op == "shift") {
-                    message.append(1, 2);
-                    if (!displayChar) {
-                        if (args[i].GetInt() > 0) {
-                            displayChar = '<';
-                        }
-                        else {
-                            displayChar = '>';
+                const Value& ops = entity["ops"];
+                const Value& args = entity["args"];
+                assert(ops.IsArray());
+                assert(args.IsArray());
+                string message;
+                for (SizeType i = 0; i < ops.Size(); i++) {
+                    string op = ops[i].GetString();
+                    if (op == "rotate") {
+                        message.append(1, 1);
+                        if (!displayChar) {
+                            if (args[i].GetInt() > 0) {
+                                displayChar = 0xab;
+                            }
+                            else {
+                                displayChar = 0xbb;
+                            }
                         }
                     }
-                }
-                else if (op == "set") {
-                    message.append(1, 3);
-                    if (!displayChar) {
-                        displayChar = 0x25a3;
+                    else if (op == "shift") {
+                        message.append(1, 2);
+                        if (!displayChar) {
+                            if (args[i].GetInt() > 0) {
+                                displayChar = '<';
+                            }
+                            else {
+                                displayChar = '>';
+                            }
+                        }
                     }
-                }
-                else if (op == "reset") {
-                    message.append(1, 4);
-                    if (!displayChar) {
-                        displayChar = 0x2610;
+                    else if (op == "set") {
+                        message.append(1, 3);
+                        if (!displayChar) {
+                            displayChar = 0x25a3;
+                        }
                     }
-                }
-                else if (op == "xor") {
-                    message.append(1, 5);
-                    if (!displayChar) {
-                        displayChar = 'X';
+                    else if (op == "reset") {
+                        message.append(1, 4);
+                        if (!displayChar) {
+                            displayChar = 0x2610;
+                        }
                     }
-                }
-                else if (op == "load") {
-                    message.append(1, 6);
-                    if (!displayChar) {
-                        displayChar = 'L';
+                    else if (op == "xor") {
+                        message.append(1, 5);
+                        if (!displayChar) {
+                            displayChar = 'X';
+                        }
                     }
-                }
-                else {
-                    message.append(1, 0);
-                    if (!displayChar) {
-                        displayChar = '?';
+                    else if (op == "load") {
+                        message.append(1, 6);
+                        if (!displayChar) {
+                            displayChar = 'L';
+                        }
                     }
+                    else {
+                        message.append(1, 0);
+                        if (!displayChar) {
+                            displayChar = '?';
+                        }
+                    }
+                    message.append(1, args[i].GetInt());
                 }
-                message.append(1, args[i].GetInt());
+                opPickUp * newOpPickUp = new opPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, message);
+                el.addEntity(newOpPickUp);
+                col -> addCollideable(newOpPickUp);
             }
-            opPickUp * newOpPickUp = new opPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, message);
-            el.addEntity(newOpPickUp);
-            col -> addCollideable(newOpPickUp);
         }
         else {
             cerr << "Bad entity type: " << type << endl;

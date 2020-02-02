@@ -9,7 +9,7 @@ using namespace std;
 
     dummyEntity::dummyEntity(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
                     float newSizeFactor, char newC) :
-        entity(newX, newY, R, G, B, A, newSizeFactor) { 
+        entity(newX, newY, R, G, B, A, newSizeFactor) {
             toPrint[0] = newC;
         }
 
@@ -84,7 +84,7 @@ using namespace std;
             frames.push_back(intCanvas);
             worldFile.close();
         }
-        
+
         else {
             canvas.push_back(string(1, display));
         }
@@ -109,7 +109,7 @@ using namespace std;
     float editableLayer::getSizeFactor() {
         return sizeFactor;
     }
-    
+
     void editableLayer::setSizeFactor(float newSizeFactor) {
         sizeFactor = newSizeFactor;
     }
@@ -307,9 +307,23 @@ using namespace std;
                 break;
             }
 
-            case 5: {   //Gradient brush (ignores selected charFill)
+            case 5: {   //Gradient brush (no blending)
 
-                vector<int> gradChars = {0x2588, 0x2593, 0x2592, 0x2591, ' '};
+                int gradSelect = F -> get(0, 0);
+                vector<int> gradChars;
+                if (0x2581 <= gradSelect && gradSelect <= 0x2587) {
+                    gradChars = {0x2588, 0x2587, 0x2586, 0x2585, 0x2584, 0x2583, 0x2582, 0x2581, ' '};
+                }
+                else if (0x2586 <= gradSelect && gradSelect <= 0x258F) {
+                    gradChars = {0x2588, 0x2589, 0x258a, 0x258b, 0x258c, 0x258d, 0x258e, 0x258f, ' '};
+                }
+                else if (0x2591 <= gradSelect && gradSelect <= 0x2593) {
+                    gradChars = {0x2588, 0x2593, 0x2592, 0x2591, ' '};
+                }
+                else {
+                    gradChars = {'E', 'R', 'R', 'O', 'R'};
+                    cout << "Error: Attempted to use gradient with a non-gradient fill.\n";
+                }
                 int charIndex = 0;
 
                 //Separate vectors from first to second and third mouse click into magnitude and direction (unit vectors
@@ -339,9 +353,24 @@ using namespace std;
                 break;
             }
 
-            case 6: {   //Other gradient brush
+            case 6: {   //Gradient brush (with blending)
 
-                vector<int> gradChars = {0x2588, 0x2587, 0x2586, 0x2585, 0x2584, 0x2583, 0x2582, 0x2581, ' '};
+                int gradSelect = F -> get(0, 0);
+                vector<int> gradChars;
+                if (0x2581 <= gradSelect && gradSelect <= 0x2587) {
+                    gradChars = {0x2588, 0x2587, 0x2586, 0x2585, 0x2584, 0x2583, 0x2582, 0x2581, ' '};
+                }
+                else if (0x2586 <= gradSelect && gradSelect <= 0x258F) {
+                    gradChars = {0x2588, 0x2589, 0x258a, 0x258b, 0x258c, 0x258d, 0x258e, 0x258f, ' '};
+                    
+                }
+                else if (0x2591 <= gradSelect && gradSelect <= 0x2593) {
+                    gradChars = {0x2588, 0x2593, 0x2592, 0x2591, ' '};
+                }
+                else {
+                    gradChars = {'E', 'R', 'R', 'O', 'R'};
+                    cout << "Error: Attempted to use gradient with a non-gradient fill.\n";
+                }
                 int charIndex = 0;
 
                 //Separate vectors from first to second and third mouse click into magnitude and direction (unit vectors
@@ -364,7 +393,9 @@ using namespace std;
                     for (float count1 = 0; count1 <= v1Magnitude; count1 += 0.5) {
                         Vector2 result = Vector2Add(Vector2Add(Vector2Scale(v1, count1), Vector2Scale(v2, count2)), origin);
                         if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && GetRandomValue(0, 1000) / 1000.0 < density) {
-                            intCanvas[(int)result.y][(int)result.x] = gradChars[charIndex];
+                            if (find(gradChars.begin(), gradChars.end(), intCanvas[(int)result.y][(int)result.x]) - gradChars.begin() > charIndex) {
+                                intCanvas[(int)result.y][(int)result.x] = gradChars[charIndex];
+                            }
                         }
                     }
                 }
@@ -464,7 +495,7 @@ using namespace std;
                 intCanvas[yIter + y1][xIter + x1] = ' ';
             }
         }
-        
+
         //Discard any frames more recent than the new one (any redo frames)
 
         while (frames.size() > currentFrame + 1) {

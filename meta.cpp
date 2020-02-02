@@ -209,12 +209,14 @@ entity::entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t 
     bool layer::readLayer() {
         canvas.clear();
         ifstream worldFile;
-        string filePath = "levels\\";
-        worldFile.open(filePath.append(fileName));
+        worldFile.open(fileName);
         if (!worldFile) {
-            return false;
+            worldFile.open(string("levels\\").append(fileName));
+            if (!worldFile) {
+                cerr << "Could not open " << fileName << endl;
+                exit(EXIT_FAILURE);
+            }
         }
-
         string line;
         while (getline(worldFile, line)) {
             canvas.push_back(line);

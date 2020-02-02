@@ -296,12 +296,12 @@ int main(int argc, char** argv) {
                     brushClickCount = 3;
                 }
                 if (IsKeyPressed(KEY_F)) {
-                    brushName = "(F)ine Gradient";
+                    brushName = "Gradient (no blending)";
                     brushID = 5;
                     brushClickCount = 3;
                 }
                 if (IsKeyPressed(KEY_G)) {
-                    brushName = "Coarse (G)radient";
+                    brushName = "(G)radient (with blending)";
                     brushID = 6;
                     brushClickCount = 3;
                 }
