@@ -10,20 +10,12 @@ using namespace rapidjson;
 //Read in a list of entities from a file
 /******************************************************************************/
 
-void readEntities(entityList& el, collider*& col, Color& background, playerEntity* player, string fileName) {
+void readEntities(entityList& el, collider*& col, Color& background, playerEntity* player, string& fileName) {
 
     //Read into a json object
 
     Document json;
-    FILE* entityFile = NULL;
-    entityFile = fopen(fileName.c_str(), "rb");
-    if (!entityFile) {
-        entityFile = fopen(string("levels\\").append(fileName).c_str(), "rb");
-    }
-    if (!entityFile) {
-        cerr << "Level file " << fileName << " not found in this dir or /level.\n";
-        exit(EXIT_FAILURE);
-    }
+    FILE* entityFile = getLevelFileP(fileName);
     fseek (entityFile, 0, SEEK_END);
     char * buffer = new char[ftell (entityFile)];
     fseek (entityFile, 0, SEEK_SET);

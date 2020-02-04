@@ -171,6 +171,8 @@ class dummyEntity : public entity {
 
 class editableLayer : public layer {
 
+    protected:
+
     Value* json;
     int flashCount = -1;
     bool visible = true;
@@ -197,11 +199,11 @@ class editableLayer : public layer {
 
     float getSizeFactor();
     
-    void setSizeFactor(float newSizeFactor);
+    virtual void setSizeFactor(float newSizeFactor);
 
     Color getColor();
 
-    void setColor(Color newColor);
+    virtual void setColor(Color newColor);
 
     void select();
 
@@ -227,7 +229,7 @@ class editableLayer : public layer {
 
     //Apply changes using left mouse button.
     
-    void move(vector<tuple<int, int>> mousePos);
+    virtual void move(vector<tuple<int, int>> mousePos);
 
     void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F, float density);
 
@@ -251,11 +253,37 @@ class editableLayer : public layer {
 
     //Save
 
-    void save();
+    virtual void save();
 
     //Display
 
     void print(float cameraX, float cameraY, Font displayFont);
+};
+
+/*****************************************************************************/
+//editableCollider
+//Like an editableLayer in every way, except that it never writes metadata.
+/*****************************************************************************/
+
+class editableCollider : virtual public editableLayer {
+
+
+    public:
+
+    editableCollider (float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson);
+
+    //Dummy functions which don't do anything
+
+    void setColor (Color newColor);
+
+    void setSizeFactor (float newSizeFactor);
+
+    void move (vector<tuple<int, int>> mousePos);
+
+    //Reduced functionality.
+
+    void save();
+
 };
 
 #endif //EDITOR_CLASSES_H

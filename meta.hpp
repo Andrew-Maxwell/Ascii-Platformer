@@ -74,6 +74,16 @@ void myDrawTexture(Texture2D texture, Rectangle sourceRec, Rectangle destRec, Ve
 void myDrawText(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint);
 
 /******************************************************************************/
+//getLevelIFStream() and getLevelFileP()
+//Checks multiple locations for filename and sets string correctly so that
+//the file can be written back to later.
+/******************************************************************************/
+
+ifstream getLevelIFStream(string& fileName);
+
+FILE* getLevelFileP(string& fileName);
+
+/******************************************************************************/
 //Virtual entity parent class.
 /******************************************************************************/
 

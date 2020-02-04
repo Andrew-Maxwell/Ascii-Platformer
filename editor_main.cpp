@@ -7,19 +7,11 @@ using namespace rapidjson;
 //Read in a list of entities from a file
 /******************************************************************************/
 
-void readEntities(entityList& el, list<editableLayer*>& layers, editableLayer*& col, Color& background, const string fileName, Document& doc) {
+void readEntities(entityList& el, list<editableLayer*>& layers, editableCollider*& col, Color& background, string& fileName, Document& doc) {
 
     //Read into a json object
 
-    FILE* entityFile = NULL;
-    entityFile = fopen(fileName.c_str(), "rb");
-    if (!entityFile) {
-        entityFile = fopen(string("levels\\").append(fileName).c_str(), "rb");
-    }
-    if (!entityFile) {
-        cerr << "Level file " << fileName << " not found in this dir or /level.\n";
-        exit(EXIT_FAILURE);
-    }
+    FILE* entityFile = getLevelFileP(fileName);
     fseek (entityFile, 0, SEEK_END);
     char * buffer = new char[ftell (entityFile)];
     fseek (entityFile, 0, SEEK_SET);
@@ -65,7 +57,7 @@ void readEntities(entityList& el, list<editableLayer*>& layers, editableLayer*& 
         layers.push_back(L);
         el.addEntity(L);
     }
-    col = new editableLayer(0.0, 0.0, 0, 0, 0, 80, 1, true, colFileName, '!', &entities[0]); //JSON for collider is junk, not used, since collider has no color.
+    col = new editableCollider(0.0, 0.0, 0, 0, 0, 80, 1, true, colFileName, '!', NULL);
     el.addEntity(col);
     layers.push_back(col);
 }
@@ -85,6 +77,8 @@ void writeEntities(entityList& el, list<editableLayer*>& layers, const string fi
         saveIter++;
     }
     
+    cout << "Finished saving layers.\n";
+
     //Save entity metadata (to json)
     
     FILE* entityFile = fopen(fileName.c_str(), "wb");
@@ -213,7 +207,7 @@ int main(int argc, char** argv) {
 
     list<editableLayer*> layers;
     entityList entities;
-    editableLayer* col;
+    editableCollider* col;
     Color background;
     string fileName(argv[1]);
     Document json;

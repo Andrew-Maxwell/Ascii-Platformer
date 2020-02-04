@@ -1,6 +1,6 @@
 #include "editor_classes.hpp"
 
-using namespace std;
+using namespace rapidjson;
 
 /*****************************************************************************/
 //dummyEntity
@@ -39,7 +39,6 @@ using namespace std;
 
         original = {R, G, B, A};
         json = newJson;
-        assert(json -> IsObject());
 
         //If layer Read in canvas information. Canvas stores the layer in UTF-8; intCanvas is in UTF-32 (?)
         //Anyway, intCanvas is much easier to edit, and changes are propogated to canvas to display using update()
@@ -48,15 +47,7 @@ using namespace std;
         if (isLayer) {
 
             canvas.clear();
-            ifstream worldFile;
-            worldFile.open(fileName);
-            if (!worldFile) {
-                worldFile.open(string("levels\\").append(fileName));
-                if (!worldFile) {
-                    cerr << "Error opening editable layer file.";
-                    exit(EXIT_FAILURE);
-                }
-            }
+            ifstream worldFile = getLevelIFStream(fileName);
             string line;
             getline(worldFile, line);
             canvas.push_back(line);
@@ -646,4 +637,37 @@ using namespace std;
                 }
             }
         }
+    }
+
+/*****************************************************************************/
+//editableCollider functions
+//Constructor
+/*****************************************************************************/
+
+    editableCollider::editableCollider (float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson) :
+        editableLayer(newX, newY, R, G, B, A, newSizeFactor, newIsLayer, newFileName, display, dummyJson),
+        entity(newX, newY, R, G, B, A, newSizeFactor) {}
+
+/*****************************************************************************/
+//Dummy functions which don't do anything for the collider
+/*****************************************************************************/
+
+    void editableCollider::setColor (Color newColor) {};
+
+    void editableCollider::setSizeFactor (float newSizeFactor) {};
+
+    void editableCollider::move(vector<tuple<int, int>> mousePos) {};
+
+/*****************************************************************************/
+//Doesn't write anything to JSON
+/*****************************************************************************/
+
+    void editableCollider::save() {
+        cout << "Saving collider " << fileName << endl;
+        ofstream layerOut;
+        layerOut.open(fileName);
+        for (string line : canvas) {
+            layerOut << line << endl;
+        }
+        layerOut.close();
     }

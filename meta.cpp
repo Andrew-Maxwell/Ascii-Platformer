@@ -105,6 +105,60 @@ void myDrawText(Font font, const char *text, Vector2 position, float fontSize, f
     }
 }
 
+/******************************************************************************/
+//getLevelIFStream() and getLevelFileP()
+//Checks multiple locations for filename and sets string correctly so that
+//the file can be written back to later.
+/******************************************************************************/
+
+ifstream getLevelIFStream(string& fileName) {
+    ifstream levelFile;
+    levelFile.open(fileName);
+    if (!levelFile) {
+        string attempt2 = string("levels/").append(fileName);
+        levelFile.open(attempt2);
+        if (!levelFile) {
+            string attempt3 = string("levels\\").append(fileName);
+            levelFile.open(attempt3);
+            if (!levelFile) {
+                cerr << "Could not open " << fileName << endl;
+                exit(EXIT_FAILURE);
+            }
+            else {
+                fileName = attempt3;
+            }
+        }
+        else {
+            fileName = attempt2;
+        }
+    }
+    return levelFile;
+}
+
+FILE* getLevelFileP(string& fileName) {
+    FILE* levelFile = NULL;
+    levelFile = fopen(fileName.c_str(), "rb");
+    if (!levelFile) {
+        string attempt2 = string("levels/").append(fileName);
+        levelFile = fopen(attempt2.c_str(), "rb");
+        if (!levelFile) {
+            string attempt3 = string("levels\\").append(fileName);
+            levelFile = fopen(attempt3.c_str(), "rb");
+            if (!levelFile) {
+                cerr << "Could not open " << fileName << endl;
+                exit(EXIT_FAILURE);
+            }
+            else {
+                fileName = attempt3;
+            }
+        }
+        else {
+            fileName = attempt2;
+        }
+    }
+    return levelFile;
+}
+
 
 /******************************************************************************/
 //Virtual entity parent class.
@@ -208,16 +262,8 @@ entity::entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t 
 
     bool layer::readLayer() {
         canvas.clear();
-        ifstream worldFile;
-        worldFile.open(fileName);
-        if (!worldFile) {
-            worldFile.open(string("levels\\").append(fileName));
-            if (!worldFile) {
-                cerr << "Could not open " << fileName << endl;
-                exit(EXIT_FAILURE);
-            }
-        }
         string line;
+        ifstream worldFile = getLevelIFStream(fileName);
         while (getline(worldFile, line)) {
             canvas.push_back(line);
         }
