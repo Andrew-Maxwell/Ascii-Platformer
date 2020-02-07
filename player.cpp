@@ -114,8 +114,8 @@ struct saveData {
         return false;
     }
 
-    void player::setColor(uint8_t R, uint8_t G, uint8_t B, uint8_t A) {
-        tint = {R, G, B, A};
+    void player::setColor(Color newTint) {
+        tint = newTint;
     }
 
     void player::setSizeFactor(float newSizeFactor) {
@@ -124,6 +124,10 @@ struct saveData {
 
     float player::getSizeFactor() {
         return sizeFactor;
+    }
+
+    void player::setEList(entityList* newEList) {
+        eList = newEList;
     }
 
 //Collision functions
@@ -158,7 +162,7 @@ struct saveData {
         //Reload room
 
         if (IsKeyPressed(KEY_R)) {
-            explosion (col, localEntities, 60, x, y, tint, 1, 1, 0, 100, 0.5);
+            explosion (col, eList, 60, x, y, tint, 1, 1, 0, 100, 0.5);
         }
 
         //Movement
@@ -263,7 +267,7 @@ struct saveData {
                 switch(gunSelect) {
                     case 0:
                         aim = Vector2Scale(Vector2Normalize(aim), 0.5);
-                        b = new bullet(x, y, tint, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10);
+                        b = new bullet(x, y, tint, sizeFactor, eList, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10);
                         gunCoolDowns[0] = 60;
                         gunAmmos[0]--;
                         break;
@@ -273,13 +277,13 @@ struct saveData {
                 }
                 b -> tickSet(col);
                 b -> tickSet(col);
-                localEntities.addEntity(b);
+                eList -> addEntity(b);
                 col.addCollideable(b);
             }
         }
         //Jomping
 
-        if (IsKeyPressed(KEY_W) && (col.isSolid(y + 1, x + (1 - width) / 2) || col.isSolid(y + 1, x + (1 + width) / 2)))  {
+        if (IsKeyPressed(KEY_W) && (col.isSolid(x + (1 - width) / 2, y + 1) || col.isSolid(x + (1 + width) / 2, y + 1)))  {
             yMomentum -= JUMPSPEED;
         }
         if (IsKeyReleased(KEY_W)) {
@@ -298,26 +302,22 @@ struct saveData {
         
         //spikes
         
-        int spikeDamage = col.getPlayerDamage((int)(y + 0.5), (int)(x + 0.5));
+        int spikeDamage = col.getPlayerDamage((int)(x + 0.5), (int)(y + 0.5));
         if (hurtTimer < 0 && spikeDamage) {
             health += spikeDamage;
             hurtTimer = 60;
-            xMomentum *= -3;
-            yMomentum *= -0.7;
-            damageIndicator(localEntities, spikeDamage, x, y, HURTCOLOR, sizeFactor);
+            Vector2 newMomentum = Vector2Scale(Vector2Negate(Vector2Normalize({xMomentum, yMomentum})), 0.7);
+            xMomentum = newMomentum.x;
+            yMomentum = newMomentum.y / 3;
+            damageIndicator(eList, spikeDamage, x, y, HURTCOLOR, sizeFactor);
         }
 
         //Apply physics
 
-        realPhysicalEntity::tickSet(col);
-
-        //update all child entities
-
-        localEntities.tickSet(col);
+        realPhysicalEntity::tickSet(col);;
     }
 
     void player::tickGet(collider& col) {
-        localEntities.tickGet(col);
         list<collision>::iterator colIter = collisions.begin();
         while (colIter != collisions.end()) {
             switch(colIter -> type) {
@@ -328,8 +328,7 @@ struct saveData {
                     x = colIter -> xVal;
                     y = colIter -> yVal;
                     nextRoom = colIter -> message;
-                    shouldChangeRooms = true;
-                    localEntities.clear();
+                    shouldChangeRooms = true;;
                     break;
                 case 4: {       //Savepoint
                     save("save");
@@ -345,7 +344,7 @@ struct saveData {
                         xMomentum += colIter -> xVal * 0.3;
                         health += (colIter -> damage);
                         hurtTimer = 60;
-                        damageIndicator(localEntities, colIter -> damage, x, y, HURTCOLOR, sizeFactor);
+                        damageIndicator(eList, colIter -> damage, x, y, HURTCOLOR, sizeFactor);
                     }
                     break;
                 case 7: {         //gun pickup
@@ -374,14 +373,14 @@ struct saveData {
                     break;
                 case 9:         //Health pickup
                     health = min(maxHealth, health + colIter -> damage);
-                    damageIndicator(localEntities, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
+                    damageIndicator(eList, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
                     break;
                 case 10:        //max health pickup
                     health += (colIter -> damage);
-                    damageIndicator(localEntities, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
+                    damageIndicator(eList, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
                     maxHealth += (colIter -> damage);
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
@@ -405,7 +404,6 @@ struct saveData {
     }
 
     bool player::finalize() {
-        localEntities.finalize();
         return false;
     }
 
@@ -417,7 +415,6 @@ struct saveData {
         else {
             myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, tint);
         }
-        localEntities.print(cameraX, cameraY, displayFont);
         drawHUD(displayFont);
     }
 

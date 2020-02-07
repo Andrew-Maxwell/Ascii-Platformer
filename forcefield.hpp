@@ -19,13 +19,13 @@ class forceField : public collideable {
     int channel;
     bool isOn;
     float power, range;
-    entityList myParticles;
+    entityList* eList;
     collision nextCollision;
     int tickCount;
 
     public:
 
-    explicit forceField(float newX, float newY, Color newTint, float newSizeFactor, int newChannel, float newPower, float newRange);
+    explicit forceField(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newChannel, float newPower, float newRange);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 

@@ -89,13 +89,13 @@ class collider : public layer {
 
     void addParticle(collideable* newParticle);
 
-    bool isSolid(int row, int col);
+    bool isSolid(int checkX, int checkY);
 
-    bool isLiquid(int row, int col);
+    bool isLiquid(int checkX, int checkY);
     
-    int getPlayerDamage(int row, int col);
+    int getPlayerDamage(int checkX, int checkY);
     
-    int getDamage(int row, int col);
+    int getDamage(int checkX, int checkY);
 
     float checkHeight(float checkX, float checkY);
 

@@ -21,44 +21,44 @@
         particles.push_back(newParticle);
     }
 
-    bool collider::isSolid(int row, int col) {
-        if (row >= 0 && row < canvas.size() && col >= 0 && col < canvas[row].size()) {
-            return canvas[row][col] == 's' || canvas[row][col] == '8';
+    bool collider::isSolid(int checkX, int checkY) {
+        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
+            return canvas[checkY][checkX] == 's' || canvas[checkY][checkX] == '8';
         }
         return false;
     }
 
-    bool collider::isLiquid(int row, int col) {
-        if (row >= 0 && row < canvas.size() && col >= 0 && col < canvas[row].size()) {
-            return canvas[row][col] == 'w';
+    bool collider::isLiquid(int checkX, int checkY) {
+        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
+            return canvas[checkY][checkX] == 'w';
         }
         return false;
     }
 
-    int collider::getPlayerDamage(int row, int col) {
-        if (row >= 0 && row < canvas.size() && col >= 0 && col < canvas[row].size()) {
-            if (canvas[row][col] == 'x' || canvas[row][col] == 'y') {
+    int collider::getPlayerDamage(int checkX, int checkY) {
+        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
+            if (canvas[checkY][checkX] == 'x' || canvas[checkY][checkX] == 'y') {
                 return -2;
             }
-            else if (canvas[row][col] == 'X' || canvas[row][col] == 'Y') {
+            else if (canvas[checkY][checkX] == 'X' || canvas[checkY][checkX] == 'Y') {
                 return -10;
             }
-            else if (canvas[row][col] == 'Z') {
+            else if (canvas[checkY][checkX] == 'Z') {
                 return -500;
             }
         }
         return 0;
     }
     
-    int collider::getDamage(int row, int col) {
-        if (row >= 0 && row < canvas.size() && col >= 0 && col < canvas[row].size()) {
-            if (canvas[row][col] == 'x') {
+    int collider::getDamage(int checkX, int checkY) {
+        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
+            if (canvas[checkY][checkX] == 'x') {
                 return -2;
             }
-            else if (canvas[row][col] == 'X') {
+            else if (canvas[checkY][checkX] == 'X') {
                 return -10;
             }
-            else if (canvas[row][col] == 'Z') {
+            else if (canvas[checkY][checkX] == 'Z') {
                 return -500;
             }
         }

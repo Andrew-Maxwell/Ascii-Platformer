@@ -13,7 +13,7 @@ using namespace rapidjson;
 //Spawn particles moving outwards in a circle
 /******************************************************************************/
 
-void explosion(collider& col, entityList& entities, int count, float x, float y, Color tint,
+void explosion(collider& col, entityList* entities, int count, float x, float y, Color tint,
                 float newSizeFactor, float speed, char c, int lifespan, float elasticity);
 
 /******************************************************************************/
@@ -21,6 +21,6 @@ void explosion(collider& col, entityList& entities, int count, float x, float y,
 //Spawns a little number that floats up when damage is taken/dealt
 /******************************************************************************/
 
-void damageIndicator(entityList& entities, int damage, float x, float y, Color tint, float newSizeFactor);
+void damageIndicator(entityList* entities, int damage, float x, float y, Color tint, float newSizeFactor);
 
 #endif //EFFECTS_HPP

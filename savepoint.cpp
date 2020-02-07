@@ -5,9 +5,10 @@
 //Saves the game when interacted with.
 /*****************************************************************************/
 
-    savePoint::savePoint(float newX, float newY, Color newTint, float newSizeFactor) :
+    savePoint::savePoint(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList) :
         entity(newX, newY, newTint, newSizeFactor) {
             type = 4;
+            eList = newEList;
         }
 
     bool savePoint::doesCollide(float otherX, float otherY, int otherType) {
@@ -24,24 +25,19 @@
         return false;
     }
 
-    void savePoint::tickSet(collider& col) {
-        myParticles.tickSet(col);;
-    }
+    void savePoint::tickSet(collider& col) {}
 
     void savePoint::tickGet(collider& col) {
         if (savedGame) {;
             savedGame = false;
-            explosion(col, myParticles, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
+            explosion(col, eList, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
         }
-        myParticles.tickGet(col);
     }
 
     bool savePoint::finalize() {
-        myParticles.finalize();
         return false;
     }
 
     void savePoint::print(float cameraX, float cameraY, Font displayFont) {
         myDrawText(displayFont, "S", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
-        myParticles.print(cameraX, cameraY, displayFont);
     }

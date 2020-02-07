@@ -20,12 +20,12 @@ class bullet : public physicalParticle {
     int damage;
     bool hit = false;
     bool exploded = false;
-    entityList collisionParticles;
+    entityList* eList;
     float width = 0.8;
 
     public:
 
-    bullet(float newX, float newY, Color newTint, float newSizeFactor,
+    bullet(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList,
                    float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage);
 

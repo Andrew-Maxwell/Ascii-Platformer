@@ -15,14 +15,14 @@ using namespace rapidjson;
 
 class rain : public entity {
 
-    entityList raindrops;
+    entityList* eList;
     float dropsPerTick, dropBuffer = 0, xMomentum;
     bool firstTick;
     bool isSnow;
 
     public:
 
-    rain(float newX, float newY, Color newTint, float newSizeFactor, float newDropsPerTick, float newXMomentum, bool isSnow);
+    rain(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, float newDropsPerTick, float newXMomentum, bool isSnow);
 
     void tickSet(collider& col);
 

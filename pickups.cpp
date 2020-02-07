@@ -6,12 +6,14 @@
 /*****************************************************************************/
 
     pickUp::pickUp(  float newX, float newY,  Color newTint,
-                    float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch) :
+                    float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch) :
         entity(newX, newY, newTint, newSizeFactor),
         displayChar(newDisplayChar),
         lifetime(newLifetime),
         ID(newID),
-        touch(newTouch) {}
+        touch(newTouch) {
+            eList = newEList;
+        }
 
     bool pickUp::doesCollide(float otherX, float otherY, int otherType) {
         if (!collected && (IsKeyPressed(KEY_S) || touch) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == 1) {
@@ -30,26 +32,21 @@
     }
 
     void pickUp::tickSet(collider& col) {
-	lifetime--;
-        myParticles.tickSet(col);
+	    lifetime--;
     }
 
     void pickUp::tickGet(collider& col) {
         if (collected && !exploded) {
             exploded = true;
-            explosion(col, myParticles, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
+            explosion(col, eList, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
         }
-
-        myParticles.tickGet(col);
     }
 
     bool pickUp::finalize() {
-        myParticles.finalize();
-        return (collected && myParticles.size() == 0) || (!(collected) && lifetime < 0);
+        return (collected || lifetime < 0);
     }
 
     void pickUp::print(float cameraX, float cameraY, Font displayFont) {
-        myParticles.print(cameraX, cameraY, displayFont);
         if (!collected) {
             myDrawText(displayFont, TextToUtf8(&displayChar, 1), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
         }
@@ -60,9 +57,9 @@
 //Unlocks a new gun
 /*****************************************************************************/
 
-    gunPickUp::gunPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
+    gunPickUp::gunPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID) {}
 
     collision gunPickUp::getCollision() {
@@ -74,9 +71,9 @@
 //Adds ammo to a given gun
 /*****************************************************************************/
 
-    ammoPickUp::ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
+    ammoPickUp::ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID),
                         ammoCount(newAmmoCount) {}
 
@@ -89,9 +86,9 @@
 //Adds health back
 /*****************************************************************************/
 
-    healthPickUp::healthPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
+    healthPickUp::healthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
                         healthCount(newHealthCount) {}
 
     collision healthPickUp::getCollision() {
@@ -103,9 +100,9 @@
 //Adds to max health
 /*****************************************************************************/
 
-    maxHealthPickUp::maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
+    maxHealthPickUp::maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
                         healthCount(newHealthCount) {}
 
     collision maxHealthPickUp::getCollision() {
@@ -117,9 +114,9 @@
 //Gives the player another bitwise op to play with
 /*****************************************************************************/
 
-    opPickUp::opPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage) :
+    opPickUp::opPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
                         message(newMessage) {}
 
     collision opPickUp::getCollision() {

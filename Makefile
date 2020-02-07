@@ -46,7 +46,7 @@ physicalentities.o:
 pickups.o:
 	g++ -g -c -I /opt/raylib/src pickups.cpp -o pickups.o -O3
 
-player.o:
+player.o: player.cpp
 	g++ -g -c -I /opt/raylib/src player.cpp -o player.o -O3
 
 rain.o:

@@ -95,7 +95,7 @@
     void physicalParticle::tickSet(collider& col) {
         lifetime--;
         lightPhysicalEntity::tickSet(col);
-        if (col.isSolid(y, x)) {
+        if (col.isSolid(x, y)) {
             shouldDelete = true;
         }
     }

@@ -38,7 +38,7 @@ class player : public realPhysicalEntity, virtual public collideable {
 
     bool pickUpsCollected[512] = { false };
 
-    entityList localEntities;
+    entityList* eList;
     int lastMovedX, lastMovedY;
     Vector2 positionOnScreen = {0, 0};
 
@@ -63,11 +63,13 @@ class player : public realPhysicalEntity, virtual public collideable {
 
     //Special accessors because playerEntity must read data from save file as well
 
-    void setColor(uint8_t R, uint8_t G, uint8_t B, uint8_t A);
+    void setColor(Color newTint);
 
     void setSizeFactor(float newSizeFactor);
 
     float getSizeFactor();
+
+    void setEList(entityList * newEList);
 
     //Collision functions
 

@@ -5,7 +5,7 @@
 //a physicalParticle that deals damage
 /*****************************************************************************/
 
-    bullet::bullet(float newX, float newY, Color newTint, float newSizeFactor,
+    bullet::bullet(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList,
                    float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage) :
         entity(newX, newY, newTint, newSizeFactor),
@@ -13,6 +13,7 @@
                          newMaxSpeed, newGravity, newFriction),
         damage(newDamage)
     {
+        eList = newEList;
         type = 6;
     }
 
@@ -40,10 +41,8 @@
 
         if (hit & !exploded) {
             exploded = true;
-            explosion(col, collisionParticles, 6, x, y, tint, sizeFactor, 0.25, 0, 60, 0.3);
+            explosion(col, eList, 6, x, y, tint, sizeFactor, 0.25, 0, 60, 0.3);
         }
-
-        collisionParticles.tickSet(col);
     }
 
     void bullet::tickGet(collider& col) {
@@ -58,13 +57,10 @@
                 hit = true;
             }
         }
-
-        collisionParticles.tickGet(col);
     }
 
     bool bullet::finalize() {
-        collisionParticles.finalize();  //Need to finalize collision particles so they have a chance to return true to stopColliding before they/this object are deleted
-        return ((physicalParticle::finalize() || hit) && collisionParticles.size() == 0);
+        return (physicalParticle::finalize() || hit);
     }
 
     void bullet::print(float cameraX, float cameraY, Font displayFont) {
@@ -75,9 +71,6 @@
                 particle::setDirection();
             }
             particle::print(cameraX, cameraY, displayFont);
-        }
-        else {
-            collisionParticles.print(cameraX, cameraY, displayFont);
         }
     }
 

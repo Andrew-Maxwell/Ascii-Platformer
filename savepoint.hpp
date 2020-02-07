@@ -16,11 +16,11 @@ using namespace rapidjson;
 class savePoint : public collideable {
 
     bool savedGame = false;
-    entityList myParticles;
+    entityList* eList;
 
     public:
 
-    explicit savePoint(float newX, float newY, Color newTint, float newSizeFactor);
+    explicit savePoint(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 

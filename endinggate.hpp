@@ -15,14 +15,14 @@ using namespace rapidjson;
 
 class endingGate : public collideable {
 
-    entityList myParticles;
+    entityList* eList;
     int width, height;
     vector<string> toPrint;
 
     public:
 
     explicit endingGate(float newX, float newY, Color newTint,
-                        float newSizeFactor, int newWidth, int newHeight);
+                        float newSizeFactor, entityList* newEList, int newWidth, int newHeight);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 

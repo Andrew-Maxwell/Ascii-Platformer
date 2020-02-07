@@ -13,8 +13,7 @@ entity::entity(float newx, float newy, Color newTint, float newSizeFactor) {
 
 /******************************************************************************/
 //A list for containing entities. Every tick, every entity in the list has its four functions called
-//once. Also, entities can contain entityLists (e.g. an entity containing the bullets it's fired) as
-//long as the four functions are called by that entity's four functions.
+//once. Only one global entityList exists for each level.
 /******************************************************************************/
 
     entityList::~entityList() {

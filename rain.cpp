@@ -5,12 +5,14 @@
 //Constantly spawns particles above the top of the screen
 /******************************************************************************/
 
-    rain::rain(float newX, float newY, Color newTint, float newSizeFactor, float newDropsPerTick, float newXMomentum, bool newIsSnow) :
+    rain::rain(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, float newDropsPerTick, float newXMomentum, bool newIsSnow) :
         entity(newX, newY, newTint, newSizeFactor),
         dropsPerTick(newDropsPerTick),
         xMomentum(newXMomentum),
         isSnow(newIsSnow),
-        firstTick(true) {}
+        firstTick(true) {
+            eList = newEList;
+        }
 
     void rain::tickSet(collider& col) {
         //Do rain for a bit on first tick so that raindrops appear to already have been falling when the room is loaded
@@ -67,22 +69,16 @@
             else {
                 raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, xMomentum, 1, 0, 200, 0, 1, GRAVITY, 0.88);
             }
-            raindrops.addEntity(raindrop);
+            eList -> addEntity(raindrop);
             col.addParticle(raindrop);
         }
-        raindrops.tickSet(col);
     }
 
-    void rain::tickGet(collider& col) {
-        raindrops.tickGet(col);
-    }
+    void rain::tickGet(collider& col) {}
 
     bool rain::finalize() {
-        raindrops.finalize();
         return false;
     }
 
-    void rain::print(float cameraX, float cameraY, Font displayFont) {
-        raindrops.print(cameraX, cameraY, displayFont);
-    }
+    void rain::print(float cameraX, float cameraY, Font displayFont) {}
 

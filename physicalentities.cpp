@@ -25,7 +25,7 @@
         xMomentum = min(xMomentum, maxSpeed);
         xMomentum = max(xMomentum, -1 * maxSpeed);
 
-        if (col.isSolid((int)y, (int)(x + xMomentum) + (xMomentum > 0))) {
+        if (col.isSolid((int)(x + xMomentum) + (xMomentum > 0), (int)(y))) {
             x = floor(x + xMomentum) + (xMomentum < 0);
             xMomentum *= (-1 * elasticity);
         }
@@ -33,7 +33,7 @@
             x += xMomentum;
         }
 
-        if (col.isSolid((int)(y + yMomentum) + (yMomentum > 0), (int)x)) {
+        if (col.isSolid((int)x, (int)(y + yMomentum) + (yMomentum > 0))) {
             y = floor(y + yMomentum) + (yMomentum < 0);
             yMomentum *= (-1 * elasticity);
             xMomentum *= friction;
@@ -75,7 +75,7 @@
 
         float xDist = xMomentum / (abs(xMomentum) + 1);
         for (int i = 0; i < abs(xMomentum) + 1; i++) {
-            if (col.isSolid((int)y, (int)(x + xDist) + (xDist > 0))) {// || col.isSolid((int)y + 0.5, (int)(x + xDist) + (xDist > 0))) {
+            if (col.isSolid((int)(x + xDist) + (xDist > 0), (int)y)) {// || col.isSolid((int)y + 0.5, (int)(x + xDist) + (xDist > 0))) {
                 x = floor(x + xDist) + (xDist < 0);
                 xMomentum *= (-1 * elasticity);
                 break;
@@ -87,7 +87,7 @@
 
         float yDist = yMomentum / (abs(yMomentum) + 1);
         for (int i = 0; i < abs(yMomentum) + 1; i++) {
-            if (col.isSolid((int)(y + yDist) + (yDist > 0), (int)(x + 0.5 - width / 2)) || col.isSolid((int)(y + yDist) + (yDist > 0), (int)(x + 0.5 + width / 2))) {
+            if (col.isSolid((int)(x + 0.5 - width / 2), (int)(y + yDist) + (yDist > 0)) || col.isSolid((int)(x + 0.5 + width / 2), (int)(y + yDist) + (yDist > 0))) {
                 y = floor(y + yDist) + (yDist < 0);
                 yMomentum *= (-1 * elasticity);
                 xMomentum *= friction;
