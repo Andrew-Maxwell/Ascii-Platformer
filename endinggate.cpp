@@ -7,9 +7,9 @@
 //an imposing gate that spawns particles that float slowly upwards.
 /*****************************************************************************/
 
-    endingGate::endingGate(float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    endingGate::endingGate(float newX, float newY, Color newTint,
                         float newSizeFactor, int newWidth = 0, int newHeight = 0) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor) {
+                        entity(newX, newY, newTint, newSizeFactor) {
         toPrint = {"O----O", "|    |", "|    |", "|    |", "O----O"};
         width = 5;
         height = 5;
@@ -30,8 +30,7 @@
 
     void endingGate::tickSet(collider& col) {
         if (GetRandomValue(0, 10) == 0) {
-            myParticles.addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint.r, tint.g,
-                                                tint.b, tint.a, sizeFactor, 0, -0.01, '*', (height - 1.5) * 100));
+            myParticles.addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, sizeFactor, 0, -0.01, '*', (height - 1.5) * 100));
         }
         myParticles.tickSet(col);
     }

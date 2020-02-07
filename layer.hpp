@@ -24,8 +24,7 @@ class layer : virtual public entity {
     
     string fileName;
 
-    explicit layer( float newx, float newy, uint8_t R, uint8_t G,
-                    uint8_t B, uint8_t A, float newSizeFactor,
+    explicit layer( float newx, float newy, Color newTint, float newSizeFactor,
                     string newFileName);
 
     bool readLayer();

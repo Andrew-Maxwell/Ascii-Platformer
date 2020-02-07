@@ -5,11 +5,11 @@
 //a physicalParticle that deals damage
 /*****************************************************************************/
 
-    bullet::bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor,
+    bullet::bullet(float newX, float newY, Color newTint, float newSizeFactor,
                    float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage) :
-        entity(newX, newY, R, G, B, A, newSizeFactor),
-        physicalParticle(newX, newY, R, G, B, A, newSizeFactor, newXMomentum, newYMomentum, c, newLifeTime, newElasticity,
+        entity(newX, newY, newTint, newSizeFactor),
+        physicalParticle(newX, newY, newTint, newSizeFactor, newXMomentum, newYMomentum, c, newLifeTime, newElasticity,
                          newMaxSpeed, newGravity, newFriction),
         damage(newDamage)
     {

@@ -22,7 +22,7 @@ class rain : public entity {
 
     public:
 
-    rain(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newDropsPerTick, float newXMomentum, bool isSnow);
+    rain(float newX, float newY, Color newTint, float newSizeFactor, float newDropsPerTick, float newXMomentum, bool isSnow);
 
     void tickSet(collider& col);
 

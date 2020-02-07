@@ -26,8 +26,7 @@ class particle : virtual public entity {
 
     public:
 
-    particle(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime);
+    particle(  float newX, float newY, Color newTint, float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime);
 
     void tickSet(collider& col);
 
@@ -51,7 +50,7 @@ class physicalParticle : public particle, public lightPhysicalEntity, public col
 
     bool dynamicChar;
 
-    physicalParticle(   float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    physicalParticle(   float newX, float newY,  Color newTint,
                         float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
                         float newElasticity, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 

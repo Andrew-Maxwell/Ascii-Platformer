@@ -4,10 +4,10 @@
 //Virtual entity parent class.
 /******************************************************************************/
 
-entity::entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor) {
+entity::entity(float newx, float newy, Color newTint, float newSizeFactor) {
     x = newx;
     y = newy;
-    tint = {R, G, B, A};
+    tint = newTint;
     sizeFactor = newSizeFactor;
 }
 

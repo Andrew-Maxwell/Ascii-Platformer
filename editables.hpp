@@ -31,7 +31,7 @@ class editableLayer : public layer {
 
     public:
 
-    editableLayer( float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson);
+    editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson);
 
     //Accessors
     
@@ -114,7 +114,7 @@ class editableCollider : virtual public editableLayer {
 
     public:
 
-    editableCollider (float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson);
+    editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson);
 
     //Dummy functions which don't do anything
 

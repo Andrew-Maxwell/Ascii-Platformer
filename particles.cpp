@@ -7,9 +7,9 @@
 //If the character passed to constructor is 0, then a character is chosen based on direction.
 /******************************************************************************/
 
-    particle::particle(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    particle::particle(  float newX, float newY, Color newTint,
                         float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor),
+                        entity(newX, newY, newTint, newSizeFactor),
                         xSpeed(newXSpeed),
                         ySpeed(newYSpeed),
                         lifetime(newLifetime) {
@@ -72,12 +72,12 @@
 //A particle to which physics applies.
 /******************************************************************************/
 
-    physicalParticle::physicalParticle(   float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    physicalParticle::physicalParticle(   float newX, float newY, Color newTint,
                         float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
                         float newElasticity, float newMaxSpeed, float newGravity, float newFriction) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor),
-                        particle(newX, newY, R, G, B, A, newSizeFactor, 0, 0, c, newLifetime),
-                        lightPhysicalEntity(newX, newY, R, G, B, A, newSizeFactor, newElasticity, newXSpeed, newYSpeed, newMaxSpeed, newGravity, newFriction),
+                        entity(newX, newY, newTint, newSizeFactor),
+                        particle(newX, newY, newTint, newSizeFactor, 0, 0, c, newLifetime),
+                        lightPhysicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXSpeed, newYSpeed, newMaxSpeed, newGravity, newFriction),
                         dynamicChar(c == 0) {}
 
     bool physicalParticle::doesCollide(float otherX, float otherY, int otherType) {

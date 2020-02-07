@@ -38,10 +38,10 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
 
     //Read level meta information: background color and collider file name
 
-    int backgroundR = json.HasMember("R") ? json["R"].GetInt() : 255;
-    int backgroundG = json.HasMember("G") ? json["G"].GetInt() : 255;
-    int backgroundB = json.HasMember("B") ? json["B"].GetInt() : 255;
-    int backgroundA = json.HasMember("A") ? json["A"].GetInt() : 255;
+    uint8_t backgroundR = json.HasMember("R") ? json["R"].GetInt() : 255;
+    uint8_t backgroundG = json.HasMember("G") ? json["G"].GetInt() : 255;
+    uint8_t backgroundB = json.HasMember("B") ? json["B"].GetInt() : 255;
+    uint8_t backgroundA = json.HasMember("A") ? json["A"].GetInt() : 255;
     string colliderFileName = json.HasMember("collider") ? json["collider"].GetString() : "test_collider.txt";
     background = {backgroundR, backgroundG, backgroundB, backgroundA};
     col = new collider(0.0, 0.0, colliderFileName);
@@ -62,21 +62,21 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
         
         float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
         float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
-        int R = entity.HasMember("R") ? entity["R"].GetInt() : 0;
-        int G = entity.HasMember("G") ? entity["G"].GetInt() : 0;
-        int B = entity.HasMember("B") ? entity["B"].GetInt() : 0;
-        int A = entity.HasMember("A") ? entity["A"].GetInt() : 0;
+        uint8_t R = entity.HasMember("R") ? entity["R"].GetInt() : 0;
+        uint8_t G = entity.HasMember("G") ? entity["G"].GetInt() : 0;
+        uint8_t B = entity.HasMember("B") ? entity["B"].GetInt() : 0;
+        uint8_t A = entity.HasMember("A") ? entity["A"].GetInt() : 0;
         float sizeFactor = entity.HasMember("sizeFactor") ? entity["sizeFactor"].GetFloat() : 1.0;
 
         if (type == "layer") {
             string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "Error: No layer filename specified.";
-            gameLayer * L = new gameLayer(x, y, R, G, B, A, sizeFactor, fileName);
+            gameLayer * L = new gameLayer(x, y, {R, G, B, A}, sizeFactor, fileName);
             el.addEntity(L);
         }
         else if (type == "endingGate") {
             int width = entity.HasMember("width") ? entity["width"].GetInt() : 3;
             int height = entity.HasMember("height") ? entity["height"].GetInt() : 3;
-            endingGate * E = new endingGate(x, y, R, G, B, A, sizeFactor, width, height);
+            endingGate * E = new endingGate(x, y, {R, G, B, A}, sizeFactor, width, height);
             el.addEntity(E);
             col -> addCollideable(E);
         }
@@ -84,12 +84,12 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
             string nextRoom = entity.HasMember("nextRoom") ? entity["nextRoom"].GetString() : "Error: No door destination specified.";
             float destinationX = entity.HasMember("destinationX") ? entity["destinationX"].GetFloat() : 0.0;
             float destinationY = entity.HasMember("destinationY") ? entity["destinationY"].GetFloat() : 0.0;
-            door * D = new door(x, y, R, G, B, A, sizeFactor, nextRoom, destinationX, destinationY);
+            door * D = new door(x, y, {R, G, B, A}, sizeFactor, nextRoom, destinationX, destinationY);
             el.addEntity(D);
             col -> addCollideable(D);
         }
         else if (type == "savePoint") {
-            savePoint * S = new savePoint(x, y, R, G, B, A, sizeFactor);
+            savePoint * S = new savePoint(x, y, {R, G, B, A}, sizeFactor);
             el.addEntity(S);
             col -> addCollideable(S);
         }
@@ -103,7 +103,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
             int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;
             float power = entity.HasMember("power") ? entity["power"].GetFloat() : 0;
             float range = entity.HasMember("range") ? entity["range"].GetFloat() : 0;
-            forceField * F = new forceField(x, y, R, G, B, A, sizeFactor, channel, power, range);
+            forceField * F = new forceField(x, y, {R, G, B, A}, sizeFactor, channel, power, range);
             el.addEntity(F);
             col -> addCollideable(F);
         }
@@ -111,7 +111,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
             float dropsPerTick = entity.HasMember("dropsPerTick") ? entity["dropsPerTick"].GetFloat() : 1.0;
             float xMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat() : 0.0;
             bool isSnow = entity.HasMember("snow") ? entity["snow"].GetBool() : 0;
-            rain * newRain = new rain(x, y, R, G, B, A, sizeFactor, dropsPerTick, xMomentum, isSnow);
+            rain * newRain = new rain(x, y, {R, G, B, A}, sizeFactor, dropsPerTick, xMomentum, isSnow);
             el.addEntity(newRain);
         }
         else if (type == "gunPickUp") {
@@ -121,7 +121,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                gunPickUp * newGunPickUp = new gunPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID);
+                gunPickUp * newGunPickUp = new gunPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID);
                 el.addEntity(newGunPickUp);
                 col -> addCollideable(newGunPickUp);
             }
@@ -134,7 +134,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
                 int ammoCount = entity.HasMember("ammoCount") ? entity["ammoCount"].GetInt() : 1;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                ammoPickUp * newAmmoPickUp = new ammoPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID, ammoCount);
+                ammoPickUp * newAmmoPickUp = new ammoPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID, ammoCount);
                 el.addEntity(newAmmoPickUp);
                 col -> addCollideable(newAmmoPickUp);
             }
@@ -146,7 +146,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                healthPickUp * newHealthPickUp = new healthPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
+                healthPickUp * newHealthPickUp = new healthPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
                 el.addEntity(newHealthPickUp);
                 col -> addCollideable(newHealthPickUp);
             }
@@ -158,7 +158,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                maxHealthPickUp * newMaxHealthPickUp = new maxHealthPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
+                maxHealthPickUp * newMaxHealthPickUp = new maxHealthPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
                 el.addEntity(newMaxHealthPickUp);
                 col -> addCollideable(newMaxHealthPickUp);
             }
@@ -233,7 +233,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                     }
                     message.append(1, args[i].GetInt());
                 }
-                opPickUp * newOpPickUp = new opPickUp(x, y, R, G, B, A, sizeFactor, displayChar, lifetime, pickUpID, touch, message);
+                opPickUp * newOpPickUp = new opPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, message);
                 el.addEntity(newOpPickUp);
                 col -> addCollideable(newOpPickUp);
             }
@@ -275,7 +275,7 @@ int main(int argc, char** argv) {
 
         //Initialize
 
-        playerObj = new player(0.0, 0.0, 255, 255, 255, 255, 1, "test.txt");
+        playerObj = new player(0.0, 0.0, {255, 255, 255, 255}, 1, "test.txt");
         if (argc == 1) {
             if (playerObj -> load("save")) {
                 cout << "Loaded save.\n";

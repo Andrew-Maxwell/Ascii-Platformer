@@ -20,7 +20,7 @@ class savePoint : public collideable {
 
     public:
 
-    explicit savePoint(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor);
+    explicit savePoint(float newX, float newY, Color newTint, float newSizeFactor);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 

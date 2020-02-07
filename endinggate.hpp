@@ -21,7 +21,7 @@ class endingGate : public collideable {
 
     public:
 
-    explicit endingGate(float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    explicit endingGate(float newX, float newY, Color newTint,
                         float newSizeFactor, int newWidth, int newHeight);
 
     bool doesCollide(float otherX, float otherY, int otherType);

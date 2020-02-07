@@ -1,4 +1,4 @@
-set -e    # if error, stop the build
+#set -e    # if error, stop the build
 g++ -g -c -I /opt/raylib/src meta.cpp -o meta.o -O3
 g++ -g -c -I /opt/raylib/src entitymeta.cpp -o entitymeta.o -O3
 g++ -g -c -I /opt/raylib/src layer.cpp -o layer.o -O3

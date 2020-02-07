@@ -5,9 +5,9 @@
 //Triggers a transition to another room when interacted with.
 /*****************************************************************************/
 
-    door::door(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    door::door(  float newX, float newY, Color newTint,
                     float newSizeFactor, string newDestinationRoom, float newDestX, float newDestY) :
-        entity(newX, newY, R, G, B, A, newSizeFactor),
+        entity(newX, newY, newTint, newSizeFactor),
         destinationRoom(newDestinationRoom),
         destinationX(newDestX),
         destinationY(newDestY) {

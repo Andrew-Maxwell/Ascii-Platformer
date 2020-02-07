@@ -7,10 +7,9 @@
 //applies -- loosely.
 /******************************************************************************/
 
-    lightPhysicalEntity::lightPhysicalEntity( float newx, float newy, uint8_t R, uint8_t G, uint8_t B,
-                                  uint8_t A, float newSizeFactor, float newElasticity, float newXMomentum,
+    lightPhysicalEntity::lightPhysicalEntity( float newx, float newy, Color newTint, float newSizeFactor, float newElasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed, float newGravity, float newFriction) :
-                                  entity(newx, newy, R, G, B, A, newSizeFactor),
+                                  entity(newx, newy, newTint, newSizeFactor),
                                   xMomentum(newXMomentum),
                                   yMomentum(newYMomentum),
                                   elasticity(newElasticity),
@@ -56,10 +55,9 @@
 //applies, more rigorously.
 /******************************************************************************/
 
-    realPhysicalEntity::realPhysicalEntity(float newx, float newy,  uint8_t R, uint8_t G, uint8_t B,
-                                uint8_t A, float newSizeFactor, float elasticity, float newXMomentum,
+    realPhysicalEntity::realPhysicalEntity(float newx, float newy,  Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed, float newGravity, float newFriction) :
-                                entity(newx, newy, R, G, B, A, newSizeFactor),
+                                entity(newx, newy, newTint, newSizeFactor),
                                 maxSpeed(newMaxSpeed),
                                 gravity(newGravity),
                                 friction(newFriction),

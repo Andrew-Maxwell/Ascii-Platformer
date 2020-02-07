@@ -5,8 +5,8 @@
 //Attracts or repels physical entities within its influence
 /*****************************************************************************/
 
-    forceField::forceField(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newChannel, float newPower, float newRange) :
-        entity(newX, newY, R, G, B, A, newSizeFactor),
+    forceField::forceField(float newX, float newY, Color newTint, float newSizeFactor, int newChannel, float newPower, float newRange) :
+        entity(newX, newY, tint, newSizeFactor),
         channel(newChannel),
         power(newPower),
         range(newRange),
@@ -40,12 +40,12 @@
             if (++tickCount % (int)(1 / power) == 0) {
                 if (power > 0) { //Attractor force field
                     for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
-                        myParticles.addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint.r, tint.g, tint.b, tint.a, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
+                        myParticles.addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
                     }
                 }
                 else {  //repeller force field
                     for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
-                        myParticles.addEntity(new particle(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
+                        myParticles.addEntity(new particle(x, y, tint, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
                     }
                 }
             }

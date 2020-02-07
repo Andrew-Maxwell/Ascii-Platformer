@@ -25,7 +25,7 @@ class forceField : public collideable {
 
     public:
 
-    explicit forceField(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newChannel, float newPower, float newRange);
+    explicit forceField(float newX, float newY, Color newTint, float newSizeFactor, int newChannel, float newPower, float newRange);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 

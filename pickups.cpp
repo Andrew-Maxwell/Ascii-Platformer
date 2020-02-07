@@ -5,9 +5,9 @@
 //Any sort of item that can be collected by the player once
 /*****************************************************************************/
 
-    pickUp::pickUp(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    pickUp::pickUp(  float newX, float newY,  Color newTint,
                     float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch) :
-        entity(newX, newY, R, G, B, A, newSizeFactor),
+        entity(newX, newY, newTint, newSizeFactor),
         displayChar(newDisplayChar),
         lifetime(newLifetime),
         ID(newID),
@@ -60,9 +60,9 @@
 //Unlocks a new gun
 /*****************************************************************************/
 
-    gunPickUp::gunPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+    gunPickUp::gunPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
+                        entity(newX, newY, newTint, newSizeFactor),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID) {}
 
     collision gunPickUp::getCollision() {
@@ -74,9 +74,9 @@
 //Adds ammo to a given gun
 /*****************************************************************************/
 
-    ammoPickUp::ammoPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+    ammoPickUp::ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
+                        entity(newX, newY, newTint, newSizeFactor),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID),
                         ammoCount(newAmmoCount) {}
 
@@ -89,9 +89,9 @@
 //Adds health back
 /*****************************************************************************/
 
-    healthPickUp::healthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+    healthPickUp::healthPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
+                        entity(newX, newY, newTint, newSizeFactor),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         healthCount(newHealthCount) {}
 
     collision healthPickUp::getCollision() {
@@ -103,9 +103,9 @@
 //Adds to max health
 /*****************************************************************************/
 
-    maxHealthPickUp::maxHealthPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+    maxHealthPickUp::maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
+                        entity(newX, newY, newTint, newSizeFactor),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         healthCount(newHealthCount) {}
 
     collision maxHealthPickUp::getCollision() {
@@ -117,9 +117,9 @@
 //Gives the player another bitwise op to play with
 /*****************************************************************************/
 
-    opPickUp::opPickUp(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage) :
-                        entity(newX, newY, R, G, B, A, newSizeFactor),
-                        pickUp(newX, newY, R, G, B, A, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+    opPickUp::opPickUp(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage) :
+                        entity(newX, newY, newTint, newSizeFactor),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         message(newMessage) {}
 
     collision opPickUp::getCollision() {

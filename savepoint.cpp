@@ -5,7 +5,10 @@
 //Saves the game when interacted with.
 /*****************************************************************************/
 
-    savePoint::savePoint(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor) : entity(newX, newY, R, G, B, A, newSizeFactor) {type = 4;}
+    savePoint::savePoint(float newX, float newY, Color newTint, float newSizeFactor) :
+        entity(newX, newY, newTint, newSizeFactor) {
+            type = 4;
+        }
 
     bool savePoint::doesCollide(float otherX, float otherY, int otherType) {
         bool collided = (IsKeyPressed(KEY_S) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == 1);

@@ -22,8 +22,7 @@ class lightPhysicalEntity : virtual public entity {
 
     public:
 
-    explicit lightPhysicalEntity( float newx, float newy, uint8_t R, uint8_t G, uint8_t B,
-                                  uint8_t A, float newSizeFactor, float elasticity, float newXMomentum,
+    explicit lightPhysicalEntity( float newx, float newy, Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     void tickSet(collider& col);
@@ -51,8 +50,7 @@ class realPhysicalEntity : virtual public entity {
 
     public:
 
-    explicit realPhysicalEntity(float newx, float newy,  uint8_t R, uint8_t G, uint8_t B,
-                                uint8_t A, float newSizeFactor, float elasticity, float newXMomentum,
+    explicit realPhysicalEntity(float newx, float newy, Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     void tickSet(collider& col);

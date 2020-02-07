@@ -7,9 +7,9 @@ using namespace rapidjson;
 //An entity that doesn't do anything. Used in mouse interface, mostly.
 /*****************************************************************************/
 
-    dummyEntity::dummyEntity(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    dummyEntity::dummyEntity(  float newX, float newY,  Color newTint,
                     float newSizeFactor, char newC) :
-        entity(newX, newY, R, G, B, A, newSizeFactor) {
+        entity(newX, newY, newTint, newSizeFactor) {
             toPrint[0] = newC;
         }
 

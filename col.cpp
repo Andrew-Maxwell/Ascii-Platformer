@@ -7,8 +7,8 @@
     //Accessors
 
     collider::collider(float newX, float newY, string fileName) :
-        entity(newX, newY, 0, 0, 0, 0, 1),
-        layer(newX, newY, 0, 0, 0, 0, 1, fileName)
+        entity(newX, newY, {0, 0, 0, 0}, 1),
+        layer(newX, newY, {0, 0, 0, 0}, 1, fileName)
         {
             layer::readLayer();
         }

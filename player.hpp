@@ -51,7 +51,7 @@ class player : public realPhysicalEntity, virtual public collideable {
 
     //Constructor + save and load functions
 
-    explicit player(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newNextRoom);
+    explicit player(  float newX, float newY, Color newTint, float newSizeFactor, string newNextRoom);
 
     bool save(string fileName);
 

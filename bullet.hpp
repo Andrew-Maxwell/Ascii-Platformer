@@ -25,7 +25,7 @@ class bullet : public physicalParticle {
 
     public:
 
-    bullet(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor,
+    bullet(float newX, float newY, Color newTint, float newSizeFactor,
                    float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage);
 

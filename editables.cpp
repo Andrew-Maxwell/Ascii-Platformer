@@ -8,15 +8,15 @@ using namespace rapidjson;
 //Also used to represent other entities (isLayer = false.) Not all of the same editing functions apply.
 /*****************************************************************************/
 
-    editableLayer::editableLayer( float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson) :
-        layer(newX, newY, R, G, B, A, newSizeFactor, newFileName),
-        entity(newX, newY, R, G, B, A, newSizeFactor),
+    editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson) :
+        layer(newX, newY, newTint, newSizeFactor, newFileName),
+        entity(newX, newY, newTint, newSizeFactor),
         isLayer(newIsLayer)
     {
 
         //Set original color to reset to after flashing
 
-        original = {R, G, B, A};
+        original = newTint;
         json = newJson;
 
         //If layer Read in canvas information. Canvas stores the layer in UTF-8; intCanvas is in UTF-32 (?)
@@ -623,9 +623,9 @@ using namespace rapidjson;
 //Constructor
 /*****************************************************************************/
 
-    editableCollider::editableCollider (float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson) :
-        editableLayer(newX, newY, R, G, B, A, newSizeFactor, newIsLayer, newFileName, display, dummyJson),
-        entity(newX, newY, R, G, B, A, newSizeFactor) {}
+    editableCollider::editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson) :
+        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, newFileName, display, dummyJson),
+        entity(newX, newY, newTint, newSizeFactor) {}
 
 /*****************************************************************************/
 //Dummy functions which don't do anything for the collider

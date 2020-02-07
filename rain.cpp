@@ -5,8 +5,8 @@
 //Constantly spawns particles above the top of the screen
 /******************************************************************************/
 
-    rain::rain(float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, float newDropsPerTick, float newXMomentum, bool newIsSnow) :
-        entity(newX, newY, R, G, B, A, newSizeFactor),
+    rain::rain(float newX, float newY, Color newTint, float newSizeFactor, float newDropsPerTick, float newXMomentum, bool newIsSnow) :
+        entity(newX, newY, newTint, newSizeFactor),
         dropsPerTick(newDropsPerTick),
         xMomentum(newXMomentum),
         isSnow(newIsSnow),
@@ -62,10 +62,10 @@
                         float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
                         float newElasticity, float newMaxSpeed, float newGravity, float newFriction) :*/
 
-                raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint.r, tint.g, tint.b, tint.a, sizeFactor, xMomentum, 0.2, snowflake, 1000, 0, 0.2, GRAVITY, 0);
+                raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, xMomentum, 0.2, snowflake, 1000, 0, 0.2, GRAVITY, 0);
             }
             else {
-                raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint.r, tint.g, tint.b, tint.a, sizeFactor, xMomentum, 1, 0, 200, 0, 1, GRAVITY, 0.88);
+                raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, xMomentum, 1, 0, 200, 0, 1, GRAVITY, 0.88);
             }
             raindrops.addEntity(raindrop);
             col.addParticle(raindrop);

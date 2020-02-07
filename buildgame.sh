@@ -1,4 +1,4 @@
-set -e    # if error, stop the build
+#set -e    # if error, stop the build
 g++ -g -c -I /opt/raylib/src game_main.cpp -o game_main.o -O3
 g++ -g -c -I /opt/raylib/src bullet.cpp -o bullet.o -O3
 g++ -g -c -I /opt/raylib/src col.cpp -o col.o -O3

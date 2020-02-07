@@ -17,7 +17,7 @@ class dummyEntity : public entity {
 
     public:
 
-    dummyEntity(  float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
+    dummyEntity(  float newX, float newY, Color newTint,
                     float newSizeFactor, char newC);
 
     void tickSet(collider& col);

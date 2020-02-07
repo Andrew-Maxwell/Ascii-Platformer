@@ -29,9 +29,9 @@ struct saveData {
 
 //Constructor
 
-    player::player(  float newX, float newY, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor, string newNextRoom) :
-                            entity(newX, newY, R, G, B, A, newSizeFactor),
-                            realPhysicalEntity(newX, newY, R, G, B, A, newSizeFactor, 1.0, 0.0, 0.0)
+    player::player(  float newX, float newY, Color newTint, float newSizeFactor, string newNextRoom) :
+                            entity(newX, newY, newTint, newSizeFactor),
+                            realPhysicalEntity(newX, newY, newTint, newSizeFactor, 1.0, 0.0, 0.0)
     {
         shouldChangeRooms = false;
         nextRoom = newNextRoom;
@@ -263,7 +263,7 @@ struct saveData {
                 switch(gunSelect) {
                     case 0:
                         aim = Vector2Scale(Vector2Normalize(aim), 0.5);
-                        b = new bullet(x, y, tint.r, tint.g, tint.b, tint.a, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10);
+                        b = new bullet(x, y, tint, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10);
                         gunCoolDowns[0] = 60;
                         gunAmmos[0]--;
                         break;

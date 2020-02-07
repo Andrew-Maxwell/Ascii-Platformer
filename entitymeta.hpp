@@ -29,7 +29,7 @@ class entity {
 
     //Constructor and destructor
 
-    entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor);
+    entity(float newx, float newy, Color newTint, float newSizeFactor);
 
     entity() {}
 

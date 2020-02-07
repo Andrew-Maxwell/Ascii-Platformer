@@ -55,11 +55,11 @@ void readEntities(entityList& el, list<editableLayer*>& layers, editableCollider
         float sizeFactor = entity.HasMember("sizeFactor") ? entity["sizeFactor"].GetFloat() : 1.0;
 
         string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "No filename found.";
-        editableLayer * L = new editableLayer(x, y, R, G, B, A, sizeFactor, (type == "layer"), fileName, toupper(type[0]), &entity);
+        editableLayer * L = new editableLayer(x, y, {R, G, B, A}, sizeFactor, (type == "layer"), fileName, toupper(type[0]), &entity);
         layers.push_back(L);
         el.addEntity(L);
     }
-    col = new editableCollider(0.0, 0.0, 0, 0, 0, 80, 1, true, colFileName, '!', NULL);
+    col = new editableCollider(0.0, 0.0, {0, 0, 0, 80}, 1, true, colFileName, '!', NULL);
     el.addEntity(col);
     layers.push_back(col);
 }
@@ -631,7 +631,7 @@ int main(int argc, char** argv) {
                         int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
                         int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
                         mousePos.push_back(make_tuple(tileX1, tileY1));
-                        markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), 255, 0, 0, 255, (*thisLayer) -> getSizeFactor(), 'X'));
+                        markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
                     }
 
                     //If the current stroke is complete
