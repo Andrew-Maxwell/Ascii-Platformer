@@ -1,6 +1,17 @@
+#include "bullet.hpp"
+#include "col.hpp"
+#include "door.hpp"
+#include "effects.hpp"
+#include "endinggate.hpp"
+#include "forcefield.hpp"
+#include "gamelayer.hpp"
+#include "layer.hpp"
 #include "meta.hpp"
-#include "game_meta_classes.hpp"
-#include "game_classes.hpp"
+#include "particles.hpp"
+#include "pickups.hpp"
+#include "player.hpp"
+#include "rain.hpp"
+#include "savepoint.hpp"
 
 #define DRAWFPS false
 
@@ -10,7 +21,7 @@ using namespace rapidjson;
 //Read in a list of entities from a file
 /******************************************************************************/
 
-void readEntities(entityList& el, collider*& col, Color& background, playerEntity* player, string& fileName) {
+void readEntities(entityList& el, collider*& col, Color& background, player* playerObj, string& fileName) {
 
     //Read into a json object
 
@@ -83,10 +94,10 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
             col -> addCollideable(S);
         }
         else if (type == "player") {
-            player -> setColor(R, G, B, A);
-            player -> setSizeFactor(sizeFactor);
-            el.addEntity(player);
-            col -> addCollideable(player);
+            playerObj -> setColor(R, G, B, A);
+            playerObj -> setSizeFactor(sizeFactor);
+            el.addEntity(playerObj);
+            col -> addCollideable(playerObj);
         }
         else if (type == "forceField") {
             int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;
@@ -105,7 +116,7 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
         }
         else if (type == "gunPickUp") {
             int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!player -> isCollected(pickUpID)) {
+            if (!playerObj -> isCollected(pickUpID)) {
                 int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
@@ -117,7 +128,7 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
         }
         else if (type == "ammoPickUp") {
             int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!player -> isCollected(pickUpID)) {
+            if (!playerObj -> isCollected(pickUpID)) {
                 int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x25a7;
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
@@ -130,7 +141,7 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
         }
         else if (type == "healthPickUp") {
             int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!player -> isCollected(pickUpID)) {
+            if (!playerObj -> isCollected(pickUpID)) {
                 int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
@@ -142,7 +153,7 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
         }
         else if (type == "maxHealthPickUp") {
             int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!player -> isCollected(pickUpID)) {
+            if (!playerObj -> isCollected(pickUpID)) {
                 int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
@@ -154,7 +165,7 @@ void readEntities(entityList& el, collider*& col, Color& background, playerEntit
         }
         else if (type == "opPickUp") {
             int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!player -> isCollected(pickUpID)) {
+            if (!playerObj -> isCollected(pickUpID)) {
                 int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0;
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
@@ -255,7 +266,7 @@ int main(int argc, char** argv) {
     long total = 0, tickCount = 0;
 
     int won = 0;
-    playerEntity* player;
+    player* playerObj;
     string savedNextRoom;
     bool shouldChangeRooms = false;
     bool showInventory = false;
@@ -264,17 +275,17 @@ int main(int argc, char** argv) {
 
         //Initialize
 
-        player = new playerEntity(0.0, 0.0, 255, 255, 255, 255, 1, "test.txt");
+        playerObj = new player(0.0, 0.0, 255, 255, 255, 255, 1, "test.txt");
         if (argc == 1) {
-            if (player -> load("save")) {
+            if (playerObj -> load("save")) {
                 cout << "Loaded save.\n";
             }
             else {
-                player -> nextRoom = "test.txt";
+                playerObj -> nextRoom = "test.txt";
             }
         }
         else {
-            player -> nextRoom = argv[1];
+            playerObj -> nextRoom = argv[1];
         }
 
         while (!(won || WindowShouldClose())) {         //While we're still alive
@@ -285,15 +296,15 @@ int main(int argc, char** argv) {
             collider* col;
             Color background;
 
-            readEntities(entities, col, background, player, player -> nextRoom);
+            readEntities(entities, col, background, playerObj, playerObj -> nextRoom);
             cout << "Finished reading in entities\n";
 
             //Camera initializations
 
             float cameraX = col -> getCols() / 2;
             float cameraY = col -> getRows() / 2;
-            bool moveCameraX = (col -> getCols() > SCREENCOLS * player -> getSizeFactor());
-            bool moveCameraY = (col -> getRows() > SCREENROWS * player -> getSizeFactor());
+            bool moveCameraX = (col -> getCols() > SCREENCOLS * playerObj -> getSizeFactor());
+            bool moveCameraY = (col -> getRows() > SCREENROWS * playerObj -> getSizeFactor());
 
             shouldChangeRooms = false;
 
@@ -301,7 +312,7 @@ int main(int argc, char** argv) {
 
                 //Begin the tick
 
-                won = player -> won;
+                won = playerObj -> won;
                 tickStart = chrono::steady_clock::now();
 
                 //Inventory screen?
@@ -313,7 +324,7 @@ int main(int argc, char** argv) {
                 if (showInventory) {
                     BeginDrawing();
                     ClearBackground(UIBACKGROUND);
-                    player -> drawTabScreen(displayFont);
+                    playerObj -> drawTabScreen(displayFont);
                     EndDrawing();
                 }
 
@@ -324,19 +335,19 @@ int main(int argc, char** argv) {
                     //Update camera
 
                     if (moveCameraX) {
-                        if (player -> x > cameraX + CAMERALAGX) {
-                            cameraX = min(player -> x - CAMERALAGX, col -> getCols() - SCREENCOLS / 2.0f);
+                        if (playerObj -> x > cameraX + CAMERALAGX) {
+                            cameraX = min(playerObj -> x - CAMERALAGX, col -> getCols() - SCREENCOLS / 2.0f);
                         }
-                        else if (player -> x < cameraX - CAMERALAGX) {
-                            cameraX = max(player -> x + CAMERALAGX, SCREENCOLS / 2.0f);
+                        else if (playerObj -> x < cameraX - CAMERALAGX) {
+                            cameraX = max(playerObj -> x + CAMERALAGX, SCREENCOLS / 2.0f);
                         }
                     }
                     if (moveCameraY) {
-                        if (player -> y > cameraY + CAMERALAGY) {
-                            cameraY = min(player -> y - CAMERALAGY, col -> getRows() - SCREENROWS / 2.0f);
+                        if (playerObj -> y > cameraY + CAMERALAGY) {
+                            cameraY = min(playerObj -> y - CAMERALAGY, col -> getRows() - SCREENROWS / 2.0f);
                         }
-                        else if (player -> y < cameraY - CAMERALAGY) {
-                            cameraY = max(player -> y + CAMERALAGY, SCREENROWS / 2.0f);
+                        else if (playerObj -> y < cameraY - CAMERALAGY) {
+                            cameraY = max(playerObj -> y + CAMERALAGY, SCREENROWS / 2.0f);
                         }
                     }
 
@@ -361,9 +372,9 @@ int main(int argc, char** argv) {
 
                     //Handle room changing
 
-                    if (player -> shouldChangeRooms) {
+                    if (playerObj -> shouldChangeRooms) {
                         shouldChangeRooms = true;
-                        player -> shouldChangeRooms = false;
+                        playerObj -> shouldChangeRooms = false;
                         delete col;
                     }
                 }
@@ -381,7 +392,7 @@ int main(int argc, char** argv) {
 
             }
         }
-        delete player;
+        delete playerObj;
         won = max(won, 0);
     }
 

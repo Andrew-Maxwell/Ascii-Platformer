@@ -1,236 +1,217 @@
 {
-    "collider":"snow_collider.txt",
-    "R":190,
-    "G":215,
-    "B":255,
-    "A":255,
-    "entities":[
+    "collider": "snow_collider.txt",
+    "R": 190,
+    "G": 215,
+    "B": 255,
+    "A": 255,
+    "entities": [
         {
-            "type":"layer",
-            "x":20,
-            "y":20,
-            "R":180,
-            "G":190,
-            "B":225,
-            "A":255,
-            "sizeFactor":0.6,
-            "fileName":"extraSnow_layer0.txt"
+            "type": "layer",
+            "x": -30.0,
+            "y": -30.0,
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 80,
+            "sizeFactor": 0.5999999046325684,
+            "fileName": "extraSnow_layer0.txt"
         },
-
         {
-            "type":"layer",
-            "x":20,
-            "y":20,
-            "R":150,
-            "G":160,
-            "B":195,
-            "A":255,
-            "sizeFactor":0.6,
-            "fileName":"extraSnow_layer1.txt"
+            "type": "layer",
+            "x": -30.0,
+            "y": -30.0,
+            "R": 150,
+            "G": 160,
+            "B": 195,
+            "A": 255,
+            "sizeFactor": 0.6000000238418579,
+            "fileName": "extraSnow_layer1.txt"
         },
-
         {
-            "type":"layer",
-            "x":20,
-            "y":20,
-            "R":160,
-            "G":150,
-            "B":170,
-            "A":255,
-            "sizeFactor":0.65,
-            "fileName":"extraSnow_layer6.txt"
+            "type": "layer",
+            "x": 20.0,
+            "y": 20.0,
+            "R": 160,
+            "G": 150,
+            "B": 170,
+            "A": 255,
+            "sizeFactor": 0.6499999761581421,
+            "fileName": "extraSnow_layer6.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":60,
-            "G":80,
-            "B":80,
-            "A":255,
-            "sizeFactor":0.75,
-            "fileName":"extraSnow_layer7.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 60,
+            "G": 80,
+            "B": 80,
+            "A": 255,
+            "sizeFactor": 0.75,
+            "fileName": "extraSnow_layer7.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":60,
-            "G":80,
-            "B":80,
-            "A":255,
-            "sizeFactor":0.8,
-            "fileName":"extraSnow_layer2.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 60,
+            "G": 80,
+            "B": 80,
+            "A": 255,
+            "sizeFactor": 0.800000011920929,
+            "fileName": "extraSnow_layer2.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":120,
-            "G":145,
-            "B":120,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"extraSnow_layer3.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 120,
+            "G": 145,
+            "B": 120,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer3.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":30,
-            "G":40,
-            "B":30,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"extraSnow_layer4.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 30,
+            "G": 40,
+            "B": 30,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer4.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":160,
-            "G":150,
-            "B":170,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"extraSnow_layer5.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 160,
+            "G": 150,
+            "B": 170,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer5.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":150,
-            "G":170,
-            "B":150,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"snow_layer0.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 150,
+            "G": 170,
+            "B": 150,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer0.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":0,
-            "G":0,
-            "B":0,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"snow_layer1.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer1.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":255,
-            "G":200,
-            "B":150,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"snow_layer2.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 255,
+            "G": 200,
+            "B": 150,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer2.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":45,
-            "G":60,
-            "B":45,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"snow_layer3.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 45,
+            "G": 60,
+            "B": 45,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer3.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":255,
-            "G":255,
-            "B":255,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"snow_layer4.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 255,
+            "G": 255,
+            "B": 255,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer4.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":255,
-            "G":0,
-            "B":0,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"snow_layer5.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer5.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":160,
-            "G":150,
-            "B":170,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"snow_layer6.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 160,
+            "G": 150,
+            "B": 170,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer6.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":255,
-            "G":255,
-            "B":255,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"snow_layer7.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 255,
+            "G": 255,
+            "B": 255,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer7.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":149,
-            "G":124,
-            "B":110,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"extraSnow_layer8.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 149,
+            "G": 124,
+            "B": 110,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer8.txt"
         },
-
         {
-            "type":"layer",
-            "x":0,
-            "y":0,
-            "R":128,
-            "G":106,
-            "B":86,
-            "A":255,
-            "sizeFactor":1,
-            "fileName":"extraSnow_layer9.txt"
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 128,
+            "G": 106,
+            "B": 86,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer9.txt"
         },
-        
         {
-            "type":"player",
-            "x":0,
-            "y":0,
-            "R":255,
-            "G":255,
-            "B":0,
-            "A":255,
-            "sizeFactor":1
+            "type": "player",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 255,
+            "G": 255,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0
         }
-        
     ]
 }

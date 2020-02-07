@@ -1,5 +1,7 @@
 #include "meta.hpp"
-#include "editor_classes.hpp"
+#include "dummyentity.hpp"
+#include "editables.hpp"
+#include "charfills.hpp"
 
 using namespace rapidjson;
 

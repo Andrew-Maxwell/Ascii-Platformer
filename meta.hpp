@@ -58,11 +58,6 @@ extern "C" {
 
 using namespace std;
 
-//Forward declarations, not sure why this fixes things but it does.
-
-class playerEntity;
-class collider;
-
 /******************************************************************************/
 //Raylib functions I optimized to run faster in my use case
 /******************************************************************************/
@@ -82,111 +77,5 @@ void myDrawText(Font font, const char *text, Vector2 position, float fontSize, f
 ifstream getLevelIFStream(string& fileName);
 
 FILE* getLevelFileP(string& fileName);
-
-/******************************************************************************/
-//Virtual entity parent class.
-/******************************************************************************/
-
-class entity {
-
-    protected:
-
-    Color tint;
-    float sizeFactor = 1;
-
-    public:
-
-    int type;
-    int id;
-    float x;
-    float y;
-
-    //Constructor and destructor
-
-    entity(float newx, float newy, uint8_t R, uint8_t G, uint8_t B, uint8_t A, float newSizeFactor);
-
-    entity() {}
-
-    virtual ~entity() = default;
-
-    //Tick functions
-    //Move entities. Update collider
-
-    virtual void tickSet(collider& col) {cerr << "Entity tickset called illegally. This function should be overridden!";}
-
-    //Update entities based on new collider values
-
-    virtual void tickGet(collider& col) {cerr << "Entity tickGet() called illegally. This function should be overridden!";}
-
-    //perform additional cleanup. If this function returns true, then the entity is deleted by the entityList.
-
-    virtual bool finalize() {cerr << "Entity finalize() called illegally. This function should be overridden!"; return false;}
-
-    //Display the entity.
-
-    virtual void print(float cameraX, float cameraY, Font displayFont) {cerr << "Entity print() called illegally. This function should be overridden!";}
-};
-
-/******************************************************************************/
-//A list for containing entities. Every tick, every entity in the list has its four functions called
-//once. Also, entities can contain entityLists (e.g. an entity containing the bullets it's fired) as
-//long as the four functions are called by that entity's four functions.
-/******************************************************************************/
-
-class entityList {
-
-    list<entity*> entities;
-
-    public:
-
-    ~entityList();
-
-    void clear(); //Has the potential to cause big issues with collideables. should ONLY be called in one place - by player when changing rooms.
-
-    int size();
-
-    void tickSet(collider& col);
-
-    void tickGet(collider& col);
-
-    void finalize();
-
-    void print(float cameraX, float cameraY, Font displayFont);
-
-    void addEntity(entity* toAdd);
-};
-
-/******************************************************************************/
-//layer
-//Static multi-character entities read in from file.
-//Designed to be the visual part of the level.
-/******************************************************************************/
-
-class layer : virtual public entity {
-
-    public:
-
-    vector<string> canvas;
-    
-    string fileName;
-
-    explicit layer( float newx, float newy, uint8_t R, uint8_t G,
-                    uint8_t B, uint8_t A, float newSizeFactor,
-                    string newFileName);
-
-    bool readLayer();
-
-    int getRows();
-
-    int getCols();
-
-    void tickSet(collider& col);
-
-    void tickGet(collider& col);
-
-    bool finalize();
-
-    void print(float cameraX, float cameraY, Font displayFont);
-};
 
 #endif //META_HPP
