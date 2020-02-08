@@ -155,6 +155,12 @@ int main(int argc, char** argv) {
     randomCharFill* shading = new randomCharFill({' ', 0x2591, 0x2592, 0x2593, 0x2588});
     charFills.push_back(shading);
 
+    randomCharFill* vertical = new randomCharFill({ 0x0049, 0x005d, 0x012e, 0x2502, 0x2503, 0x257d, 0x257f, 0x25ae});
+    charFills.push_back(vertical);
+
+    randomCharFill* horizontal = new randomCharFill({0x001d, 0x002A, 0x2500, 0x2501, 0x257c, 0x257e});
+    charFills.push_back(horizontal);
+
     randomCharFill* randomPipes = new randomCharFill;
     randomCharFill* singlePipes = new randomCharFill;
     randomCharFill* doublePipes = new randomCharFill;
@@ -199,6 +205,7 @@ int main(int argc, char** argv) {
     int brushClickCount = 1;
     string brushName = "(P)encil";
     float density = 1;
+    bool absoluteBrush = false;
 
     //mayNeedToSave?
 
@@ -239,18 +246,18 @@ int main(int argc, char** argv) {
             if (IsKeyDown(KEY_TAB)) {
                 mousePos.clear();
                 BeginDrawing();
-                ClearBackground(DARKGRAY);
+                ClearBackground(UIBACKGROUND);
 
                 //Print out all available charFills
 
                 for (int i = 0; i < charFills.size(); i++) {
-                    int codePointToDisplay =  charFills[i] -> get(-1, -1);
-                    myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, WHITE);
+                    int codePointToDisplay =  charFills[i] -> display();
+                    myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
                 }
 
                 //Print out currently selected brush
 
-                myDrawText(displayFont, (brushName + " Density: " + to_string(density)).c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, WHITE);
+                myDrawText(displayFont, (brushName + " Density: " + to_string(density) + (absoluteBrush? " Absolute mode" : " Relative mode")).c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, UIFOREGROUND);
 
                 EndDrawing();
 
@@ -339,6 +346,9 @@ int main(int argc, char** argv) {
                     else {
                         density = 1;
                     }
+                }
+                if (IsKeyPressed(KEY_A)) {
+                    absoluteBrush = !absoluteBrush;
                 }
             }
             else {
@@ -601,20 +611,20 @@ int main(int argc, char** argv) {
                     }
 
                     //Output clipboard in format to be added to a textureCharFill, and create new texture
-                    /*
+
                     if (IsKeyPressed(KEY_ENTER)) {
                         cout << "{\n";
                         for (vector<int> row : clipboard) {
                             cout << "{";
                             for(int i = 0; i < row.size() - 1; i++) {
-                                cout << hex << row[i] << ", ";
+                                cout << hex << "0x" << row[i] << ", ";
                             }
-                            cout << hex << row[row.size() - 1] << "}\n";
+                            cout << hex << "0x" << row[row.size() - 1] << "}\n";
                         }
                         cout << "}";
                         charFills.push_back(new textureCharFill(clipboard));
                     }
-                    */
+
                     //mouse input: Right click to sample character
 
                     if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) && (*thisLayer) -> getIsLayer()) {
@@ -626,12 +636,17 @@ int main(int argc, char** argv) {
 
                     //Left click to add a brush input point
 
-                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && ((*thisLayer) -> getIsLayer() || brushID == 3)) {
+                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         Vector2 mouse = GetMousePosition();
                         int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
                         int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
-                        mousePos.push_back(make_tuple(tileX1, tileY1));
-                        markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
+                        if ((*thisLayer) -> getIsLayer() || brushID == 3) {
+                            mousePos.push_back(make_tuple(tileX1, tileY1));
+                            markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
+                        }
+                        else {
+                            markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), '?', 30));
+                        }
                     }
 
                     //If the current stroke is complete
@@ -642,7 +657,7 @@ int main(int argc, char** argv) {
                             mayNeedToSave = true;
                         }
                         else if ((*thisLayer) -> getIsLayer()) {
-                            (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]], density);
+                            (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]], density, absoluteBrush);
                             mayNeedToSave = true;
                         }
                         markers.clear();
@@ -687,8 +702,8 @@ int main(int argc, char** argv) {
         }
         if (mayNeedToSave) {
             BeginDrawing();
-            ClearBackground(BLACK);
-            myDrawText(displayFont, "You didn't save the level. Do you want to save? Y/S or N/ESC.", (Vector2){FONTSIZE, FONTSIZE}, FONTSIZE, 0, WHITE);
+            ClearBackground(UIBACKGROUND);
+            myDrawText(displayFont, "You didn't save the level. Do you want to save? Y/S or N/ESC.", (Vector2){FONTSIZE, FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
                 writeEntities(entities, layers, fileName, json);

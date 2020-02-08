@@ -75,7 +75,7 @@ class editableLayer : public layer {
     
     virtual void move(vector<tuple<int, int>> mousePos);
 
-    void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F, float density);
+    void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F, float density, bool absolute);
 
     //Cut, copy, and paste
 

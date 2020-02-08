@@ -8,8 +8,9 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     dummyEntity::dummyEntity(  float newX, float newY,  Color newTint,
-                    float newSizeFactor, char newC) :
-        entity(newX, newY, newTint, newSizeFactor) {
+                    float newSizeFactor, char newC, int newLifetime) :
+        entity(newX, newY, newTint, newSizeFactor),
+        lifetime(newLifetime) {
             toPrint[0] = newC;
         }
 
@@ -17,7 +18,7 @@ using namespace rapidjson;
 
     void dummyEntity::tickGet(collider& col) {}
 
-    bool dummyEntity::finalize() {return false;}
+    bool dummyEntity::finalize() {return --lifetime < 0;}
 
     void dummyEntity::print(float cameraX, float cameraY, Font displayFont)  {
         myDrawText(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);

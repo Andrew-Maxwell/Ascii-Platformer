@@ -14,11 +14,12 @@ using namespace rapidjson;
 class dummyEntity : public entity {
 
     char toPrint[2] = " ";
+    int lifetime;
 
     public:
 
     dummyEntity(  float newX, float newY, Color newTint,
-                    float newSizeFactor, char newC);
+                    float newSizeFactor, char newC, int newLifetime = 10000000);
 
     void tickSet(collider& col);
 

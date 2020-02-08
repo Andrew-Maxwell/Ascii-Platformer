@@ -20,6 +20,10 @@ using namespace rapidjson;
         return codepoint;
     }
 
+    int charFill::display() {
+        return codepoint;
+    }
+
 /*****************************************************************************/
 //randomCharFill()
 //Fills the shape with chars picked randomly from a set
@@ -32,6 +36,10 @@ using namespace rapidjson;
     }
 
     int randomCharFill::get(int x, int y) {
+        return codepoints[GetRandomValue(0, codepoints.size() - 1)];
+    }
+
+    int randomCharFill::display() {
         return codepoints[GetRandomValue(0, codepoints.size() - 1)];
     }
 
@@ -62,29 +70,29 @@ using namespace rapidjson;
         cross(newCross) {}
 
     int gridCharFill::get(int x, int y) {
-        if (x == -1 && y == -1) {
-            if (displayCount++ % 60 < 30) {
+        if (x % size == 0) {
+            if (y % size == 0) {
                 return cross;
             }
-            else {
-                return 48 + size;
-            }
+            return vert;
+        }
+        else if (y % size == 0) {
+            return horiz;
         }
         else {
-            if (x % size == 0) {
-                if (y % size == 0) {
-                    return cross;
-                }
-                return vert;
-            }
-            else if (y % size == 0) {
-                return horiz;
-            }
-            else {
-                return ' ';
-            }
+            return ' ';
         }
     }
+
+    int gridCharFill::display() {
+        if (displayCount++ % 60 < 30) {
+            return cross;
+        }
+        else {
+            return 48 + size;
+        }
+    }
+
 
 
 /*****************************************************************************/
@@ -99,29 +107,29 @@ using namespace rapidjson;
         cross(newCross) {}
 
     int diagGridCharFill::get(int x, int y) {
-        if (x == -1 && y == -1) {
-            if (displayCount++ % 60 < 30) {
+        if ((x + y) % size == 0) {
+            if ((x -y) % size == 0) {
                 return cross;
             }
-            else {
-                return 48 + size;
-            }
+            return upRight;
+        }
+        else if ((x - y) % size == 0) {
+            return downRight;
         }
         else {
-            if ((x + y) % size == 0) {
-                if ((x -y) % size == 0) {
-                    return cross;
-                }
-                return upRight;
-            }
-            else if ((x - y) % size == 0) {
-                return downRight;
-            }
-            else {
-                return ' ';
-            }
+            return ' ';
         }
     }
+
+    int diagGridCharFill::display() {
+        if (displayCount++ % 60 < 30) {
+            return cross;
+        }
+        else {
+            return 48 + size;
+        }
+    }
+
 
 
 /*****************************************************************************/
@@ -134,6 +142,10 @@ using namespace rapidjson;
 
     int textureCharFill::get(int x, int y) {
         return texture[y % texture.size()][x % texture[0].size()];
+    }
+
+    int textureCharFill::display() {
+        return 'T';
     }
 
 

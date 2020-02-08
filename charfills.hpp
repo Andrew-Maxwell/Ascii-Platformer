@@ -21,6 +21,8 @@ struct charFill {
     charFill(int newCodepoint);
 
     virtual int get(int x, int y);
+
+    virtual int display();
 };
 
 /*****************************************************************************/
@@ -37,6 +39,8 @@ struct randomCharFill : public charFill {
     randomCharFill(vector<int> newCodepoints);
 
     int get(int x, int y) override;
+
+    int display();
 };
 
 /*****************************************************************************/
@@ -61,6 +65,8 @@ struct gridCharFill : public charFill {
     gridCharFill(int newSize, int newHoriz, int newVert, int newCross);
 
     int get(int x, int y);
+
+    int display();
 };
 
 /*****************************************************************************/
@@ -75,6 +81,8 @@ struct diagGridCharFill : public charFill {
     diagGridCharFill(int newSize, int newUpRight, int newDownRight, int newCross);
 
     int get(int x, int y);
+
+    int display();
 };
 
 /*****************************************************************************/
@@ -89,6 +97,8 @@ struct textureCharFill : public charFill {
     textureCharFill(vector<vector<int>> newTexture);
 
     int get(int x, int y);
+
+    int display();
 };
 
 #endif //CHARFILLS_HPP
