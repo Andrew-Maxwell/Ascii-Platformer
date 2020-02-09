@@ -4,7 +4,6 @@
 #include "col.hpp"
 #include "entitymeta.hpp"
 #include "meta.hpp"
-#include "physicalentities.hpp"
 
 using namespace rapidjson;
 
@@ -41,7 +40,7 @@ class particle : virtual public entity {
 //physicalParticle
 //A particle to which physics applies.
 /******************************************************************************/
-
+/*
 class physicalParticle : public particle, public lightPhysicalEntity, public collideable {
 
     bool shouldDelete = false;
@@ -68,5 +67,5 @@ class physicalParticle : public particle, public lightPhysicalEntity, public col
 
     void print(float cameraX, float cameraY, Font displayFont);
 };
-
+*/
 #endif //PARTICLES_HPP

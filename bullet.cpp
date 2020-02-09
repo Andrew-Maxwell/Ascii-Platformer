@@ -6,19 +6,23 @@
 /*****************************************************************************/
 
     bullet::bullet(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList,
-                   float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
+                   float newXMomentum, float newYMomentum, int c, int newLifetime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage) :
         entity(newX, newY, newTint, newSizeFactor),
-        physicalParticle(newX, newY, newTint, newSizeFactor, newXMomentum, newYMomentum, c, newLifeTime, newElasticity,
-                         newMaxSpeed, newGravity, newFriction),
-        damage(newDamage)
+        particle(newX, newY, newTint, newSizeFactor, 0, 0, c, newLifetime),
+        realPhysicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXMomentum, newYMomentum, 
+            newMaxSpeed, newGravity, newFriction),
+        damage(newDamage),
+        dynamicChar(c == 0),
+        lifetime(newLifetime)
     {
         eList = newEList;
         type = 6;
     }
 
     bool bullet::doesCollide(float otherX, float otherY, int type) {
-        if (!hit && otherX > x - width && otherX < x + width && otherY > y - width && otherY < y + width) {
+        if (realPhysicalEntity::doesCollide(otherX, otherY, type) && !hit) {
+            hit = true;
             return true;
         }
         return false;
@@ -29,38 +33,28 @@
     }
 
     bool bullet::stopColliding() {
-        return hit || physicalParticle::stopColliding();
+        return hit;
     }
 
     void bullet::tickSet(collider& col) {
-        physicalParticle::tickSet(col);
+        realPhysicalEntity::tickSet(col);
 
-        if (xMomentum == 0) {   //If hit a wall during physicalParticle::tickSet()
+        if (xMomentum == 0 || lifetime < 0) {   //If hit a wall during physicalParticle::tickSet()
             hit = true;
         }
 
         if (hit & !exploded) {
             exploded = true;
-            explosion(col, eList, 6, x, y, tint, sizeFactor, 0.25, 0, 60, 0.3);
+            explosion(col, eList, 7, x, y, tint, sizeFactor, 0.2, 0, 60, 1);
         }
     }
 
     void bullet::tickGet(collider& col) {
-        physicalParticle::tickGet(col);
-
-        for (collision c : collisions) {
-            if (c.type == 5) {   //forcefield
-                xMomentum += c.xVal;
-                yMomentum += c.yVal;
-            }
-            else {
-                hit = true;
-            }
-        }
+        realPhysicalEntity::tickGet(col);
     }
 
     bool bullet::finalize() {
-        return (physicalParticle::finalize() || hit);
+        return hit;
     }
 
     void bullet::print(float cameraX, float cameraY, Font displayFont) {

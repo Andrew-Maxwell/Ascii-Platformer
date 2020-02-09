@@ -15,7 +15,7 @@ using namespace rapidjson;
 //what it sounds like, I guess.
 /******************************************************************************/
 
-class player : public realPhysicalEntity, virtual public collideable {
+class player : protected realPhysicalEntity, virtual public collideable {
 
     int health, maxHealth, hurtTimer = 0;
 
@@ -26,6 +26,7 @@ class player : public realPhysicalEntity, virtual public collideable {
     int gunDisplayChars[16] = {'E'};
     Color gunColors[16] = {{255, 0, 255, 255}};
     Color gunColorsFaded[16] = {{127, 0, 127, 127}};
+    int lastCollisionType;
 
     int gunSelect = 0;
 

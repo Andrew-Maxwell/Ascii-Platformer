@@ -12,8 +12,9 @@
 #include "player.hpp"
 #include "rain.hpp"
 #include "savepoint.hpp"
+#include "water.hpp"
 
-#define DRAWFPS false
+#define DRAWFPS true
 
 using namespace rapidjson;
 
@@ -113,6 +114,15 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
             bool isSnow = entity.HasMember("snow") ? entity["snow"].GetBool() : 0;
             rain * newRain = new rain(x, y, {R, G, B, A}, sizeFactor, &el, dropsPerTick, xMomentum, isSnow);
             el.addEntity(newRain);
+        }
+        else if (type == "water") {
+            int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
+            float depth = entity.HasMember("depth") ? entity["depth"].GetFloat() : 1.0;
+            float wavelength = entity.HasMember("wavelength") ? entity["wavelength"].GetFloat() : 1.0;
+            float amplitude = entity.HasMember("amplitude") ? entity["amplitude"].GetFloat() : 1.0;
+            water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, &el, width, depth, wavelength, amplitude);
+            el.addEntity(newWater);
+            col -> addCollideable(newWater);
         }
         else if (type == "gunPickUp") {
             int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;

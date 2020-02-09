@@ -71,7 +71,7 @@
 //physicalParticle
 //A particle to which physics applies.
 /******************************************************************************/
-
+/*
     physicalParticle::physicalParticle(   float newX, float newY, Color newTint,
                         float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
                         float newElasticity, float newMaxSpeed, float newGravity, float newFriction) :
@@ -104,6 +104,9 @@
         for (collision thisCollision : collisions) {
             xMomentum += thisCollision.xVal;
             yMomentum += thisCollision.yVal;
+            if (thisCollision.type == 'w') {
+                shouldDelete = true;
+            }
         }
         lightPhysicalEntity::tickGet(col);
         collisions.clear();
@@ -126,3 +129,4 @@
         }
         myDrawText(displayFont, TextToUtf8(&toPrint, 1), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
     }
+*/

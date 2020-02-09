@@ -133,11 +133,15 @@ struct saveData {
 //Collision functions
 
     bool player::doesCollide(float otherX, float otherY, int type) {
-        return (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1);
+        lastCollisionType = type;
+        return (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1) || realPhysicalEntity::doesCollide(otherX, otherY, type);
     }
 
     collision player::getCollision() {
-        collision c;
+        if (lastCollisionType == 'w') {
+            return realPhysicalEntity::getCollision();
+        }
+        collision c(1);
         return c;
     }
 
@@ -149,20 +153,11 @@ struct saveData {
 
     void player::tickSet(collider& col) {
         lastMovedY = 0;
-//        xMomentum *= 0.5;
-    /*
-        if (xMomentum > 2) {
-            xMomentum = 2;
-        }
-        if (yMomentum > 2) {
-            yMomentum = 2;
-        }
-    */
 
-        //Reload room
+        //Explosions
 
         if (IsKeyPressed(KEY_R)) {
-            explosion (col, eList, 60, x, y, tint, 1, 1, 0, 100, 0.5);
+            explosion (col, eList, 60, x, y, tint, sizeFactor, 1, 0, 100, 0.5);
         }
 
         //Movement
@@ -188,14 +183,30 @@ struct saveData {
             lastMovedX = -1;
         }
         else if (IsKeyUp(KEY_A) && IsKeyUp(KEY_D)) {
-            xMomentum *= 0.75;
+            xMomentum *= 0.85;
         }
 
         if (IsKeyDown(KEY_W)) {
             lastMovedY += -1;
+            if (isUnderWater) {
+                yMomentum -= PLAYERSPEED;
+            }
         }
         if (IsKeyDown(KEY_S)) {
             lastMovedY += 1;
+            if (isUnderWater) {
+                yMomentum += PLAYERSPEED;
+            }
+        }
+      	//Jomping
+
+        if (IsKeyPressed(KEY_W)) {
+            if (col.isSolid(x + (1 - width) / 2, y + 1) || col.isSolid(x + (1 + width) / 2, y + 1))  {
+                yMomentum -= JUMPSPEED;
+            }
+        }
+        if (IsKeyReleased(KEY_W)) {
+            yMomentum = max(0.0f, yMomentum);
         }
 
         //Channels
@@ -268,6 +279,8 @@ struct saveData {
                     case 0:
                         aim = Vector2Scale(Vector2Normalize(aim), 0.5);
                         b = new bullet(x, y, tint, sizeFactor, eList, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10);
+                        b -> tickGet(col);
+                        b -> tickGet(col);
                         gunCoolDowns[0] = 60;
                         gunAmmos[0]--;
                         break;
@@ -280,14 +293,6 @@ struct saveData {
                 eList -> addEntity(b);
                 col.addCollideable(b);
             }
-        }
-        //Jomping
-
-        if (IsKeyPressed(KEY_W) && (col.isSolid(x + (1 - width) / 2, y + 1) || col.isSolid(x + (1 + width) / 2, y + 1)))  {
-            yMomentum -= JUMPSPEED;
-        }
-        if (IsKeyReleased(KEY_W)) {
-            yMomentum = max(0.0f, yMomentum);
         }
 
         //Spikes, falling, and death
@@ -311,9 +316,6 @@ struct saveData {
             yMomentum = newMomentum.y / 3;
             damageIndicator(eList, spikeDamage, x, y, HURTCOLOR, sizeFactor);
         }
-
-        //Apply physics
-
         realPhysicalEntity::tickSet(col);;
     }
 
@@ -323,21 +325,20 @@ struct saveData {
             switch(colIter -> type) {
                 case 2:         //Win portal
                     won = 1;
+                    colIter = collisions.erase(colIter);
                     break;
                 case 3:         //Door
                     x = colIter -> xVal;
                     y = colIter -> yVal;
                     nextRoom = colIter -> message;
-                    shouldChangeRooms = true;;
+                    shouldChangeRooms = true;
+                    colIter = collisions.erase(colIter);
                     break;
                 case 4: {       //Savepoint
                     save("save");
+                    colIter = collisions.erase(colIter);
                     break;
                 }
-                case 5:         //Forcefield
-                    xMomentum += colIter -> xVal;
-                    yMomentum += colIter -> yVal;
-                    break;
                 case 6:         //Bullet
                     if ((hurtTimer < 0)) {
                         yMomentum += colIter -> yVal * 0.3;
@@ -346,6 +347,7 @@ struct saveData {
                         hurtTimer = 60;
                         damageIndicator(eList, colIter -> damage, x, y, HURTCOLOR, sizeFactor);
                     }
+                    colIter = collisions.erase(colIter);
                     break;
                 case 7: {         //gun pickup
                     int gunID = colIter -> damage;
@@ -363,6 +365,7 @@ struct saveData {
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
+                    colIter = collisions.erase(colIter);
                     break;
                     }
                 case 8:         //Ammo pickup
@@ -370,6 +373,7 @@ struct saveData {
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
+                    colIter = collisions.erase(colIter);
                     break;
                 case 9:         //Health pickup
                     health = min(maxHealth, health + colIter -> damage);
@@ -377,6 +381,7 @@ struct saveData {
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
+                    colIter = collisions.erase(colIter);
                     break;
                 case 10:        //max health pickup
                     health += (colIter -> damage);
@@ -385,6 +390,7 @@ struct saveData {
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
+                    colIter = collisions.erase(colIter);
                     break;
                 case 11: {        //op pickup
                     string message = colIter -> message;
@@ -396,11 +402,14 @@ struct saveData {
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
+                    colIter = collisions.erase(colIter);
                     break;
                 }
+                default:
+                    colIter++;
             }
-            colIter = collisions.erase(colIter);
         }
+        realPhysicalEntity::tickGet(col);
     }
 
     bool player::finalize() {
@@ -408,6 +417,7 @@ struct saveData {
     }
 
     void player::print(float cameraX, float cameraY, Font displayFont) {
+
         positionOnScreen = (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor };   //Used for mouse aiming
         if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
             myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, HURTCOLOR);
@@ -438,33 +448,15 @@ struct saveData {
 
         //Health background bar
 
-        int fullBlock = 0x2588;
-        int partBlock = ' ';
-        if (maxHealth % 8 != 0) {
-            partBlock = 0x2590 - maxHealth % 8;
-        }
-        for (int i = 0; i < maxHealth / 8; i++) {
-            myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, UIBACKGROUND);
-        }
-        myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (maxHealth / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, UIBACKGROUND);
+        drawHudBarRight(displayFont, FONTSIZE, FONTSIZE, UIBACKGROUND, maxHealth);
 
         //Health bar
 
-        partBlock = ' ';
-        if (health % 8 != 0) {
-            partBlock = 0x2590 - health % 8;
-        }
         if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //If hurt, flash
-            for (int i = 0; i < health / 8; i++) {
-                myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HURTCOLOR);
-            }
-            myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HURTCOLOR);
+            drawHudBarRight(displayFont, FONTSIZE, FONTSIZE, HURTCOLOR, health);
         }
         else {
-            for (int i = 0; i < health / 8; i++) {
-                myDrawText(displayFont, TextToUtf8(&fullBlock, 1), { (i + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HEALTHCOLOR);
-            }
-            myDrawText(displayFont, TextToUtf8(&partBlock, 1), { (health / 8 + 1) * FONTSIZE, FONTSIZE }, FONTSIZE, 0, HEALTHCOLOR);
+            drawHudBarRight(displayFont, FONTSIZE, FONTSIZE, HEALTHCOLOR, health);
         }
     }
 

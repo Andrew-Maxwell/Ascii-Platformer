@@ -1,6 +1,27 @@
 #include "rain.hpp"
 
 /******************************************************************************/
+//drop
+//Physical particle that disappears on contact with water.
+/******************************************************************************/
+
+    drop::drop( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+              float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int newLifetime) :
+                entity(newx, newy, newTint, newSizeFactor),
+                physicalParticle(newx, newy, newTint, newSizeFactor, displayChar, elasticity, newXMomentum,
+                newYMomentum, newMaxSpeed, newGravity, newFriction, newLifetime) {}
+
+
+
+    void drop::tickGet(collider& col) {
+        physicalParticle::tickGet(col);
+        if (isUnderWater) {
+            shouldDelete = true;
+        }
+    }
+
+
+/******************************************************************************/
 //Rain
 //Constantly spawns particles above the top of the screen
 /******************************************************************************/
@@ -38,7 +59,7 @@
         dropBuffer += dropsPerTick;
         while (dropBuffer > 1) {
             dropBuffer--;
-            physicalParticle* raindrop;
+            drop* raindrop;
             if (isSnow) {
                 int snowflake = 0;
                 switch(GetRandomValue(1, 5)) {
@@ -64,10 +85,10 @@
                         float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
                         float newElasticity, float newMaxSpeed, float newGravity, float newFriction) :*/
 
-                raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, xMomentum, 0.2, snowflake, 1000, 0, 0.2, GRAVITY, 0);
+                raindrop = new drop(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, snowflake, 0, xMomentum, 0.2, 0.2, GRAVITY, 0.5, 1000);
             }
             else {
-                raindrop = new physicalParticle(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, xMomentum, 1, 0, 200, 0, 1, GRAVITY, 0.88);
+                raindrop = new drop(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, 0, 0, xMomentum, 0.7, 0.7, GRAVITY, 0.5, 200);
             }
             eList -> addEntity(raindrop);
             col.addParticle(raindrop);

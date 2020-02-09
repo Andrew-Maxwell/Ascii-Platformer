@@ -15,13 +15,15 @@ using namespace rapidjson;
 //Also self-explanatory
 /*****************************************************************************/
 
-class bullet : public physicalParticle {
+class bullet : public realPhysicalEntity, public particle {
 
     int damage;
     bool hit = false;
     bool exploded = false;
+    bool dynamicChar;
     entityList* eList;
     float width = 0.8;
+    int lifetime;
 
     public:
 

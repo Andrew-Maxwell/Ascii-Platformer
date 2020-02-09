@@ -6,7 +6,7 @@
 /*****************************************************************************/
 
     forceField::forceField(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newChannel, float newPower, float newRange) :
-        entity(newX, newY, tint, newSizeFactor),
+        entity(newX, newY, newTint, newSizeFactor),
         channel(newChannel),
         power(newPower),
         range(newRange),

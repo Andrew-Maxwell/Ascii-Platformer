@@ -4,9 +4,26 @@
 #include "col.hpp"
 #include "entitymeta.hpp"
 #include "meta.hpp"
-#include "particles.hpp"
+#include "physicalentities.hpp"
 
 using namespace rapidjson;
+
+/******************************************************************************/
+//drop
+//Physical particle that disappears on contact with water.
+/******************************************************************************/
+
+class drop : public physicalParticle {
+
+    public:
+
+     explicit drop( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+                                  float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION, int newLifetime = 2147483647);
+
+    void tickGet(collider& col);
+
+};
+
 
 /******************************************************************************/
 //rain
