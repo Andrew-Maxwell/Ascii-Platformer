@@ -8,7 +8,7 @@ extern "C" int FONTCHARS[] = {  //Line break prevents horrifically long warning 
 //Optimized functions
 //myGetGlyphIndex is long, so placed at bottom of the file
 
-void myDrawTexture(Texture2D texture, Rectangle sourceRec, Rectangle destRec, Vector2 origin, float rotation, Color tint)
+void myDrawTexture(Texture2D& texture, Rectangle& sourceRec, Rectangle& destRec, Vector2 origin, float rotation, Color tint)
 {
     // Check if texture is valid
     if (texture.id > 0)
@@ -58,7 +58,7 @@ void myDrawTexture(Texture2D texture, Rectangle sourceRec, Rectangle destRec, Ve
     }
 }
 
-void myDrawText(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
+void myDrawText(Font& font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
 {
     int length = strlen(text);      // Total length in bytes of the text, scanned by codepoints in loop
 

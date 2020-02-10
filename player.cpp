@@ -8,10 +8,11 @@
 struct saveData {
     float x, y;
     int health, maxHealth;
+    int air, maxAir;
     bool gunUnlocked[16] = {false};
     int gunAmmos[16] {0};
     int gunMaxAmmos[16] = {0};
-    int gunDisplayChars[16] = {'E'};
+    int gunDisplays[16];
     int ops[16][4] = {{0}};
     int args[16][4] = {{0}};
     int opCount = 0;
@@ -39,9 +40,20 @@ struct saveData {
         elasticity = 0;
         type = 1;
         health = maxHealth = 8;
+        air = maxAir = 600;
 
         for (int i = 0; i < 10; i++) {
             channels[i] = bitset<8>("00000000");
+        }
+
+        for (int i = 0; i < 16; i++) {
+            gunDisplayChars[i] = TextToUtf8(&gunDisplays[i], 1);
+        }
+    }
+
+    player::~player() {
+        for (int i = 0; i < 16; i++) {
+            free(gunDisplayChars[i]);
         }
     }
 
@@ -51,10 +63,11 @@ struct saveData {
         s.y = y;
         s.health = health;
         s.maxHealth = maxHealth;
+        s.air = air;
+        s.maxAir = maxAir;
         copy(gunUnlocked, gunUnlocked + 16, s.gunUnlocked);
         copy(gunAmmos, gunAmmos + 16, s.gunAmmos);
         copy(gunMaxAmmos, gunMaxAmmos + 16, s.gunMaxAmmos);
-        copy(gunDisplayChars, gunDisplayChars + 16, s.gunDisplayChars);
         copy(&ops[0][0], &ops[0][0] + 64, &s.ops[0][0]);
         copy(&args[0][0], &args[0][0] + 64, &s.args[0][0]);
         s.opCount = opCount;
@@ -90,10 +103,11 @@ struct saveData {
             y = s.y;
             health = s.health;
             maxHealth = s.maxHealth;
+            air = s.air;
+            maxAir = s.maxAir;
             copy(s.gunUnlocked, s.gunUnlocked + 16, gunUnlocked);
             copy(s.gunAmmos, s.gunAmmos + 16, gunAmmos);
             copy(s.gunMaxAmmos, s.gunMaxAmmos + 16, gunMaxAmmos);
-            copy(s.gunDisplayChars, s.gunDisplayChars + 16, gunDisplayChars);
             copy(&s.ops[0][0], &s.ops[0][0] + 64, &ops[0][0]);
             copy(&s.args[0][0], &s.args[0][0] + 64, &args[0][0]);
             copy(s.pickUpsCollected, s.pickUpsCollected + 512, pickUpsCollected);
@@ -137,9 +151,9 @@ struct saveData {
         return (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1) || realPhysicalEntity::doesCollide(otherX, otherY, type);
     }
 
-    collision player::getCollision() {
-        if (lastCollisionType == 'w') {
-            return realPhysicalEntity::getCollision();
+    collision player::getCollision(float otherX, float otherY, int otherType) {
+        if (lastCollisionType == WATERTYPE) {
+            return realPhysicalEntity::getCollision(otherX, otherY, otherType);
         }
         collision c(1);
         return c;
@@ -152,61 +166,79 @@ struct saveData {
 //Tick functions
 
     void player::tickSet(collider& col) {
-        lastMovedY = 0;
 
         //Explosions
 
         if (IsKeyPressed(KEY_R)) {
-            explosion (col, eList, 60, x, y, tint, sizeFactor, 1, 0, 100, 0.5);
+            explosion (col, eList, 60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
         }
 
-        //Movement
+        //Movement in air
 
-        if (IsKeyDown(KEY_D)) {
-            if (xMomentum < 0) {
-                xMomentum /= 2;
-                xMomentum += PLAYERSPEED;
+        if (!isUnderWater) {
+            if (IsKeyDown(KEY_D)) {
+                if (xMomentum < 0) {
+                    xMomentum /= 2;
+                    xMomentum += PLAYERSPEED;
+                }
+                else if (xMomentum < PLAYERMAXSPEED) {
+                    xMomentum = min(xMomentum + PLAYERSPEED, PLAYERMAXSPEED);
+                }
             }
-            else if (xMomentum < PLAYERMAXSPEED) {
-                xMomentum = min(xMomentum + PLAYERSPEED, PLAYERMAXSPEED);
+            if (IsKeyDown(KEY_A)) {
+                if (xMomentum > 0) {
+                    xMomentum /= 2;
+                    xMomentum -= PLAYERSPEED;
+                }
+                else if (xMomentum > 0 - PLAYERMAXSPEED) {
+                    xMomentum = max(xMomentum - PLAYERSPEED, 0 - PLAYERMAXSPEED);
+                }
             }
-            lastMovedX = 1;
-        }
-        if (IsKeyDown(KEY_A)) {
-            if (xMomentum > 0) {
-                xMomentum /= 2;
-                xMomentum -= PLAYERSPEED;
+            else if (IsKeyUp(KEY_A) && IsKeyUp(KEY_D)) {
+                xMomentum *= 0.85;
             }
-            else if (xMomentum > 0 - PLAYERMAXSPEED) {
-                xMomentum = max(xMomentum - PLAYERSPEED, 0 - PLAYERMAXSPEED);
-            }
-            lastMovedX = -1;
-        }
-        else if (IsKeyUp(KEY_A) && IsKeyUp(KEY_D)) {
-            xMomentum *= 0.85;
-        }
 
-        if (IsKeyDown(KEY_W)) {
-            lastMovedY += -1;
-            if (isUnderWater) {
-                yMomentum -= PLAYERSPEED;
-            }
-        }
-        if (IsKeyDown(KEY_S)) {
-            lastMovedY += 1;
-            if (isUnderWater) {
-                yMomentum += PLAYERSPEED;
-            }
-        }
-      	//Jomping
+          	//Jomping
 
-        if (IsKeyPressed(KEY_W)) {
-            if (col.isSolid(x + (1 - width) / 2, y + 1) || col.isSolid(x + (1 + width) / 2, y + 1))  {
-                yMomentum -= JUMPSPEED;
+            if (IsKeyPressed(KEY_W)) {
+                if (col.isSolid(x + (1 - width) / 2, y + 1) || col.isSolid(x + (1 + width) / 2, y + 1))  {
+                    yMomentum -= JUMPSPEED;
+                }
             }
+            if (IsKeyReleased(KEY_W)) {
+                yMomentum = max(0.0f, yMomentum);
+            }
+
+            //Air recovery
+
+            air = min(maxAir, air + AIRRECOVERYRATE);
+
         }
-        if (IsKeyReleased(KEY_W)) {
-            yMomentum = max(0.0f, yMomentum);
+        else {
+
+            //Moving underwater
+
+            if (IsKeyDown(KEY_W)) {
+                yMomentum -= SWIMSPEED;
+            }
+            if (IsKeyDown(KEY_S)) {
+                yMomentum += SWIMSPEED;
+            }
+            if (IsKeyDown(KEY_A)) {
+                xMomentum -= SWIMSPEED;
+            }
+            if (IsKeyDown(KEY_D)) {
+                xMomentum += SWIMSPEED;
+            }
+
+            //Drowning
+
+            if (air == 0) {
+                health--;
+            }
+            else {
+                air--;
+            }
         }
 
         //Channels
@@ -304,7 +336,7 @@ struct saveData {
         if (health <= 0) {
             won = -1;
         }
-        
+
         //spikes
         
         int spikeDamage = col.getPlayerDamage((int)(x + 0.5), (int)(y + 0.5));
@@ -323,23 +355,23 @@ struct saveData {
         list<collision>::iterator colIter = collisions.begin();
         while (colIter != collisions.end()) {
             switch(colIter -> type) {
-                case 2:         //Win portal
+                case ENDINGGATETYPE:
                     won = 1;
                     colIter = collisions.erase(colIter);
                     break;
-                case 3:         //Door
+                case DOORTYPE:
                     x = colIter -> xVal;
                     y = colIter -> yVal;
                     nextRoom = colIter -> message;
                     shouldChangeRooms = true;
                     colIter = collisions.erase(colIter);
                     break;
-                case 4: {       //Savepoint
+                case SAVEPOINTTYPE: {
                     save("save");
                     colIter = collisions.erase(colIter);
                     break;
                 }
-                case 6:         //Bullet
+                case BULLETTYPE:
                     if ((hurtTimer < 0)) {
                         yMomentum += colIter -> yVal * 0.3;
                         xMomentum += colIter -> xVal * 0.3;
@@ -349,14 +381,13 @@ struct saveData {
                     }
                     colIter = collisions.erase(colIter);
                     break;
-                case 7: {         //gun pickup
+                case GUNPICKUPTYPE: {
                     int gunID = colIter -> damage;
                     gunUnlocked[gunID] = true;  // damage is actually the gunID
                     switch(gunID) {
                         case 0:
                             gunAmmos[gunID] = 3;
                             gunMaxAmmos[gunID] = 6;
-                            gunDisplayChars[gunID] = '1';
                             break;
                         default:
                             cerr << "Error: Gun Pickup contains invalid gunID.";
@@ -368,22 +399,22 @@ struct saveData {
                     colIter = collisions.erase(colIter);
                     break;
                     }
-                case 8:         //Ammo pickup
+                case AMMOPICKUPTYPE:
                     gunAmmos[colIter -> damage] = min(gunMaxAmmos[colIter -> damage], (int)(gunAmmos[colIter -> damage] + colIter -> xVal));
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
                     colIter = collisions.erase(colIter);
                     break;
-                case 9:         //Health pickup
-                    health = min(maxHealth, health + colIter -> damage);
+                case HEALTHPICKUPTYPE:
                     damageIndicator(eList, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
+                    health = min(maxHealth, health + colIter -> damage);
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
                     colIter = collisions.erase(colIter);
                     break;
-                case 10:        //max health pickup
+                case MAXHEALTHPICKUPTYPE:
                     health += (colIter -> damage);
                     damageIndicator(eList, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
                     maxHealth += (colIter -> damage);
@@ -392,7 +423,24 @@ struct saveData {
                     }
                     colIter = collisions.erase(colIter);
                     break;
-                case 11: {        //op pickup
+                case AIRPICKUPTYPE:
+                    air = min(maxAir, air + colIter -> damage);
+                    damageIndicator(eList, colIter -> damage, x, y, AIRCOLOR, sizeFactor);
+                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
+                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    }
+                    colIter = collisions.erase(colIter);
+                    break;
+                case MAXAIRPICKUPTYPE:
+                    air += (colIter -> damage);
+                    damageIndicator(eList, colIter -> damage, x, y, AIRCOLOR, sizeFactor);
+                    maxAir += (colIter -> damage);
+                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
+                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    }
+                    colIter = collisions.erase(colIter);
+                    break;
+                case OPPICKUPTYPE: {
                     string message = colIter -> message;
                     for (int i = 0; i < 8; i+= 2) {
                         ops[opCount][i / 2] = message[i];
@@ -436,12 +484,12 @@ struct saveData {
         for (int i = 0; i < 16; i++) {
             if (gunUnlocked[i]) {
                 if (gunCoolDowns[i] > 0 || gunAmmos[i] < 1) {
-                    myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (++rowCount + 2) * FONTSIZE}, FONTSIZE, 0, gunColorsFaded[i]);
-                    myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 2) * FONTSIZE}, FONTSIZE, 0, gunColorsFaded[i]);
+                    myDrawText(displayFont, gunDisplayChars[i], { FONTSIZE, (++rowCount + 3) * FONTSIZE}, FONTSIZE, 0, gunColorsFaded[i]);
+                    myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 3) * FONTSIZE}, FONTSIZE, 0, gunColorsFaded[i]);
                 }
                 else {
-                    myDrawText(displayFont, TextToUtf8(&gunDisplayChars[i], 1), { FONTSIZE, (++rowCount + 2) * FONTSIZE}, FONTSIZE, 0, gunColors[i]);
-                    myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 2) * FONTSIZE}, FONTSIZE, 0, gunColors[i]);
+                    myDrawText(displayFont, gunDisplayChars[i], { FONTSIZE, (++rowCount + 3) * FONTSIZE}, FONTSIZE, 0, gunColors[i]);
+                    myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 3) * FONTSIZE}, FONTSIZE, 0, gunColors[i]);
                 }
             }
         }
@@ -457,6 +505,12 @@ struct saveData {
         }
         else {
             drawHudBarRight(displayFont, FONTSIZE, FONTSIZE, HEALTHCOLOR, health);
+        }
+
+        //Air bar
+
+        if (air < maxAir) {
+            drawHudBarRight(displayFont, FONTSIZE, FONTSIZE * 2, AIRCOLOR, air / 7);
         }
     }
 
@@ -535,7 +589,9 @@ struct saveData {
                 }
             }
             for (int k = 0; k < 16; k++) {
-                myDrawText(displayFont, TextToUtf8(&icons[ops[k][0]], 1), { FONTSIZE * (k * 3 + 15), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                char* temp = TextToUtf8(&icons[ops[k][0]], 1);
+                myDrawText(displayFont, temp, { FONTSIZE * (k * 3 + 15), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                free(temp);
                 if (ops[k][1] != 0) {
                     myDrawText(displayFont, "+", {FONTSIZE * (k * 3 + 16), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
                 }

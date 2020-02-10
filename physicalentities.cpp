@@ -38,10 +38,12 @@
 
         isUnderWater = false;
         for (auto c : collisions) {
-            if (c.type == 'w') {
+            if (c.type == WATERTYPE) {
                 isUnderWater = true;
+                xMomentum = 0.8 * xMomentum + 0.2 * c.xVal;
+                yMomentum = 0.8 * yMomentum + 0.2 * c.yVal;
             }
-            else if (c.type == 5) {
+            else if (c.type == FORCEFIELDTYPE) {
                 xMomentum += c.xVal;
                 yMomentum += c.yVal;
             }
@@ -49,9 +51,8 @@
         collisions.clear();
 
         if (isUnderWater) {
-            yMomentum -= gravity / 3;
-            yMomentum *= pow (friction, 2);
-            xMomentum *= pow (friction, 2);
+//            yMomentum *= pow (friction, 2);
+//            xMomentum *= pow (friction, 2);
         }
         else {
             yMomentum += gravity;
@@ -85,10 +86,10 @@
                 particle::setDirection();
             }
             else {
-                toPrint = '.';
+                toPrint[0] = '.';
             }
         }
-        myDrawText(displayFont, TextToUtf8(&toPrint, 1), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
+        myDrawText(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
     }
 
 /******************************************************************************/
@@ -107,10 +108,10 @@
                                 yMomentum(newYMomentum) {}
 
     bool realPhysicalEntity::doesCollide(float otherX, float otherY, int otherType) {
-        return ((otherType == 'w' && lastTickUnderWater != isUnderWater) || (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1));
+        return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1));
     }
 
-    collision realPhysicalEntity::getCollision() {
+    collision realPhysicalEntity::getCollision(float otherX, float otherY, int otherType) {
         return collision(-1, 0, x, yMomentum);
     }
 
@@ -121,13 +122,16 @@
     void realPhysicalEntity::tickSet(collider& col) {}
 
     void realPhysicalEntity::tickGet(collider& col) {
+        float waterMoveX = 0, waterMoveY = 0;
         lastTickUnderWater = isUnderWater;
         isUnderWater = false;
         for (auto c : collisions) {
-            if (c.type == 'w') {
+            if (c.type == WATERTYPE) {
                 isUnderWater = true;
+                waterMoveX += c.xVal / 2;
+                waterMoveY += c.yVal / 2;
             }
-            else if (c.type == 5) {
+            else if (c.type == FORCEFIELDTYPE) {
                 xMomentum += c.xVal;
                 yMomentum += c.yVal;
             }
@@ -135,7 +139,6 @@
         collisions.clear();
 
         if (isUnderWater) {
-            yMomentum -= gravity / 3;
             yMomentum *= pow (friction, 2);
             xMomentum *= pow (friction, 2);
         }
@@ -149,8 +152,8 @@
             yMomentum *= momentumMagnitude / maxSpeed;
         }
 
-        float xDist = xMomentum / (abs(xMomentum) + 1);
-        for (int i = 0; i < abs(xMomentum) + 1; i++) {
+        float xDist = (xMomentum + waterMoveX) / (abs(xMomentum + waterMoveX) + 1);
+        for (int i = 0; i < abs(xMomentum + waterMoveX) + 1; i++) {
             if (col.isSolid((int)(x + xDist) + (xDist > 0), (int)y)) {// || col.isSolid((int)y + 0.5, (int)(x + xDist) + (xDist > 0))) {
                 x = floor(x + xDist) + (xDist < 0);
                 xMomentum *= (-1 * elasticity);
@@ -161,8 +164,8 @@
             }
         }
 
-        float yDist = yMomentum / (abs(yMomentum) + 1);
-        for (int i = 0; i < abs(yMomentum) + 1; i++) {
+        float yDist = (yMomentum + waterMoveY) / (abs(yMomentum + waterMoveY) + 1);
+        for (int i = 0; i < abs(yMomentum + waterMoveY) + 1; i++) {
             if (col.isSolid((int)(x + 0.5 - width / 2), (int)(y + yDist) + (yDist > 0)) || col.isSolid((int)(x + 0.5 + width / 2), (int)(y + yDist) + (yDist > 0))) {
                 y = floor(y + yDist) + (yDist < 0);
                 yMomentum *= (-1 * elasticity);

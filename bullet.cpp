@@ -17,10 +17,10 @@
         lifetime(newLifetime)
     {
         eList = newEList;
-        type = 6;
+        type = BULLETTYPE;
     }
 
-    bool bullet::doesCollide(float otherX, float otherY, int type) {
+    bool bullet::doesCollide(float otherX, float otherY, int otherType) {
         if (realPhysicalEntity::doesCollide(otherX, otherY, type) && !hit) {
             hit = true;
             return true;
@@ -28,8 +28,8 @@
         return false;
     }
 
-    collision bullet::getCollision() {
-        return collision(6, damage, xMomentum, yMomentum);
+    collision bullet::getCollision(float otherX, float otherY, int otherType) {
+        return collision(type, damage, xMomentum, yMomentum);
     }
 
     bool bullet::stopColliding() {

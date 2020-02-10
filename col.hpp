@@ -17,14 +17,16 @@ struct collision {
     int damage;
     float xVal;
     float yVal;
+    float magnitude;
     string message;
 
-    collision(int newType = 0, int newDamage = 0, float newXVal = 0, float newYVal = 0, string newMessage = "") :
+    collision(int newType = 0, int newDamage = 0, float newXVal = 0, float newYVal = 0, string newMessage = "", float newMagnitude = 0) :
         type(newType),
         damage(newDamage),
         xVal(newXVal),
         yVal(newYVal),
-        message(newMessage) {}
+        message(newMessage),
+        magnitude(newMagnitude) {}
 };
 
 /******************************************************************************/
@@ -51,7 +53,7 @@ class collideable : virtual public entity {
 
     //B's getCollision is used to get a collision object containing how A should respond to colliding with B
 
-    virtual collision getCollision() {cerr << "collideable::getCollision() called. This function should be overridden."; return collision();}
+    virtual collision getCollision(float otherX = 0, float otherY = 0, int otherType = 0) {cerr << "collideable::getCollision() called. This function should be overridden."; return collision();}
 
     //This function is called to add the collision object from B to A's collision list. Then, A responds during tickGet.
 

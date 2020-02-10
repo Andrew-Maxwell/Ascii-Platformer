@@ -111,10 +111,10 @@
         for (unsigned int i = 0; i < collideables.size(); i++) {
             for (unsigned int j = i + 1; j < collideables.size(); j++) {
                 if (collideables[i] -> doesCollide(collideables[j] -> x, collideables[j] -> y, collideables[j] -> type)) {
-                    collideables[j] -> addCollision(collideables[i] -> getCollision());
+                    collideables[j] -> addCollision(collideables[i] -> getCollision(collideables[j] -> x, collideables[j] -> y, collideables[j] -> type));
                 }
                 if (collideables[j] -> doesCollide(collideables[i] -> x, collideables[i] -> y, collideables[i] -> type)) {
-                    collideables[i] -> addCollision(collideables[j] -> getCollision());
+                    collideables[i] -> addCollision(collideables[j] -> getCollision(collideables[i] -> x, collideables[i] -> y, collideables[i] -> type));
                 }
             }
         }
@@ -124,7 +124,7 @@
         for (unsigned int i = 0; i < collideables.size(); i++) {
             for (unsigned int j = 0; j < particles.size(); j++) {
                 if (collideables[i] -> doesCollide(particles[j] -> x, particles[j] -> y, particles[j] -> type)) {
-                    particles[j] -> addCollision(collideables[i] -> getCollision());
+                    particles[j] -> addCollision(collideables[i] -> getCollision(particles[j] -> x, particles[j] -> y, particles[j] -> type));
                 }
             }
         }

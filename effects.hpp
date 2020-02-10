@@ -36,13 +36,13 @@ void damageIndicator(entityList* entities, int damage, float x, float y, Color t
 //Due to character limitations, for down and left, rounds to four pixels.
 /******************************************************************************/
 
-void drawBarLeft (float cameraX, float cameraY, Font displayFont, float x, float y, Color tint, float sizeFactor, int length);
+void drawBarLeft (float cameraX, float cameraY, Font& displayFont, float x, float y, Color tint, float sizeFactor, int length);
 
-void drawBarRight (float cameraX, float cameraY, Font displayFont, float x, float y, Color tint, float sizeFactor, int length);
+void drawBarRight (float cameraX, float cameraY, Font& displayFont, float x, float y, Color tint, float sizeFactor, int length);
 
-void drawBarUp (float cameraX, float cameraY, Font displayFont, float x, float y, Color tint, float sizeFactor, int length);
+void drawBarUp (float cameraX, float cameraY, Font& displayFont, float x, float y, Color tint, float sizeFactor, int length);
 
-void drawBarDown (float cameraX, float cameraY, Font displayFont, float x, float y, Color tint, float sizeFactor, int length);
+void drawBarDown (float cameraX, float cameraY, Font& displayFont, float x, float y, Color tint, float sizeFactor, int length);
 
 /******************************************************************************/
 //drawHudBar...()
@@ -50,13 +50,13 @@ void drawBarDown (float cameraX, float cameraY, Font displayFont, float x, float
 //Due to character limitations, for down and left, roounds to four pixels.
 /******************************************************************************/
 
-void drawHudBarLeft (Font displayFont, int x, int y, Color tint, int length);
+void drawHudBarLeft (Font& displayFont, int x, int y, Color tint, int length);
 
-void drawHudBarRight (Font displayFont, int x, int y, Color tint, int length);
+void drawHudBarRight (Font& displayFont, int x, int y, Color tint, int length);
 
-void drawHudBarUp (Font displayFont, int x, int y, Color tint, int length);
+void drawHudBarUp (Font& displayFont, int x, int y, Color tint, int length);
 
-void drawHudBarDown (Font displayFont, int x, int y, Color tint, int length);
+void drawHudBarDown (Font& displayFont, int x, int y, Color tint, int length);
 
 
 #endif //EFFECTS_HPP

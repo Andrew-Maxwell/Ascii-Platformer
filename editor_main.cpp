@@ -252,7 +252,9 @@ int main(int argc, char** argv) {
 
                 for (int i = 0; i < charFills.size(); i++) {
                     int codePointToDisplay =  charFills[i] -> display();
-                    myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
+                    char* temp = TextToUtf8(&codePointToDisplay, 1);
+                    myDrawText(displayFont, temp, (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
+                    free(temp);
                 }
 
                 //Print out currently selected brush
@@ -675,22 +677,26 @@ int main(int argc, char** argv) {
 
                 for (int i = 0; i < 12; i++) {
                     int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
+                    char* temp = TextToUtf8(&codePointToDisplay, 1);
                     if (i == paletteSelection) {
-                        myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
+                        myDrawText(displayFont, temp, (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
                     else {
-                        myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
+                        myDrawText(displayFont, temp, (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
                     }
+                    free(temp);
                 }
 
                 for (int i = 12; i < 22; i++) {
                     int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
+                    char* temp = TextToUtf8(&codePointToDisplay, 1);
                     if (i == paletteSelection) {
-                        myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
+                        myDrawText(displayFont, temp, (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
                     }
                     else {
-                        myDrawText(displayFont, TextToUtf8(&codePointToDisplay, 1), (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
+                        myDrawText(displayFont, temp, (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
                     }
+                    free(temp);
                 }
 
                 //display cursor markers

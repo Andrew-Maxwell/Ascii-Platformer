@@ -19,7 +19,7 @@ class particle : virtual public entity {
 
     float xSpeed, ySpeed;
     int lifetime;
-    int toPrint;
+    char* toPrint;
 
     void setDirection();
 
@@ -27,37 +27,7 @@ class particle : virtual public entity {
 
     particle(  float newX, float newY, Color newTint, float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime);
 
-    void tickSet(collider& col);
-
-    void tickGet(collider& col);
-
-    bool finalize();
-
-    void print(float cameraX, float cameraY, Font displayFont);
-};
-
-/******************************************************************************/
-//physicalParticle
-//A particle to which physics applies.
-/******************************************************************************/
-/*
-class physicalParticle : public particle, public lightPhysicalEntity, public collideable {
-
-    bool shouldDelete = false;
-
-    public:
-
-    bool dynamicChar;
-
-    physicalParticle(   float newX, float newY,  Color newTint,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
-                        float newElasticity, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
-
-    bool doesCollide(float otherX, float otherY, int otherType);
-
-    collision getCollision();
-
-    bool stopColliding();
+    ~particle();
 
     void tickSet(collider& col);
 
@@ -67,5 +37,5 @@ class physicalParticle : public particle, public lightPhysicalEntity, public col
 
     void print(float cameraX, float cameraY, Font displayFont);
 };
-*/
+
 #endif //PARTICLES_HPP

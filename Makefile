@@ -55,8 +55,8 @@ EDTROBJS := $(patsubst %,$(OBJDIR)/%.o,$(basename $(EDTRSRCS)))
 GAMEDEPS := $(patsubst %,$(DEPDIR)/%.d,$(basename $(GAMESRCS)))
 EDTRDEPS := $(patsubst %,$(DEPDIR)/%.d,$(basename $(EDTRSRCS)))
 # compilers (at least gcc and clang) don't create the subdirectories automatically
-$(shell mkdir -p $(dir $(OBJS)) >/dev/null)
-$(shell mkdir -p $(dir $(DEPS)) >/dev/null)
+$(shell mkdir -p $(dir $(GAMEOBJS)) >/dev/null)
+$(shell mkdir -p $(dir $(GAMEDEPS)) >/dev/null)
 
 # C compiler
 CC := gcc

@@ -18,12 +18,14 @@ using namespace rapidjson;
 class player : protected realPhysicalEntity, virtual public collideable {
 
     int health, maxHealth, hurtTimer = 0;
+    int air, maxAir;
 
     bool gunUnlocked[16] = {false};
     int gunAmmos[16] {0};
     int gunMaxAmmos[16] = {0};
     int gunCoolDowns[16] = {0};
-    int gunDisplayChars[16] = {'E'};
+    int gunDisplays[16] = {'E'};
+    char* gunDisplayChars[16] = {NULL};
     Color gunColors[16] = {{255, 0, 255, 255}};
     Color gunColorsFaded[16] = {{127, 0, 127, 127}};
     int lastCollisionType;
@@ -40,7 +42,6 @@ class player : protected realPhysicalEntity, virtual public collideable {
     bool pickUpsCollected[512] = { false };
 
     entityList* eList;
-    int lastMovedX, lastMovedY;
     Vector2 positionOnScreen = {0, 0};
 
     public:
@@ -53,6 +54,8 @@ class player : protected realPhysicalEntity, virtual public collideable {
     //Constructor + save and load functions
 
     explicit player(  float newX, float newY, Color newTint, float newSizeFactor, string newNextRoom);
+
+    ~player();
 
     bool save(string fileName);
 
@@ -76,7 +79,7 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     bool doesCollide(float otherX, float otherY, int type);
 
-    collision getCollision();
+    collision getCollision(float otherX, float otherY, int otherType);
 
     bool stopColliding();
 

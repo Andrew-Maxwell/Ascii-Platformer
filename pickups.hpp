@@ -23,6 +23,7 @@ class pickUp : public collideable {
     bool touch;
     int lifetime, ID;
     entityList* eList;
+    char* toPrint;
 
     public:
 
@@ -31,9 +32,11 @@ class pickUp : public collideable {
     explicit pickUp(  float newX, float newY,  Color newTint,
                     float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch);
 
+    ~pickUp();
+
     bool doesCollide(float otherX, float otherY, int otherType);
 
-    virtual collision getCollision();
+    virtual collision getCollision(float otherX, float otherY, int otherType);
 
     bool stopColliding();
 
@@ -59,7 +62,7 @@ class gunPickUp : public pickUp {
 
     explicit gunPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
-    collision getCollision();
+    collision getCollision(float otherX, float otherY, int otherType);
 
 };
 
@@ -77,7 +80,7 @@ class ammoPickUp : public pickUp {
 
     explicit ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
 
-    collision getCollision();
+    collision getCollision(float otherX, float otherY, int otherType);
 
 };
 
@@ -95,7 +98,7 @@ class healthPickUp : public pickUp {
 
     explicit healthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
-    collision getCollision();
+    collision getCollision(float otherX, float otherY, int otherType);
 
 };
 
@@ -113,7 +116,42 @@ class maxHealthPickUp : public pickUp {
 
     explicit maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
-    collision getCollision();
+    collision getCollision(float otherX, float otherY, int otherType);
+
+};
+
+/*****************************************************************************/
+//airPickUp
+//Adds air back
+/*****************************************************************************/
+
+class airPickUp : public pickUp {
+
+    int airCount;
+
+    public:
+
+    explicit airPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+
+    collision getCollision(float otherX, float otherY, int otherType);
+
+};
+
+
+/*****************************************************************************/
+//max air pickup
+//Increases max air
+/*****************************************************************************/
+
+class maxAirPickUp : public pickUp {
+
+    int airCount;
+
+    public:
+
+    explicit maxAirPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+
+    collision getCollision(float otherX, float otherY, int otherType);
 
 };
 
@@ -131,7 +169,7 @@ class opPickUp : public pickUp {
 
     explicit opPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage);
 
-    collision getCollision();
+    collision getCollision(float otherX, float otherY, int otherType);
 
 };
 

@@ -13,15 +13,15 @@
         toPrint = {"O----O", "|    |", "|    |", "|    |", "O----O"};
         width = 5;
         height = 5;
-        type = 2;
+        type = ENDINGGATETYPE;
         eList = newEList;
     }
 
     bool endingGate::doesCollide(float otherX, float otherY, int otherType) {
-        return (otherX > x && otherX < x + width && otherY > y && otherY < y + height && otherType == 1);
+        return (otherX > x && otherX < x + width && otherY > y && otherY < y + height && otherType == PLAYERTYPE);
     }
 
-    collision endingGate::getCollision() {
+    collision endingGate::getCollision(float otherX, float otherY, int otherType) {
         return collision(type, 0, 0, 0, "");
     }
 

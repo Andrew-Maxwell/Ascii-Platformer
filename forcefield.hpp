@@ -29,7 +29,7 @@ class forceField : public collideable {
 
     bool doesCollide(float otherX, float otherY, int otherType);
 
-    collision getCollision();
+    collision getCollision(float otherX, float otherY, int otherType);
 
     bool stopColliding();
 

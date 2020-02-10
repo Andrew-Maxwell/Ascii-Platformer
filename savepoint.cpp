@@ -7,18 +7,18 @@
 
     savePoint::savePoint(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList) :
         entity(newX, newY, newTint, newSizeFactor) {
-            type = 4;
+            type = SAVEPOINTTYPE;
             eList = newEList;
         }
 
     bool savePoint::doesCollide(float otherX, float otherY, int otherType) {
-        bool collided = (IsKeyPressed(KEY_S) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == 1);
+        bool collided = (IsKeyPressed(KEY_S) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE);
         savedGame |= collided;
         return collided;
     }
 
-    collision savePoint::getCollision() {
-        return collision(4);
+    collision savePoint::getCollision(float otherX, float otherY, int otherType) {
+        return collision(type);
     }
 
     bool savePoint::stopColliding() {

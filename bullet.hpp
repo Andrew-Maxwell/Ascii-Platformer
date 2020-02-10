@@ -31,9 +31,9 @@ class bullet : public realPhysicalEntity, public particle {
                    float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage);
 
-    bool doesCollide(float otherX, float otherY, int type);
+    bool doesCollide(float otherX, float otherY, int otherType);
 
-    collision getCollision();
+    collision getCollision(float otherX, float otherY, int otherType);
 
     bool stopColliding();
 

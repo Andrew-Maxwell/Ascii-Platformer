@@ -173,6 +173,30 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 col -> addCollideable(newMaxHealthPickUp);
             }
         }
+        else if (type == "airPickUp") {
+            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
+            if (!playerPtr -> isCollected(pickUpID)) {
+                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x02da;
+                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
+                int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
+                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
+                airPickUp * newAirPickUp = new airPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, airCount);
+                el.addEntity(newAirPickUp);
+                col -> addCollideable(newAirPickUp);
+            }
+        }
+        else if (type == "maxAirPickUp") {
+            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
+            if (!playerPtr -> isCollected(pickUpID)) {
+                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2299;
+                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
+                int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
+                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
+                maxAirPickUp * newMaxAirPickUp = new maxAirPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, airCount);
+                el.addEntity(newMaxAirPickUp);
+                col -> addCollideable(newMaxAirPickUp);
+            }
+        }
         else if (type == "opPickUp") {
             int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
             if (!playerPtr -> isCollected(pickUpID)) {

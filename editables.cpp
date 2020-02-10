@@ -113,6 +113,7 @@ using namespace rapidjson;
         for (int i = 0; i < frames[currentFrame].size(); i++) {
             char* lineC = TextToUtf8(frames[currentFrame][i], knownWidth);
             canvas.push_back(lineC);
+            free(lineC);
          //  cout << "\t" << intCanvas[i] << endl;
         }
     }

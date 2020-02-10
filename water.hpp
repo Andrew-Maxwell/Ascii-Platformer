@@ -22,6 +22,7 @@ class water : public collideable {
     bool reverse;
     int time = 0;
     entityList* eList;
+    float sTime, location, size;
 
     public:
 
@@ -29,7 +30,7 @@ class water : public collideable {
 
     bool doesCollide( float otherX, float otherY, int type);
 
-    collision getCollision();
+    collision getCollision( float otherX, float otherY, int otherType);
 
     bool stopColliding();
 

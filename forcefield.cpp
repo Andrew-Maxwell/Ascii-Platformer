@@ -12,7 +12,7 @@
         range(newRange),
         isOn(false) {
             eList = newEList;
-            nextCollision.type = 5;
+            nextCollision.type = FORCEFIELDTYPE;
         }
 
     bool forceField::doesCollide(float otherX, float otherY, int otherType) {
@@ -22,12 +22,12 @@
         if (pow(pow(x - otherX, 2) + pow(y - otherY, 2), 0.5) > range) {
             return false;
         }
-        nextCollision.xVal = copysign(pow(pow(power, 2) / (1 + pow((y - otherY) / (x - otherX), 2)), 0.5), x - otherX) * copysign(1, power);
-        nextCollision.yVal = copysign(pow(pow(power, 2) / (1 + pow((x - otherX) / (y - otherY), 2)), 0.5), y - otherY) * copysign(1, power);
         return true;
     }
 
-    collision forceField::getCollision() {
+    collision forceField::getCollision(float otherX, float otherY, int otherType) {
+        nextCollision.xVal = copysign(pow(pow(power, 2) / (1 + pow((y - otherY) / (x - otherX), 2)), 0.5), x - otherX) * copysign(1, power);
+        nextCollision.yVal = copysign(pow(pow(power, 2) / (1 + pow((x - otherX) / (y - otherY), 2)), 0.5), y - otherY) * copysign(1, power);
         return nextCollision;
     }
 
