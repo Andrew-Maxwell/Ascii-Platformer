@@ -22,7 +22,7 @@ class entity {
 
     public:
 
-    int type;
+    int type = ERRORTYPE;
     int id;
     float x;
     float y;

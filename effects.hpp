@@ -15,7 +15,7 @@ using namespace rapidjson;
 //Splash() spawns drops specifically
 /******************************************************************************/
 
-void explosion(collider& col, entityList* entities, int count, float x, float y, Color tint,
+void explode(collider& col, entityList* entities, int count, float x, float y, Color tint,
                 float newSizeFactor, float speed, int c, int lifespan, float elasticity);
 
 

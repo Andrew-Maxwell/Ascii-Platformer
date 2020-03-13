@@ -18,7 +18,9 @@
                                   maxSpeed(newMaxSpeed),
                                   gravity(newGravity),
                                   friction(newFriction),
-                                  lifetime(newLifetime) {}
+                                  lifetime(newLifetime) {
+                                      type = PHYSICALPARTICLETYPE;
+                                  }
 
     bool physicalParticle::doesCollide(float otherX, float otherY, int otherType) {
         return false;
@@ -105,7 +107,9 @@
                                 gravity(newGravity),
                                 friction(newFriction),
                                 xMomentum(newXMomentum),
-                                yMomentum(newYMomentum) {}
+                                yMomentum(newYMomentum) {
+                                    type = ERRORTYPE;
+                                }
 
     bool realPhysicalEntity::doesCollide(float otherX, float otherY, int otherType) {
         return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1));

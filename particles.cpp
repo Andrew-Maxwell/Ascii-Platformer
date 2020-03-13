@@ -13,6 +13,7 @@
                         xSpeed(newXSpeed),
                         ySpeed(newYSpeed),
                         lifetime(newLifetime) {
+        type = PARTICLETYPE;
         if (c == 0) {
             toPrint = new char[2];
             setDirection();

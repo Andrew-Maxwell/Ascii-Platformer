@@ -277,6 +277,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
             break;
         }
     }
+    free(buffer);
 }
 
 /******************************************************************************/
@@ -426,6 +427,7 @@ int main(int argc, char** argv) {
 //                this_thread::sleep_for(16666000ns - chrono::duration_cast<chrono::nanoseconds>(tickEnd - tickStart));
 
             }
+            delete col;
         }
         delete playerPtr;
         won = max(won, 0);

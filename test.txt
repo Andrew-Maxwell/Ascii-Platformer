@@ -7,7 +7,7 @@
     "entities": [
         {
             "type": "water",
-            "x": 16.0,
+            "x": 1.0,
             "y": 57.0,
             "R": 0,
             "G": 0,
@@ -16,8 +16,8 @@
             "sizeFactor": 1.0,
             "wavelength": 30.0,
             "amplitude": 2.5,
-            "width": 260,
-            "depth": 50
+            "width": 198,
+            "depth": 40
         },
         {
             "type": "airPickUp",
@@ -57,10 +57,10 @@
             "type": "player",
             "x": 20.0,
             "y": 18.0,
-            "R": 254,
-            "G": 1,
-            "B": 254,
-            "A": 254,
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 255,
             "sizeFactor": 1.0
         },
         {

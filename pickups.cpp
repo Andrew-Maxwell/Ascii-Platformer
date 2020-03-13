@@ -43,7 +43,7 @@
     void pickUp::tickGet(collider& col) {
         if (collected && !exploded) {
             exploded = true;
-            explosion(col, eList, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
+            explode(col, eList, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
         }
     }
 
@@ -65,7 +65,9 @@
     gunPickUp::gunPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
                         entity(newX, newY, newTint, newSizeFactor),
                         pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
-                        gunID(newGunID) {}
+                        gunID(newGunID) {
+                            type = GUNPICKUPTYPE;
+                        }
 
     collision gunPickUp::getCollision(float otherX, float otherY, int otherType) {
         return collision(GUNPICKUPTYPE, gunID, 0.0, ID);
@@ -80,7 +82,9 @@
                         entity(newX, newY, newTint, newSizeFactor),
                         pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID),
-                        ammoCount(newAmmoCount) {}
+                        ammoCount(newAmmoCount) {
+                            type = AMMOPICKUPTYPE;
+                        }
 
     collision ammoPickUp::getCollision(float otherX, float otherY, int otherType) {
         return collision(AMMOPICKUPTYPE, gunID, ammoCount, ID);      //ammoCount in xVal
@@ -94,7 +98,9 @@
     healthPickUp::healthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
                         entity(newX, newY, newTint, newSizeFactor),
                         pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
-                        healthCount(newHealthCount) {}
+                        healthCount(newHealthCount) {
+                            type = HEALTHPICKUPTYPE;
+                        }
 
     collision healthPickUp::getCollision(float otherX, float otherY, int otherType) {
         return collision(HEALTHPICKUPTYPE, healthCount, 0.0, ID);
@@ -108,7 +114,9 @@
     maxHealthPickUp::maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
                         entity(newX, newY, newTint, newSizeFactor),
                         pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
-                        healthCount(newHealthCount) {}
+                        healthCount(newHealthCount) {
+                            type = MAXHEALTHPICKUPTYPE;
+                        }
 
     collision maxHealthPickUp::getCollision(float otherX, float otherY, int otherType) {
         return collision(MAXHEALTHPICKUPTYPE, healthCount, 0.0, ID);
@@ -122,7 +130,9 @@
     airPickUp::airPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newAirCount) :
                         entity(newX, newY, newTint, newSizeFactor),
                         pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
-                        airCount(newAirCount) {}
+                        airCount(newAirCount) {
+                            type = AIRPICKUPTYPE;
+                        }
 
     collision airPickUp::getCollision(float otherX, float otherY, int otherType) {
         return collision(AIRPICKUPTYPE, airCount, 0.0, ID);
@@ -136,7 +146,9 @@
     maxAirPickUp::maxAirPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newAirCount) :
                         entity(newX, newY, newTint, newSizeFactor),
                         pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
-                        airCount(newAirCount) {}
+                        airCount(newAirCount) {
+                            type = MAXAIRPICKUPTYPE;
+                        }
 
     collision maxAirPickUp::getCollision(float otherX, float otherY, int otherType) {
         return collision(MAXAIRPICKUPTYPE, airCount, 0.0, ID);
@@ -151,7 +163,9 @@
     opPickUp::opPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage) :
                         entity(newX, newY, newTint, newSizeFactor),
                         pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
-                        message(newMessage) {}
+                        message(newMessage) {
+                            type = OPPICKUPTYPE;
+                        }
 
     collision opPickUp::getCollision(float otherX, float otherY, int otherType) {
         return collision(OPPICKUPTYPE, 0, 0.0, ID, message);

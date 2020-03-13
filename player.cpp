@@ -38,7 +38,7 @@ struct saveData {
         nextRoom = newNextRoom;
         yMomentum = 0;
         elasticity = 0;
-        type = 1;
+        type = PLAYERTYPE;
         health = maxHealth = 8;
         air = maxAir = 600;
 
@@ -170,7 +170,7 @@ struct saveData {
         //Explosions
 
         if (IsKeyPressed(KEY_R)) {
-            explosion (col, eList, 60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
+            explode (col, eList, 60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
         }
 
         //Movement in air
@@ -310,9 +310,7 @@ struct saveData {
                 switch(gunSelect) {
                     case 0:
                         aim = Vector2Scale(Vector2Normalize(aim), 0.5);
-                        b = new bullet(x, y, tint, sizeFactor, eList, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10);
-                        b -> tickGet(col);
-                        b -> tickGet(col);
+                        b = new bullet(x + 3 * aim.x, y + 3 * aim.y, tint, sizeFactor, eList, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10, -0.5, 20);
                         gunCoolDowns[0] = 60;
                         gunAmmos[0]--;
                         break;

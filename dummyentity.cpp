@@ -12,6 +12,7 @@ using namespace rapidjson;
         entity(newX, newY, newTint, newSizeFactor),
         lifetime(newLifetime) {
             toPrint[0] = newC;
+            type = -1;
         }
 
     void dummyEntity::tickSet(collider& col) {}

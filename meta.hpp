@@ -27,6 +27,8 @@
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/prettywriter.h"
 
+#define DEBUG true
+
 #define SCREENWIDTH 1600
 #define SCREENHEIGHT 900
 #define FONTSIZE 16
@@ -55,6 +57,8 @@
 #define HURTCOLOR {255, 0, 0, 255}
 #define AIRCOLOR {255, 255, 255, 255}
 
+#define ERRORTYPE -1
+#define LAYERTYPE 0
 #define PLAYERTYPE 1
 #define ENDINGGATETYPE 2
 #define DOORTYPE 3
@@ -62,7 +66,10 @@
 #define FORCEFIELDTYPE 5
 #define BULLETTYPE 6
 #define WATERTYPE 7
-#define PHYSICALENTITYTYPE 8
+#define PARTICLETYPE  8
+#define PHYSICALENTITYTYPE 9
+#define PHYSICALPARTICLETYPE 10
+#define RAINTYPE 11
 
 #define GUNPICKUPTYPE 21
 #define AMMOPICKUPTYPE 22

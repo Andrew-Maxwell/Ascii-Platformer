@@ -1,0 +1,67 @@
+Features:
+- Water:
+    - interacting with forcefield: standing wave, produces moving wave when released + drops flying into air
+    - Bullets underwater
+    - PhysicalEntity density parameter defines buoyancy
+- Generic physicalEntity width parameter
+- Improved code interface
+    - Intercepted codes
+    - Colored based on code value
+    - Broadcast animation
+    - Indicators showing how many codes you've collected/total in the level
+- Puzzle elements:
+    - Switches
+    - Triggers
+    - Color changing/other effect layers
+    - AND/OR/Timer relays
+    - Doors
+    - Moving platforms
+    - Guns/turrets/enemies
+- Explosions: Powerful invisible forcefields that self-delete after one tick
+- Overhaul movement: tweak everything. Decide how you want it to be *before* you start making levels.
+- Wind/current object (or maybe put it in the collider?)
+- leaf physicalParticles that fly eratically
+- Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
+    original.
+
+Ideas:
+    - Cyberpunk theme: Parallel digital and physical realms, distinct visual style, distinct puzzle types
+    - Level where you find breath upgrades above water and ops below water - back and forth between those two
+    - Level that is completely dark, must use bouncing particle explosion effect to navigate
+    - WRT puzzles: Should give player feedback on plausible but wrong attempts, keep them entertained
+    - You have a computer companion which is what allows you to broadcast codes. It has a test level which acts as
+        the tutorial, also has randomly-generated puzzles with small bonuses.
+    - Command line graphical effect when logging into a terminal.
+
+
+inspiration/vague visual ideas:
+    - Giant drum machine like washing machine
+    - Submechanophobia
+    - Trippy AI face that speaks to you/watches you in the virtual world
+        - AI doesn't want you poking around, if you go to far into his world he threatens you then starts killing you
+            IRL and you have to get out of the level before he kills you entirely. Makes more sense if you don't usually
+            have a health bar in the virtual world. Making virtual world one-hit-kill makes sense for small, puzzle-oriented levels.
+    
+
+Housekeeping items:
+- Merge entityList and collideable into a single entity
+    - Separate lists for two-way, one-way, non-colliding entities
+    - Keep lists sorted by X or Y position, and add accessible "collisionrange" functions, to reduce the number of comparisons.
+        (Would this actually help? I feel like checking whether something is within collision range would not be much cheaper than
+        the existing doesCollide solution in many cases...)
+- Make a display(x, y, sizeFactor, color) and displayHUD(x, y, sizeFactor, color)
+- Replace drawBar() with a rectangle-drawing function.
+- Docs, including "lessons learned"
+- Replace x, y with Vector2 everywhere
+- Create configure() functions rather than having 10-argument constructors/standardize constructor argument order
+- Cap line lengths
+- change everything from camelCase to PascalCase
+- rename sizeFactor to Scale
+- make layer use char[][] for mild performance benefits
+
+Bugs:
+- player disappears when standing on tile right below top of level
+- touch pickups sometimes collected (?) randomly
+- Markers appearing in wrong place in level editor
+- "Not a valid choice!" error appears when using op screen
+- Bullets disappear on contact with particles such as raindrops

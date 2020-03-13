@@ -6,10 +6,10 @@
 //Spawn particles moving outwards in a circle
 /******************************************************************************/
 
-    void explosion( collider& col, entityList* entities, int count, float x, float y, Color tint,
+    void explode( collider& col, entityList* entities, int count, float x, float y, Color tint,
                     float newSizeFactor, float speed, int c, int lifespan, float elasticity) {
         for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / count)) {
-            physicalParticle* p = new physicalParticle(x, y, tint, newSizeFactor, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
+            physicalParticle* p = new physicalParticle(x + cos(angle) * speed, y + sin(angle) * speed, tint, newSizeFactor, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
             entities -> addEntity(p);
             col.addParticle(p);
         }

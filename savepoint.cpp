@@ -30,7 +30,7 @@
     void savePoint::tickGet(collider& col) {
         if (savedGame) {;
             savedGame = false;
-            explosion(col, eList, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
+            explode(col, eList, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
         }
     }
 

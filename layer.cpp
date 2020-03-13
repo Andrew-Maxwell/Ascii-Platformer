@@ -19,7 +19,9 @@
 
     layer::layer( float newx, float newy, Color newTint, float newSizeFactor, string newFileName) :
         entity(newx, newy, newTint, newSizeFactor),
-        fileName(newFileName) {}
+        fileName(newFileName) {
+            type = LAYERTYPE;
+        }
 
     bool layer::readLayer() {
         canvas.clear();

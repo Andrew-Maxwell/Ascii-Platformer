@@ -33,6 +33,7 @@
         isSnow(newIsSnow),
         firstTick(true) {
             eList = newEList;
+            type = RAINTYPE;
         }
 
     void rain::tickSet(collider& col) {

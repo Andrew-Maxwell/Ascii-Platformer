@@ -13,6 +13,7 @@
         isOn(false) {
             eList = newEList;
             nextCollision.type = FORCEFIELDTYPE;
+            type = FORCEFIELDTYPE;
         }
 
     bool forceField::doesCollide(float otherX, float otherY, int otherType) {
@@ -67,3 +68,32 @@
     void forceField::print(float cameraX, float cameraY, Font displayFont) {
         myDrawText(displayFont, "F", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
     }
+
+/*****************************************************************************/
+//explosion 
+//Attracts or repels physical entities for one tick, then disappears.
+/*****************************************************************************/
+
+    explosion::explosion(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newChannel, float newPower, float newRange) :
+        entity(newX, newY, newTint, newSizeFactor),
+        forceField(newX, newY, newTint, newSizeFactor, newEList, newChannel, newPower, newRange) {}
+
+    bool explosion::doesCollide(float otherX, float otherY, int otherType) {
+        return(pow(pow(x - otherX, 2) + pow(y - otherY, 2), 0.5) < range);
+    }
+
+    bool explosion::stopColliding() {
+        return true;
+    }
+
+    void explosion::tickSet(collider& col) {}
+
+    void explosion::tickGet(collider& col) {}
+
+    bool explosion::finalize() {
+        return true;
+    }
+
+    void explosion::print(float cameraX, float cameraY, Font displayFont) {}
+
+
