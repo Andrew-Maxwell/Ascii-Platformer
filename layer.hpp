@@ -1,7 +1,7 @@
 #ifndef LAYER_HPP
 #define LAYER_HPP
 
-#include "entitymeta.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 
 using namespace rapidjson;
@@ -33,9 +33,9 @@ class layer : virtual public entity {
 
     int getCols();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

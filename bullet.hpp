@@ -1,13 +1,14 @@
 #ifndef BULLET_HPP
 #define BULLET_HPP
 
-#include "col.hpp"
+
 #include "effects.hpp"
-#include "entitymeta.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
 #include "physicalentities.hpp"
 #include "forcefield.hpp"
+#include "world.hpp"
 
 using namespace rapidjson;
 
@@ -22,14 +23,14 @@ class bullet : public realPhysicalEntity, public particle {
     bool hit = false;
     bool exploded = false;
     bool dynamicChar;
-    entityList* eList;
+    
     float width = 0.8;
     int lifetime;
     float power, range;
 
     public:
 
-    bullet(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList,
+    bullet(float newX, float newY, Color newTint, float newSizeFactor, 
                    float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage, float power, float range);
 
@@ -39,9 +40,9 @@ class bullet : public realPhysicalEntity, public particle {
 
     bool stopColliding();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

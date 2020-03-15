@@ -1,9 +1,8 @@
-#ifndef COL_HPP
-#define COL_HPP
+#ifndef WORLD_HPP
+#define WORLD_HPP
 
-#include "entitymeta.hpp"
-#include "layer.hpp"
 #include "meta.hpp"
+#include "layer.hpp"
 
 using namespace rapidjson;
 
@@ -75,8 +74,10 @@ class collider : public layer {
     //Collideables can exchange collisions and pass collisions to particles
     //Particles can't pass collisions to anything
 
-    vector<collideable*> collideables;
-    vector<collideable*> particles;
+    bool deleted = false;
+    list<entity*> entities;
+    list<collideable*> collideables;
+    list<collideable*> particles;
     bool channel[512] = {false};
 
     public:
@@ -85,11 +86,29 @@ class collider : public layer {
 
     collider(   float newX, float newY, string fileName = "collider.txt");
 
-    //Accessors
+    //destructor
+
+    ~collider();
+
+    //Tick functions
+
+    void tickSet();
+
+    void tickGet();
+
+    bool finalize();
+
+    void print(float cameraX, float cameraY, Font displayFont);
+
+    //Add functions
+
+    void addEntity(entity* toAdd);
 
     void addCollideable(collideable* newCollideable);
 
     void addParticle(collideable* newParticle);
+
+    //physical tilemap functions
 
     bool isSolid(int checkX, int checkY);
 
@@ -103,18 +122,13 @@ class collider : public layer {
 
     float getFloorLevel(float entityX, float entityY);
 
+    //Broadcast functions
+
     void setChannel(int freq);
 
     bool getChannel(int freq);
 
-    //tickSet, tickGet, and finalize are each called here AFTER they have been called on all other entities.
-
-    void tickSet(collider& col);
-
-    void tickGet(collider& col);
-
-    bool finalize();
 };
 
-#endif //COL_HPP
+#endif //WORLD_HPP
 

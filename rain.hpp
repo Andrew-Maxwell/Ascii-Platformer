@@ -1,8 +1,8 @@
 #ifndef RAIN_HPP
 #define RAIN_HPP
 
-#include "col.hpp"
-#include "entitymeta.hpp"
+#include "world.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 #include "physicalentities.hpp"
 
@@ -20,7 +20,7 @@ class drop : public physicalParticle {
      explicit drop( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION, int newLifetime = 2147483647);
 
-    void tickGet(collider& col);
+    void tickGet();
 
 };
 
@@ -32,18 +32,18 @@ class drop : public physicalParticle {
 
 class rain : public entity {
 
-    entityList* eList;
+    
     float dropsPerTick, dropBuffer = 0, xMomentum;
     bool firstTick;
     bool isSnow;
 
     public:
 
-    rain(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, float newDropsPerTick, float newXMomentum, bool isSnow);
+    rain(float newX, float newY, Color newTint, float newSizeFactor,  float newDropsPerTick, float newXMomentum, bool isSnow);
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

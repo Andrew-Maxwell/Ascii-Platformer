@@ -5,13 +5,13 @@
 //Attracts or repels physical entities within its influence
 /*****************************************************************************/
 
-    forceField::forceField(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newChannel, float newPower, float newRange) :
+    forceField::forceField(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange) :
         entity(newX, newY, newTint, newSizeFactor),
         channel(newChannel),
         power(newPower),
         range(newRange),
         isOn(false) {
-            eList = newEList;
+            
             nextCollision.type = FORCEFIELDTYPE;
             type = FORCEFIELDTYPE;
         }
@@ -36,18 +36,18 @@
         return false;
     }
 
-    void forceField::tickSet(collider& col) {
-        if (col.getChannel(channel)) {
+    void forceField::tickSet() {
+        if (world -> getChannel(channel)) {
             isOn = true;
             if (++tickCount % (int)(1 / power) == 0) {
                 if (power > 0) { //Attractor force field
                     for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
-                        eList -> addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
+                        world -> addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
                     }
                 }
                 else {  //repeller force field
                     for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
-                        eList -> addEntity(new particle(x, y, tint, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
+                        world -> addEntity(new particle(x, y, tint, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
                     }
                 }
             }
@@ -58,7 +58,7 @@
         }
     }
 
-    void forceField::tickGet(collider& col) {
+    void forceField::tickGet() {
     }
 
     bool forceField::finalize() {
@@ -74,9 +74,9 @@
 //Attracts or repels physical entities for one tick, then disappears.
 /*****************************************************************************/
 
-    explosion::explosion(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newChannel, float newPower, float newRange) :
+    explosion::explosion(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange) :
         entity(newX, newY, newTint, newSizeFactor),
-        forceField(newX, newY, newTint, newSizeFactor, newEList, newChannel, newPower, newRange) {}
+        forceField(newX, newY, newTint, newSizeFactor, newChannel, newPower, newRange) {}
 
     bool explosion::doesCollide(float otherX, float otherY, int otherType) {
         return(pow(pow(x - otherX, 2) + pow(y - otherY, 2), 0.5) < range);
@@ -86,9 +86,9 @@
         return true;
     }
 
-    void explosion::tickSet(collider& col) {}
+    void explosion::tickSet() {}
 
-    void explosion::tickGet(collider& col) {}
+    void explosion::tickGet() {}
 
     bool explosion::finalize() {
         return true;

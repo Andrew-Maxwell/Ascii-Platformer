@@ -1,7 +1,8 @@
 #include "meta.hpp"
-#include "entitymeta.hpp"
+#include "entity.hpp"
 #include "layer.hpp"
 #include "charfills.hpp"
+#include "world.hpp"
 
 #ifndef EDITABLES_HPP
 #define EDITABLES_HPP

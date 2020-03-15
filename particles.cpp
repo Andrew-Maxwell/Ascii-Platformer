@@ -51,13 +51,13 @@
         }
     }
 
-    void particle::tickSet(collider& col) {
+    void particle::tickSet() {
         x += xSpeed;
         y += ySpeed;
         lifetime--;
     }
 
-    void particle::tickGet(collider& col) {}
+    void particle::tickGet() {}
 
     bool particle::finalize() {
         if (lifetime == 0) {

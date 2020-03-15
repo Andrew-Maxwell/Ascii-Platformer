@@ -2,8 +2,8 @@
 #define EFFECTS_HPP
 
 #include "rain.hpp" //for drop
-#include "col.hpp"
-#include "entitymeta.hpp"
+#include "entity.hpp"
+#include "world.hpp"
 #include "meta.hpp"
 #include "physicalentities.hpp"
 
@@ -15,11 +15,11 @@ using namespace rapidjson;
 //Splash() spawns drops specifically
 /******************************************************************************/
 
-void explode(collider& col, entityList* entities, int count, float x, float y, Color tint,
+void explode(int count, float x, float y, Color tint,
                 float newSizeFactor, float speed, int c, int lifespan, float elasticity);
 
 
-void splash(collider& col, entityList* entities, int count, float x, float y, Color tint,
+void splash(int count, float x, float y, Color tint,
                 float newSizeFactor, float speed, int c, int lifespan, float elasticity);
 
 
@@ -28,7 +28,7 @@ void splash(collider& col, entityList* entities, int count, float x, float y, Co
 //Spawns a little number that floats up when damage is taken/dealt
 /******************************************************************************/
 
-void damageIndicator(entityList* entities, int damage, float x, float y, Color tint, float newSizeFactor);
+void damageIndicator(int damage, float x, float y, Color tint, float newSizeFactor);
 
 /******************************************************************************/
 //drawBar...()

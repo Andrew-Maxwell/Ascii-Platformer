@@ -1,9 +1,9 @@
 #ifndef PICKUPS_HPP
 #define PICKUPS_HPP
 
-#include "col.hpp"
+#include "world.hpp"
 #include "effects.hpp"
-#include "entitymeta.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
 
@@ -22,7 +22,7 @@ class pickUp : public collideable {
     bool exploded = false;
     bool touch;
     int lifetime, ID;
-    entityList* eList;
+    
     char* toPrint;
 
     public:
@@ -30,7 +30,7 @@ class pickUp : public collideable {
     int displayChar;
 
     explicit pickUp(  float newX, float newY,  Color newTint,
-                    float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch);
+                    float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch);
 
     ~pickUp();
 
@@ -40,9 +40,9 @@ class pickUp : public collideable {
 
     bool stopColliding();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 
@@ -60,7 +60,7 @@ class gunPickUp : public pickUp {
 
     public:
 
-    explicit gunPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+    explicit gunPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     collision getCollision(float otherX, float otherY, int otherType);
 
@@ -78,7 +78,7 @@ class ammoPickUp : public pickUp {
 
     public:
 
-    explicit ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
+    explicit ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
 
     collision getCollision(float otherX, float otherY, int otherType);
 
@@ -96,7 +96,7 @@ class healthPickUp : public pickUp {
 
     public:
 
-    explicit healthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+    explicit healthPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     collision getCollision(float otherX, float otherY, int otherType);
 
@@ -114,7 +114,7 @@ class maxHealthPickUp : public pickUp {
 
     public:
 
-    explicit maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+    explicit maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     collision getCollision(float otherX, float otherY, int otherType);
 
@@ -131,7 +131,7 @@ class airPickUp : public pickUp {
 
     public:
 
-    explicit airPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+    explicit airPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     collision getCollision(float otherX, float otherY, int otherType);
 
@@ -149,7 +149,7 @@ class maxAirPickUp : public pickUp {
 
     public:
 
-    explicit maxAirPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+    explicit maxAirPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     collision getCollision(float otherX, float otherY, int otherType);
 
@@ -167,7 +167,7 @@ class opPickUp : public pickUp {
 
     public:
 
-    explicit opPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage);
+    explicit opPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage);
 
     collision getCollision(float otherX, float otherY, int otherType);
 

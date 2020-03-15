@@ -1,9 +1,10 @@
 #ifndef WATER_HPP
 #define WATER_HPP
 
-#include "col.hpp"
+
 #include <deque>
-#include "entitymeta.hpp"
+#include "world.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 
 using namespace std;
@@ -21,12 +22,12 @@ class water : public collideable {
     float depth, wavelength, amplitude, k, omega;
     bool reverse;
     int time = 0;
-    entityList* eList;
+    
     float sTime, location, size;
 
     public:
 
-    explicit water( float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newWidth, float newDepth, float newWavelength, float newAmplitude);
+    explicit water( float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newDepth, float newWavelength, float newAmplitude);
 
     bool doesCollide( float otherX, float otherY, int type);
 
@@ -34,9 +35,9 @@ class water : public collideable {
 
     bool stopColliding();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

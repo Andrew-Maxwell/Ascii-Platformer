@@ -8,13 +8,13 @@
 //Animates the surface of water
 /*****************************************************************************/
 
-    water:: water(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newWidth, float newDepth, float newWavelength, float newAmplitude) :
+    water:: water(float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newDepth, float newWavelength, float newAmplitude) :
         entity (newX, newY, newTint, newSizeFactor),
         width (newWidth),
         depth (newDepth),
         wavelength (newWavelength),
         amplitude (newAmplitude) {
-            eList = newEList;
+            
             surface.resize(width, 0.0);
             k = 2 * PI / wavelength;
             omega = sqrt(GRAVITY * k * tanh(k * depth));
@@ -34,11 +34,11 @@
         return false;
     }
 
-    void water::tickSet(collider& col) {
+    void water::tickSet() {
         time++;
     }
 
-    void water::tickGet(collider& col) {
+    void water::tickGet() {
         for (int i = 0; i < width - 1; i++) {
             surface[i] = amplitude * sin(k * i + omega * time);
         }
@@ -48,7 +48,7 @@
             splashTimes.push_back(time);
             splashPositions.push_back(colIter -> xVal - x);
             splashSizes.push_back(colIter -> yVal);
-            splash(col, eList, 40 * abs(colIter -> yVal), colIter -> xVal, y - surface[colIter -> xVal - x], tint, sizeFactor, abs(colIter -> yVal) * 0.5, 0, 100, 0.5);
+            splash(40 * abs(colIter -> yVal), colIter -> xVal, y - surface[colIter -> xVal - x], tint, sizeFactor, abs(colIter -> yVal) * 0.5, 0, 100, 0.5);
             colIter = collisions.erase(colIter);
         }
         for (int i = 0; i < splashTimes.size(); i++) {

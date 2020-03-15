@@ -9,11 +9,11 @@ EDTR := editor
 GAMESRCS := \
 	bullet.cpp \
 	charfills.cpp \
-	col.cpp \
+	world.cpp \
 	door.cpp \
 	effects.cpp \
 	endinggate.cpp \
-	entitymeta.cpp \
+	entity.cpp \
 	forcefield.cpp \
 	gamelayer.cpp \
 	game_main.cpp \

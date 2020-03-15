@@ -5,10 +5,10 @@
 //Saves the game when interacted with.
 /*****************************************************************************/
 
-    savePoint::savePoint(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList) :
+    savePoint::savePoint(float newX, float newY, Color newTint, float newSizeFactor) :
         entity(newX, newY, newTint, newSizeFactor) {
             type = SAVEPOINTTYPE;
-            eList = newEList;
+            
         }
 
     bool savePoint::doesCollide(float otherX, float otherY, int otherType) {
@@ -25,12 +25,12 @@
         return false;
     }
 
-    void savePoint::tickSet(collider& col) {}
+    void savePoint::tickSet() {}
 
-    void savePoint::tickGet(collider& col) {
+    void savePoint::tickGet() {
         if (savedGame) {;
             savedGame = false;
-            explode(col, eList, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
+            explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
         }
     }
 

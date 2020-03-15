@@ -8,13 +8,13 @@
 /*****************************************************************************/
 
     endingGate::endingGate(float newX, float newY, Color newTint,
-                        float newSizeFactor, entityList* newEList, int newWidth = 0, int newHeight = 0) :
+                        float newSizeFactor,  int newWidth = 0, int newHeight = 0) :
                         entity(newX, newY, newTint, newSizeFactor) {
         toPrint = {"O----O", "|    |", "|    |", "|    |", "O----O"};
         width = 5;
         height = 5;
         type = ENDINGGATETYPE;
-        eList = newEList;
+        
     }
 
     bool endingGate::doesCollide(float otherX, float otherY, int otherType) {
@@ -29,13 +29,13 @@
         return false;
     }
 
-    void endingGate::tickSet(collider& col) {
+    void endingGate::tickSet() {
         if (GetRandomValue(0, 10) == 0) {
-            eList -> addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, sizeFactor, 0, -0.01, '*', (height - 1.5) * 100));
+            world -> addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, sizeFactor, 0, -0.01, '*', (height - 1.5) * 100));
         }
     }
 
-    void endingGate::tickGet(collider& col) {
+    void endingGate::tickGet() {
     }
 
     bool endingGate::finalize() {

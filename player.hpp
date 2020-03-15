@@ -2,9 +2,9 @@
 #define PLAYER_HPP
 
 #include "bullet.hpp"
-#include "col.hpp"
+#include "world.hpp"
 #include "effects.hpp"
-#include "entitymeta.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
 
@@ -41,7 +41,7 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     bool pickUpsCollected[512] = { false };
 
-    entityList* eList;
+    
     Vector2 positionOnScreen = {0, 0};
 
     public:
@@ -73,8 +73,6 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     float getSizeFactor();
 
-    void setEList(entityList * newEList);
-
     //Collision functions
 
     bool doesCollide(float otherX, float otherY, int type);
@@ -85,9 +83,9 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     //Tick functions
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

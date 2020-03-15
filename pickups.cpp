@@ -6,13 +6,12 @@
 /*****************************************************************************/
 
     pickUp::pickUp(  float newX, float newY,  Color newTint,
-                    float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifetime, int newID, bool newTouch) :
+                    float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch) :
         entity(newX, newY, newTint, newSizeFactor),
         displayChar(newDisplayChar),
         lifetime(newLifetime),
         ID(newID),
         touch(newTouch) {
-            eList = newEList;
             toPrint = TextToUtf8(&displayChar, 1);
         }
 
@@ -36,14 +35,14 @@
         return collected || lifetime < 0;
     }
 
-    void pickUp::tickSet(collider& col) {
+    void pickUp::tickSet() {
 	    lifetime--;
     }
 
-    void pickUp::tickGet(collider& col) {
+    void pickUp::tickGet() {
         if (collected && !exploded) {
             exploded = true;
-            explode(col, eList, 16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
+            explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
         }
     }
 
@@ -62,9 +61,9 @@
 //Unlocks a new gun
 /*****************************************************************************/
 
-    gunPickUp::gunPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
+    gunPickUp::gunPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID) {
                             type = GUNPICKUPTYPE;
                         }
@@ -78,9 +77,9 @@
 //Adds ammo to a given gun
 /*****************************************************************************/
 
-    ammoPickUp::ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
+    ammoPickUp::ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID),
                         ammoCount(newAmmoCount) {
                             type = AMMOPICKUPTYPE;
@@ -95,9 +94,9 @@
 //Adds health back
 /*****************************************************************************/
 
-    healthPickUp::healthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
+    healthPickUp::healthPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         healthCount(newHealthCount) {
                             type = HEALTHPICKUPTYPE;
                         }
@@ -111,9 +110,9 @@
 //Adds to max health
 /*****************************************************************************/
 
-    maxHealthPickUp::maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
+    maxHealthPickUp::maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         healthCount(newHealthCount) {
                             type = MAXHEALTHPICKUPTYPE;
                         }
@@ -127,9 +126,9 @@
 //Adds air back
 /*****************************************************************************/
 
-    airPickUp::airPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newAirCount) :
+    airPickUp::airPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newAirCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         airCount(newAirCount) {
                             type = AIRPICKUPTYPE;
                         }
@@ -143,9 +142,9 @@
 //Adds to max air
 /*****************************************************************************/
 
-    maxAirPickUp::maxAirPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newAirCount) :
+    maxAirPickUp::maxAirPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newAirCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         airCount(newAirCount) {
                             type = MAXAIRPICKUPTYPE;
                         }
@@ -160,9 +159,9 @@
 //Gives the player another bitwise op to play with
 /*****************************************************************************/
 
-    opPickUp::opPickUp(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage) :
+    opPickUp::opPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickUp(newX, newY, newTint, newSizeFactor, newEList, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickUp(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
                         message(newMessage) {
                             type = OPPICKUPTYPE;
                         }

@@ -6,21 +6,19 @@
 //Spawn particles moving outwards in a circle
 /******************************************************************************/
 
-    void explode( collider& col, entityList* entities, int count, float x, float y, Color tint,
+    void explode(int count, float x, float y, Color tint,
                     float newSizeFactor, float speed, int c, int lifespan, float elasticity) {
         for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / count)) {
             physicalParticle* p = new physicalParticle(x + cos(angle) * speed, y + sin(angle) * speed, tint, newSizeFactor, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
-            entities -> addEntity(p);
-            col.addParticle(p);
+            world -> addParticle(p);
         }
     }
 
-    void splash( collider& col, entityList* entities, int count, float x, float y, Color tint,
+    void splash(int count, float x, float y, Color tint,
                     float newSizeFactor, float speed, int c, int lifespan, float elasticity) {
         for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / count)) {
             drop* p = new drop(x, y, tint, newSizeFactor, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
-            entities -> addEntity(p);
-            col.addParticle(p);
+            world -> addParticle(p);
         }
     }
 
@@ -30,11 +28,11 @@
 //Spawns a little number that floats up when damage is taken/dealt
 /******************************************************************************/
 
-void damageIndicator(entityList* entities, int damage, float x, float y, Color tint, float newSizeFactor) {
+void damageIndicator(int damage, float x, float y, Color tint, float newSizeFactor) {
     float leftEnd = x - 1 - floor(log10(abs(damage))) / 2;
     string digits = to_string(damage);
     for (int i = 0; i < digits.length(); i++) {
-        entities -> addEntity (new particle (leftEnd + i, y, tint, newSizeFactor, 0, -0.1, digits[i], 60));
+        world -> addEntity(new particle (leftEnd + i, y, tint, newSizeFactor, 0, -0.1, digits[i], 60));
     }
 }
 

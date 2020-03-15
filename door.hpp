@@ -1,8 +1,8 @@
 #ifndef DOOR_HPP
 #define DOOR_HPP
 
-#include "col.hpp"
-#include "entitymeta.hpp"
+#include "world.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 
 using namespace rapidjson;
@@ -28,9 +28,9 @@ class door : public collideable {
 
     bool stopColliding();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

@@ -140,10 +140,6 @@ struct saveData {
         return sizeFactor;
     }
 
-    void player::setEList(entityList* newEList) {
-        eList = newEList;
-    }
-
 //Collision functions
 
     bool player::doesCollide(float otherX, float otherY, int type) {
@@ -165,12 +161,12 @@ struct saveData {
 
 //Tick functions
 
-    void player::tickSet(collider& col) {
+    void player::tickSet() {
 
         //Explosions
 
         if (IsKeyPressed(KEY_R)) {
-            explode (col, eList, 60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
+            explode (60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
         }
 
         //Movement in air
@@ -201,7 +197,7 @@ struct saveData {
           	//Jomping
 
             if (IsKeyPressed(KEY_W)) {
-                if (col.isSolid(x + (1 - width) / 2, y + 1) || col.isSolid(x + (1 + width) / 2, y + 1))  {
+                if (world -> isSolid(x + (1 - width) / 2, y + 1) || world -> isSolid(x + (1 + width) / 2, y + 1))  {
                     yMomentum -= JUMPSPEED;
                 }
             }
@@ -244,34 +240,34 @@ struct saveData {
         //Channels
 
         if (IsKeyDown(KEY_ONE)) {
-            col.setChannel(channels[1].to_ulong());
+            world -> setChannel(channels[1].to_ulong());
         }
         if (IsKeyDown(KEY_TWO)) {
-            col.setChannel(channels[2].to_ulong());
+            world -> setChannel(channels[2].to_ulong());
         }
         if (IsKeyDown(KEY_THREE)) {
-            col.setChannel(channels[3].to_ulong());
+            world -> setChannel(channels[3].to_ulong());
         }
         if (IsKeyDown(KEY_FOUR)) {
-            col.setChannel(channels[4].to_ulong());
+            world -> setChannel(channels[4].to_ulong());
         }
         if (IsKeyDown(KEY_FIVE)) {
-            col.setChannel(channels[5].to_ulong());
+            world -> setChannel(channels[5].to_ulong());
         }
         if (IsKeyDown(KEY_SIX)) {
-            col.setChannel(channels[6].to_ulong());
+            world -> setChannel(channels[6].to_ulong());
         }
         if (IsKeyDown(KEY_SEVEN)) {
-            col.setChannel(channels[7].to_ulong());
+            world -> setChannel(channels[7].to_ulong());
         }
         if (IsKeyDown(KEY_EIGHT)) {
-            col.setChannel(channels[8].to_ulong());
+            world -> setChannel(channels[8].to_ulong());
         }
         if (IsKeyDown(KEY_NINE)) {
-            col.setChannel(channels[9].to_ulong());
+            world -> setChannel(channels[9].to_ulong());
         }
         if (IsKeyDown(KEY_ZERO)) {
-            col.setChannel(channels[0].to_ulong());
+            world -> setChannel(channels[0].to_ulong());
         }
         //Boollets
 
@@ -310,7 +306,7 @@ struct saveData {
                 switch(gunSelect) {
                     case 0:
                         aim = Vector2Scale(Vector2Normalize(aim), 0.5);
-                        b = new bullet(x + 3 * aim.x, y + 3 * aim.y, tint, sizeFactor, eList, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10, -0.5, 20);
+                        b = new bullet(x + 3 * aim.x, y + 3 * aim.y, tint, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10, -0.5, 20);
                         gunCoolDowns[0] = 60;
                         gunAmmos[0]--;
                         break;
@@ -318,17 +314,17 @@ struct saveData {
                         cerr << "Fired bullet with invalid gun\n";
                         break;
                 }
-                b -> tickSet(col);
-                b -> tickSet(col);
-                eList -> addEntity(b);
-                col.addCollideable(b);
+                b -> tickSet();
+                b -> tickSet();
+                world -> addEntity(b);
+                world -> addCollideable(b);
             }
         }
 
         //Spikes, falling, and death
         
         hurtTimer--;
-        if (y > col.getRows() + 25) {
+        if (y > world -> getRows() + 25) {
             health = 0;
         }
         if (health <= 0) {
@@ -337,19 +333,19 @@ struct saveData {
 
         //spikes
         
-        int spikeDamage = col.getPlayerDamage((int)(x + 0.5), (int)(y + 0.5));
+        int spikeDamage = world -> getPlayerDamage((int)(x + 0.5), (int)(y + 0.5));
         if (hurtTimer < 0 && spikeDamage) {
             health += spikeDamage;
             hurtTimer = 60;
             Vector2 newMomentum = Vector2Scale(Vector2Negate(Vector2Normalize({xMomentum, yMomentum})), 0.7);
             xMomentum = newMomentum.x;
             yMomentum = newMomentum.y / 3;
-            damageIndicator(eList, spikeDamage, x, y, HURTCOLOR, sizeFactor);
+            damageIndicator(spikeDamage, x, y, HURTCOLOR, sizeFactor);
         }
-        realPhysicalEntity::tickSet(col);;
+        realPhysicalEntity::tickSet();;
     }
 
-    void player::tickGet(collider& col) {
+    void player::tickGet() {
         list<collision>::iterator colIter = collisions.begin();
         while (colIter != collisions.end()) {
             switch(colIter -> type) {
@@ -375,7 +371,7 @@ struct saveData {
                         xMomentum += colIter -> xVal * 0.3;
                         health += (colIter -> damage);
                         hurtTimer = 60;
-                        damageIndicator(eList, colIter -> damage, x, y, HURTCOLOR, sizeFactor);
+                        damageIndicator(colIter -> damage, x, y, HURTCOLOR, sizeFactor);
                     }
                     colIter = collisions.erase(colIter);
                     break;
@@ -405,7 +401,7 @@ struct saveData {
                     colIter = collisions.erase(colIter);
                     break;
                 case HEALTHPICKUPTYPE:
-                    damageIndicator(eList, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
+                    damageIndicator(colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
                     health = min(maxHealth, health + colIter -> damage);
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
@@ -414,7 +410,7 @@ struct saveData {
                     break;
                 case MAXHEALTHPICKUPTYPE:
                     health += (colIter -> damage);
-                    damageIndicator(eList, colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
+                    damageIndicator(colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
                     maxHealth += (colIter -> damage);
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
@@ -423,7 +419,7 @@ struct saveData {
                     break;
                 case AIRPICKUPTYPE:
                     air = min(maxAir, air + colIter -> damage);
-                    damageIndicator(eList, colIter -> damage, x, y, AIRCOLOR, sizeFactor);
+                    damageIndicator(colIter -> damage, x, y, AIRCOLOR, sizeFactor);
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
                     }
@@ -431,7 +427,7 @@ struct saveData {
                     break;
                 case MAXAIRPICKUPTYPE:
                     air += (colIter -> damage);
-                    damageIndicator(eList, colIter -> damage, x, y, AIRCOLOR, sizeFactor);
+                    damageIndicator(colIter -> damage, x, y, AIRCOLOR, sizeFactor);
                     maxAir += (colIter -> damage);
                     if (0 < colIter -> yVal && colIter -> yVal < 512) {
                         pickUpsCollected[(int)(colIter -> yVal)] = true;
@@ -455,7 +451,7 @@ struct saveData {
                     colIter++;
             }
         }
-        realPhysicalEntity::tickGet(col);
+        realPhysicalEntity::tickGet();
     }
 
     bool player::finalize() {

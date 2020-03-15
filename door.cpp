@@ -26,9 +26,9 @@
         return false;
     }
 
-    void door::tickSet(collider& col) {}
+    void door::tickSet() {}
 
-    void door::tickGet(collider& col) {}
+    void door::tickGet() {}
 
     bool door::finalize() {return false;}
 

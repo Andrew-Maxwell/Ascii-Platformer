@@ -15,9 +15,9 @@ using namespace rapidjson;
             type = -1;
         }
 
-    void dummyEntity::tickSet(collider& col) {}
+    void dummyEntity::tickSet() {}
 
-    void dummyEntity::tickGet(collider& col) {}
+    void dummyEntity::tickGet() {}
 
     bool dummyEntity::finalize() {return --lifetime < 0;}
 

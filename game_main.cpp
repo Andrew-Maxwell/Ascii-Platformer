@@ -1,5 +1,5 @@
 #include "bullet.hpp"
-#include "col.hpp"
+
 #include "door.hpp"
 #include "effects.hpp"
 #include "endinggate.hpp"
@@ -14,6 +14,8 @@
 #include "savepoint.hpp"
 #include "water.hpp"
 
+collider* world = NULL;
+
 #define DRAWFPS true
 
 using namespace rapidjson;
@@ -22,7 +24,7 @@ using namespace rapidjson;
 //Read in a list of entities from a file
 /******************************************************************************/
 
-void readEntities(entityList& el, collider*& col, Color& background, player* playerPtr, string& fileName) {
+void readEntities(Color& background, player* playerPtr, string& fileName) {
 
     //Read into a json object
 
@@ -45,7 +47,7 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
     uint8_t backgroundA = json.HasMember("A") ? json["A"].GetInt() : 255;
     string colliderFileName = json.HasMember("collider") ? json["collider"].GetString() : "test_collider.txt";
     background = {backgroundR, backgroundG, backgroundB, backgroundA};
-    col = new collider(0.0, 0.0, colliderFileName);
+    world = new collider(0.0, 0.0, colliderFileName);
 
     //Get the list of entities
 
@@ -72,57 +74,51 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
         if (type == "layer") {
             string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "Error: No layer filename specified.";
             gameLayer * L = new gameLayer(x, y, {R, G, B, A}, sizeFactor, fileName);
-            el.addEntity(L);
+            world -> addEntity(L);
         }
         else if (type == "endingGate") {
             int width = entity.HasMember("width") ? entity["width"].GetInt() : 3;
             int height = entity.HasMember("height") ? entity["height"].GetInt() : 3;
-            endingGate * E = new endingGate(x, y, {R, G, B, A}, sizeFactor, &el, width, height);
-            el.addEntity(E);
-            col -> addCollideable(E);
+            endingGate * E = new endingGate(x, y, {R, G, B, A}, sizeFactor, width, height);
+            world -> addCollideable(E);
         }
         else if (type == "door") {
             string nextRoom = entity.HasMember("nextRoom") ? entity["nextRoom"].GetString() : "Error: No door destination specified.";
             float destinationX = entity.HasMember("destinationX") ? entity["destinationX"].GetFloat() : 0.0;
             float destinationY = entity.HasMember("destinationY") ? entity["destinationY"].GetFloat() : 0.0;
             door * D = new door(x, y, {R, G, B, A}, sizeFactor, nextRoom, destinationX, destinationY);
-            el.addEntity(D);
-            col -> addCollideable(D);
+            world -> addCollideable(D);
         }
         else if (type == "savePoint") {
-            savePoint * S = new savePoint(x, y, {R, G, B, A}, sizeFactor, &el);
-            el.addEntity(S);
-            col -> addCollideable(S);
+            savePoint * S = new savePoint(x, y, {R, G, B, A}, sizeFactor);
+            world -> addCollideable(S);
         }
         else if (type == "player") {
             playerPtr -> setColor({R, G, B, A});
             playerPtr -> setSizeFactor(sizeFactor);
-            el.addEntity(playerPtr);
-            col -> addCollideable(playerPtr);
+            world -> addCollideable(playerPtr);
         }
         else if (type == "forceField") {
             int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;
             float power = entity.HasMember("power") ? entity["power"].GetFloat() : 0;
             float range = entity.HasMember("range") ? entity["range"].GetFloat() : 0;
-            forceField * F = new forceField(x, y, {R, G, B, A}, sizeFactor, &el, channel, power, range);
-            el.addEntity(F);
-            col -> addCollideable(F);
+            forceField * F = new forceField(x, y, {R, G, B, A}, sizeFactor, channel, power, range);
+            world -> addCollideable(F);
         }
         else if (type == "rain") {
             float dropsPerTick = entity.HasMember("dropsPerTick") ? entity["dropsPerTick"].GetFloat() : 1.0;
             float xMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat() : 0.0;
             bool isSnow = entity.HasMember("snow") ? entity["snow"].GetBool() : 0;
-            rain * newRain = new rain(x, y, {R, G, B, A}, sizeFactor, &el, dropsPerTick, xMomentum, isSnow);
-            el.addEntity(newRain);
+            rain * newRain = new rain(x, y, {R, G, B, A}, sizeFactor, dropsPerTick, xMomentum, isSnow);
+            world -> addEntity(newRain);
         }
         else if (type == "water") {
             int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
             float depth = entity.HasMember("depth") ? entity["depth"].GetFloat() : 1.0;
             float wavelength = entity.HasMember("wavelength") ? entity["wavelength"].GetFloat() : 1.0;
             float amplitude = entity.HasMember("amplitude") ? entity["amplitude"].GetFloat() : 1.0;
-            water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, &el, width, depth, wavelength, amplitude);
-            el.addEntity(newWater);
-            col -> addCollideable(newWater);
+            water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, width, depth, wavelength, amplitude);
+            world -> addCollideable(newWater);
         }
         else if (type == "gunPickUp") {
             int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
@@ -131,9 +127,8 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                gunPickUp * newGunPickUp = new gunPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, gunID);
-                el.addEntity(newGunPickUp);
-                col -> addCollideable(newGunPickUp);
+                gunPickUp * newGunPickUp = new gunPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID);
+                world -> addCollideable(newGunPickUp);
             }
         }
         else if (type == "ammoPickUp") {
@@ -144,9 +139,8 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
                 int ammoCount = entity.HasMember("ammoCount") ? entity["ammoCount"].GetInt() : 1;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                ammoPickUp * newAmmoPickUp = new ammoPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, gunID, ammoCount);
-                el.addEntity(newAmmoPickUp);
-                col -> addCollideable(newAmmoPickUp);
+                ammoPickUp * newAmmoPickUp = new ammoPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID, ammoCount);
+                world -> addCollideable(newAmmoPickUp);
             }
         }
         else if (type == "healthPickUp") {
@@ -156,9 +150,8 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                healthPickUp * newHealthPickUp = new healthPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, healthCount);
-                el.addEntity(newHealthPickUp);
-                col -> addCollideable(newHealthPickUp);
+                healthPickUp * newHealthPickUp = new healthPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
+                world -> addCollideable(newHealthPickUp);
             }
         }
         else if (type == "maxHealthPickUp") {
@@ -168,9 +161,8 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                maxHealthPickUp * newMaxHealthPickUp = new maxHealthPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, healthCount);
-                el.addEntity(newMaxHealthPickUp);
-                col -> addCollideable(newMaxHealthPickUp);
+                maxHealthPickUp * newMaxHealthPickUp = new maxHealthPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
+                world -> addCollideable(newMaxHealthPickUp);
             }
         }
         else if (type == "airPickUp") {
@@ -180,9 +172,8 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                airPickUp * newAirPickUp = new airPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, airCount);
-                el.addEntity(newAirPickUp);
-                col -> addCollideable(newAirPickUp);
+                airPickUp * newAirPickUp = new airPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, airCount);
+                world -> addCollideable(newAirPickUp);
             }
         }
         else if (type == "maxAirPickUp") {
@@ -192,9 +183,8 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                 int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                 int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
                 bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                maxAirPickUp * newMaxAirPickUp = new maxAirPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, airCount);
-                el.addEntity(newMaxAirPickUp);
-                col -> addCollideable(newMaxAirPickUp);
+                maxAirPickUp * newMaxAirPickUp = new maxAirPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, airCount);
+                world -> addCollideable(newMaxAirPickUp);
             }
         }
         else if (type == "opPickUp") {
@@ -267,9 +257,8 @@ void readEntities(entityList& el, collider*& col, Color& background, player* pla
                     }
                     message.append(1, args[i].GetInt());
                 }
-                opPickUp * newOpPickUp = new opPickUp(x, y, {R, G, B, A}, sizeFactor, &el, displayChar, lifetime, pickUpID, touch, message);
-                el.addEntity(newOpPickUp);
-                col -> addCollideable(newOpPickUp);
+                opPickUp * newOpPickUp = new opPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, message);
+                world -> addCollideable(newOpPickUp);
             }
         }
         else {
@@ -327,20 +316,16 @@ int main(int argc, char** argv) {
 
             //Read in entities, including colllider
 
-            entityList entities;
-            playerPtr -> setEList(&entities);
-            collider* col;
             Color background;
-
-            readEntities(entities, col, background, playerPtr, playerPtr -> nextRoom);
+            readEntities(background, playerPtr, playerPtr -> nextRoom);
             cout << "Finished reading in entities\n";
 
             //Camera initializations
 
-            float cameraX = col -> getCols() / 2;
-            float cameraY = col -> getRows() / 2;
-            bool moveCameraX = (col -> getCols() > SCREENCOLS * playerPtr -> getSizeFactor());
-            bool moveCameraY = (col -> getRows() > SCREENROWS * playerPtr -> getSizeFactor());
+            float cameraX = world -> getCols() / 2;
+            float cameraY = world -> getRows() / 2;
+            bool moveCameraX = (world -> getCols() > SCREENCOLS * playerPtr -> getSizeFactor());
+            bool moveCameraY = (world -> getRows() > SCREENROWS * playerPtr -> getSizeFactor());
 
             shouldChangeRooms = false;
 
@@ -372,7 +357,7 @@ int main(int argc, char** argv) {
 
                     if (moveCameraX) {
                         if (playerPtr -> x > cameraX + CAMERALAGX) {
-                            cameraX = min(playerPtr -> x - CAMERALAGX, col -> getCols() - SCREENCOLS / 2.0f);
+                            cameraX = min(playerPtr -> x - CAMERALAGX, world -> getCols() - SCREENCOLS / 2.0f);
                         }
                         else if (playerPtr -> x < cameraX - CAMERALAGX) {
                             cameraX = max(playerPtr -> x + CAMERALAGX, SCREENCOLS / 2.0f);
@@ -380,7 +365,7 @@ int main(int argc, char** argv) {
                     }
                     if (moveCameraY) {
                         if (playerPtr -> y > cameraY + CAMERALAGY) {
-                            cameraY = min(playerPtr -> y - CAMERALAGY, col -> getRows() - SCREENROWS / 2.0f);
+                            cameraY = min(playerPtr -> y - CAMERALAGY, world -> getRows() - SCREENROWS / 2.0f);
                         }
                         else if (playerPtr -> y < cameraY - CAMERALAGY) {
                             cameraY = max(playerPtr -> y + CAMERALAGY, SCREENROWS / 2.0f);
@@ -389,18 +374,15 @@ int main(int argc, char** argv) {
 
                     //Update entities
 
-                    entities.tickSet(*col);
-                    col -> tickSet(*col);
-                    entities.tickGet(*col);
-                    col -> tickGet(*col);
-                    entities.finalize();
-                    col -> finalize();
+                    world -> tickSet();
+                    world -> tickGet();
+                    world -> finalize();
 
                     //Display the world
 
                     BeginDrawing();
                     ClearBackground(background);
-                    entities.print(cameraX, cameraY, displayFont);
+                    world -> print(cameraX, cameraY, displayFont);
                     if (DRAWFPS) {
                         myDrawText(displayFont, to_string(GetFPS()).c_str(), (Vector2){10, 10}, 16, 0, WHITE);
                     }
@@ -411,7 +393,7 @@ int main(int argc, char** argv) {
                     if (playerPtr -> shouldChangeRooms) {
                         shouldChangeRooms = true;
                         playerPtr -> shouldChangeRooms = false;
-                        delete col;
+                        delete world;
                     }
                 }
 
@@ -427,7 +409,6 @@ int main(int argc, char** argv) {
 //                this_thread::sleep_for(16666000ns - chrono::duration_cast<chrono::nanoseconds>(tickEnd - tickStart));
 
             }
-            delete col;
         }
         delete playerPtr;
         won = max(won, 0);

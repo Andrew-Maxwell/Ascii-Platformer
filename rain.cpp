@@ -13,8 +13,8 @@
 
 
 
-    void drop::tickGet(collider& col) {
-        physicalParticle::tickGet(col);
+    void drop::tickGet() {
+        physicalParticle::tickGet();
         if (isUnderWater) {
             shouldDelete = true;
         }
@@ -26,17 +26,17 @@
 //Constantly spawns particles above the top of the screen
 /******************************************************************************/
 
-    rain::rain(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList, float newDropsPerTick, float newXMomentum, bool newIsSnow) :
+    rain::rain(float newX, float newY, Color newTint, float newSizeFactor,  float newDropsPerTick, float newXMomentum, bool newIsSnow) :
         entity(newX, newY, newTint, newSizeFactor),
         dropsPerTick(newDropsPerTick),
         xMomentum(newXMomentum),
         isSnow(newIsSnow),
         firstTick(true) {
-            eList = newEList;
+            
             type = RAINTYPE;
         }
 
-    void rain::tickSet(collider& col) {
+    void rain::tickSet() {
         //Do rain for a bit on first tick so that raindrops appear to already have been falling when the room is loaded
         //Note that since collider can't be run this way, interactions with other entities won't work properly
         //in these preloaded raindrops. Probably not an issue
@@ -45,14 +45,14 @@
             firstTick = false;
             if (isSnow) {
                 for (int i = 0; i < 500; i++) {
-                    tickSet(col);
-                    tickGet(col);
+                    tickSet();
+                    tickGet();
                 }
             }
             else {
                 for (int i = 0; i < 50; i++) {
-                    tickSet(col);
-                    tickGet(col);
+                    tickSet();
+                    tickGet();
                 }
             }
         }
@@ -86,17 +86,17 @@
                         float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
                         float newElasticity, float newMaxSpeed, float newGravity, float newFriction) :*/
 
-                raindrop = new drop(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, snowflake, 0, xMomentum, 0.2, 0.2, GRAVITY, 0.5, 1000);
+                raindrop = new drop(GetRandomValue(0, world -> getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, snowflake, 0, xMomentum, 0.2, 0.2, GRAVITY, 0.5, 1000);
             }
             else {
-                raindrop = new drop(GetRandomValue(0, col.getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, 0, 0, xMomentum, 0.7, 0.7, GRAVITY, 0.5, 200);
+                raindrop = new drop(GetRandomValue(0, world -> getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, 0, 0, xMomentum, 0.7, 0.7, GRAVITY, 0.5, 200);
             }
-            eList -> addEntity(raindrop);
-            col.addParticle(raindrop);
+            world -> addEntity(raindrop);
+            world -> addParticle(raindrop);
         }
     }
 
-    void rain::tickGet(collider& col) {}
+    void rain::tickGet() {}
 
     bool rain::finalize() {
         return false;

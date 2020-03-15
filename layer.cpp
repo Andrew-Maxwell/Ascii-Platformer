@@ -42,9 +42,9 @@
         return canvas[0].length();
     }
 
-    void layer::tickSet(collider& col) {}
+    void layer::tickSet() {}
 
-    void layer::tickGet(collider& col) {}
+    void layer::tickGet() {}
 
     bool layer::finalize() {
         return false;

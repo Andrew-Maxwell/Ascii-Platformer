@@ -1,5 +1,5 @@
 #include "meta.hpp"
-#include "entitymeta.hpp"
+#include "entity.hpp"
 
 #ifndef DUMMYENTITY_HPP
 #define DUMMYENTITY_HPP
@@ -21,9 +21,9 @@ class dummyEntity : public entity {
     dummyEntity(  float newX, float newY, Color newTint,
                     float newSizeFactor, char newC, int newLifetime = 10000000);
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

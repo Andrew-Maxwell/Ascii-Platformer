@@ -1,8 +1,8 @@
 #ifndef PARTICLES_HPP
 #define PARTICLES_HPP
 
-#include "col.hpp"
-#include "entitymeta.hpp"
+#include "world.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 
 using namespace rapidjson;
@@ -29,9 +29,9 @@ class particle : virtual public entity {
 
     ~particle();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

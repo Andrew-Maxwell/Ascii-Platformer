@@ -30,13 +30,13 @@
         return shouldDelete;
     }
 
-    void physicalParticle::tickSet(collider& col) {
-        if (col.isSolid(x, y) || lifetime-- < 0 || (xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01)) {
+    void physicalParticle::tickSet() {
+        if (world -> isSolid(x, y) || lifetime-- < 0 || (xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01)) {
             shouldDelete = true;
         }
     }
 
-    void physicalParticle::tickGet(collider& col) {
+    void physicalParticle::tickGet() {
 
         isUnderWater = false;
         for (auto c : collisions) {
@@ -60,7 +60,7 @@
             yMomentum += gravity;
         }
 
-        if (col.isSolid((int)(x + xMomentum) + (xMomentum > 0), (int)(y))) {
+        if (world -> isSolid((int)(x + xMomentum) + (xMomentum > 0), (int)(y))) {
             x = floor(x + xMomentum) + (xMomentum < 0);
             xMomentum *= (-1 * elasticity);
         }
@@ -68,7 +68,7 @@
             x += xMomentum;
         }
 
-        if (col.isSolid((int)x, (int)(y + yMomentum) + (yMomentum > 0))) {
+        if (world -> isSolid((int)x, (int)(y + yMomentum) + (yMomentum > 0))) {
             y = floor(y + yMomentum) + (yMomentum < 0);
             yMomentum *= (-1 * elasticity);
             xMomentum *= friction;
@@ -123,9 +123,9 @@
         return false;
     }
 
-    void realPhysicalEntity::tickSet(collider& col) {}
+    void realPhysicalEntity::tickSet() {}
 
-    void realPhysicalEntity::tickGet(collider& col) {
+    void realPhysicalEntity::tickGet() {
         float waterMoveX = 0, waterMoveY = 0;
         lastTickUnderWater = isUnderWater;
         isUnderWater = false;
@@ -158,7 +158,7 @@
 
         float xDist = (xMomentum + waterMoveX) / (abs(xMomentum + waterMoveX) + 1);
         for (int i = 0; i < abs(xMomentum + waterMoveX) + 1; i++) {
-            if (col.isSolid((int)(x + xDist) + (xDist > 0), (int)y)) {// || col.isSolid((int)y + 0.5, (int)(x + xDist) + (xDist > 0))) {
+            if (world -> isSolid((int)(x + xDist) + (xDist > 0), (int)y)) {// || world -> isSolid((int)y + 0.5, (int)(x + xDist) + (xDist > 0))) {
                 x = floor(x + xDist) + (xDist < 0);
                 xMomentum *= (-1 * elasticity);
                 break;
@@ -170,7 +170,7 @@
 
         float yDist = (yMomentum + waterMoveY) / (abs(yMomentum + waterMoveY) + 1);
         for (int i = 0; i < abs(yMomentum + waterMoveY) + 1; i++) {
-            if (col.isSolid((int)(x + 0.5 - width / 2), (int)(y + yDist) + (yDist > 0)) || col.isSolid((int)(x + 0.5 + width / 2), (int)(y + yDist) + (yDist > 0))) {
+            if (world -> isSolid((int)(x + 0.5 - width / 2), (int)(y + yDist) + (yDist > 0)) || world -> isSolid((int)(x + 0.5 + width / 2), (int)(y + yDist) + (yDist > 0))) {
                 y = floor(y + yDist) + (yDist < 0);
                 yMomentum *= (-1 * elasticity);
                 xMomentum *= friction;

@@ -1,7 +1,7 @@
 #ifndef GAMELAYER_HPP
 #define GAMELAYER_HPP
 
-#include "col.hpp"
+
 #include "layer.hpp"
 #include "meta.hpp"
 

@@ -1,9 +1,9 @@
 #ifndef SAVEPOINT_HPP
 #define SAVEPOINT_HPP
 
-#include "col.hpp"
+#include "world.hpp"
 #include "effects.hpp"
-#include "entitymeta.hpp"
+#include "entity.hpp"
 #include "particles.hpp"
 
 using namespace rapidjson;
@@ -16,11 +16,11 @@ using namespace rapidjson;
 class savePoint : public collideable {
 
     bool savedGame = false;
-    entityList* eList;
+    
 
     public:
 
-    explicit savePoint(float newX, float newY, Color newTint, float newSizeFactor, entityList* newEList);
+    explicit savePoint(float newX, float newY, Color newTint, float newSizeFactor);
 
     bool doesCollide(float otherX, float otherY, int otherType);
 
@@ -28,9 +28,9 @@ class savePoint : public collideable {
 
     bool stopColliding();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 

@@ -1,8 +1,8 @@
 #ifndef PHYSICALENTITIES_HPP
 #define PHYSICALENTITIES_HPP
 
-#include "col.hpp"
-#include "entitymeta.hpp"
+#include "world.hpp"
+#include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
 
@@ -33,9 +33,9 @@ class physicalParticle : virtual public collideable, public particle {
 
     bool stopColliding();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 
@@ -68,9 +68,9 @@ class realPhysicalEntity : virtual public collideable {
 
     bool stopColliding();
 
-    void tickSet(collider& col);
+    void tickSet();
 
-    void tickGet(collider& col);
+    void tickGet();
 
     bool finalize();
 
