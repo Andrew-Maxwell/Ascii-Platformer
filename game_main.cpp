@@ -263,7 +263,6 @@ void readEntities(Color& background, player* playerPtr, string& fileName) {
         }
         else {
             cerr << "Bad entity type: " << type << endl;
-            break;
         }
     }
     free(buffer);

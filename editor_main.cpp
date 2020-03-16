@@ -2,14 +2,19 @@
 #include "dummyentity.hpp"
 #include "editables.hpp"
 #include "charfills.hpp"
+#include "world.hpp"
 
 using namespace rapidjson;
+
+collider* world = NULL;
 
 /******************************************************************************/
 //Read in a list of entities from a file
 /******************************************************************************/
 
-void readEntities(entityList& el, list<editableLayer*>& layers, editableCollider*& col, Color& background, string& fileName, Document& doc) {
+void readEntities(list<editableLayer*>& layers, editableCollider*& col, Color& background, string& fileName, Document& doc) {
+
+    world = new collider();
 
     //Read into a json object
 
@@ -57,16 +62,16 @@ void readEntities(entityList& el, list<editableLayer*>& layers, editableCollider
         string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "No filename found.";
         editableLayer * L = new editableLayer(x, y, {R, G, B, A}, sizeFactor, (type == "layer"), fileName, toupper(type[0]), &entity);
         layers.push_back(L);
-        el.addEntity(L);
+        world -> addEntity(L);
     }
     col = new editableCollider(0.0, 0.0, {0, 0, 0, 80}, 1, true, colFileName, '!', NULL);
-    el.addEntity(col);
+    world -> addEntity(col);
     layers.push_back(col);
 }
 
 //Save all the data
 
-void writeEntities(entityList& el, list<editableLayer*>& layers, const string fileName, Document& doc) {
+void writeEntities(list<editableLayer*>& layers, const string fileName, Document& doc) {
     cout << "Saving file...\n";
     
     //Save layer files
@@ -114,7 +119,7 @@ int main(int argc, char** argv) {
     //Mouse interface variables
 
     vector<tuple<int, int>> mousePos;
-    entityList markers;
+    collider markers;
     float oldMouseX, oldMouseY, oldCameraX, oldCameraY;
 
     //Clipboard
@@ -215,7 +220,6 @@ int main(int argc, char** argv) {
     //Level data
 
     list<editableLayer*> layers;
-    entityList entities;
     editableCollider* col;
     Color background;
     string fileName(argv[1]);
@@ -223,7 +227,7 @@ int main(int argc, char** argv) {
     
     cout << "Starting loading entities...\n";
     
-    readEntities(entities, layers, col, background, fileName, json);
+    readEntities(layers, col, background, fileName, json);
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
     float speedMult;
@@ -373,7 +377,7 @@ int main(int argc, char** argv) {
                         mayNeedToSave = true;
                     }
                     if (IsKeyPressed(KEY_S)) {
-                        writeEntities(entities, layers, fileName, json);
+                        writeEntities(layers, fileName, json);
                         mayNeedToSave = false;
                     }
                     if (IsKeyPressed(KEY_X) && (*thisLayer) -> getIsLayer() && mousePos.size() > 1) {
@@ -671,7 +675,7 @@ int main(int argc, char** argv) {
 
                 BeginDrawing();
                 ClearBackground(background);
-                entities.print(cameraX, cameraY, displayFont);
+                world -> print(cameraX, cameraY, displayFont);
 
                 //display brush palette
 
@@ -712,7 +716,7 @@ int main(int argc, char** argv) {
             myDrawText(displayFont, "You didn't save the level. Do you want to save? Y/S or N/ESC.", (Vector2){FONTSIZE, FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
-                writeEntities(entities, layers, fileName, json);
+                writeEntities(layers, fileName, json);
                 mayNeedToSave = false;
             }
             if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_N)) {

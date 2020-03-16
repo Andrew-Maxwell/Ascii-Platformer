@@ -9,9 +9,11 @@
     collider::collider(float newX, float newY, string fileName) :
         entity(newX, newY, {0, 0, 0, 0}, 1),
         layer(newX, newY, {0, 0, 0, 0}, 1, fileName)
-        {
+    {
+        if (fileName != "") {
             layer::readLayer();
         }
+    }
 
     //destructor
 
@@ -24,6 +26,15 @@
         }
     }
 
+    void collider::clear() {
+        while (entities.begin() != entities.end()) {
+            delete (*entities.begin());
+            entities.erase(entities.begin());
+        }
+        entities.clear();
+        collideables.clear();
+        particles.clear();
+    }
 
     //Tick functions
 
@@ -138,7 +149,6 @@
         list<entity*>::iterator e = entities.begin();
         while (e != entities.end()) {
             if ((*e) -> finalize()) {
-                cout << "Died while trying to finalize " << (*e) -> type << endl;
                 delete *e;
                 e = entities.erase(e);
             }

@@ -60,12 +60,7 @@
     void particle::tickGet() {}
 
     bool particle::finalize() {
-        if (lifetime == 0) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return lifetime == 0;
     }
 
     void particle::print(float cameraX, float cameraY, Font displayFont) {

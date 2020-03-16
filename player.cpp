@@ -316,7 +316,6 @@ struct saveData {
                 }
                 b -> tickSet();
                 b -> tickSet();
-                world -> addEntity(b);
                 world -> addCollideable(b);
             }
         }

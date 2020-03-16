@@ -91,7 +91,6 @@
             else {
                 raindrop = new drop(GetRandomValue(0, world -> getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, 0, 0, xMomentum, 0.7, 0.7, GRAVITY, 0.5, 200);
             }
-            world -> addEntity(raindrop);
             world -> addParticle(raindrop);
         }
     }

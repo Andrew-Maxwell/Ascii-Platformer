@@ -84,11 +84,13 @@ class collider : public layer {
 
     //Constructor
 
-    collider(   float newX, float newY, string fileName = "collider.txt");
+    collider (float newX = 0.0, float newY = 0.0, string fileName = "");
 
     //destructor
 
     ~collider();
+
+    void clear();
 
     //Tick functions
 

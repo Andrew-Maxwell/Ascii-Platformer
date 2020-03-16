@@ -29,7 +29,8 @@ GAMESRCS := \
 
 EDTRSRCS := \
 	meta.cpp \
-	entitymeta.cpp \
+    world.cpp \
+    entity.cpp \
 	layer.cpp \
 	dummyentity.cpp \
 	editables.cpp \

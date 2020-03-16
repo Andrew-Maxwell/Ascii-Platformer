@@ -49,7 +49,6 @@
             exploded = true;
             explode (60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
             explosion* e = new explosion(x, y, tint, sizeFactor, 0, -1.0, 30);
-            world -> addEntity(e);
             world -> addCollideable(e);
         }
     }
