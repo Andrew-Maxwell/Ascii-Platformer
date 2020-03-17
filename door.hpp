@@ -3,6 +3,7 @@
 
 #include "world.hpp"
 #include "entity.hpp"
+#include "canvas.hpp"
 #include "meta.hpp"
 
 using namespace rapidjson;
@@ -34,7 +35,7 @@ class door : public collideable {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 #endif //DOOR_HPP

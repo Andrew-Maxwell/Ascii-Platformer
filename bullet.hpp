@@ -46,7 +46,7 @@ class bullet : public realPhysicalEntity, public particle {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 
 };
 

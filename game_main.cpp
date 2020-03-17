@@ -13,10 +13,10 @@
 #include "rain.hpp"
 #include "savepoint.hpp"
 #include "water.hpp"
+#include "canvas.hpp"
 
 collider* world = NULL;
-
-#define DRAWFPS true
+canvas* theCanvas = NULL;
 
 using namespace rapidjson;
 
@@ -281,15 +281,12 @@ int main(int argc, char** argv) {
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer");
     SetTargetFPS(60);
 
-    Font displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
-
 //misc initializations
 
     chrono::steady_clock::time_point tickStart, tickEnd;
     long total = 0, tickCount = 0;
 
     int won = 0;
-    player* playerPtr;
     string savedNextRoom;
     bool shouldChangeRooms = false;
     bool showInventory = false;
@@ -298,7 +295,7 @@ int main(int argc, char** argv) {
 
         //Initialize
 
-        playerPtr = new player(0.0, 0.0, {255, 255, 255, 255}, 1, "test.txt");
+        player* playerPtr = new player(0.0, 0.0, {255, 255, 255, 255}, 1);
         if (argc == 1) {
             if (playerPtr -> load("save")) {
                 cout << "Loaded save.\n";
@@ -317,14 +314,10 @@ int main(int argc, char** argv) {
 
             Color background;
             readEntities(background, playerPtr, playerPtr -> nextRoom);
+            theCanvas = new canvas(world -> getRows(), world -> getCols(), background,
+                playerPtr -> getSizeFactor());
+
             cout << "Finished reading in entities\n";
-
-            //Camera initializations
-
-            float cameraX = world -> getCols() / 2;
-            float cameraY = world -> getRows() / 2;
-            bool moveCameraX = (world -> getCols() > SCREENCOLS * playerPtr -> getSizeFactor());
-            bool moveCameraY = (world -> getRows() > SCREENROWS * playerPtr -> getSizeFactor());
 
             shouldChangeRooms = false;
 
@@ -344,32 +337,13 @@ int main(int argc, char** argv) {
                 if (showInventory) {
                     BeginDrawing();
                     ClearBackground(UIBACKGROUND);
-                    playerPtr -> drawTabScreen(displayFont);
+                    playerPtr -> drawTabScreen();
                     EndDrawing();
                 }
 
                 //Otherwise, just show normally
 
                 else {
-
-                    //Update camera
-
-                    if (moveCameraX) {
-                        if (playerPtr -> x > cameraX + CAMERALAGX) {
-                            cameraX = min(playerPtr -> x - CAMERALAGX, world -> getCols() - SCREENCOLS / 2.0f);
-                        }
-                        else if (playerPtr -> x < cameraX - CAMERALAGX) {
-                            cameraX = max(playerPtr -> x + CAMERALAGX, SCREENCOLS / 2.0f);
-                        }
-                    }
-                    if (moveCameraY) {
-                        if (playerPtr -> y > cameraY + CAMERALAGY) {
-                            cameraY = min(playerPtr -> y - CAMERALAGY, world -> getRows() - SCREENROWS / 2.0f);
-                        }
-                        else if (playerPtr -> y < cameraY - CAMERALAGY) {
-                            cameraY = max(playerPtr -> y + CAMERALAGY, SCREENROWS / 2.0f);
-                        }
-                    }
 
                     //Update entities
 
@@ -379,13 +353,10 @@ int main(int argc, char** argv) {
 
                     //Display the world
 
-                    BeginDrawing();
-                    ClearBackground(background);
-                    world -> print(cameraX, cameraY, displayFont);
-                    if (DRAWFPS) {
-                        myDrawText(displayFont, to_string(GetFPS()).c_str(), (Vector2){10, 10}, 16, 0, WHITE);
-                    }
-                    EndDrawing();
+                    Vector2 playerPos = playerPtr -> getPos();
+                    theCanvas -> start(playerPos.x, playerPos.y);
+                    world -> print();
+                    theCanvas -> end();
 
                     //Handle room changing
 
@@ -393,6 +364,7 @@ int main(int argc, char** argv) {
                         shouldChangeRooms = true;
                         playerPtr -> shouldChangeRooms = false;
                         delete world;
+                        delete theCanvas;
                     }
                 }
 

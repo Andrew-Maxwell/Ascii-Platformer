@@ -159,10 +159,10 @@
         return false;
     }
 
-    void collider::print(float cameraX, float cameraY, Font displayFont) {
+    void collider::print() {
         list<entity*>::iterator e = entities.begin();
         while (e != entities.end()) {
-            (*e) -> print(cameraX, cameraY, displayFont);
+            (*e) -> print();
             e++;
         }
     }

@@ -50,9 +50,14 @@
         return false;
     }
 
-    void layer::print(float cameraX, float cameraY, Font displayFont) {
-        for (int i = max((int)(cameraY - y - SCREENROWS / sizeFactor / 2), 0); i < min((int)(cameraY - y + SCREENROWS / 2.0 / sizeFactor) + 1, (int)canvas.size()); i++) {
-            myDrawText(displayFont, canvas[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
+    void layer::print() {
+//        for (int i = 0; i < canvas.size(); i++) {
+//            theCanvas -> draw(x, y + i, tint, sizeFactor, canvas[i]);
+//        }
+        Vector2 camera = theCanvas -> getCamera();
+        int iMin = max(int(camera.y - y - theCanvas -> getScreenRows() / sizeFactor / 2), 0);
+        for (int i = iMin; i < min((int)(camera.y - y + theCanvas -> getScreenRows() / 2.0 / sizeFactor) + 1, (int)canvas.size()); i++) {
+            theCanvas -> draw(x, y + i, tint, sizeFactor, canvas[i]);
         }
     }
 

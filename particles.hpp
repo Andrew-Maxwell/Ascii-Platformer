@@ -35,7 +35,7 @@ class particle : virtual public entity {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 #endif //PARTICLES_HPP

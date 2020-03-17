@@ -6,6 +6,7 @@
 #include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
+#include "canvas.hpp"
 
 using namespace rapidjson;
 
@@ -41,7 +42,7 @@ class forceField : public collideable {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 /*****************************************************************************/
@@ -65,7 +66,7 @@ class explosion : public forceField {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 #endif //FORCEFIELD_HPP

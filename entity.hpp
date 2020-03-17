@@ -48,7 +48,7 @@ class entity {
 
     //Display the entity.
 
-    virtual void print(float cameraX, float cameraY, Font displayFont) {cout << "Error: entity::print() should be overloaded.";}
+    virtual void print() {cout << "Error: entity::print() should be overloaded.";}
 };
 
 #endif //ENTITY_HPP

@@ -30,33 +30,4 @@ void splash(int count, float x, float y, Color tint,
 
 void damageIndicator(int damage, float x, float y, Color tint, float newSizeFactor);
 
-/******************************************************************************/
-//drawBar...()
-//Draws a bar of length n pixels starting at x, y (level coordinates) in the direction specified.
-//Due to character limitations, for down and left, rounds to four pixels.
-/******************************************************************************/
-
-void drawBarLeft (float cameraX, float cameraY, Font& displayFont, float x, float y, Color tint, float sizeFactor, int length);
-
-void drawBarRight (float cameraX, float cameraY, Font& displayFont, float x, float y, Color tint, float sizeFactor, int length);
-
-void drawBarUp (float cameraX, float cameraY, Font& displayFont, float x, float y, Color tint, float sizeFactor, int length);
-
-void drawBarDown (float cameraX, float cameraY, Font& displayFont, float x, float y, Color tint, float sizeFactor, int length);
-
-/******************************************************************************/
-//drawHudBar...()
-//Draws a bar of length n pixels starting at x, y (screen coordinates) in the direction specified
-//Due to character limitations, for down and left, roounds to four pixels.
-/******************************************************************************/
-
-void drawHudBarLeft (Font& displayFont, int x, int y, Color tint, int length);
-
-void drawHudBarRight (Font& displayFont, int x, int y, Color tint, int length);
-
-void drawHudBarUp (Font& displayFont, int x, int y, Color tint, int length);
-
-void drawHudBarDown (Font& displayFont, int x, int y, Color tint, int length);
-
-
 #endif //EFFECTS_HPP

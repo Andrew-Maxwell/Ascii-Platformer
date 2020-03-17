@@ -21,6 +21,6 @@ using namespace rapidjson;
 
     bool dummyEntity::finalize() {return --lifetime < 0;}
 
-    void dummyEntity::print(float cameraX, float cameraY, Font displayFont)  {
-        myDrawText(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+    void dummyEntity::print()  {
+        theCanvas -> draw(x, y, tint, sizeFactor, toPrint);
     }

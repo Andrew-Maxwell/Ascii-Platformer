@@ -7,6 +7,7 @@
 #include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
+#include "physicalentities.hpp"
 
 using namespace rapidjson;
 
@@ -25,7 +26,7 @@ class player : protected realPhysicalEntity, virtual public collideable {
     int gunMaxAmmos[16] = {0};
     int gunCoolDowns[16] = {0};
     int gunDisplays[16] = {'E'};
-    char* gunDisplayChars[16] = {NULL};
+    string gunDisplayChars[16] = {""};
     Color gunColors[16] = {{255, 0, 255, 255}};
     Color gunColorsFaded[16] = {{127, 0, 127, 127}};
     int lastCollisionType;
@@ -41,7 +42,6 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     bool pickUpsCollected[512] = { false };
 
-    
     Vector2 positionOnScreen = {0, 0};
 
     public:
@@ -53,9 +53,7 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     //Constructor + save and load functions
 
-    explicit player(  float newX, float newY, Color newTint, float newSizeFactor, string newNextRoom);
-
-    ~player();
+    explicit player(  float newX, float newY, Color newTint, float newSizeFactor);
 
     bool save(string fileName);
 
@@ -73,6 +71,8 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     float getSizeFactor();
 
+    Vector2 getPos();
+
     //Collision functions
 
     bool doesCollide(float otherX, float otherY, int type);
@@ -89,15 +89,15 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 
     //Draw the HUD
 
-    void drawHUD(Font displayFont);
+    void drawHud();
 
     //Draw a GUI inventory/byte editor screen
 
-    void drawTabScreen(Font displayFont);
+    void drawTabScreen();
 
 };
 

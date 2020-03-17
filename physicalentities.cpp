@@ -80,7 +80,7 @@
 
     bool physicalParticle::finalize() {return shouldDelete;}
 
-    void physicalParticle::print(float cameraX, float cameraY, Font displayFont) {
+    void physicalParticle::print() {
         if (dynamicChar) {
             if (abs(xMomentum) + abs(yMomentum) > 0.2) {
                 xSpeed = xMomentum;
@@ -91,7 +91,7 @@
                 toPrint[0] = '.';
             }
         }
-        myDrawText(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
+        theCanvas -> draw(x, y, tint, sizeFactor, toPrint);
     }
 
 /******************************************************************************/

@@ -41,7 +41,7 @@ class water : public collideable {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 #endif //WATER_HPP

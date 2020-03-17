@@ -61,14 +61,14 @@
         return hit;
     }
 
-    void bullet::print(float cameraX, float cameraY, Font displayFont) {
+    void bullet::print() {
          if (!hit) {
             if (dynamicChar) {
                 xSpeed = xMomentum;
                 ySpeed = yMomentum;
                 particle::setDirection();
             }
-            particle::print(cameraX, cameraY, displayFont);
+            particle::print();
         }
     }
 

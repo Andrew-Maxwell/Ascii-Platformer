@@ -38,6 +38,6 @@
         return false;
     }
 
-    void savePoint::print(float cameraX, float cameraY, Font displayFont) {
-        myDrawText(displayFont, "S", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+    void savePoint::print() {
+        theCanvas -> draw(x, y, tint, sizeFactor, "S");
     }

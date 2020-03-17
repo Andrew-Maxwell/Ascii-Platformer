@@ -50,9 +50,9 @@
         return (collected || lifetime < 0);
     }
 
-    void pickUp::print(float cameraX, float cameraY, Font displayFont) {
+    void pickUp::print() {
         if (!collected) {
-            myDrawText(displayFont, toPrint, (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+            theCanvas -> draw(x, y, tint, sizeFactor, toPrint);
         }
     }
 

@@ -30,12 +30,11 @@ struct saveData {
 
 //Constructor
 
-    player::player(  float newX, float newY, Color newTint, float newSizeFactor, string newNextRoom) :
+    player::player(  float newX, float newY, Color newTint, float newSizeFactor) :
                             entity(newX, newY, newTint, newSizeFactor),
                             realPhysicalEntity(newX, newY, newTint, newSizeFactor, 1.0, 0.0, 0.0)
     {
         shouldChangeRooms = false;
-        nextRoom = newNextRoom;
         yMomentum = 0;
         elasticity = 0;
         type = PLAYERTYPE;
@@ -47,13 +46,7 @@ struct saveData {
         }
 
         for (int i = 0; i < 16; i++) {
-            gunDisplayChars[i] = TextToUtf8(&gunDisplays[i], 1);
-        }
-    }
-
-    player::~player() {
-        for (int i = 0; i < 16; i++) {
-            free(gunDisplayChars[i]);
+            gunDisplayChars[i] = string(TextToUtf8(&gunDisplays[i], 1));
         }
     }
 
@@ -138,6 +131,10 @@ struct saveData {
 
     float player::getSizeFactor() {
         return sizeFactor;
+    }
+
+    Vector2 player::getPos() {
+        return (Vector2){x, y};
     }
 
 //Collision functions
@@ -457,19 +454,17 @@ struct saveData {
         return false;
     }
 
-    void player::print(float cameraX, float cameraY, Font displayFont) {
-
-        positionOnScreen = (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor };   //Used for mouse aiming
+    void player::print() {
         if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
-            myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, HURTCOLOR);
+            theCanvas -> draw(x, y, HURTCOLOR, sizeFactor, "@");
         }
         else {
-            myDrawText(displayFont, "@", positionOnScreen, FONTSIZE * sizeFactor, 1, tint);
+            theCanvas -> draw(x, y, tint, sizeFactor, "@");
         }
-        drawHUD(displayFont);
+        drawHud();
     }
 
-    void player::drawHUD(Font displayFont) {
+    void player::drawHud() {
 
         //Print gun info
 
@@ -477,33 +472,33 @@ struct saveData {
         for (int i = 0; i < 16; i++) {
             if (gunUnlocked[i]) {
                 if (gunCoolDowns[i] > 0 || gunAmmos[i] < 1) {
-                    myDrawText(displayFont, gunDisplayChars[i], { FONTSIZE, (++rowCount + 3) * FONTSIZE}, FONTSIZE, 0, gunColorsFaded[i]);
-                    myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 3) * FONTSIZE}, FONTSIZE, 0, gunColorsFaded[i]);
+                    theCanvas -> drawHud(1, ++rowCount + 3, gunColorsFaded[i], gunDisplayChars[i]);
+                    theCanvas -> drawHud(2, rowCount + 3, gunColorsFaded[i], to_string(gunAmmos[i]));
                 }
                 else {
-                    myDrawText(displayFont, gunDisplayChars[i], { FONTSIZE, (++rowCount + 3) * FONTSIZE}, FONTSIZE, 0, gunColors[i]);
-                    myDrawText(displayFont, to_string(gunAmmos[i]).c_str(), { 2 * FONTSIZE, (rowCount + 3) * FONTSIZE}, FONTSIZE, 0, gunColors[i]);
+                    theCanvas -> drawHud(1, ++rowCount + 3, gunColors[i], gunDisplayChars[i]);
+                    theCanvas -> drawHud(2, rowCount + 3, gunColors[i], to_string(gunAmmos[i]));
                 }
             }
         }
 
         //Health background bar
 
-        drawHudBarRight(displayFont, FONTSIZE, FONTSIZE, UIBACKGROUND, maxHealth);
+        theCanvas -> drawHudBarRight(1, 1, UIBACKGROUND, maxHealth);
 
         //Health bar
 
         if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //If hurt, flash
-            drawHudBarRight(displayFont, FONTSIZE, FONTSIZE, HURTCOLOR, health);
+            theCanvas -> drawHudBarRight(1, 1, HURTCOLOR, health);
         }
         else {
-            drawHudBarRight(displayFont, FONTSIZE, FONTSIZE, HEALTHCOLOR, health);
+            theCanvas -> drawHudBarRight(1, 1, HEALTHCOLOR, health);
         }
 
         //Air bar
 
         if (air < maxAir) {
-            drawHudBarRight(displayFont, FONTSIZE, FONTSIZE * 2, AIRCOLOR, air / 7);
+            theCanvas -> drawHudBarRight(1, 2, AIRCOLOR, air / 7);
         }
     }
 
@@ -560,33 +555,33 @@ struct saveData {
     }
 
 
-    void player::drawTabScreen(Font displayFont) {
+    void player::drawTabScreen() {
 
         int keys[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
         int icons[] = {' ', 0xab, '<', 0x25a3, 0x2610, 'X', 'L'};
 
-        drawHUD(displayFont);
+        drawHud();
         string listNum = "0: ";
 
         //Print out all of the channel bitsets + all available ops, one per row.
 
         for (int i = 0; i < 10; i++) {
             listNum[0] = '0' + keys[i];
-            myDrawText(displayFont, listNum.c_str(), { FONTSIZE, FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+            theCanvas -> drawHud(1, 10 + 2 * i, UIFOREGROUND, listNum);
             for (int j = 0; j < 8; j++) {
                 if (channels[keys[i]][j]) {
-                    myDrawText(displayFont, "1", { FONTSIZE * (j + 4), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                    theCanvas -> drawHud(j + 4, 10 + 2 * i, UIFOREGROUND, "1");
                 }
                 else {
-                    myDrawText(displayFont, "0", { FONTSIZE * (j + 4), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                    theCanvas -> drawHud(j + 4, 10 + 2 * i, UIFOREGROUND, "0");
                 }
             }
             for (int k = 0; k < 16; k++) {
                 char* temp = TextToUtf8(&icons[ops[k][0]], 1);
-                myDrawText(displayFont, temp, { FONTSIZE * (k * 3 + 15), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                theCanvas -> drawHud(k * 3 + 15, 10 + 2 * i, UIFOREGROUND, temp);
                 free(temp);
                 if (ops[k][1] != 0) {
-                    myDrawText(displayFont, "+", {FONTSIZE * (k * 3 + 16), FONTSIZE * (10 + 2 * i) }, FONTSIZE, 0, UIFOREGROUND);
+                    theCanvas -> drawHud(k * 3 + 16, 10 + 2 * i, UIFOREGROUND, "+");
                 }
             }
         }
@@ -595,9 +590,9 @@ struct saveData {
 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             Vector2 mouse = GetMousePosition();
-            int lineSelect = (mouse.y / FONTSIZE - 10) / 2;
+            int lineSelect = (mouse.y / theCanvas -> getFontSize() - 10) / 2;
             if (0 <= lineSelect && lineSelect <= 9) {
-                int opSelect = (mouse.x / FONTSIZE - 15) / 3;
+                int opSelect = (mouse.x / theCanvas -> getFontSize() - 15) / 3;
                 if (0 <= opSelect && opSelect < 16) {
                     for (int i = 0; i < 4; i++) {
                         apply(&channels[keys[lineSelect]], ops[opSelect][i], args[opSelect][i]);

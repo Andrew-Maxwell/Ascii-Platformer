@@ -3,6 +3,7 @@
 
 #include "entity.hpp"
 #include "meta.hpp"
+#include "canvas.hpp"
 
 using namespace rapidjson;
 
@@ -39,7 +40,7 @@ class layer : virtual public entity {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 #endif //LAYER_HPP

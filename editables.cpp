@@ -141,11 +141,11 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     float editableLayer::getTileX(float cameraX, float mouseX) {
-        return mouseX / FONTSIZE / sizeFactor + cameraX - SCREENCOLS / sizeFactor / 2 - x;
+        return mouseX / theCanvas -> getFontSize() / sizeFactor + cameraX - theCanvas -> getScreenCols() / sizeFactor / 2 - x;
     }
 
     float editableLayer::getTileY(float cameraY, float mouseY) {
-        return mouseY / FONTSIZE / sizeFactor + cameraY - SCREENROWS / sizeFactor / 2 - y;
+        return mouseY / theCanvas -> getFontSize() / sizeFactor + cameraY - theCanvas -> getScreenCols() / sizeFactor / 2 - y;
     }
 
 
@@ -631,16 +631,21 @@ using namespace rapidjson;
 //Display
 /*****************************************************************************/
 
-    void editableLayer::print(float cameraX, float cameraY, Font displayFont) {
+    void editableLayer::print() {
         if (flashCount-- == 0) {
             tint = original;
         }
         if (visible) {
-            layer::print(cameraX, cameraY, displayFont);
+            layer::print();
+            Vector2 camera = theCanvas -> getCamera();
+            int screenRows = theCanvas -> getScreenRows();
+            int screenCols = theCanvas -> getScreenCols();
             if (selected && isLayer) {  //Boundary indicators (helps with editing)
-                for (int i = max((int)(cameraY - y - SCREENROWS / sizeFactor / 2), 0); i < min((int)(cameraY - y + SCREENROWS / sizeFactor / 2) + 1, (int)canvas.size()); i++) {
-                    myDrawText(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x - 1) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
-                    myDrawText(displayFont, "#", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x + knownWidth) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, RED);
+                int imin = max((int)(camera.y - y - screenRows / sizeFactor / 2), 0);
+                int imax = min((int)(camera.y - y + screenRows / sizeFactor / 2) + 1, (int)canvas.size());
+                for (int i = 0; i < imax - imin; i++) {
+                    theCanvas -> draw(x - 1, y + i, RED, sizeFactor, "#");
+                    theCanvas -> draw(x + knownWidth, y + i, RED, sizeFactor, "#");
                 }
             }
         }

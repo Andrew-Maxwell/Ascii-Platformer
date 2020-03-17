@@ -101,5 +101,5 @@
         return false;
     }
 
-    void rain::print(float cameraX, float cameraY, Font displayFont) {}
+    void rain::print() {}
 

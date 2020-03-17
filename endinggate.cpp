@@ -42,9 +42,9 @@
         return false;
     }
 
-    void endingGate::print(float cameraX, float cameraY, Font displayFont) {
+    void endingGate::print() {
         for (int i = 0; i < height; i++) {
-            myDrawText(displayFont, toPrint[i].c_str(), (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y + i) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 0, tint);
+            theCanvas -> draw(x, y + i, tint, sizeFactor, toPrint[i]);
         }
     }
 

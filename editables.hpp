@@ -102,7 +102,7 @@ class editableLayer : public layer {
 
     //Display
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 /*****************************************************************************/

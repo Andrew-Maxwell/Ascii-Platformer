@@ -44,13 +44,8 @@ inspiration/vague visual ideas:
     
 
 Housekeeping items:
-- Merge entityList and collideable into a single entity
-    - Separate lists for two-way, one-way, non-colliding entities
-    - Keep lists sorted by X or Y position, and add accessible "collisionrange" functions, to reduce the number of comparisons.
-        (Would this actually help? I feel like checking whether something is within collision range would not be much cheaper than
-        the existing doesCollide solution in many cases...)
-- Make a display(x, y, sizeFactor, color) and displayHUD(x, y, sizeFactor, color)
 - Replace drawBar() with a rectangle-drawing function.
+- Use ImageDrawTextEx to generate layer image files when entering a room; massive performance improvements.
 - Docs, including "lessons learned"
 - Replace x, y with Vector2 everywhere
 - Create configure() functions rather than having 10-argument constructors/standardize constructor argument order

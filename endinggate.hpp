@@ -5,6 +5,7 @@
 #include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
+#include "canvas.hpp"
 
 using namespace rapidjson;
 
@@ -36,7 +37,7 @@ class endingGate : public collideable {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 #endif //ENDINGGATE_HPP

@@ -39,7 +39,7 @@ class physicalParticle : virtual public collideable, public particle {
 
     bool finalize();
 
-    void print(float cameraX, float cameraY, Font displayFont);
+    void print();
 };
 
 /******************************************************************************/

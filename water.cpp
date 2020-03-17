@@ -75,8 +75,8 @@
         return false;
     }
 
-    void water::print(float cameraX, float cameraY, Font displayFont) {
+    void water::print() {
         for (int i = 0; i < width - 1; i++) {
-            drawBarUp(cameraX, cameraY, displayFont, x + i, y + depth, tint, sizeFactor, depth * FONTSIZE / 2 + surface[i] * 8);
+            theCanvas -> drawBarUp(x + i, y + depth, tint, sizeFactor, depth * theCanvas -> getFontSize() / 2 + surface[i] * 8);
         }
     }

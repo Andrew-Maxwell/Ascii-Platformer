@@ -65,8 +65,8 @@
         return false;
     }
 
-    void forceField::print(float cameraX, float cameraY, Font displayFont) {
-        myDrawText(displayFont, "F", (Vector2){ (SCREENCOLS / sizeFactor / 2 - cameraX + x) * FONTSIZE * sizeFactor, (SCREENROWS / sizeFactor / 2 - cameraY + y) * FONTSIZE * sizeFactor }, FONTSIZE * sizeFactor, 1, tint);
+    void forceField::print() {
+        theCanvas -> draw(x, y, tint, sizeFactor, "F");
     }
 
 /*****************************************************************************/
@@ -94,6 +94,6 @@
         return true;
     }
 
-    void explosion::print(float cameraX, float cameraY, Font displayFont) {}
+    void explosion::print() {}
 
 
