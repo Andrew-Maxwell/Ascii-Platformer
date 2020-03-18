@@ -41,6 +41,7 @@ class player : protected realPhysicalEntity, virtual public collideable {
     bitset<8> channels[10];
 
     bool pickUpsCollected[512] = { false };
+    bool spawned = false;
 
     Vector2 positionOnScreen = {0, 0};
 
@@ -54,6 +55,8 @@ class player : protected realPhysicalEntity, virtual public collideable {
     //Constructor + save and load functions
 
     explicit player(  float newX, float newY, Color newTint, float newSizeFactor);
+
+    void spawn(float spawnX, float spawnY);
 
     bool save(string fileName);
 

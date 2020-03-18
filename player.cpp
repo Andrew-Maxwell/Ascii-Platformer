@@ -50,6 +50,14 @@ struct saveData {
         }
     }
 
+    void player::spawn(float spawnX, float spawnY) {
+        if (!spawned) {
+            spawned = true;
+            x = spawnX;
+            y = spawnY;
+        }
+    }
+
     bool player::save(string fileName) {
         saveData s;
         s.x = x;

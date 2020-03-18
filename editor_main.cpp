@@ -7,14 +7,13 @@
 using namespace rapidjson;
 
 collider* world = NULL;
+canvas* theCanvas = NULL;
 
 /******************************************************************************/
 //Read in a list of entities from a file
 /******************************************************************************/
 
 void readEntities(list<editableLayer*>& layers, editableCollider*& col, Color& background, string& fileName, Document& doc) {
-
-    world = new collider();
 
     //Read into a json object
 
@@ -227,6 +226,8 @@ int main(int argc, char** argv) {
     
     cout << "Starting loading entities...\n";
     
+    world = new collider();
+
     readEntities(layers, col, background, fileName, json);
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
@@ -238,6 +239,7 @@ int main(int argc, char** argv) {
 
     while (!WindowShouldClose() || mayNeedToSave) {
 
+        theCanvas = new canvas(world -> getRows(), world -> getCols(), background, 1);
 
         while (!(WindowShouldClose() || exit)) {
 

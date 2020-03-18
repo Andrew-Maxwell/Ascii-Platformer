@@ -44,7 +44,8 @@ inspiration/vague visual ideas:
     
 
 Housekeeping items:
-- Replace drawBar() with a rectangle-drawing function.
+- Finish replacing drawBar() functions with rectangle-drawing functions + figure out why
+    they're not continuous.
 - Use ImageDrawTextEx to generate layer image files when entering a room; massive performance improvements.
 - Docs, including "lessons learned"
 - Replace x, y with Vector2 everywhere
@@ -53,6 +54,7 @@ Housekeeping items:
 - change everything from camelCase to PascalCase
 - rename sizeFactor to Scale
 - make layer use char[][] for mild performance benefits
+- Convert rain to a generic random particle spawner
 
 Bugs:
 - player disappears when standing on tile right below top of level

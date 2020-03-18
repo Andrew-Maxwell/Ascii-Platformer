@@ -175,6 +175,7 @@
         (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor }, fontSize, 0, tint);
         free(fb);
         free(pb);
+        DrawRectangle(x, y, -length * 2 * sizeFactor, fontSize * sizeFactor, RED);
     }
 
     void canvas::drawBarRight(float x, float y, Color tint, float sizeFactor, int length) {
@@ -212,25 +213,21 @@
         myDrawText(pb, {
         (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
         (screenRows / sizeFactor / 2 - cameraY + y + (length + 2) / 8) * fontSize * sizeFactor }, fontSize, 0, tint);
+        DrawRectangle((screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
+            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor,
+            fontSize * sizeFactor, length * fontSize / 8 * sizeFactor, tint);
     }
 
     void canvas::drawBarUp(float x, float y, Color tint, float sizeFactor, int length) {
-        int partBlock = ' ', fullBlock = 0x2588;
-        if (length % 8 != 0) {
-            partBlock = 0x2580 + length % 8;
-        }
-        char* fb = TextToUtf8(&fullBlock, 1);
-        char* pb = TextToUtf8(&partBlock, 1);
-        for (int i = 0; i < length / 8; i++) {
-            myDrawText(fb, {
-            (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
-            (screenRows / sizeFactor / 2 - cameraY + y - i) * fontSize * sizeFactor }, fontSize, 0, tint);
-        }
-        myDrawText(pb, {
-        (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
-        (screenRows / sizeFactor / 2 - cameraY + y - length / 8) * fontSize * sizeFactor }, fontSize, 0, tint);
-        free(fb);
-        free(pb);
+
+        //Using double fixes some alignment errors (esp. visible in water)
+
+        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
+        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
+        double width = fontSize * sizeFactor + xPixel - floor(xPixel);
+        double height = length * fontSize / 8 * sizeFactor + yPixel - floor(yPixel);
+        //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
+        DrawRectangle(xPixel, yPixel - height, width, height, tint);
     }
 
     /******************************************************************************/

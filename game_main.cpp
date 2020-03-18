@@ -96,6 +96,7 @@ void readEntities(Color& background, player* playerPtr, string& fileName) {
         else if (type == "player") {
             playerPtr -> setColor({R, G, B, A});
             playerPtr -> setSizeFactor(sizeFactor);
+            playerPtr -> spawn(x, y);
             world -> addCollideable(playerPtr);
         }
         else if (type == "forceField") {
@@ -283,8 +284,9 @@ int main(int argc, char** argv) {
 
 //misc initializations
 
-    chrono::steady_clock::time_point tickStart, tickEnd;
-    long total = 0, tickCount = 0;
+    chrono::steady_clock::time_point tickStart = chrono::steady_clock::now(), tickEnd;
+    long total = 0, totalSecond = 0, tickCount = 0;
+    int maxLoad = 0;
 
     int won = 0;
     string savedNextRoom;
@@ -323,10 +325,7 @@ int main(int argc, char** argv) {
 
             while (!(won || WindowShouldClose() || shouldChangeRooms)) {        //While we're in the same room
 
-                //Begin the tick
-
                 won = playerPtr -> won;
-                tickStart = chrono::steady_clock::now();
 
                 //Inventory screen?
 
@@ -345,6 +344,8 @@ int main(int argc, char** argv) {
 
                 else {
 
+                    tickStart = chrono::steady_clock::now();
+
                     //Update entities
 
                     world -> tickSet();
@@ -356,6 +357,27 @@ int main(int argc, char** argv) {
                     Vector2 playerPos = playerPtr -> getPos();
                     theCanvas -> start(playerPos.x, playerPos.y);
                     world -> print();
+
+                    //end the tick
+
+                    tickEnd = chrono::steady_clock::now();
+                    int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
+                    total += tickLength;
+                    totalSecond += tickLength;
+                    tickCount++;
+                    if (tickCount % 60 == 0) {
+                        cout << "Load: " << totalSecond / 10000 << "%\n";
+                        if (totalSecond / 10000 > maxLoad) {
+                            maxLoad = totalSecond / 10000;
+                        }
+                        totalSecond = 0;
+                    }
+
+                    //Sleep until the next frame
+
+//                  this_thread::sleep_for(16666000ns - chrono::duration_cast<chrono::nanoseconds>(tickEnd - tickStart));
+
+
                     theCanvas -> end();
 
                     //Handle room changing
@@ -367,18 +389,6 @@ int main(int argc, char** argv) {
                         delete theCanvas;
                     }
                 }
-
-                //End the tick
-
-                tickEnd = chrono::steady_clock::now();
-                int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
-                total += tickLength;
-                tickCount++;
-
-                //Sleep until the next frame
-
-//                this_thread::sleep_for(16666000ns - chrono::duration_cast<chrono::nanoseconds>(tickEnd - tickStart));
-
             }
         }
         delete playerPtr;
@@ -388,12 +398,6 @@ int main(int argc, char** argv) {
 //final clean up
 
     CloseWindow();
-    cout << "Average tick length: " << total / tickCount << endl;
-    if (won == -1) {
-        cout << "You lose.";
-    }
-    else {
-        cout << "You win! your score is: " << won;
-    }
+    cout << "Average load: " << total * 100 / 1000000 / (tickCount / 60) << "%\nMax load: " << maxLoad << "%\n";
 }
 

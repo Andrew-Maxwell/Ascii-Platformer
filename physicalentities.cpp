@@ -82,7 +82,7 @@
 
     void physicalParticle::print() {
         if (dynamicChar) {
-            if (abs(xMomentum) + abs(yMomentum) > 0.2) {
+            if (abs(xMomentum) + abs(yMomentum) > 0.5) {
                 xSpeed = xMomentum;
                 ySpeed = yMomentum;
                 particle::setDirection();

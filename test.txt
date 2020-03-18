@@ -13,9 +13,9 @@
             "G": 0,
             "B": 255,
             "A": 80,
-            "sizeFactor": 1.0,
+            "sizeFactor": 0.3,
             "wavelength": 30.0,
-            "amplitude": 2.5,
+            "amplitude": 4,
             "width": 198,
             "depth": 40
         },
@@ -55,8 +55,8 @@
         },
         {
             "type": "player",
-            "x": 20.0,
-            "y": 18.0,
+            "x": 33.0,
+            "y": 50.0,
             "R": 0,
             "G": 0,
             "B": 0,
