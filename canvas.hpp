@@ -79,6 +79,12 @@ class canvas {
 
     int getFontSize();
 
+    int getHudRows();
+
+    int getHudCols();
+
+    int getHudFontSize();
+
 };
 
 class editableCanvas : public canvas {

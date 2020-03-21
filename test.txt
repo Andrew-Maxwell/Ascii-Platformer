@@ -4,7 +4,7 @@
     "G": 255,
     "B": 100,
     "A": 255,
-    "fontSize": 12,
+    "fontSize": 16,
     "entities": [
         {
             "type": "water",
@@ -86,7 +86,7 @@
             "A": 255,
             "sizeFactor": 1.0,
             "channel": 1,
-            "power": -0.05,
+            "power": 0.05,
             "range": 30
         },
         {

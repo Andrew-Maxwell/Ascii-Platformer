@@ -17,7 +17,7 @@
 
     void drop::tickGet() {
         physicalParticle::tickGet();
-        if (isUnderWater) {
+        if (lastTickUnderWater) {
             shouldDelete = true;
         }
     }

@@ -2,8 +2,6 @@
 #include "rain.hpp"
 #include "effects.hpp"
 
-#define PULSESPEED 0.2
-
 /*****************************************************************************/
 //Water
 //Animates the surface of water
@@ -15,10 +13,11 @@
         depth (newDepth),
         wavelength (newWavelength),
         amplitude (newAmplitude) {
-            
             surface.resize(width, 0.0);
+            lastSurface.resize(width, 0.0);
             k = 2 * PI / wavelength;
             omega = sqrt(GRAVITY * k * tanh(k * depth));
+            pulseSpeed = omega / k;
         }
 
     unsigned int water::type() {
@@ -30,8 +29,25 @@
     }
 
     collision water::getCollision(float otherX, float otherY, int otherType) {
-        return collision(WATERTYPE, 0, amplitude * (y + depth - otherY) / depth * sin(k * (otherX - x) + omega * tickCounter) * -1 * omega * copysign(1, wavelength),
-                                       amplitude * (y + depth - otherY) / depth * cos(k * (otherX - x) + omega * tickCounter) * -1 * omega);
+        float yForce = -1 * (y + depth - otherY) / depth * (surface[otherX - x] - lastSurface[otherX - x]);
+        float otherYForce = -1 * (y + depth - otherY) / depth * (surface[otherX - x + 1] - lastSurface[otherX - x + 1]);
+        float xForce = 5 * (yForce - otherYForce);
+/*        float xForce = amplitude * (y + depth - otherY) / depth * sin(k * (otherX - x) + omega * tickCounter) * -1 * omega * copysign(1, wavelength);
+        float yForce = amplitude * (y + depth - otherY) / depth * cos(k * (otherX - x) + omega * tickCounter) * -1 * omega;
+        for (int i = 0; i < splashTimes.size(); i++) {
+            int ticksPassed = tickCounter - splashTimes[i];
+            float spread = (ticksPassed + 1) / 2.0f;
+            float location = splashPositions[i];
+            float size = 2.0f * splashSizes[i];
+            xForce += ( -1 * size * spread / (pow (otherX - location - pulseSpeed * ticksPassed, 2) + spread) +
+                        -1 * size * spread / (pow (otherX - location + pulseSpeed * ticksPassed, 2) + spread) +
+                         1 * size * spread / (pow (otherX - location - pulseSpeed * ticksPassed - 1.5, 2) + spread) +
+                         1 * size * spread / (pow (otherX - location + pulseSpeed * ticksPassed + 1.5, 2) + spread)) *
+                        copysign(1, location - otherX);
+        }*/
+
+        return collision(WATERTYPE, 0, xForce, yForce);
+
     }
 
     bool water::stopColliding() {
@@ -42,6 +58,8 @@
 
     void water::tickGet() {
 
+        lastSurface = surface;
+
         cout << "splashes: " << splashSizes.size() << endl;
         for (int i = 0; i < width - 1; i++) {
             surface[i] = amplitude * sin(k * i + omega * tickCounter);
@@ -51,18 +69,18 @@
         while (colIter != collisions.end()) {
             if (colIter -> type == FORCEFIELDTYPE) {
                 float range = colIter -> damage;
-                float power = colIter -> magnitude;
                 float otherX = colIter -> xVal, otherY = colIter -> yVal;
                 if (abs(y - otherY) <= range && otherX - x > 0 && otherX - x < width) {
+                    splashTimes.push_back(tickCounter);
+                    splashPositions.push_back(colIter -> xVal - x);
+                    splashSizes.push_back(-4 * colIter -> magnitude);
+                    float power = colIter -> magnitude;
                     float xRange = pow(pow(range, 2) - pow(y - otherY, 2), 0.5);
-                    for (int i = otherX - x - xRange + 1; i < otherX - x + xRange; i++) {
-                        surface[i] += 100 * power * (1 - pow((i + x - otherX) / xRange, 2));
-                    }
                     if (y > otherY && power > 0) {
                         for (int i = 0; i < power * 40; i++) {
-                            world -> addParticle(new drop(GetRandomValue(otherX - xRange, otherX + xRange),
-                                                          y - surface[otherX - x], tint, sizeFactor, 0, 0, 0,
-                                                          power * -5, 100, GRAVITY, FRICTION, 100));
+                            world -> addParticle(new drop(GetRandomValue(colIter -> xVal - xRange, colIter -> xVal + xRange),
+                                y - surface[otherX - x], tint, sizeFactor, 0, 0, 0,
+                                power * -5, 100, GRAVITY, FRICTION, 100));
                         }
                     }
                 }
@@ -77,20 +95,22 @@
         }
         for (int i = 0; i < splashTimes.size(); i++) {
             int ticksPassed = tickCounter - splashTimes[i];
-            if (ticksPassed > width / PULSESPEED) {
+            if (ticksPassed > width / pulseSpeed) {
                 splashTimes.pop_front();
                 splashPositions.pop_front();
                 splashSizes.pop_front();
             }
             else {
-                location = splashPositions[i];
-                size = abs(splashSizes[i]);
+
+                float spread = (ticksPassed + 1) / 4.0f;
+                float location = splashPositions[i];
+                float size = 2.0f * splashSizes[i];
                 
                 for (int i = 0; i < width - 1; i++) {
-                    surface[i] += ( -2 * size * ticksPassed / (pow (i - location - PULSESPEED * ticksPassed, 2) + ticksPassed) +
-                                    -2 * size * ticksPassed / (pow (i - location + PULSESPEED * ticksPassed, 2) + ticksPassed) +
-                                     2 * size * ticksPassed / (pow (i - location - PULSESPEED * ticksPassed - 1.5, 2) + ticksPassed) +
-                                     2 * size * ticksPassed / (pow (i - location + PULSESPEED * ticksPassed + 1.5, 2) + ticksPassed));
+                    surface[i] += ( -1 * size * spread / (pow (i - location - pulseSpeed * ticksPassed, 2) + spread) +
+                                    -1 * size * spread / (pow (i - location + pulseSpeed * ticksPassed, 2) + spread) +
+                                     1 * size * spread / (pow (i - location - pulseSpeed * ticksPassed - 1.5, 2) + spread) +
+                                     1 * size * spread / (pow (i - location + pulseSpeed * ticksPassed + 1.5, 2) + spread));
                 }
             }
         }

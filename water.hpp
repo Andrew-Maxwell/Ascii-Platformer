@@ -17,31 +17,33 @@ using namespace std;
 class water : public collideable {
 
     deque<float> splashTimes, splashPositions, splashSizes;
-    vector<float> surface;
+    vector<float> surface, lastSurface;
     int width;
-    float depth, wavelength, amplitude, k, omega;
+    float depth, wavelength, amplitude, k, omega, pulseSpeed;
     bool reverse;
-    float sTime, location, size;
+    float sTime;
 
     public:
 
-    explicit water( float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newDepth, float newWavelength, float newAmplitude);
+    explicit water (float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newDepth, float newWavelength, float newAmplitude);
 
-    unsigned int type();
+    unsigned int type ();
 
-    bool doesCollide( float otherX, float otherY, int otherType);
+    float calculateSurface (float atX)
 
-    collision getCollision( float otherX, float otherY, int otherType);
+    bool doesCollide (float otherX, float otherY, int otherType);
 
-    bool stopColliding();
+    collision getCollision (float otherX, float otherY, int otherType);
 
-    void tickSet();
+    bool stopColliding ();
 
-    void tickGet();
+    void tickSet ();
 
-    bool finalize();
+    void tickGet ();
 
-    void print();
+    bool finalize ();
+
+    void print ();
 };
 
 #endif //WATER_HPP

@@ -254,16 +254,16 @@ int main(int argc, char** argv) {
                 for (int i = 0; i < charFills.size(); i++) {
                     int codePointToDisplay =  charFills[i] -> display();
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
-                    theCanvas -> drawHud(i % (theCanvas -> getScreenCols() / 2) * 2,
-                                         i / (theCanvas -> getScreenCols() / 2) * 2,
-                                         UIFOREGROUND, string(temp)); // TODO: remove , (intVector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
+                    theCanvas -> drawHud(i % (theCanvas -> getHudCols() / 2) * 2,
+                                         i / (theCanvas -> getHudCols() / 2) * 2,
+                                         UIFOREGROUND, string(temp));
                     free(temp);
                 }
 
                 //Print out currently selected brush
 
                 string brushLabel = brushName + " Density: " + to_string(density) + (absoluteBrush? " Absolute mode" : " Relative mode");
-                theCanvas -> drawHud(1, theCanvas -> getScreenRows() - 2, UIFOREGROUND, brushLabel);
+                theCanvas -> drawHud(1, theCanvas -> getHudRows() - 2, UIFOREGROUND, brushLabel);
 
                 theCanvas -> end();
 
@@ -271,8 +271,8 @@ int main(int argc, char** argv) {
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mouse = GetMousePosition();
-                    int selection = (int)mouse.y / (2 * theCanvas -> getFontSize()) *
-                        (theCanvas -> getScreenCols() / 2) + (int)mouse.x / (2 * theCanvas -> getFontSize());
+                    int selection = (int)mouse.y / (2 * theCanvas -> getHudFontSize()) *
+                        (theCanvas -> getHudCols() / 2) + (int)mouse.x / (2 * theCanvas -> getHudFontSize());
                     if (selection > 0 && selection < charFills.size()) {
                         palette[paletteSelection + 22 * paletteSwitch] = selection;
                     }

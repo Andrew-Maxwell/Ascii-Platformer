@@ -9,29 +9,29 @@
 using namespace rapidjson;
 
 /******************************************************************************/
-//physicalParticle
+//realPhysicalEntity
 //An entity to which physics (gravity and not travelling through solid objects)
-//applies -- loosely.
+//applies, more rigorously.
 /******************************************************************************/
 
-class physicalParticle : virtual public collideable, public particle {
+class realPhysicalEntity : virtual public collideable {
 
     protected:
 
-    bool isUnderWater = false;
-    bool shouldDelete = false, dynamicChar;
+    bool isUnderWater = false, lastTickUnderWater = false;
     float elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction;
-    int xSign = 1, ySign = 1;
-    int lifetime;
+    float width = 0.8;
 
     public:
 
-    explicit physicalParticle( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
-                                  float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION, int newLifetime = 2147483647);
+    explicit realPhysicalEntity(float newx, float newy, Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
+                                float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     unsigned int type();
 
     bool doesCollide(float otherX, float otherY, int otherType);
+
+    collision getCollision(float otherX, float otherY, int otherType);
 
     bool stopColliding();
 
@@ -45,30 +45,29 @@ class physicalParticle : virtual public collideable, public particle {
 };
 
 /******************************************************************************/
-//realPhysicalEntity
+//physicalParticle
 //An entity to which physics (gravity and not travelling through solid objects)
-//applies, more rigorously.
+//applies -- loosely.
 /******************************************************************************/
 
-class realPhysicalEntity : virtual public collideable {
+class physicalParticle : virtual public collideable, public particle {
 
     protected:
 
-    bool lastTickUnderWater = false, isUnderWater = false;
+    bool isUnderWater = false, lastTickUnderWater = false;
     float elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction;
-    int xSign = 1, ySign = 1;
-    float width = 0.8;
+
+    bool shouldDelete = false, dynamicChar;
+    int lifetime;
 
     public:
 
-    explicit realPhysicalEntity(float newx, float newy, Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
-                                float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
+    explicit physicalParticle( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+                                  float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION, int newLifetime = 2147483647);
 
     unsigned int type();
 
     bool doesCollide(float otherX, float otherY, int otherType);
-
-    collision getCollision(float otherX, float otherY, int otherType);
 
     bool stopColliding();
 

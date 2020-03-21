@@ -179,6 +179,13 @@ struct saveData {
 
         //Movement in air
 
+        if (IsKeyPressed(KEY_W)) {
+            if (world -> isSolid(x + (1 - width) / 2, y + 1) || world -> isSolid(x + (1 + width) / 2, y + 1))  {
+                yMomentum -= JUMPSPEED;
+            }
+        }
+
+
         if (!isUnderWater) {
             if (IsKeyDown(KEY_D)) {
                 if (xMomentum < 0) {
@@ -202,13 +209,8 @@ struct saveData {
                 xMomentum *= 0.85;
             }
 
-          	//Jomping
+          	//Short jumps
 
-            if (IsKeyPressed(KEY_W)) {
-                if (world -> isSolid(x + (1 - width) / 2, y + 1) || world -> isSolid(x + (1 + width) / 2, y + 1))  {
-                    yMomentum -= JUMPSPEED;
-                }
-            }
             if (IsKeyReleased(KEY_W)) {
                 yMomentum = max(0.0f, yMomentum);
             }

@@ -296,11 +296,21 @@
         return screenCols;
     }
 
+    int canvas::getHudRows() {
+        return screenHeight / HUDFONTSIZE;
+    }
+
+    int canvas::getHudCols() {
+        return screenWidth / HUDFONTSIZE;
+    }
+
     int canvas::getFontSize() {
         return fontSize;
     }
 
-
+    int canvas::getHudFontSize() {
+        return HUDFONTSIZE;
+    }
 
     editableCanvas::editableCanvas(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor) :
         canvas(newWorldRows, newWorldCols, newBackground, newFontSize, newPlayerSizeFactor) {}
