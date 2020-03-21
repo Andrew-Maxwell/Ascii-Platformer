@@ -9,4 +9,5 @@ entity::entity(float newx, float newy, Color newTint, float newSizeFactor) {
     y = newy;
     tint = newTint;
     sizeFactor = newSizeFactor;
+    id = ++entityCounter;
 }

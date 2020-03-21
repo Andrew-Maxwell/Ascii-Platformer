@@ -56,6 +56,8 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     explicit player(  float newX, float newY, Color newTint, float newSizeFactor);
 
+    unsigned int type();
+
     void spawn(float spawnX, float spawnY);
 
     bool save(string fileName);
@@ -78,7 +80,7 @@ class player : protected realPhysicalEntity, virtual public collideable {
 
     //Collision functions
 
-    bool doesCollide(float otherX, float otherY, int type);
+    bool doesCollide(float otherX, float otherY, int otherType);
 
     collision getCollision(float otherX, float otherY, int otherType);
 

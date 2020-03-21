@@ -15,16 +15,13 @@
 #include "water.hpp"
 #include "canvas.hpp"
 
-collider* world = NULL;
-canvas* theCanvas = NULL;
-
 using namespace rapidjson;
 
 /******************************************************************************/
 //Read in a list of entities from a file
 /******************************************************************************/
 
-void readEntities(Color& background, player* playerPtr, string& fileName) {
+void readEntities(Color& background, int& fontSize, player* playerPtr, string& fileName) {
 
     //Read into a json object
 
@@ -46,8 +43,11 @@ void readEntities(Color& background, player* playerPtr, string& fileName) {
     uint8_t backgroundB = json.HasMember("B") ? json["B"].GetInt() : 255;
     uint8_t backgroundA = json.HasMember("A") ? json["A"].GetInt() : 255;
     string colliderFileName = json.HasMember("collider") ? json["collider"].GetString() : "test_collider.txt";
+    fontSize = json.HasMember("fontSize") ? json["fontSize"].GetInt() : 16;
     background = {backgroundR, backgroundG, backgroundB, backgroundA};
     world = new collider(0.0, 0.0, colliderFileName);
+    theCanvas = new canvas(world -> getRows(), world -> getCols(), background,
+        fontSize, playerPtr -> getSizeFactor());
 
     //Get the list of entities
 
@@ -285,13 +285,15 @@ int main(int argc, char** argv) {
 //misc initializations
 
     chrono::steady_clock::time_point tickStart = chrono::steady_clock::now(), tickEnd;
-    long total = 0, totalSecond = 0, tickCount = 0;
+    long total = 0, totalSecond = 0;
     int maxLoad = 0;
 
     int won = 0;
     string savedNextRoom;
     bool shouldChangeRooms = false;
     bool showInventory = false;
+
+//testing
 
     while (!(won > 0 || WindowShouldClose())) {      //While we don't want to stop playing, and haven't won
 
@@ -315,9 +317,8 @@ int main(int argc, char** argv) {
             //Read in entities, including colllider
 
             Color background;
-            readEntities(background, playerPtr, playerPtr -> nextRoom);
-            theCanvas = new canvas(world -> getRows(), world -> getCols(), background,
-                playerPtr -> getSizeFactor());
+            int fontSize;
+            readEntities(background, fontSize, playerPtr, playerPtr -> nextRoom);
 
             cout << "Finished reading in entities\n";
 
@@ -334,10 +335,9 @@ int main(int argc, char** argv) {
                 }
 
                 if (showInventory) {
-                    BeginDrawing();
-                    ClearBackground(UIBACKGROUND);
+                    theCanvas -> start(true);
                     playerPtr -> drawTabScreen();
-                    EndDrawing();
+                    theCanvas -> end();
                 }
 
                 //Otherwise, just show normally
@@ -345,6 +345,7 @@ int main(int argc, char** argv) {
                 else {
 
                     tickStart = chrono::steady_clock::now();
+                    tickCounter++;
 
                     //Update entities
 
@@ -355,7 +356,7 @@ int main(int argc, char** argv) {
                     //Display the world
 
                     Vector2 playerPos = playerPtr -> getPos();
-                    theCanvas -> start(playerPos.x, playerPos.y);
+                    theCanvas -> start(playerPos.x, playerPos.y, false);
                     world -> print();
 
                     //end the tick
@@ -364,8 +365,7 @@ int main(int argc, char** argv) {
                     int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
                     total += tickLength;
                     totalSecond += tickLength;
-                    tickCount++;
-                    if (tickCount % 60 == 0) {
+                    if (tickCounter % 60 == 0) {
                         cout << "Load: " << totalSecond / 10000 << "%\n";
                         if (totalSecond / 10000 > maxLoad) {
                             maxLoad = totalSecond / 10000;
@@ -385,11 +385,11 @@ int main(int argc, char** argv) {
                     if (playerPtr -> shouldChangeRooms) {
                         shouldChangeRooms = true;
                         playerPtr -> shouldChangeRooms = false;
-                        delete world;
-                        delete theCanvas;
                     }
                 }
             }
+            delete world;
+            delete theCanvas;
         }
         delete playerPtr;
         won = max(won, 0);
@@ -398,6 +398,6 @@ int main(int argc, char** argv) {
 //final clean up
 
     CloseWindow();
-    cout << "Average load: " << total * 100 / 1000000 / (tickCount / 60) << "%\nMax load: " << maxLoad << "%\n";
+    cout << "Average load: " << total * 100 / 1000000 / (tickCounter / 60) << "%\nMax load: " << maxLoad << "%\n";
 }
 

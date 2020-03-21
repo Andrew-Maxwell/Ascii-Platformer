@@ -19,26 +19,40 @@ class collider;
 
 class layer : virtual public entity {
 
-    public:
+    protected:
 
     vector<string> canvas;
-    
     string fileName;
+    RenderTexture2D tex;
+
+    public:
 
     explicit layer( float newx, float newy, Color newTint, float newSizeFactor,
                     string newFileName);
 
+    ~layer();
+
+    unsigned int type();
+
     bool readLayer();
+
+    void render();
+
+    //accessors
 
     int getRows();
 
     int getCols();
+
+    //junk
 
     void tickSet();
 
     void tickGet();
 
     bool finalize();
+
+    //Active ingredient
 
     void print();
 };

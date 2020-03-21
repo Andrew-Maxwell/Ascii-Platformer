@@ -17,7 +17,9 @@ class gameLayer : public layer {
     public:
     
     gameLayer(float newx, float newy, Color newTint, float newSizeFactor, string newFileName);
-  
+
+    unsigned int type();
+
 };
 
 #endif //GAMELAYER_HPP

@@ -11,7 +11,10 @@
         destinationRoom(newDestinationRoom),
         destinationX(newDestX),
         destinationY(newDestY) {
-        type = DOORTYPE;
+    }
+
+    unsigned int door::type() {
+        return DOORTYPE;
     }
 
     bool door::doesCollide(float otherX, float otherY, int otherType) {
@@ -19,7 +22,7 @@
     }
 
     collision door::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type, 0, destinationX, destinationY, destinationRoom);
+        return collision(type(), 0, destinationX, destinationY, destinationRoom);
     }
 
     bool door::stopColliding() {

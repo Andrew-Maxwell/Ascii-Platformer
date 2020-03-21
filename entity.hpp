@@ -20,8 +20,7 @@ class entity {
 
     public:
 
-    int type = ERRORTYPE;
-    int id;
+    unsigned int id;
     float x;
     float y;
 
@@ -32,6 +31,8 @@ class entity {
     entity() {}
 
     virtual ~entity() = default;
+
+    virtual unsigned int type() = 0;
 
     //Tick functions
     //Move entities. Update collider

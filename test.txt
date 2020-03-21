@@ -4,18 +4,19 @@
     "G": 255,
     "B": 100,
     "A": 255,
+    "fontSize": 12,
     "entities": [
         {
             "type": "water",
             "x": 1.0,
-            "y": 57.0,
+            "y": 53.0,
             "R": 0,
             "G": 0,
             "B": 255,
             "A": 80,
-            "sizeFactor": 0.3,
+            "sizeFactor": 1.0,
             "wavelength": 30.0,
-            "amplitude": 4,
+            "amplitude": 0,
             "width": 198,
             "depth": 40
         },
@@ -55,8 +56,8 @@
         },
         {
             "type": "player",
-            "x": 33.0,
-            "y": 50.0,
+            "x": 18.0,
+            "y": 19.0,
             "R": 0,
             "G": 0,
             "B": 0,
@@ -78,14 +79,14 @@
         {
             "type": "forceField",
             "x": 59.0,
-            "y": 18.0,
+            "y": 40.0,
             "R": 255,
             "G": 0,
             "B": 0,
             "A": 255,
             "sizeFactor": 1.0,
             "channel": 1,
-            "power": 0.05,
+            "power": -0.05,
             "range": 30
         },
         {

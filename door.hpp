@@ -23,6 +23,8 @@ class door : public collideable {
     explicit door(  float newX, float newY, Color newTint,
                     float newSizeFactor, string newDestinationRoom, float newDestX, float newDestY);
 
+    unsigned int type();
+
     bool doesCollide(float otherX, float otherY, int otherType);
 
     collision getCollision(float otherX, float otherY, int otherType);

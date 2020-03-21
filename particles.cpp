@@ -13,7 +13,6 @@
                         xSpeed(newXSpeed),
                         ySpeed(newYSpeed),
                         lifetime(newLifetime) {
-        type = PARTICLETYPE;
         if (c == 0) {
             toPrint = new char[2];
             setDirection();
@@ -21,6 +20,10 @@
         else {
             toPrint = TextToUtf8(&c, 1);
         }
+    }
+
+    unsigned int particle::type() {
+        return PARTICLETYPE;
     }
 
     particle::~particle() {

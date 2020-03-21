@@ -30,6 +30,8 @@ class forceField : public collideable {
 
     explicit forceField(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange);
 
+    unsigned int type();
+
     bool doesCollide(float otherX, float otherY, int otherType);
 
     collision getCollision(float otherX, float otherY, int otherType);

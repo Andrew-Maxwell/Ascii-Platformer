@@ -58,6 +58,8 @@ using namespace rapidjson;
         else {
             canvas.push_back(string(1, display));
         }
+        tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
+        render();
     }
 
 /*****************************************************************************/
@@ -116,6 +118,7 @@ using namespace rapidjson;
             free(lineC);
          //  cout << "\t" << intCanvas[i] << endl;
         }
+        render();
     }
 
 /*****************************************************************************/
@@ -136,33 +139,30 @@ using namespace rapidjson;
         visible = !visible;
     }
 
-/*****************************************************************************/
-//Determine which tile a given mouse position on the screen is in.
-/*****************************************************************************/
-
-    float editableLayer::getTileX(float cameraX, float mouseX) {
-        return mouseX / theCanvas -> getFontSize() / sizeFactor + cameraX - theCanvas -> getScreenCols() / sizeFactor / 2 - x;
-    }
-
-    float editableLayer::getTileY(float cameraY, float mouseY) {
-        return mouseY / theCanvas -> getFontSize() / sizeFactor + cameraY - theCanvas -> getScreenCols() / sizeFactor / 2 - y;
-    }
-
 
 /*****************************************************************************/
 //move entity using left mouse button (for all entities.)
 /*****************************************************************************/
 
-    void editableLayer::move(vector<tuple<int, int>> mousePos) {
-        x += get<0>(mousePos[1]) - get<0>(mousePos[0]);
-        y += get<1>(mousePos[1]) - get<1>(mousePos[0]);
+    void editableLayer::move(vector<intVector2> mousePos) {
+        cout << "Moving " << mousePos[1].x - mousePos[0].x << endl;
+        x += mousePos[1].x - mousePos[0].x;
+        y += mousePos[1].y - mousePos[0].y;
+    }
+
+/*****************************************************************************/
+//Get which tile the mouse is on
+/*****************************************************************************/
+
+    intVector2 editableLayer::getMouseTile() {
+        return intVector2(theCanvas -> getMouseRelativeTo(x, y, sizeFactor));
     }
 
 /*****************************************************************************/
 //Apply changes using left mouse button (for layers only, not other entities)
 /*****************************************************************************/
 
-    void editableLayer::leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F, float density, bool absolute) {
+    void editableLayer::leftBrush(vector<intVector2> mousePos, int brushID, charFill* F, float density, bool absolute) {
 
         //Create a new frame in undo history (deep copy)
 
@@ -178,16 +178,16 @@ using namespace rapidjson;
         //Allow for absolute vs. relative coordinates in get() calls
         int tileXOrig = 0, tileYOrig = 0;
         if (!absolute) {
-            tileXOrig = get<0>(mousePos[0]);
-            tileYOrig = get<1>(mousePos[0]);
+            tileXOrig = mousePos[0].x;
+            tileYOrig = mousePos[0].y;
         }
 
         //Apply the brush to the new frame
 
         switch(brushID) {
             case 0: {   //Pencil
-                int tileX = get<0>(mousePos[0]);
-                int tileY = get<1>(mousePos[0]);
+                int tileX = mousePos[0].x;
+                int tileY = mousePos[0].y;
                 if (tileX >= 0 && tileX < knownWidth && tileY >= 0 && tileY < intCanvas.size()) {
                     intCanvas[tileY][tileX] = F -> get(tileX - tileXOrig, tileY - tileYOrig);
                 }
@@ -196,13 +196,13 @@ using namespace rapidjson;
 
             case 1: {   //Square brush
 
-                int tileX1 = min(knownWidth, max(0, min(get<0>(mousePos[0]), get<0>(mousePos[1]))));
-                int tileX2 = min(knownWidth, max(0, max(get<0>(mousePos[0]), get<0>(mousePos[1]))));
-                int tileY1 = min((int)intCanvas.size(), max(0, min(get<1>(mousePos[0]), get<1>(mousePos[1]))));
-                int tileY2 = min((int)intCanvas.size(), max(0, max(get<1>(mousePos[0]), get<1>(mousePos[1]))));
-                for (int i = 0; i < tileY2 - tileY1; i++) {
-                    for (int j = 0; j < tileX2 - tileX1; j++) {
-                        if (GetRandomValue(0, 1000) / 1000.0 < density) {
+                int tileX1 = min(knownWidth, max(0, min((int)mousePos[0].x, (int)mousePos[1].x)));
+                int tileX2 = min(knownWidth, max(0, max((int)mousePos[0].x, (int)mousePos[1].x)));
+                int tileY1 = min((int)intCanvas.size(), max(0, min((int)mousePos[0].y, (int)mousePos[1].y)));
+                int tileY2 = min((int)intCanvas.size(), max(0, max((int)mousePos[0].y, (int)mousePos[1].y)));
+                for (int i = 0; i <= tileY2 - tileY1; i++) {
+                    for (int j = 0; j <= tileX2 - tileX1; j++) {
+                        if (GetRandomValue(0, 1000) / 1000.0 <= density) {
                             intCanvas[tileY1 + i][tileX1 + j] = F -> get(tileX1 + j - tileXOrig, tileY1 + i - tileYOrig);
                         }
                     }
@@ -212,13 +212,13 @@ using namespace rapidjson;
 
 /*
 
-                int tileX1 = get<0>(mousePos[0]);
-                int tileY1 = get<1>(mousePos[0]);
-                int tileX2 = get<0>(mousePos[1]);
-                int tileY2 = get<1>(mousePos[1]);
+                int tileX1 = mousePos[0].x;
+                int tileY1 = mousePos[0].y;
+                int tileX2 = mousePos[1].x;
+                int tileY2 = mousePos[1].y;
                 for (int i = min((int)intCanvas.size() - 1, max(0, min(tileY1, tileY2))); i != min((int)intCanvas.size() - 1, max(0, max(tileY1, tileY2))) + 1; i++) {
                     for (int j = max(0, min(tileX1, tileX2)); j != min(knownWidth, max(tileX1, tileX2)) + 1; j++) {
-                        if (GetRandomValue(0, 1000) / 1000.0 < density) {
+                        if (GetRandomValue(0, 1000) / 1000.0 <= density) {
                             intCanvas[i][j] = F -> get(j - tileXOrig, i - tileYOrig);
                         }
                     }
@@ -230,23 +230,23 @@ using namespace rapidjson;
 
             case 2: {   //Diamond brush (Corners are always 90 degrees - so it's a rectangle rotated 45 degrees)
                 int tileX1, tileY1, tileX2, tileY2;
-                if (abs(get<0>(mousePos[0]) - get<0>(mousePos[1])) < abs(get<1>(mousePos[0]) - get<1>(mousePos[1]))) {
-                    if (get<1>(mousePos[0]) < get<1>(mousePos[1])) {
-                        tileX1 = get<0>(mousePos[0]);
-                        tileY1 = get<1>(mousePos[0]);
-                        tileX2 = get<0>(mousePos[1]);
-                        tileY2 = get<1>(mousePos[1]);
+                if (abs(mousePos[0].x - mousePos[1].x) < abs(mousePos[0].y - mousePos[1].y)) {
+                    if (mousePos[0].y < mousePos[1].y) {
+                        tileX1 = mousePos[0].x;
+                        tileY1 = mousePos[0].y;
+                        tileX2 = mousePos[1].x;
+                        tileY2 = mousePos[1].y;
                     }
                     else {
-                        tileX1 = get<0>(mousePos[1]);
-                        tileY1 = get<1>(mousePos[1]);
-                        tileX2 = get<0>(mousePos[0]);
-                        tileY2 = get<1>(mousePos[0]);
+                        tileX1 = mousePos[1].x;
+                        tileY1 = mousePos[1].y;
+                        tileX2 = mousePos[0].x;
+                        tileY2 = mousePos[0].y;
                     }
                     for (int i = 0; i <= tileY2 - tileY1; i++) {
                         if (tileY1 + i >= 0 && tileY1 + i < getRows()) {
                             for (int j = max(0, max(tileX1 - i, tileX2 - (tileY2 - tileY1 - i))); j <=  min(knownWidth, min(tileX1 + i, tileX2 + (tileY2 - tileY1 - i))); j++) {
-                                if (GetRandomValue(0, 1000) / 1000.0 < density) {
+                                if (GetRandomValue(0, 1000) / 1000.0 <= density) {
                                     intCanvas[tileY1 + i][j] = F -> get(j - tileXOrig, tileY1 + i - tileYOrig);
                                 }
                             }
@@ -254,22 +254,22 @@ using namespace rapidjson;
                     }
                 }
                 else {
-                    if (get<0>(mousePos[0]) < get<0>(mousePos[1])) {
-                        tileX1 = get<0>(mousePos[0]);
-                        tileY1 = get<1>(mousePos[0]);
-                        tileX2 = get<0>(mousePos[1]);
-                        tileY2 = get<1>(mousePos[1]);
+                    if (mousePos[0].x < mousePos[1].x) {
+                        tileX1 = mousePos[0].x;
+                        tileY1 = mousePos[0].y;
+                        tileX2 = mousePos[1].x;
+                        tileY2 = mousePos[1].y;
                     }
                     else {
-                        tileX1 = get<0>(mousePos[1]);
-                        tileY1 = get<1>(mousePos[1]);
-                        tileX2 = get<0>(mousePos[0]);
-                        tileY2 = get<1>(mousePos[0]);
+                        tileX1 = mousePos[1].x;
+                        tileY1 = mousePos[1].y;
+                        tileX2 = mousePos[0].x;
+                        tileY2 = mousePos[0].y;
                     }
                     for (int i = 0; i <= tileX2 - tileX1; i++) {
                         if (tileX1 + i >= 0 && tileX1 + i < knownWidth) {
                             for (int j = max(0, max(tileY1 - i, tileY2 - (tileX2 - tileX1 - i))); j <= min(getRows() - 1, min(tileY1 + i, tileY2 + (tileX2 - tileX1 - i))); j++) {
-                                if (GetRandomValue(0, 1000) / 1000.0 < density) {
+                                if (GetRandomValue(0, 1000) / 1000.0 <= density) {
                                     intCanvas[j][tileX1 + i] = F -> get(i - tileXOrig, tileY1 + j - tileYOrig);
                                 }
                             }
@@ -283,11 +283,11 @@ using namespace rapidjson;
                 //Separate vectors from first to second and third mouse click into magnitude and direction (unit vectors
                 //v1 and v2)
 
-                Vector2 origin = {get<0>(mousePos[0]) + 0.5, get<1>(mousePos[0]) + 0.5};
-                Vector2 v1 = {get<0>(mousePos[1]) - get<0>(mousePos[0]), get<1>(mousePos[1]) - get<1>(mousePos[0])};
+                Vector2 origin = {mousePos[0].x + 0.5, mousePos[0].y + 0.5};
+                Vector2 v1 = {mousePos[1].x - mousePos[0].x, mousePos[1].y - mousePos[0].y};
                 float v1Magnitude = Vector2Length(v1);
                 v1 = Vector2Normalize(v1);
-                Vector2 v2 = {get<0>(mousePos[2]) - get<0>(mousePos[1]), get<1>(mousePos[2]) - get<1>(mousePos[1])};
+                Vector2 v2 = {mousePos[2].x - mousePos[1].x, mousePos[2].y - mousePos[1].y};
                 float v2Magnitude = Vector2Length(v2);
                 v2 = Vector2Normalize(v2);
 
@@ -296,7 +296,7 @@ using namespace rapidjson;
                 for (float count1 = 0; count1 <= v1Magnitude; count1 += 0.5) {
                     for (float count2 = 0; count2 <= v2Magnitude; count2 += 0.5) {
                         Vector2 result = Vector2Add(Vector2Add(Vector2Scale(v1, count1), Vector2Scale(v2, count2)), origin);
-                        if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && (GetRandomValue(0, 1000) / 1000.0 < density)) {
+                        if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && (GetRandomValue(0, 1000) / 1000.0 <= density)) {
                             intCanvas[(int)result.y][(int)result.x] = F -> get((int)result.x - tileXOrig, (int)result.y - tileYOrig);
                         }
                     }
@@ -326,11 +326,11 @@ using namespace rapidjson;
                 //Separate vectors from first to second and third mouse click into magnitude and direction (unit vectors
                 //v1 and v2)
 
-                Vector2 origin = {get<0>(mousePos[0]) + 0.5, get<1>(mousePos[0]) + 0.5};
-                Vector2 v1 = {get<0>(mousePos[1]) - get<0>(mousePos[0]), get<1>(mousePos[1]) - get<1>(mousePos[0])};
+                Vector2 origin = {mousePos[0].x + 0.5, mousePos[0].y + 0.5};
+                Vector2 v1 = {mousePos[1].x - mousePos[0].x, mousePos[1].y - mousePos[0].y};
                 float v1Magnitude = Vector2Length(v1);
                 v1 = Vector2Normalize(v1);
-                Vector2 v2 = {get<0>(mousePos[2]) - get<0>(mousePos[1]), get<1>(mousePos[2]) - get<1>(mousePos[1])};
+                Vector2 v2 = {mousePos[2].x - mousePos[1].x, mousePos[2].y - mousePos[1].y};
                 float v2Magnitude = Vector2Length(v2);
                 v2 = Vector2Normalize(v2);
 
@@ -342,7 +342,7 @@ using namespace rapidjson;
                     }
                     for (float count1 = 0; count1 <= v1Magnitude; count1 += 0.5) {
                         Vector2 result = Vector2Add(Vector2Add(Vector2Scale(v1, count1), Vector2Scale(v2, count2)), origin);
-                        if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && GetRandomValue(0, 1000) / 1000.0 < density) {
+                        if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && GetRandomValue(0, 1000) / 1000.0 <= density) {
                             intCanvas[(int)result.y][(int)result.x] = gradChars[charIndex];
                         }
                     }
@@ -372,11 +372,11 @@ using namespace rapidjson;
                 //Separate vectors from first to second and third mouse click into magnitude and direction (unit vectors
                 //v1 and v2)
 
-                Vector2 origin = {get<0>(mousePos[0]) + 0.5, get<1>(mousePos[0]) + 0.5};
-                Vector2 v1 = {get<0>(mousePos[1]) - get<0>(mousePos[0]), get<1>(mousePos[1]) - get<1>(mousePos[0])};
+                Vector2 origin = {mousePos[0].x + 0.5, mousePos[0].y + 0.5};
+                Vector2 v1 = {mousePos[1].x - mousePos[0].x, mousePos[1].y - mousePos[0].y};
                 float v1Magnitude = Vector2Length(v1);
                 v1 = Vector2Normalize(v1);
-                Vector2 v2 = {get<0>(mousePos[2]) - get<0>(mousePos[1]), get<1>(mousePos[2]) - get<1>(mousePos[1])};
+                Vector2 v2 = {mousePos[2].x - mousePos[1].x, mousePos[2].y - mousePos[1].y};
                 float v2Magnitude = Vector2Length(v2);
                 v2 = Vector2Normalize(v2);
 
@@ -388,7 +388,7 @@ using namespace rapidjson;
                     }
                     for (float count1 = 0; count1 <= v1Magnitude; count1 += 0.5) {
                         Vector2 result = Vector2Add(Vector2Add(Vector2Scale(v1, count1), Vector2Scale(v2, count2)), origin);
-                        if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && GetRandomValue(0, 1000) / 1000.0 < density) {
+                        if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && GetRandomValue(0, 1000) / 1000.0 <= density) {
                             if (find(gradChars.begin(), gradChars.end(), intCanvas[(int)result.y][(int)result.x]) - gradChars.begin() > charIndex) {
                                 intCanvas[(int)result.y][(int)result.x] = gradChars[charIndex];
                             }
@@ -403,11 +403,11 @@ using namespace rapidjson;
                 //Separate vectors from first to second and third mouse click into magnitude and direction (unit vectors
                 //v1 and v2)
 
-                Vector2 origin = {get<0>(mousePos[0]) + 0.5, get<1>(mousePos[0]) + 0.5};
-                Vector2 v1 = {get<0>(mousePos[1]) - get<0>(mousePos[0]), get<1>(mousePos[1]) - get<1>(mousePos[0])};
+                Vector2 origin = {mousePos[0].x + 0.5, mousePos[0].y + 0.5};
+                Vector2 v1 = {mousePos[1].x - mousePos[0].x, mousePos[1].y - mousePos[0].y};
                 float v1Magnitude = Vector2Length(v1);
                 v1 = Vector2Normalize(v1);
-                Vector2 v2 = {get<0>(mousePos[2]) - get<0>(mousePos[1]), get<1>(mousePos[2]) - get<1>(mousePos[1])};
+                Vector2 v2 = {mousePos[2].x - mousePos[1].x, mousePos[2].y - mousePos[1].y};
                 float v2Magnitude = Vector2Length(v2);
                 v2 = Vector2Normalize(v2);
 
@@ -415,7 +415,7 @@ using namespace rapidjson;
                     float spikeLength = GetRandomValue(0, v2Magnitude * 10) / 10;
                     for (float count2 = 0; count2 <= spikeLength; count2 += 0.5) {
                         Vector2 result = Vector2Add(Vector2Add(Vector2Scale(v1, count1), Vector2Scale(v2, count2)), origin);
-                        if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && GetRandomValue(0, 1000) / 1000.0 < density) {
+                        if (0 < result.x && result.x < knownWidth && result.y > 0 && result.y < intCanvas.size() && GetRandomValue(0, 1000) / 1000.0 <= density) {
                             intCanvas[(int)result.y][(int)result.x] = F -> get((int)result.x - tileXOrig, (int)result.y - tileYOrig);
                         }
                     }
@@ -424,8 +424,8 @@ using namespace rapidjson;
             }
 
             case 9: {   //Replace
-                if (get<1>(mousePos[0]) >= 0 && get<1>(mousePos[0]) < intCanvas.size() && get<0>(mousePos[0]) >= 0 && get<0>(mousePos[0]) < knownWidth) {
-                    int toReplace = intCanvas[get<1>(mousePos[0])][get<0>(mousePos[0])];
+                if (mousePos[0].y >= 0 && mousePos[0].y < intCanvas.size() && mousePos[0].x >= 0 && mousePos[0].x < knownWidth) {
+                    int toReplace = intCanvas[(int)mousePos[0].y][(int)mousePos[0].x];
                     for (int i = 0; i < intCanvas.size(); i++) {
                         for (int j = 0; j < knownWidth; j++) {
                             if (intCanvas[i][j] == toReplace) {
@@ -462,7 +462,7 @@ using namespace rapidjson;
     //Cut
 /*****************************************************************************/
 
-    vector<vector<int>> editableLayer::cut(vector<tuple<int, int>> mousePos) {
+    vector<vector<int>> editableLayer::cut(vector<intVector2> mousePos) {
 
         //Create new frame
 
@@ -477,10 +477,10 @@ using namespace rapidjson;
 
         //Get position to cut
 
-        int x1 = min(get<0>(mousePos[0]), get<0>(mousePos[1]));
-        int x2 = max(get<0>(mousePos[0]), get<0>(mousePos[1]));
-        int y1 = min(get<1>(mousePos[0]), get<1>(mousePos[1]));
-        int y2 = max(get<1>(mousePos[0]), get<1>(mousePos[1]));
+        int x1 = min(mousePos[0].x, mousePos[1].x);
+        int x2 = max(mousePos[0].x, mousePos[1].x);
+        int y1 = min(mousePos[0].y, mousePos[1].y);
+        int y2 = max(mousePos[0].y, mousePos[1].y);
 
         //Copy and fill with space character
 
@@ -514,11 +514,11 @@ using namespace rapidjson;
 //Copy
 /*****************************************************************************/
 
-    vector<vector<int>> editableLayer::copy(vector<tuple<int, int>> mousePos) {
-        int x1 = min(get<0>(mousePos[0]), get<0>(mousePos[1]));
-        int x2 = max(get<0>(mousePos[0]), get<0>(mousePos[1]));
-        int y1 = min(get<1>(mousePos[0]), get<1>(mousePos[1]));
-        int y2 = max(get<1>(mousePos[0]), get<1>(mousePos[1]));
+    vector<vector<int>> editableLayer::copy(vector<intVector2> mousePos) {
+        int x1 = min(mousePos[0].x, mousePos[1].x);
+        int x2 = max(mousePos[0].x, mousePos[1].x);
+        int y1 = min(mousePos[0].y, mousePos[1].y);
+        int y2 = max(mousePos[0].y, mousePos[1].y);
         vector<vector<int>> toReturn(y2 - y1 + 1, vector<int>(x2 - x1 + 1, ' '));
         for (int yIter = 0; yIter <= y2 - y1; yIter++) {
             for (int xIter = 0; xIter <= x2 - x1; xIter++) {
@@ -532,7 +532,7 @@ using namespace rapidjson;
 //Paste
 /*****************************************************************************/
 
-    void editableLayer::paste(vector<tuple<int, int>> mousePos, vector<vector<int>> toPaste) {
+    void editableLayer::paste(vector<intVector2> mousePos, vector<vector<int>> toPaste) {
 
         //Create new frame
 
@@ -545,8 +545,8 @@ using namespace rapidjson;
             intCanvas.push_back(newLine);
         }
 
-        int tileX1 = get<0>(mousePos[0]);
-        int tileY1 = get<1>(mousePos[0]);
+        int tileX1 = mousePos[0].x;
+        int tileY1 = mousePos[0].y;
 
         //Apply the change
 
@@ -664,11 +664,11 @@ using namespace rapidjson;
 //Dummy functions which don't do anything for the collider
 /*****************************************************************************/
 
-    void editableCollider::setColor (Color newColor) {};
+    void editableCollider::setColor (Color newColor) {}
 
-    void editableCollider::setSizeFactor (float newSizeFactor) {};
+    void editableCollider::setSizeFactor (float newSizeFactor) {}
 
-    void editableCollider::move(vector<tuple<int, int>> mousePos) {};
+    void editableCollider::move(vector<intVector2> mousePos) {}
 
 /*****************************************************************************/
 //Doesn't write anything to JSON

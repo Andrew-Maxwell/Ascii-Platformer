@@ -6,14 +6,11 @@
 
 using namespace rapidjson;
 
-collider* world = NULL;
-canvas* theCanvas = NULL;
-
 /******************************************************************************/
 //Read in a list of entities from a file
 /******************************************************************************/
 
-void readEntities(list<editableLayer*>& layers, editableCollider*& col, Color& background, string& fileName, Document& doc) {
+void readEntities(list<editableLayer*>& layers, editableCollider*& col, Color& background, int& fontSize, string& fileName, Document& doc) {
 
     //Read into a json object
 
@@ -33,8 +30,17 @@ void readEntities(list<editableLayer*>& layers, editableCollider*& col, Color& b
     int backgroundG = doc.HasMember("G") ? doc["G"].GetInt() : 255;
     int backgroundB = doc.HasMember("B") ? doc["B"].GetInt() : 255;
     int backgroundA = doc.HasMember("A") ? doc["A"].GetInt() : 255;
+    fontSize = doc.HasMember("fontSize") ? doc["fontSize"].GetInt() : 16;
     string colFileName = doc.HasMember("collider") ? doc["collider"].GetString() : "test_collider.txt";
     background = {backgroundR, backgroundG, backgroundB, backgroundA};
+
+    //Hacky hacky
+
+    theCanvas = new editableCanvas(200, 200, background, fontSize, 1);
+    col = new editableCollider(0.0, 0.0, {0, 0, 0, 80}, 1, true, colFileName, '!', NULL);
+    world = new collider();
+    world -> addEntity(col);
+    layers.push_back(col);
 
     //Get the list of entities
 
@@ -63,9 +69,6 @@ void readEntities(list<editableLayer*>& layers, editableCollider*& col, Color& b
         layers.push_back(L);
         world -> addEntity(L);
     }
-    col = new editableCollider(0.0, 0.0, {0, 0, 0, 80}, 1, true, colFileName, '!', NULL);
-    world -> addEntity(col);
-    layers.push_back(col);
 }
 
 //Save all the data
@@ -108,22 +111,15 @@ int main(int argc, char** argv) {
     SetTargetFPS(60);
     SetExitKey(KEY_RIGHT_CONTROL);
 
-    Font displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
-
-    //Camera initializations
-
-    float cameraX = SCREENROWS / 2;
-    float cameraY = SCREENCOLS / 2;
-
     //Mouse interface variables
 
-    vector<tuple<int, int>> mousePos;
+    vector<intVector2> mousePos;
     collider markers;
     float oldMouseX, oldMouseY, oldCameraX, oldCameraY;
 
     //Clipboard
 
-    vector<vector<int>> clipboard({{}});
+    vector<vector<int>> clipboard;
 
     //charFill variables - analogous to color in an image editor
 
@@ -221,14 +217,14 @@ int main(int argc, char** argv) {
     list<editableLayer*> layers;
     editableCollider* col;
     Color background;
+    int fontSize;
     string fileName(argv[1]);
     Document json;
     
     cout << "Starting loading entities...\n";
     
-    world = new collider();
+    readEntities(layers, col, background, fontSize, fileName, json);
 
-    readEntities(layers, col, background, fileName, json);
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
     float speedMult;
@@ -239,8 +235,6 @@ int main(int argc, char** argv) {
 
     while (!WindowShouldClose() || mayNeedToSave) {
 
-        theCanvas = new canvas(world -> getRows(), world -> getCols(), background, 1);
-
         while (!(WindowShouldClose() || exit)) {
 
             if (IsKeyPressed(KEY_ESCAPE)) {
@@ -250,30 +244,35 @@ int main(int argc, char** argv) {
             //Character selector
 
             if (IsKeyDown(KEY_TAB)) {
+
+                tickCounter++;
                 mousePos.clear();
-                BeginDrawing();
-                ClearBackground(UIBACKGROUND);
+                theCanvas -> start(true);
 
                 //Print out all available charFills
 
                 for (int i = 0; i < charFills.size(); i++) {
                     int codePointToDisplay =  charFills[i] -> display();
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
-                    myDrawText(displayFont, temp, (Vector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
+                    theCanvas -> drawHud(i % (theCanvas -> getScreenCols() / 2) * 2,
+                                         i / (theCanvas -> getScreenCols() / 2) * 2,
+                                         UIFOREGROUND, string(temp)); // TODO: remove , (intVector2){(i % (SCREENCOLS / 2)) * 2 * FONTSIZE, i / (SCREENCOLS / 2) * 2 * FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
                     free(temp);
                 }
 
                 //Print out currently selected brush
 
-                myDrawText(displayFont, (brushName + " Density: " + to_string(density) + (absoluteBrush? " Absolute mode" : " Relative mode")).c_str(), (Vector2){FONTSIZE, SCREENHEIGHT - FONTSIZE * 2}, FONTSIZE, 0, UIFOREGROUND);
+                string brushLabel = brushName + " Density: " + to_string(density) + (absoluteBrush? " Absolute mode" : " Relative mode");
+                theCanvas -> drawHud(1, theCanvas -> getScreenRows() - 2, UIFOREGROUND, brushLabel);
 
-                EndDrawing();
+                theCanvas -> end();
 
                 //If a character is clicked, add it to the palette
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mouse = GetMousePosition();
-                    int selection = (int)mouse.y / (2 * FONTSIZE) * (SCREENCOLS / 2) + (int)mouse.x / (2 * FONTSIZE);
+                    int selection = (int)mouse.y / (2 * theCanvas -> getFontSize()) *
+                        (theCanvas -> getScreenCols() / 2) + (int)mouse.x / (2 * theCanvas -> getFontSize());
                     if (selection > 0 && selection < charFills.size()) {
                         palette[paletteSelection + 22 * paletteSwitch] = selection;
                     }
@@ -361,6 +360,8 @@ int main(int argc, char** argv) {
             }
             else {
 
+                theCanvas -> moveCamera();
+
                 //Meta: Undo, redo, save
 
                 if (IsKeyDown(KEY_LEFT_CONTROL)) {
@@ -395,7 +396,7 @@ int main(int argc, char** argv) {
                     }
                     if (IsKeyPressed(KEY_V) && (*thisLayer) -> getIsLayer()) {
                         if (mousePos.size() == 0) {
-                            mousePos.push_back(make_tuple(0, 0));    //Paste in upper right by default
+                            mousePos.push_back((Vector2){0, 0});    //Paste in upper right by default
                         }
                         (*thisLayer) -> paste(mousePos, clipboard);
                         markers.clear();
@@ -406,49 +407,12 @@ int main(int argc, char** argv) {
                         brushName = "Select";
                         brushID = 8;
                         brushClickCount = 100000;
-                        mousePos.push_back(make_tuple(0, 0));
-                        mousePos.push_back(make_tuple((*thisLayer) -> getCols() - 1, (*thisLayer) -> getRows() - 1));
+                        mousePos.push_back((Vector2){0, 0});
+                        mousePos.push_back((Vector2){(*thisLayer) -> getCols() - 1, (*thisLayer) -> getRows() - 1});
                     }
                 }
                 
                 else {  //Control is not down
-
-                    //Camera movement
-
-                    if (IsKeyDown(KEY_LEFT_SHIFT)) {
-                        speedMult = 8;
-                    }
-                    else {
-                        speedMult = 1;
-                    }
-                    if (IsKeyDown(KEY_D)) {
-                        cameraX += CAMERASPEED * speedMult;
-                    }
-                    if (IsKeyDown(KEY_A)) {
-                        cameraX -= CAMERASPEED * speedMult;
-                    }
-                    if (IsKeyDown(KEY_W)) {
-                        cameraY -= CAMERASPEED * speedMult;
-                    }
-                    if (IsKeyDown(KEY_S)) {
-                        cameraY += CAMERASPEED * speedMult;
-                    }
-
-                    //Click and drag camera movement
-
-                    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {     //When the drag begins
-                        oldCameraX = cameraX;
-                        oldCameraY = cameraY;
-                        Vector2 mouse = GetMousePosition();
-                        oldMouseX = mouse.x;
-                        oldMouseY = mouse.y;
-                    }
-
-                    if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {        //While dragging
-                        Vector2 mouse = GetMousePosition();
-                        cameraX = oldCameraX - (mouse.x - oldMouseX) / FONTSIZE;
-                        cameraY = oldCameraY - (mouse.y - oldMouseY) / FONTSIZE;
-                    }
 
                     //switch to prev layer, then flash
 
@@ -624,7 +588,7 @@ int main(int argc, char** argv) {
                         cout << "{\n";
                         for (vector<int> row : clipboard) {
                             cout << "{";
-                            for(int i = 0; i < row.size() - 1; i++) {
+                            for(int i = 0; i < row.size(); i++) {
                                 cout << hex << "0x" << row[i] << ", ";
                             }
                             cout << hex << "0x" << row[row.size() - 1] << "}\n";
@@ -636,24 +600,20 @@ int main(int argc, char** argv) {
                     //mouse input: Right click to sample character
 
                     if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) && (*thisLayer) -> getIsLayer()) {
-                        Vector2 mouse = GetMousePosition();
-                        int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
-                        int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
-                        palette[paletteSelection + 22 * paletteSwitch] = GetGlyphIndex(displayFont, (*thisLayer) -> sample(tileX1, tileY1));
+                        intVector2 tile = (*thisLayer) -> getMouseTile();
+                        palette[paletteSelection + 22 * paletteSwitch] = theCanvas -> myGetGlyphIndex((*thisLayer) -> sample(tile.x, tile.y));
                     }
 
                     //Left click to add a brush input point
 
                     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        Vector2 mouse = GetMousePosition();
-                        int tileX1 = (*thisLayer) -> getTileX(cameraX, mouse.x);
-                        int tileY1 = (*thisLayer) -> getTileY(cameraY, mouse.y);
+                        intVector2 tile = (*thisLayer) -> getMouseTile();
                         if ((*thisLayer) -> getIsLayer() || brushID == 3) {
-                            mousePos.push_back(make_tuple(tileX1, tileY1));
-                            markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
+                            mousePos.push_back(tile);
+                            markers.addEntity(new dummyEntity(tile.x, tile.y, {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
                         }
                         else {
-                            markers.addEntity(new dummyEntity(tileX1 - (*thisLayer) -> getX(), tileY1 - (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), '?', 30));
+                            markers.addEntity(new dummyEntity(tile.x, tile.y, {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), '?', 30));
                         }
                     }
 
@@ -675,9 +635,9 @@ int main(int argc, char** argv) {
 
                 //display the world
 
-                BeginDrawing();
-                ClearBackground(background);
-                world -> print(cameraX, cameraY, displayFont);
+                theCanvas -> start(false);
+                world -> print();
+
 
                 //display brush palette
 
@@ -685,10 +645,10 @@ int main(int argc, char** argv) {
                     int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
                     if (i == paletteSelection) {
-                        myDrawText(displayFont, temp, (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 0, 0, 255});
+                        theCanvas -> drawHud(i * 2 + 1, 1, (Color){255, 0, 0, 255}, temp);
                     }
                     else {
-                        myDrawText(displayFont, temp, (Vector2){10 + i * 20, 10}, FONTSIZE, 0, {255, 255, 255, 255});
+                        theCanvas -> drawHud(i * 2 + 1, 1, (Color){255, 255, 255, 255}, temp);
                     }
                     free(temp);
                 }
@@ -697,25 +657,25 @@ int main(int argc, char** argv) {
                     int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
                     if (i == paletteSelection) {
-                        myDrawText(displayFont, temp, (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 0, 0, 255});
+                        theCanvas -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 0, 0, 255}, temp);
                     }
                     else {
-                        myDrawText(displayFont, temp, (Vector2){10 + (i - 12) * 20, 30}, FONTSIZE, 0, {255, 255, 255, 255});
+                        theCanvas -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 255, 255, 255}, temp);
                     }
                     free(temp);
                 }
 
                 //display cursor markers
 
-                markers.print(cameraX, cameraY, displayFont);
+                markers.print();
+                theCanvas -> end();
 
-                EndDrawing();
             }
         }
         if (mayNeedToSave) {
             BeginDrawing();
             ClearBackground(UIBACKGROUND);
-            myDrawText(displayFont, "You didn't save the level. Do you want to save? Y/S or N/ESC.", (Vector2){FONTSIZE, FONTSIZE}, FONTSIZE, 0, UIFOREGROUND);
+            theCanvas -> drawHud(1, 1, UIFOREGROUND, "You didn't save the level. Do you want to save? Y/S or N/ESC.");
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
                 writeEntities(layers, fileName, json);

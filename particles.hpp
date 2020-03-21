@@ -29,6 +29,8 @@ class particle : virtual public entity {
 
     ~particle();
 
+    unsigned int type();
+
     void tickSet();
 
     void tickGet();

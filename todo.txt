@@ -44,17 +44,17 @@ inspiration/vague visual ideas:
     
 
 Housekeeping items:
-- Finish replacing drawBar() functions with rectangle-drawing functions + figure out why
-    they're not continuous.
 - Use ImageDrawTextEx to generate layer image files when entering a room; massive performance improvements.
 - Docs, including "lessons learned"
 - Replace x, y with Vector2 everywhere
 - Create configure() functions rather than having 10-argument constructors/standardize constructor argument order
 - Cap line lengths
-- change everything from camelCase to PascalCase
+- change everything from camelCase to PascalCase - use Perl to identify variable names using declarations? what about scoping?
 - rename sizeFactor to Scale
 - make layer use char[][] for mild performance benefits
-- Convert rain to a generic random particle spawner
+- Convert rain to a generic random particle spawner that can spawn particles within a given box area
+- Come up with better names for everything
+- replace type variables with type() functions
 
 Bugs:
 - player disappears when standing on tile right below top of level

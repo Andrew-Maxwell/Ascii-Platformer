@@ -17,13 +17,14 @@
         lifetime(newLifetime),
         power(newPower),
         range(newRange)
-    {
-        
-        type = BULLETTYPE;
+    {}
+
+    unsigned int bullet::type() {
+        return BULLETTYPE;
     }
 
     bool bullet::doesCollide(float otherX, float otherY, int otherType) {
-        if (realPhysicalEntity::doesCollide(otherX, otherY, type) && !hit) {
+        if (realPhysicalEntity::doesCollide(otherX, otherY, otherType) && !hit) {
             hit = true;
             return true;
         }
@@ -31,7 +32,10 @@
     }
 
     collision bullet::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type, damage, xMomentum, yMomentum);
+        if (otherType == WATERTYPE) {
+            return realPhysicalEntity::getCollision(otherX, otherY, otherType);
+        }
+        return collision(type(), damage, xMomentum, yMomentum);
     }
 
     bool bullet::stopColliding() {
@@ -45,7 +49,6 @@
         }
 
         if (hit && !exploded) {
-            cout << "hit!\n";
             exploded = true;
             explode (60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
             explosion* e = new explosion(x, y, tint, sizeFactor, 0, -1.0, 30);

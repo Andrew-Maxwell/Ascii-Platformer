@@ -11,7 +11,9 @@
                 physicalParticle(newx, newy, newTint, newSizeFactor, displayChar, elasticity, newXMomentum,
                 newYMomentum, newMaxSpeed, newGravity, newFriction, newLifetime) {}
 
-
+    unsigned int drop::type() {
+        return DROPTYPE;
+    }
 
     void drop::tickGet() {
         physicalParticle::tickGet();
@@ -30,32 +32,16 @@
         entity(newX, newY, newTint, newSizeFactor),
         dropsPerTick(newDropsPerTick),
         xMomentum(newXMomentum),
-        isSnow(newIsSnow),
-        firstTick(true) {
-            
-            type = RAINTYPE;
-        }
+        isSnow(newIsSnow) {}
+
+    unsigned int rain::type() {
+        return RAINTYPE;
+    }
 
     void rain::tickSet() {
         //Do rain for a bit on first tick so that raindrops appear to already have been falling when the room is loaded
         //Note that since collider can't be run this way, interactions with other entities won't work properly
         //in these preloaded raindrops. Probably not an issue
-
-        if(firstTick) {
-            firstTick = false;
-            if (isSnow) {
-                for (int i = 0; i < 500; i++) {
-                    tickSet();
-                    tickGet();
-                }
-            }
-            else {
-                for (int i = 0; i < 50; i++) {
-                    tickSet();
-                    tickGet();
-                }
-            }
-        }
 
         dropBuffer += dropsPerTick;
         while (dropBuffer > 1) {
@@ -80,12 +66,6 @@
                         snowflake = 0x263c;
                         break;
                 }
-
-/*  physicalParticle constructor:
-                        float newX, float newY,  uint8_t R, uint8_t G, uint8_t B, uint8_t A,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime,
-                        float newElasticity, float newMaxSpeed, float newGravity, float newFriction) :*/
-
                 raindrop = new drop(GetRandomValue(0, world -> getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, snowflake, 0, xMomentum, 0.2, 0.2, GRAVITY, 0.5, 1000);
             }
             else {

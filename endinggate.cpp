@@ -13,8 +13,10 @@
         toPrint = {"O----O", "|    |", "|    |", "|    |", "O----O"};
         width = 5;
         height = 5;
-        type = ENDINGGATETYPE;
-        
+    }
+
+    unsigned int endingGate::type() {
+        return ENDINGGATETYPE;
     }
 
     bool endingGate::doesCollide(float otherX, float otherY, int otherType) {
@@ -22,7 +24,7 @@
     }
 
     collision endingGate::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type, 0, 0, 0, "");
+        return collision(type(), 0, 0, 0, "");
     }
 
     bool endingGate::stopColliding() {

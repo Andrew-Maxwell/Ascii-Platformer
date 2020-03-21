@@ -18,9 +18,11 @@
                                   maxSpeed(newMaxSpeed),
                                   gravity(newGravity),
                                   friction(newFriction),
-                                  lifetime(newLifetime) {
-                                      type = PHYSICALPARTICLETYPE;
-                                  }
+                                  lifetime(newLifetime) {}
+
+    unsigned int physicalParticle::type() {
+        return PHYSICALPARTICLETYPE;
+    }
 
     bool physicalParticle::doesCollide(float otherX, float otherY, int otherType) {
         return false;
@@ -107,16 +109,23 @@
                                 gravity(newGravity),
                                 friction(newFriction),
                                 xMomentum(newXMomentum),
-                                yMomentum(newYMomentum) {
-                                    type = ERRORTYPE;
-                                }
+                                yMomentum(newYMomentum) {}
+
+    unsigned int realPhysicalEntity::type() {
+        return REALPHYSICALENTITYTYPE;
+    }
 
     bool realPhysicalEntity::doesCollide(float otherX, float otherY, int otherType) {
         return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1));
     }
 
     collision realPhysicalEntity::getCollision(float otherX, float otherY, int otherType) {
-        return collision(-1, 0, x, yMomentum);
+        if (otherType == WATERTYPE) {
+            return collision(type(), 0, x, yMomentum);
+        }
+        else {
+            return collision(type(), 0, xMomentum, yMomentum);
+        }
     }
 
     bool realPhysicalEntity::stopColliding() {

@@ -9,7 +9,7 @@
     void explode(int count, float x, float y, Color tint,
                     float newSizeFactor, float speed, int c, int lifespan, float elasticity) {
         for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / count)) {
-            physicalParticle* p = new physicalParticle(x + cos(angle) * speed, y + sin(angle) * speed, tint, newSizeFactor, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
+            physicalParticle* p = new physicalParticle(x + cos(angle) / 1000, y + sin(angle) / 1000, tint, newSizeFactor, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
             world -> addParticle(p);
         }
     }
@@ -17,7 +17,7 @@
     void splash(int count, float x, float y, Color tint,
                     float newSizeFactor, float speed, int c, int lifespan, float elasticity) {
         for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / count)) {
-            drop* p = new drop(x, y, tint, newSizeFactor, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
+            drop* p = new drop(x + cos(angle) / 1000, y + sin(angle) / 1000, tint, newSizeFactor, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
             world -> addParticle(p);
         }
     }

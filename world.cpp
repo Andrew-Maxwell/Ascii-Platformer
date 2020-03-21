@@ -19,7 +19,7 @@
 
     collider::~collider() {
         while (entities.begin() != entities.end()) {
-            if ((*entities.begin()) -> type != 1) { //Don't delete the player!
+            if ((*entities.begin()) -> type() != 1) { //Don't delete the player!
                 delete (*entities.begin());
             }
             entities.erase(entities.begin());
@@ -55,11 +55,11 @@
             list<collideable*>::iterator colIter2 = colIter1;
             colIter2++;
             while (colIter2 != collideables.end()) {
-                if ((*colIter1) -> doesCollide((*colIter2) -> x, (*colIter2) -> y, (*colIter2) -> type)) {
-                    (*colIter2) -> addCollision((*colIter1) -> getCollision((*colIter2) -> x, (*colIter2) -> y, (*colIter2) -> type));
+                if ((*colIter1) -> doesCollide((*colIter2) -> x, (*colIter2) -> y, (*colIter2) -> type())) {
+                    (*colIter2) -> addCollision((*colIter1) -> getCollision((*colIter2) -> x, (*colIter2) -> y, (*colIter2) -> type()));
                 }
-                if ((*colIter2) -> doesCollide((*colIter1) -> x, (*colIter1) -> y, (*colIter1) -> type)) {
-                    (*colIter1) -> addCollision((*colIter2) -> getCollision((*colIter1) -> x, (*colIter1) -> y, (*colIter1) -> type));
+                if ((*colIter2) -> doesCollide((*colIter1) -> x, (*colIter1) -> y, (*colIter1) -> type())) {
+                    (*colIter1) -> addCollision((*colIter2) -> getCollision((*colIter1) -> x, (*colIter1) -> y, (*colIter1) -> type()));
                 }
                 colIter2++;
             }
@@ -72,8 +72,8 @@
         while (colIter != collideables.end()) {
             list<collideable*>::iterator partIter = particles.begin();
             while (partIter != particles.end()) {
-                if ((*colIter) -> doesCollide((*partIter) -> x, (*partIter) -> y, (*partIter) -> type)) {
-                    (*partIter) -> addCollision((*colIter) -> getCollision((*partIter) -> x, (*partIter) -> y, (*partIter) -> type));
+                if ((*colIter) -> doesCollide((*partIter) -> x, (*partIter) -> y, (*partIter) -> type())) {
+                    (*partIter) -> addCollision((*colIter) -> getCollision((*partIter) -> x, (*partIter) -> y, (*partIter) -> type()));
                 }
                 partIter++;
             }

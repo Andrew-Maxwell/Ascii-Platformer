@@ -1,5 +1,29 @@
 #include "canvas.hpp"
 
+#define HUDFONTSIZE 16
+
+    canvas::canvas(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor) :
+        background(newBackground),
+        worldRows(newWorldRows),
+        worldCols(newWorldCols),
+        playerSizeFactor(newPlayerSizeFactor),
+        fontSize(newFontSize) {
+
+        //Camera initializations
+
+        cameraX = worldCols / 2;
+        cameraY = worldRows / 2;
+        screenRows = screenHeight / fontSize;
+        screenCols = screenWidth / fontSize;
+        moveCameraX = (worldCols > screenCols * playerSizeFactor);
+        moveCameraY = (worldRows > screenRows * playerSizeFactor);
+        cameraLagX = screenCols * 3 / 16;
+        cameraLagY = screenRows * 3 / 16;
+
+        displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
+
+    }
+
 //Optimized functions
 //myGetGlyphIndex is long, so placed at bottom of the file
 
@@ -100,24 +124,7 @@
         }
     }
 
-    canvas::canvas(int newWorldRows, int newWorldCols, Color newBackground, float newPlayerSizeFactor) :
-        background(newBackground),
-        worldRows(newWorldRows),
-        worldCols(newWorldCols),
-        playerSizeFactor(newPlayerSizeFactor) {
-
-        //Camera initializations
-
-        cameraX = worldCols / 2;
-        cameraY = worldRows / 2;
-        moveCameraX = (worldCols > screenCols * playerSizeFactor);
-        moveCameraY = (worldRows > screenRows * playerSizeFactor);
-
-        displayFont = LoadFontEx(FONTNAME, 8, fontChars, NUMCHARS);
-
-    }
-
-    void canvas::start(float playerX, float playerY) {
+    void canvas::start(float playerX, float playerY, bool tabScreen) {
 
         //Update camera
 
@@ -138,7 +145,22 @@
             }
         }
         BeginDrawing();
-        ClearBackground(background);
+        if (tabScreen) {
+            ClearBackground(UIBACKGROUND);
+        }
+        else {
+            ClearBackground(background);
+        }
+    }
+
+    void canvas::start(bool tabScreen) {
+        BeginDrawing();
+        if (tabScreen) {
+            ClearBackground(UIBACKGROUND);
+        }
+        else {
+            ClearBackground(background);
+        }
     }
 
     void canvas::draw(float x, float y, Color tint, float sizeFactor, string text) {
@@ -148,8 +170,16 @@
             fontSize * sizeFactor, 0, tint);
     }
 
+    void canvas::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t) {
+        Rectangle sourceRec = {0.0f, 0.0f, (float)t.width, -1 * (float)t.height};
+        Vector2 origin = { (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
+            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor };
+        Rectangle destRec = {origin.x, origin.y, t.width * fontSize / 8 * sizeFactor, t.height * fontSize / 8 * sizeFactor};
+        myDrawTexture(t, sourceRec, destRec, (Vector2){0.0f, 0.0f}, 0.0f, tint);
+    }
+
     void canvas::drawHud(float x, float y, Color tint, string text) {
-        myDrawText(text.c_str(), (Vector2){x * fontSize, y * fontSize}, fontSize, 1, tint);
+        myDrawText(text.c_str(), (Vector2){x * HUDFONTSIZE, y * HUDFONTSIZE}, HUDFONTSIZE, 1, tint);
     }
 
     /******************************************************************************/
@@ -158,154 +188,104 @@
     //Due to character limitations, for down and left, rounds to four pixels.
     /******************************************************************************/
 
-    void canvas::drawBarLeft(float x, float y, Color tint, float sizeFactor, int length) {
-        int partBlock = ' ', fullBlock = 0x2588;
-        if ((length + 2) / 4 % 2 == 1) {
-            partBlock = 0x2590;
-        }
-        char* fb = TextToUtf8(&fullBlock, 1);
-        char* pb = TextToUtf8(&partBlock, 1);
-        for (int i = 0; i < (length + 2) / 8; i++) {
-            myDrawText(fb, {
-            (screenCols / sizeFactor / 2 - cameraX + x - i) * fontSize * sizeFactor,
-            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor }, fontSize, 0, tint);
-        }
-        myDrawText(pb, {
-        (screenCols / sizeFactor / 2 - cameraX + x - (length + 2) / 8) * fontSize * sizeFactor,
-        (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor }, fontSize, 0, tint);
-        free(fb);
-        free(pb);
-        DrawRectangle(x, y, -length * 2 * sizeFactor, fontSize * sizeFactor, RED);
-    }
-
-    void canvas::drawBarRight(float x, float y, Color tint, float sizeFactor, int length) {
-        int partBlock = ' ', fullBlock = 0x2588;
-        if (length % 8 != 0) {
-            partBlock = 0x2590 - length % 8;
-        }
-        char* fb = TextToUtf8(&fullBlock, 1);
-        char* pb = TextToUtf8(&partBlock, 1);
-        for (int i = 0; i < length / 8; i++) {
-            myDrawText(fb, {
-            (screenCols / sizeFactor / 2 - cameraX + x + i) * fontSize * sizeFactor,
-            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor }, fontSize, 0, tint);
-        }
-        myDrawText(pb, {
-        (screenCols / sizeFactor / 2 - cameraX + x + length / 8) * fontSize * sizeFactor,
-        (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor }, fontSize, 0, tint);
-        free(fb);
-        free(pb);
-    }
-
-
-    void canvas::drawBarDown(float x, float y, Color tint, float sizeFactor, int length) {
-        int partBlock = ' ', fullBlock = 0x2588;
-        if ((length + 2) / 4 % 2 == 1) {
-            partBlock = 0x2580;
-        };
-        char* fb = TextToUtf8(&fullBlock, 1);
-        char* pb = TextToUtf8(&partBlock, 1);
-        for (int i = 0; i < (length + 2) / 8; i++) {
-            myDrawText(fb, {
-            (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
-            (screenRows / sizeFactor / 2 - cameraY + y + i) * fontSize * sizeFactor }, fontSize, 0, tint);
-        }
-        myDrawText(pb, {
-        (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
-        (screenRows / sizeFactor / 2 - cameraY + y + (length + 2) / 8) * fontSize * sizeFactor }, fontSize, 0, tint);
-        DrawRectangle((screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
-            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor,
-            fontSize * sizeFactor, length * fontSize / 8 * sizeFactor, tint);
-    }
-
-    void canvas::drawBarUp(float x, float y, Color tint, float sizeFactor, int length) {
+    void canvas::drawBarLeft(float x, float y, Color tint, float sizeFactor, float length) {
+        x = roundTo8th(x);
+        y = roundTo8th(y);
+        length = roundTo8th(length);
 
         //Using double fixes some alignment errors (esp. visible in water)
 
         double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
         double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
+        double width = length * fontSize * sizeFactor + xPixel - floor(xPixel);
+        double height = fontSize * sizeFactor + yPixel - floor(yPixel);
+        //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
+        DrawRectangle(xPixel - width, yPixel, width, height, tint);
+    }
+
+    void canvas::drawBarRight(float x, float y, Color tint, float sizeFactor, float length) {
+        x = roundTo8th(x);
+        y = roundTo8th(y);
+        length = roundTo8th(length);
+        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
+        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
+        double width = length * fontSize * sizeFactor + xPixel - floor(xPixel);
+        double height = fontSize * sizeFactor + yPixel - floor(yPixel);
+        //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
+        DrawRectangle(xPixel, yPixel, width, height, tint);
+    }
+
+
+    void canvas::drawBarDown(float x, float y, Color tint, float sizeFactor, float length) {
+        x = roundTo8th(x);
+        y = roundTo8th(y);
+        length = roundTo8th(length);
+        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
+        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
         double width = fontSize * sizeFactor + xPixel - floor(xPixel);
-        double height = length * fontSize / 8 * sizeFactor + yPixel - floor(yPixel);
+        double height = length * fontSize * sizeFactor + yPixel - floor(yPixel);
+        //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
+        DrawRectangle(xPixel, yPixel, width, height, tint);
+    }
+
+    void canvas::drawBarUp(float x, float y, Color tint, float sizeFactor, float length) {
+        length = roundTo8th(length);
+        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
+        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
+        double width = fontSize * sizeFactor + xPixel - floor(xPixel);
+        double height = length * fontSize * sizeFactor + yPixel - floor(yPixel);
         //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
         DrawRectangle(xPixel, yPixel - height, width, height, tint);
     }
 
-    /******************************************************************************/
-    //drawHudBar...()
-    //Draws a bar of length n pixels starting at x, y (screen coordinates) in the direction specified.
-    //Due to character limitations, for down and left, rounds to four pixels.
-    /******************************************************************************/
+/******************************************************************************/
+//drawHudBar...()
+//Draws a bar of length n pixels starting at x, y (screen coordinates) in the direction specified.
+/******************************************************************************/
 
-    void canvas::drawHudBarLeft (float x, float y, Color tint, int length) {
-        int partBlock = ' ', fullBlock = 0x2588;
-        if ((length + 2) / 4 % 2 == 1) {
-            partBlock = 0x2590;
-        }
-        char* fb = TextToUtf8(&fullBlock, 1);
-        char* pb = TextToUtf8(&partBlock, 1);
-        for (int i = 0; i < (length + 2) / 8; i++) {
-            myDrawText(fb, { (x - i) * fontSize, y * fontSize}, fontSize, 0, tint);
-        }
-        myDrawText(pb, { (x - (length + 2) / 8) * fontSize, y * fontSize}, fontSize, 0, tint);
-        free(fb);
-        free(pb);
+    void canvas::drawHudBarLeft (float x, float y, Color tint, float length) {
+        x = roundTo8th(x);
+        y = roundTo8th(y);
+        length = roundTo8th(length);
+        DrawRectangle((x - length) * HUDFONTSIZE, y * HUDFONTSIZE, length * HUDFONTSIZE, HUDFONTSIZE, tint);
     }
 
-    void canvas::drawHudBarRight (float x, float y, Color tint, int length) {
-        int partBlock = ' ', fullBlock = 0x2588;
-        if (length % 8 != 0) {
-            partBlock = 0x2590 - length % 8;
-        }
-        char* fb = TextToUtf8(&fullBlock, 1);
-        char* pb = TextToUtf8(&partBlock, 1);
-        for (int i = 0; i < length / 8; i++) {
-            myDrawText(fb, { (x + i) * fontSize, y * fontSize}, fontSize, 0, tint);
-        }
-        myDrawText(pb, { (x + length / 8) * fontSize, y * fontSize}, fontSize, 0, tint);
-        free(fb);
-        free(pb);
+    void canvas::drawHudBarRight (float x, float y, Color tint, float length) {
+        x = roundTo8th(x);
+        y = roundTo8th(y);
+        length = roundTo8th(length);
+        DrawRectangle(x * HUDFONTSIZE, y * HUDFONTSIZE, length * HUDFONTSIZE, HUDFONTSIZE, tint);
     }
 
-
-    void canvas::drawHudBarDown (float x, float y, Color tint, int length) {
-        int partBlock = ' ', fullBlock = 0x2588;
-        if ((length + 2) / 4 % 2 == 1) {
-            partBlock = 0x2580;
-        }
-        char* fb = TextToUtf8(&fullBlock, 1);
-        char* pb = TextToUtf8(&partBlock, 1);
-        for (int i = 0; i < (length + 2) / 8; i++) {
-            myDrawText(fb, {x * fontSize, (y + i) * fontSize }, fontSize, 0, tint);
-        }
-        myDrawText(pb, {x * fontSize, (y + (length + 2) / 8) * fontSize }, fontSize, 0, tint);
-        free(fb);
-        free(pb);
+    void canvas::drawHudBarDown (float x, float y, Color tint, float length) {
+        x = roundTo8th(x);
+        y = roundTo8th(y);
+        length = roundTo8th(length);
+        DrawRectangle(x * HUDFONTSIZE, y * HUDFONTSIZE, HUDFONTSIZE, length * HUDFONTSIZE, tint);
     }
 
-    void canvas::drawHudBarUp (float x, float y, Color tint, int length) {
-        int partBlock = ' ', fullBlock = 0x2588;
-        if (length % 8 != 0) {
-            partBlock = 0x2580 + length % 8;
-        }
-        char* fb = TextToUtf8(&fullBlock, 1);
-        char* pb = TextToUtf8(&partBlock, 1);
-        for (int i = 0; i < length / 8; i++) {
-            myDrawText(fb, { x * fontSize, (y - i) * fontSize }, fontSize, 0, tint);
-        }
-        myDrawText(pb, { x * fontSize, (y - length / 8) * fontSize }, fontSize, 0, tint);
-        free(fb);
-        free(pb);
+    void canvas::drawHudBarUp (float x, float y, Color tint, float length) {
+        x = roundTo8th(x);
+        y = roundTo8th(y);
+        length = roundTo8th(length);
+        DrawRectangle(x * HUDFONTSIZE, (y - length) * HUDFONTSIZE, HUDFONTSIZE, length * HUDFONTSIZE, tint);
     }
 
     void canvas::end() {
         if (DRAWFPS) {
-            myDrawText(to_string(GetFPS()).c_str(), (Vector2){10, 10}, 16, 0, WHITE);
+            myDrawText(to_string(GetFPS()).c_str(), (Vector2){0, 0}, 16, 0, WHITE);
         }
         EndDrawing();
     }
 
     Vector2 canvas::getCamera() {
         return (Vector2){cameraX, cameraY};
+    }
+
+    Vector2 canvas::getMouseRelativeTo(float x, float y, float sizeFactor) {
+        Vector2 mouse = GetMousePosition();
+        return (Vector2){(mouse.x / fontSize - screenCols / 2.0) / sizeFactor + cameraX - x,
+                         (mouse.y / fontSize - screenRows / 2.0) / sizeFactor + cameraY - y};
     }
 
     int canvas::getScreenRows() {
@@ -319,6 +299,57 @@
     int canvas::getFontSize() {
         return fontSize;
     }
+
+
+
+    editableCanvas::editableCanvas(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor) :
+        canvas(newWorldRows, newWorldCols, newBackground, newFontSize, newPlayerSizeFactor) {}
+
+    void editableCanvas::moveCamera() {
+
+        //Camera movement
+
+        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+            cameraSpeed = 8;
+        }
+        else {
+            cameraSpeed = 1;
+        }
+        if (IsKeyDown(KEY_D)) {
+            cameraX += cameraSpeed;
+        }
+        if (IsKeyDown(KEY_A)) {
+            cameraX -= cameraSpeed;
+        }
+        if (IsKeyDown(KEY_W)) {
+            cameraY -= cameraSpeed;
+        }
+        if (IsKeyDown(KEY_S)) {
+            cameraY += cameraSpeed;
+        }
+
+        //Click and drag camera movement
+
+        if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {     //When the drag begins
+            oldCameraX = cameraX;
+            oldCameraY = cameraY;
+            Vector2 mouse = GetMousePosition();
+            oldMouseX = mouse.x;
+            oldMouseY = mouse.y;
+        }
+
+        if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {        //While dragging
+            Vector2 mouse = GetMousePosition();
+            cameraX = oldCameraX - (mouse.x - oldMouseX) / theCanvas -> getFontSize();
+            cameraY = oldCameraY - (mouse.y - oldMouseY) / theCanvas -> getFontSize();
+        }
+
+        //Zoom
+
+        fontSize += GetMouseWheelMove();
+
+    }
+
 
 //I don't know how the compiler is actually doing this, but
 //this seems like the fastest implementation, ugly as it is.

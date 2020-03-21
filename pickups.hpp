@@ -62,6 +62,8 @@ class gunPickUp : public pickUp {
 
     explicit gunPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
+    unsigned int type();
+
     collision getCollision(float otherX, float otherY, int otherType);
 
 };
@@ -79,6 +81,8 @@ class ammoPickUp : public pickUp {
     public:
 
     explicit ammoPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
+
+    unsigned int type();
 
     collision getCollision(float otherX, float otherY, int otherType);
 
@@ -98,6 +102,8 @@ class healthPickUp : public pickUp {
 
     explicit healthPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
+    unsigned int type();
+
     collision getCollision(float otherX, float otherY, int otherType);
 
 };
@@ -116,6 +122,8 @@ class maxHealthPickUp : public pickUp {
 
     explicit maxHealthPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
+    unsigned int type();
+
     collision getCollision(float otherX, float otherY, int otherType);
 
 };
@@ -132,6 +140,8 @@ class airPickUp : public pickUp {
     public:
 
     explicit airPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+
+    unsigned int type();
 
     collision getCollision(float otherX, float otherY, int otherType);
 
@@ -151,6 +161,8 @@ class maxAirPickUp : public pickUp {
 
     explicit maxAirPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
+    unsigned int type();
+
     collision getCollision(float otherX, float otherY, int otherType);
 
 };
@@ -168,6 +180,8 @@ class opPickUp : public pickUp {
     public:
 
     explicit opPickUp(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, string newMessage);
+
+    unsigned int type();
 
     collision getCollision(float otherX, float otherY, int otherType);
 

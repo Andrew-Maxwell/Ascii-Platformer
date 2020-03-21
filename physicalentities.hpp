@@ -29,6 +29,8 @@ class physicalParticle : virtual public collideable, public particle {
     explicit physicalParticle( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION, int newLifetime = 2147483647);
 
+    unsigned int type();
+
     bool doesCollide(float otherX, float otherY, int otherType);
 
     bool stopColliding();
@@ -61,6 +63,8 @@ class realPhysicalEntity : virtual public collideable {
 
     explicit realPhysicalEntity(float newx, float newy, Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
+
+    unsigned int type();
 
     bool doesCollide(float otherX, float otherY, int otherType);
 

@@ -11,14 +11,19 @@
         power(newPower),
         range(newRange),
         isOn(false) {
-            
             nextCollision.type = FORCEFIELDTYPE;
-            type = FORCEFIELDTYPE;
         }
+
+    unsigned int forceField::type() {
+        return FORCEFIELDTYPE;
+    }
 
     bool forceField::doesCollide(float otherX, float otherY, int otherType) {
         if (!isOn) {
             return false;
+        }
+        if (otherType == WATERTYPE) {
+            return true;
         }
         if (pow(pow(x - otherX, 2) + pow(y - otherY, 2), 0.5) > range) {
             return false;
@@ -27,9 +32,14 @@
     }
 
     collision forceField::getCollision(float otherX, float otherY, int otherType) {
-        nextCollision.xVal = copysign(pow(pow(power, 2) / (1 + pow((y - otherY) / (x - otherX), 2)), 0.5), x - otherX) * copysign(1, power);
-        nextCollision.yVal = copysign(pow(pow(power, 2) / (1 + pow((x - otherX) / (y - otherY), 2)), 0.5), y - otherY) * copysign(1, power);
-        return nextCollision;
+        if (otherType == WATERTYPE) {
+            return collision(FORCEFIELDTYPE, range, x, y, "", power);
+        }
+        else {
+            nextCollision.xVal = copysign(pow(pow(power, 2) / (1 + pow((y - otherY) / (x - otherX), 2)), 0.5), x - otherX) * copysign(1, power);
+            nextCollision.yVal = copysign(pow(pow(power, 2) / (1 + pow((x - otherX) / (y - otherY), 2)), 0.5), y - otherY) * copysign(1, power);
+            return nextCollision;
+        }
     }
 
     bool forceField::stopColliding() {
@@ -39,14 +49,14 @@
     void forceField::tickSet() {
         if (world -> getChannel(channel)) {
             isOn = true;
-            if (++tickCount % (int)(1 / power) == 0) {
+            if (tickCount++ % (int)(1 / power) == 0) {
                 if (power > 0) { //Attractor force field
-                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
+                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 50)) {
                         world -> addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
                     }
                 }
                 else {  //repeller force field
-                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 20)) {
+                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 50)) {
                         world -> addEntity(new particle(x, y, tint, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
                     }
                 }
@@ -79,7 +89,8 @@
         forceField(newX, newY, newTint, newSizeFactor, newChannel, newPower, newRange) {}
 
     bool explosion::doesCollide(float otherX, float otherY, int otherType) {
-        return(pow(pow(x - otherX, 2) + pow(y - otherY, 2), 0.5) < range);
+        isOn = true;
+        return forceField::doesCollide(otherX, otherY, otherType);
     }
 
     bool explosion::stopColliding() {

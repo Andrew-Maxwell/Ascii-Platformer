@@ -1,5 +1,6 @@
 #include "meta.hpp"
 #include "entity.hpp"
+#include "canvas.hpp"
 
 #ifndef DUMMYENTITY_HPP
 #define DUMMYENTITY_HPP
@@ -20,6 +21,8 @@ class dummyEntity : public entity {
 
     dummyEntity(  float newX, float newY, Color newTint,
                     float newSizeFactor, char newC, int newLifetime = 10000000);
+
+    unsigned int type();
 
     void tickSet();
 

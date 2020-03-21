@@ -37,7 +37,6 @@ struct saveData {
         shouldChangeRooms = false;
         yMomentum = 0;
         elasticity = 0;
-        type = PLAYERTYPE;
         health = maxHealth = 8;
         air = maxAir = 600;
 
@@ -48,6 +47,10 @@ struct saveData {
         for (int i = 0; i < 16; i++) {
             gunDisplayChars[i] = string(TextToUtf8(&gunDisplays[i], 1));
         }
+    }
+
+    unsigned int player::type() {
+        return PLAYERTYPE;
     }
 
     void player::spawn(float spawnX, float spawnY) {
@@ -98,6 +101,7 @@ struct saveData {
             return false;
         }
         else {
+            spawned = true;
             saveIn.read((char*)&s, sizeof(s));
             saveIn.close();
             x = s.x;
@@ -147,13 +151,12 @@ struct saveData {
 
 //Collision functions
 
-    bool player::doesCollide(float otherX, float otherY, int type) {
-        lastCollisionType = type;
-        return (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1) || realPhysicalEntity::doesCollide(otherX, otherY, type);
+    bool player::doesCollide(float otherX, float otherY, int otherType) {
+        return (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1) || realPhysicalEntity::doesCollide(otherX, otherY, otherType);
     }
 
     collision player::getCollision(float otherX, float otherY, int otherType) {
-        if (lastCollisionType == WATERTYPE) {
+        if (otherType == WATERTYPE) {
             return realPhysicalEntity::getCollision(otherX, otherY, otherType);
         }
         collision c(1);
@@ -306,7 +309,7 @@ struct saveData {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && gunUnlocked[gunSelect]) {
             gunSelect = gunSelect % 16;
             if (gunAmmos[gunSelect] > 0 && gunCoolDowns[gunSelect] < 0) {
-                Vector2 aim = Vector2Subtract(GetMousePosition(), positionOnScreen);
+                Vector2 aim = theCanvas -> getMouseRelativeTo(x, y, sizeFactor);
                 bullet* b;
                 switch(gunSelect) {
                     case 0:
@@ -492,21 +495,21 @@ struct saveData {
 
         //Health background bar
 
-        theCanvas -> drawHudBarRight(1, 1, UIBACKGROUND, maxHealth);
+        theCanvas -> drawHudBarRight(1, 1, UIBACKGROUND, maxHealth / 8.0f);
 
         //Health bar
 
         if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //If hurt, flash
-            theCanvas -> drawHudBarRight(1, 1, HURTCOLOR, health);
+            theCanvas -> drawHudBarRight(1, 1, HURTCOLOR, health / 8.0f);
         }
         else {
-            theCanvas -> drawHudBarRight(1, 1, HEALTHCOLOR, health);
+            theCanvas -> drawHudBarRight(1, 1, HEALTHCOLOR, health / 8.0f);
         }
 
         //Air bar
 
         if (air < maxAir) {
-            theCanvas -> drawHudBarRight(1, 2, AIRCOLOR, air / 7);
+            theCanvas -> drawHudBarRight(1, 2, AIRCOLOR, air / 64.0);
         }
     }
 

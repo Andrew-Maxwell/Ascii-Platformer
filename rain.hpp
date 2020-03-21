@@ -20,6 +20,8 @@ class drop : public physicalParticle {
      explicit drop( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION, int newLifetime = 2147483647);
 
+    unsigned int type();
+
     void tickGet();
 
 };
@@ -34,12 +36,13 @@ class rain : public entity {
 
     
     float dropsPerTick, dropBuffer = 0, xMomentum;
-    bool firstTick;
     bool isSnow;
 
     public:
 
     rain(float newX, float newY, Color newTint, float newSizeFactor,  float newDropsPerTick, float newXMomentum, bool isSnow);
+
+    unsigned int type();
 
     void tickSet();
 

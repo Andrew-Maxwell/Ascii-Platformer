@@ -66,25 +66,21 @@ class editableLayer : public layer {
 
     void toggleHide();
 
-    //Determine which tile a given mouse position on the screen is in.
-
-    float getTileX(float cameraX, float mouseX);
-
-    float getTileY(float cameraY, float mouseY);
-
     //Apply changes using left mouse button.
-    
-    virtual void move(vector<tuple<int, int>> mousePos);
 
-    void leftBrush(vector<tuple<int, int>> mousePos, int brushID, charFill* F, float density, bool absolute);
+    intVector2 getMouseTile();
+
+    virtual void move(vector<intVector2> mousePos);
+
+    void leftBrush(vector<intVector2> mousePos, int brushID, charFill* F, float density, bool absolute);
 
     //Cut, copy, and paste
 
-    vector<vector<int>> cut(vector<tuple<int, int>> mousePos);
+    vector<vector<int>> cut(vector<intVector2> mousePos);
 
-    vector<vector<int>> copy(vector<tuple<int, int>> mousePos);
+    vector<vector<int>> copy(vector<intVector2> mousePos);
 
-    void paste(vector<tuple<int, int>> mousePos, vector<vector<int>> toPaste);
+    void paste(vector<intVector2> mousePos, vector<vector<int>> toPaste);
 
     //Select a tile to the palette (using right mouse button.
 
@@ -123,7 +119,7 @@ class editableCollider : virtual public editableLayer {
 
     void setSizeFactor (float newSizeFactor);
 
-    void move (vector<tuple<int, int>> mousePos);
+    void move (vector<intVector2> mousePos);
 
     //Reduced functionality.
 

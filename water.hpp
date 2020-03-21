@@ -21,15 +21,15 @@ class water : public collideable {
     int width;
     float depth, wavelength, amplitude, k, omega;
     bool reverse;
-    int time = 0;
-    
     float sTime, location, size;
 
     public:
 
     explicit water( float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newDepth, float newWavelength, float newAmplitude);
 
-    bool doesCollide( float otherX, float otherY, int type);
+    unsigned int type();
+
+    bool doesCollide( float otherX, float otherY, int otherType);
 
     collision getCollision( float otherX, float otherY, int otherType);
 
