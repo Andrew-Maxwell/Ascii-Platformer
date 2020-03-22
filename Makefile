@@ -69,14 +69,15 @@ LD := g++
 # tar
 TAR := tar
 
+NOWARN := -Wno-reorder -Wno-narrowing -Wno-sign-compare -Wno-unused-parameter
 # C flags
 CFLAGS := -std=c11
 # C++ flags
 CXXFLAGS := -std=c++11
 # C/C++ flags
-CPPFLAGS := -g -Wall -Wextra -pedantic -c -I/opt/raylib/src -O3
+CPPFLAGS := -g -Wall -Wextra -c -I/opt/raylib/src -O3 $(NOWARN)
 # linker flags
-LDFLAGS := -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux  -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -O3
+LDFLAGS := -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux  -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -O3 $(NOWARN)
 # flags required for dependency generation; passed to compilers
 DEPFLAGS = -MT $@ -MD -MP -MF $(DEPDIR)/$*.Td
 

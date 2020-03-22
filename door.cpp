@@ -8,10 +8,9 @@
     door::door(  float newX, float newY, Color newTint,
                     float newSizeFactor, string newDestinationRoom, float newDestX, float newDestY) :
         entity(newX, newY, newTint, newSizeFactor),
-        destinationRoom(newDestinationRoom),
         destinationX(newDestX),
-        destinationY(newDestY) {
-    }
+        destinationY(newDestY),
+        destinationRoom(newDestinationRoom) {}
 
     unsigned int door::type() {
         return DOORTYPE;

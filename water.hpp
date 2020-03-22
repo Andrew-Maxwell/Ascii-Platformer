@@ -29,7 +29,9 @@ class water : public collideable {
 
     unsigned int type ();
 
-    float calculateSurface (float atX)
+    float calculateSurface (float atX, int tickOffSet);
+
+    float calculateSurfaceLastTick (float atX);
 
     bool doesCollide (float otherX, float otherY, int otherType);
 

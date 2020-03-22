@@ -6,8 +6,9 @@
         background(newBackground),
         worldRows(newWorldRows),
         worldCols(newWorldCols),
-        playerSizeFactor(newPlayerSizeFactor),
-        fontSize(newFontSize) {
+        fontSize(newFontSize),
+        playerSizeFactor(newPlayerSizeFactor)
+    {
 
         //Camera initializations
 

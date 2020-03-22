@@ -24,8 +24,8 @@ struct collision {
         damage(newDamage),
         xVal(newXVal),
         yVal(newYVal),
-        message(newMessage),
-        magnitude(newMagnitude) {}
+        magnitude(newMagnitude),
+        message(newMessage) {}
 };
 
 /******************************************************************************/

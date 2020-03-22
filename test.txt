@@ -15,7 +15,7 @@
             "B": 255,
             "A": 80,
             "sizeFactor": 1.0,
-            "wavelength": 30.0,
+            "wavelength": -30.0,
             "amplitude": 0,
             "width": 198,
             "depth": 40

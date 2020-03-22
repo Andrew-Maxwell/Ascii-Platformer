@@ -326,6 +326,7 @@ int main(int argc, char** argv) {
 
             while (!(won || WindowShouldClose() || shouldChangeRooms)) {        //While we're in the same room
 
+                debugWatch = false;
                 won = playerPtr -> won;
 
                 //Inventory screen?

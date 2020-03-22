@@ -9,9 +9,9 @@
                    float newXMomentum, float newYMomentum, int c, int newLifetime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage, float newPower, float newRange) :
         entity(newX, newY, newTint, newSizeFactor),
-        particle(newX, newY, newTint, newSizeFactor, 0, 0, c, newLifetime),
         realPhysicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXMomentum, newYMomentum, 
             newMaxSpeed, newGravity, newFriction),
+        particle(newX, newY, newTint, newSizeFactor, 0, 0, c, newLifetime),
         damage(newDamage),
         dynamicChar(c == 0),
         lifetime(newLifetime),

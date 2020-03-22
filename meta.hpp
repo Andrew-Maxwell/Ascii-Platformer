@@ -44,6 +44,7 @@
 #define COLLIDERTILESIZE 10
 #define GRAVITY 0.01
 #define FRICTION 0.95
+#define WATERRESISTANCE 0.9
 
 #define UIBACKGROUND {15, 15, 30, 255}
 #define UIFOREGROUND {255, 240, 200, 255}
@@ -84,6 +85,7 @@ class canvas;
 extern canvas* theCanvas;
 extern unsigned int entityCounter;
 extern unsigned int tickCounter;
+extern bool debugWatch;
 
 extern "C" {
     extern int FONTCHARS[];

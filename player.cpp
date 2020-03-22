@@ -322,6 +322,7 @@ struct saveData {
                         break;
                     default:
                         cerr << "Fired bullet with invalid gun\n";
+                        exit(EXIT_FAILURE);
                         break;
                 }
                 b -> tickSet();

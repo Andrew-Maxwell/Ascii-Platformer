@@ -7,6 +7,7 @@ collider* world = NULL;
 canvas* theCanvas = NULL;
 unsigned int entityCounter = 0;
 unsigned int tickCounter = 0;
+bool debugWatch = false;
 
 float roundTo8th(float x) {
     return (int)(x * 8) / 8.0;

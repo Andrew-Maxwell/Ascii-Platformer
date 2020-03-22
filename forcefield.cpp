@@ -9,8 +9,8 @@
         entity(newX, newY, newTint, newSizeFactor),
         channel(newChannel),
         power(newPower),
-        range(newRange),
-        isOn(false) {
+        isOn(false),
+        range(newRange) {
             nextCollision.type = FORCEFIELDTYPE;
         }
 

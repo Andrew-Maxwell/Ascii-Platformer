@@ -115,7 +115,6 @@ int main(int argc, char** argv) {
 
     vector<intVector2> mousePos;
     collider markers;
-    float oldMouseX, oldMouseY, oldCameraX, oldCameraY;
 
     //Clipboard
 
@@ -220,15 +219,10 @@ int main(int argc, char** argv) {
     int fontSize;
     string fileName(argv[1]);
     Document json;
-    
     cout << "Starting loading entities...\n";
-    
     readEntities(layers, col, background, fontSize, fileName, json);
-
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
-    float speedMult;
-    
     cout << "Finished loading.\n";
 
     //Main loop

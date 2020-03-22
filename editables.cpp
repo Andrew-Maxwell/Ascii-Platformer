@@ -9,8 +9,8 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson) :
-        layer(newX, newY, newTint, newSizeFactor, newFileName),
         entity(newX, newY, newTint, newSizeFactor),
+        layer(newX, newY, newTint, newSizeFactor, newFileName),
         isLayer(newIsLayer)
     {
 
@@ -657,8 +657,8 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     editableCollider::editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson) :
-        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, newFileName, display, dummyJson),
-        entity(newX, newY, newTint, newSizeFactor) {}
+        entity(newX, newY, newTint, newSizeFactor),
+        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, newFileName, display, dummyJson) {}
 
 /*****************************************************************************/
 //Dummy functions which don't do anything for the collider

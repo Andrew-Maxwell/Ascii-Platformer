@@ -45,7 +45,7 @@ class entity {
 
     //perform additional cleanup. If this function returns true, then the entity is deleted by the entityList.
 
-    virtual bool finalize() {cout << "Error: entity::finalize() should be overloaded.";}
+    virtual bool finalize() {cout << "Error: entity::finalize() should be overloaded."; return true;}
 
     //Display the entity.
 
