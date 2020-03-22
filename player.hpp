@@ -16,7 +16,7 @@ using namespace rapidjson;
 //what it sounds like, I guess.
 /******************************************************************************/
 
-class player : protected realPhysicalEntity, virtual public collideable {
+class player : protected physicalEntity, virtual public collideable {
 
     int health, maxHealth, hurtTimer = 0;
     int air, maxAir;

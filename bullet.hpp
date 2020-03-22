@@ -17,7 +17,7 @@ using namespace rapidjson;
 //Also self-explanatory
 /*****************************************************************************/
 
-class bullet : public realPhysicalEntity, public particle {
+class bullet : public physicalEntity, public particle {
 
     int damage;
     bool hit = false;

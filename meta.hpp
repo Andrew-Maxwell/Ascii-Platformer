@@ -28,6 +28,7 @@
 #include <rapidjson/prettywriter.h>
 
 #define DEBUG true
+#define STATS true
 
 //Convert to be read from a config file
 
@@ -62,7 +63,7 @@
 #define BULLETTYPE 6
 #define WATERTYPE 7
 #define PARTICLETYPE  8
-#define REALPHYSICALENTITYTYPE 9
+#define PHYSICALENTITYTYPE 9
 #define PHYSICALPARTICLETYPE 10
 #define RAINTYPE 11
 #define DROPTYPE 12

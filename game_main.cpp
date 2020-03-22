@@ -366,7 +366,7 @@ int main(int argc, char** argv) {
                     int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
                     total += tickLength;
                     totalSecond += tickLength;
-                    if (tickCounter % 60 == 0) {
+                    if (STATS && tickCounter % 60 == 0) {
                         cout << "Load: " << totalSecond / 10000 << "%\n";
                         if (totalSecond / 10000 > maxLoad) {
                             maxLoad = totalSecond / 10000;

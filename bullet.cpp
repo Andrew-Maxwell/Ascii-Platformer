@@ -9,7 +9,7 @@
                    float newXMomentum, float newYMomentum, int c, int newLifetime, float newElasticity,
                    float newMaxSpeed, float newGravity, float newFriction, int newDamage, float newPower, float newRange) :
         entity(newX, newY, newTint, newSizeFactor),
-        realPhysicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXMomentum, newYMomentum, 
+        physicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXMomentum, newYMomentum, 
             newMaxSpeed, newGravity, newFriction),
         particle(newX, newY, newTint, newSizeFactor, 0, 0, c, newLifetime),
         damage(newDamage),
@@ -24,7 +24,7 @@
     }
 
     bool bullet::doesCollide(float otherX, float otherY, int otherType) {
-        if (realPhysicalEntity::doesCollide(otherX, otherY, otherType) && !hit) {
+        if (physicalEntity::doesCollide(otherX, otherY, otherType) && !hit) {
             hit = true;
             return true;
         }
@@ -33,7 +33,7 @@
 
     collision bullet::getCollision(float otherX, float otherY, int otherType) {
         if (otherType == WATERTYPE) {
-            return realPhysicalEntity::getCollision(otherX, otherY, otherType);
+            return physicalEntity::getCollision(otherX, otherY, otherType);
         }
         return collision(type(), damage, xMomentum, yMomentum);
     }
@@ -43,7 +43,7 @@
     }
 
     void bullet::tickSet() {
-        realPhysicalEntity::tickSet();
+        physicalEntity::tickSet();
         if (xMomentum == 0 || lifetime < 0) {   //If hit a wall during physicalParticle::tickSet()
             hit = true;
         }
@@ -57,7 +57,7 @@
     }
 
     void bullet::tickGet() {
-        realPhysicalEntity::tickGet();
+        physicalEntity::tickGet();
     }
 
     bool bullet::finalize() {

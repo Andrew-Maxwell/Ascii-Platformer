@@ -32,7 +32,7 @@ struct saveData {
 
     player::player(  float newX, float newY, Color newTint, float newSizeFactor) :
                             entity(newX, newY, newTint, newSizeFactor),
-                            realPhysicalEntity(newX, newY, newTint, newSizeFactor, 1.0, 0.0, 0.0)
+                            physicalEntity(newX, newY, newTint, newSizeFactor, 1.0, 0.0, 0.0)
     {
         shouldChangeRooms = false;
         yMomentum = 0;
@@ -152,12 +152,12 @@ struct saveData {
 //Collision functions
 
     bool player::doesCollide(float otherX, float otherY, int otherType) {
-        return (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1) || realPhysicalEntity::doesCollide(otherX, otherY, otherType);
+        return (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1) || physicalEntity::doesCollide(otherX, otherY, otherType);
     }
 
     collision player::getCollision(float otherX, float otherY, int otherType) {
         if (otherType == WATERTYPE) {
-            return realPhysicalEntity::getCollision(otherX, otherY, otherType);
+            return physicalEntity::getCollision(otherX, otherY, otherType);
         }
         collision c(1);
         return c;
@@ -352,7 +352,7 @@ struct saveData {
             yMomentum = newMomentum.y / 3;
             damageIndicator(spikeDamage, x, y, HURTCOLOR, sizeFactor);
         }
-        realPhysicalEntity::tickSet();;
+        physicalEntity::tickSet();;
     }
 
     void player::tickGet() {
@@ -461,7 +461,7 @@ struct saveData {
                     colIter++;
             }
         }
-        realPhysicalEntity::tickGet();
+        physicalEntity::tickGet();
     }
 
     bool player::finalize() {

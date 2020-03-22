@@ -40,6 +40,10 @@
 
     void collider::tickSet() {
 
+        if (STATS && tickCounter % 60 == 0) {
+            cout << "Entities: " << entities.size() << " ";
+        }
+
         //(Formerly entitylist functionality)
 
         list<entity*>::iterator e = entities.begin();

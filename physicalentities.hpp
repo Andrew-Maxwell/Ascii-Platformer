@@ -9,12 +9,12 @@
 using namespace rapidjson;
 
 /******************************************************************************/
-//realPhysicalEntity
+//physicalEntity
 //An entity to which physics (gravity and not travelling through solid objects)
 //applies, more rigorously.
 /******************************************************************************/
 
-class realPhysicalEntity : virtual public collideable {
+class physicalEntity : virtual public collideable {
 
     protected:
 
@@ -24,7 +24,7 @@ class realPhysicalEntity : virtual public collideable {
 
     public:
 
-    explicit realPhysicalEntity(float newx, float newy, Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
+    explicit physicalEntity(float newx, float newy, Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     unsigned int type();
@@ -46,16 +46,12 @@ class realPhysicalEntity : virtual public collideable {
 
 /******************************************************************************/
 //physicalParticle
-//An entity to which physics (gravity and not travelling through solid objects)
-//applies -- loosely.
+//physicalEntity with some particle features
 /******************************************************************************/
 
-class physicalParticle : virtual public collideable, public particle {
+class physicalParticle : public physicalEntity, protected particle {
 
     protected:
-
-    bool isUnderWater = false, lastTickUnderWater = false;
-    float elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction;
 
     bool shouldDelete = false, dynamicChar;
     int lifetime;

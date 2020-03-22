@@ -109,7 +109,7 @@
                     }
                 }
             }
-            else if (colIter -> type == REALPHYSICALENTITYTYPE) {
+            else if (colIter -> type == PHYSICALENTITYTYPE) {
                 splashTimes.push_back(tickCounter - 6);
                 splashPositions.push_back(colIter -> xVal - x);
                 splashSizes.push_back(-2 * colIter -> yVal);
