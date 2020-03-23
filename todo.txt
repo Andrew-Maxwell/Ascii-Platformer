@@ -43,8 +43,7 @@ inspiration/vague visual ideas:
             have a health bar in the virtual world. Making virtual world one-hit-kill makes sense for small, puzzle-oriented levels.
     
 
-Housekeeping items:
-- Use ImageDrawTextEx to generate layer image files when entering a room; massive performance improvements.
+Housekeeping items (may never get to all of these):
 - Docs, including "lessons learned"
 - Replace x, y with Vector2 everywhere
 - Create configure() functions rather than having 10-argument constructors/standardize constructor argument order
@@ -54,7 +53,12 @@ Housekeeping items:
 - make layer use char[][] for mild performance benefits
 - Convert rain to a generic random particle spawner that can spawn particles within a given box area
 - Come up with better names for everything
-- replace type variables with type() functions
+- Several items which should be done together:
+    - Rewrite save system as JSON
+    - Rewrite player to not use so many fixed-size arrays
+    - Create gun and op objects in player, instead of having a bunch of arrays
+    - Guns and ops stored in player; pickups just unlock them.
+        - Op data can be passed to player in readEntities() in game_main.cpp
 
 Bugs:
 - player disappears when standing on tile right below top of level

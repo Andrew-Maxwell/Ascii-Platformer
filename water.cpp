@@ -62,7 +62,7 @@
         force is d/dx (d/dt (surface)).
         Also, the forces are smaller at deeper depths.*/
 
-        float depthFactor = -1 * pow(2, (y - otherY - 1) / abs(wavelength) * 9);
+        float depthFactor = -1 * pow(2, (y - otherY - 2) / abs(wavelength) * 9);
         float yForce1 = depthFactor * (surface[otherX - x] - lastSurface[otherX - x]);
         float yForce2 = depthFactor * (surface[otherX - x + 1] - lastSurface[otherX - x + 1]);
         float xForce = 3 * (yForce1 - yForce2);
