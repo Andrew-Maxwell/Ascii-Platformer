@@ -8,8 +8,65 @@
 #include "meta.hpp"
 #include "particles.hpp"
 #include "physicalentities.hpp"
+#include <set>
 
 using namespace rapidjson;
+
+struct weapon {
+    bool unlocked = false;
+    int gunID;
+    int gunType;
+    int ammo = 0;
+    int maxAmmo = 0;
+    int lastFired = 0;
+    int cooldown = 60;
+    string display = "";
+    Color tint, tintFaded;
+
+    bool operator== (const weapon& other) {
+        return gunID == other.gunID;
+    }
+};
+
+struct puzzleOp {
+    bool unlocked = false;
+    int opID;
+    string display = "";
+    vector<uint8_t> operations;
+    vector<uint8_t> operands;
+
+    bool operator== (const puzzleOp& other) {
+        return opID == other.opID;
+    }
+};
+
+struct outfit {
+    string name;
+    int health = 8;
+    int maxHealth;
+    int air;
+    int maxAir;
+
+    vector<weapon> guns;
+
+    vector<puzzleOp> ops;
+    bitset<8> channels[10];
+
+    set<int> collectedPickups;
+
+    void merge(outfit& otherOutfit) {
+        for (int i = 0; i < otherOutfit.guns.size(); i++) {
+            if (find(guns.begin(), guns.end(), otherOutfit.guns[i]) == guns.end()) {
+                guns.push_back(otherOutfit.guns[i]);
+            }
+        }
+        for (int i = 0; i < otherOutfit.ops.size(); i++) {
+            if (find(ops.begin(), ops.end(), otherOutfit.ops[i]) == ops.end()) {
+                ops.push_back(otherOutfit.ops[i]);
+            }
+        }
+    }
+};
 
 /******************************************************************************/
 //PlayerEntity
@@ -18,55 +75,47 @@ using namespace rapidjson;
 
 class player : protected physicalEntity, virtual public collideable {
 
+    string outfitName;
+
     int health, maxHealth, hurtTimer = 0;
     int air, maxAir;
 
-    bool gunUnlocked[16] = {false};
-    int gunAmmos[16] {0};
-    int gunMaxAmmos[16] = {0};
-    int gunCoolDowns[16] = {0};
-    int gunDisplays[16] = {'E'};
-    string gunDisplayChars[16] = {""};
-    Color gunColors[16] = {{255, 0, 255, 255}};
-    Color gunColorsFaded[16] = {{127, 0, 127, 127}};
-    int lastCollisionType;
-
+    vector<weapon> guns;
     int gunSelect = 0;
 
     //Used in bit manipulation
 
-    int ops[16][4] = {{4}, {0}};
-    int args[16][4] = {{0}, {0}};
-    int opCount = 1;
+    vector<puzzleOp> ops;
     bitset<8> channels[10];
 
-    bool pickUpsCollected[512] = { false };
-    bool spawned = false;
-
-    Vector2 positionOnScreen = {0, 0};
+    set<int> collectedPickups;
 
     public:
 
     string nextRoom;
-    bool shouldChangeRooms;
+    bool breakDoor = false, breakSave = false, breakDead = false;
 
     int won = 0;
 
-    //Constructor + save and load functions
+    //Constructor
 
-    explicit player(  float newX, float newY, Color newTint, float newSizeFactor);
+    explicit player (float newX, float newY, Color newTint, float newSizeFactor);
 
-    unsigned int type();
+    unsigned int type ();
 
-    void spawn(float spawnX, float spawnY);
+    //Outfit handling functions
 
-    bool save(string fileName);
+    outfit getCurrentOutfit();
 
-    bool load(string fileName);
-    
-    //Access whether pickup is collected. Saved here so that it can go in the same savefile.
-    
-    bool isCollected(int pickUpID);
+    void setOutfit(outfit newOutfit);
+
+    //Accessors used for save/load system
+
+    void moveTo(Vector2 position);
+
+    Vector2 getPosition();
+
+    set<int> getCollectedPickups();
 
     //Special accessors because playerEntity must read data from save file as well
 
@@ -85,6 +134,10 @@ class player : protected physicalEntity, virtual public collideable {
     collision getCollision(float otherX, float otherY, int otherType);
 
     bool stopColliding();
+
+    //Fire the gun
+
+    void fire(weapon& gun);
 
     //Tick functions
 

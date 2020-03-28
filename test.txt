@@ -7,6 +7,19 @@
     "fontSize": 16,
     "entities": [
         {
+            "type": "door",
+            "x": 15.0,
+            "y": 19.0,
+            "R": 200,
+            "G": 200,
+            "B": 255,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "nextRoom": "test2.json",
+            "destinationX": 14.0,
+            "destinationY": 9.0
+        },
+        {
             "type": "water",
             "x": 1.0,
             "y": 53.0,
@@ -21,7 +34,7 @@
             "depth": 40
         },
         {
-            "type": "airPickUp",
+            "type": "airPickup",
             "x": 20.0,
             "y": 65.0,
             "R": 200,
@@ -32,7 +45,7 @@
             "airCount": 6000
         },
         {
-            "type": "maxAirPickUp",
+            "type": "maxAirPickup",
             "x": 17.0,
             "y": 53.0,
             "R": 255,
@@ -56,7 +69,7 @@
         },
         {
             "type": "player",
-            "x": 18.0,
+            "x": 20.0,
             "y": 19.0,
             "R": 0,
             "G": 0,
@@ -65,7 +78,7 @@
             "sizeFactor": 1.0
         },
         {
-            "type": "rain",
+            "type": "notrain",
             "x": 0.0,
             "y": 0.0,
             "R": 100,
@@ -85,8 +98,8 @@
             "B": 0,
             "A": 255,
             "sizeFactor": 1.0,
-            "channel": 1,
-            "power": 0.05,
+            "channel": 0,
+            "power": -0.1,
             "range": 30
         },
         {
@@ -100,7 +113,7 @@
             "sizeFactor": 1.0
         },
         {
-            "type": "gunPickUp",
+            "type": "gunPickup",
             "x": 90.0,
             "y": 18.0,
             "R": 255,
@@ -108,11 +121,11 @@
             "B": 255,
             "A": 255,
             "sizeFactor": 1.0,
-            "gunID": 0,
-            "pickUpID": 1
+            "gunID": 1,
+            "pickupID": 1
         },
         {
-            "type": "ammoPickUp",
+            "type": "ammoPickup",
             "x": 100.0,
             "y": 16.0,
             "R": 255,
@@ -120,11 +133,11 @@
             "B": 255,
             "A": 255,
             "sizeFactor": 1.0,
-            "gunID": 0,
+            "gunID": 2,
             "ammoCount": 4
         },
         {
-            "type": "healthPickUp",
+            "type": "healthPickup",
             "x": 98.0,
             "y": 16.0,
             "R": 255,
@@ -135,7 +148,7 @@
             "healthCount": -30
         },
         {
-            "type": "maxHealthPickUp",
+            "type": "maxHealthPickup",
             "x": 16.0,
             "y": 53.0,
             "R": 255,
@@ -146,7 +159,7 @@
             "healthCount": 100
         },
         {
-            "type": "opPickUp",
+            "type": "opPickup",
             "x": 97.0,
             "y": 16.0,
             "R": 0,
@@ -155,31 +168,41 @@
             "A": 255,
             "sizeFactor": 1.0,
             "touch": true,
-            "ops": [
-                "rotate"
-            ],
-            "args": [
-                1
-            ]
-        },
-        {
-            "type": "opPickUp",
-            "x": 96.0,
-            "y": 16.0,
-            "R": 0,
-            "G": 0,
-            "B": 255,
-            "A": 255,
-            "sizeFactor": 1.0,
-            "touch": true,
-            "ops": [
-                "set",
-                "rotate"
-            ],
-            "args": [
-                4,
-                -1
-            ]
+            "opID": 100
         }
-    ]
+    ],
+    "defaultOutfit": {
+        "name": "test_outfit",
+        "health": 16,
+        "maxHealth": 24,
+        "air": 64,
+        "maxAir": 64,
+        "ops": [
+            {
+                "opID": 100,
+                "operations": [
+                    "set",
+                    "rotate"
+                ],
+                "operands": [
+                    4,
+                    -1
+                ]
+            }
+        ],
+        "guns": [
+            {
+                "gunID": 1,
+                "gunType": 1,
+                "ammo": 100,
+                "maxAmmo": 200,
+                "cooldown": 30,
+                "display": 9788,
+                "R": 100,
+                "G": 100,
+                "B": 255,
+                "A": 255
+            }
+        ]
+    }
 }

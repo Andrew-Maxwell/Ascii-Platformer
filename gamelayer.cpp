@@ -13,6 +13,10 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
             layer::render();
         }
 
+    gameLayer::~gameLayer() {
+        cout << "gameLayer destroyed\n";
+    }
+
     unsigned int gameLayer::type() {
         return GAMELAYERTYPE;
     }

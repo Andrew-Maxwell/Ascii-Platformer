@@ -2,13 +2,16 @@
 
 #define HUDFONTSIZE 16
 
-    canvas::canvas(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor) :
-        background(newBackground),
-        worldRows(newWorldRows),
-        worldCols(newWorldCols),
-        fontSize(newFontSize),
-        playerSizeFactor(newPlayerSizeFactor)
-    {
+    canvas::canvas() {
+        displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
+    }
+
+    void canvas::setParams(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor) {
+        background = newBackground;
+        worldRows = newWorldRows;
+        worldCols = newWorldCols;
+        fontSize = newFontSize;
+        playerSizeFactor = newPlayerSizeFactor;
 
         //Camera initializations
 
@@ -20,9 +23,6 @@
         moveCameraY = (worldRows > screenRows * playerSizeFactor);
         cameraLagX = screenCols * 3 / 16;
         cameraLagY = screenRows * 3 / 16;
-
-        displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
-
     }
 
 //Optimized functions
@@ -127,7 +127,7 @@
 
     void canvas::start(float playerX, float playerY, bool tabScreen) {
 
-        //Update camera
+        //Update camera; round value to nearest pixel
 
         if (moveCameraX) {
             if (playerX > cameraX + cameraLagX) {
@@ -145,6 +145,9 @@
                 cameraY = max(playerY + cameraLagY, screenRows / 2.0f);
             }
         }
+
+        //Round camera to a larger value to mitigate pixel flashing effects
+
         BeginDrawing();
         if (tabScreen) {
             ClearBackground(UIBACKGROUND);
@@ -314,7 +317,9 @@
     }
 
     editableCanvas::editableCanvas(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor) :
-        canvas(newWorldRows, newWorldCols, newBackground, newFontSize, newPlayerSizeFactor) {}
+        canvas() {
+        canvas::setParams(newWorldRows, newWorldCols, newBackground, newFontSize, newPlayerSizeFactor);
+    }
 
     void editableCanvas::moveCamera() {
 

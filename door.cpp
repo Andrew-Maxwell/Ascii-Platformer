@@ -17,7 +17,7 @@
     }
 
     bool door::doesCollide(float otherX, float otherY, int otherType) {
-        return (IsKeyPressed(KEY_DOWN) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE);
+        return (otherType == PLAYERTYPE && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1);
     }
 
     collision door::getCollision(float otherX, float otherY, int otherType) {

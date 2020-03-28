@@ -5,8 +5,8 @@ extern "C" int FONTCHARS[] = {  //Line break prevents horrifically long warning 
 
 collider* world = NULL;
 canvas* theCanvas = NULL;
-unsigned int entityCounter = 0;
-unsigned int tickCounter = 0;
+int entityCounter = 0;
+int tickCounter = 0;
 bool debugWatch = false;
 
 float roundTo8th(float x) {

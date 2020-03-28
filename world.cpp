@@ -19,7 +19,8 @@
 
     collider::~collider() {
         while (entities.begin() != entities.end()) {
-            if ((*entities.begin()) -> type() != 1) { //Don't delete the player!
+            if ((*entities.begin()) -> type() != PLAYERTYPE &&
+                (*entities.begin()) -> type() != GAMELAYERTYPE) {
                 delete (*entities.begin());
             }
             entities.erase(entities.begin());
@@ -28,7 +29,10 @@
 
     void collider::clear() {
         while (entities.begin() != entities.end()) {
-            delete (*entities.begin());
+            if ((*entities.begin()) -> type() != PLAYERTYPE &&
+                (*entities.begin()) -> type() != GAMELAYERTYPE) {
+                delete (*entities.begin());
+            }
             entities.erase(entities.begin());
         }
         entities.clear();

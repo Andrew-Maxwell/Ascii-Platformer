@@ -1,273 +1,7 @@
-#include "bullet.hpp"
-
-#include "door.hpp"
-#include "effects.hpp"
-#include "endinggate.hpp"
-#include "forcefield.hpp"
-#include "gamelayer.hpp"
-#include "layer.hpp"
-#include "meta.hpp"
-#include "particles.hpp"
-#include "pickups.hpp"
-#include "player.hpp"
-#include "rain.hpp"
-#include "savepoint.hpp"
-#include "water.hpp"
-#include "canvas.hpp"
+#include "gameleveldata.hpp"
+#include "savedata.hpp"
 
 using namespace rapidjson;
-
-/******************************************************************************/
-//Read in a list of entities from a file
-/******************************************************************************/
-
-void readEntities(Color& background, int& fontSize, player* playerPtr, string& fileName) {
-
-    //Read into a json object
-
-    Document json;
-    FILE* entityFile = getLevelFileP(fileName);
-    fseek (entityFile, 0, SEEK_END);
-    char * buffer = new char[ftell (entityFile)];
-    fseek (entityFile, 0, SEEK_SET);
-    FileReadStream entityReadStream(entityFile, buffer, sizeof(buffer));
-    if (json.ParseStream(entityReadStream).HasParseError()) {
-        cerr << "Error parsing json.\n" << endl;
-    }
-    fclose(entityFile);
-
-    //Read level meta information: background color and collider file name
-
-    uint8_t backgroundR = json.HasMember("R") ? json["R"].GetInt() : 255;
-    uint8_t backgroundG = json.HasMember("G") ? json["G"].GetInt() : 255;
-    uint8_t backgroundB = json.HasMember("B") ? json["B"].GetInt() : 255;
-    uint8_t backgroundA = json.HasMember("A") ? json["A"].GetInt() : 255;
-    string colliderFileName = json.HasMember("collider") ? json["collider"].GetString() : "test_collider.txt";
-    fontSize = json.HasMember("fontSize") ? json["fontSize"].GetInt() : 16;
-    background = {backgroundR, backgroundG, backgroundB, backgroundA};
-    world = new collider(0.0, 0.0, colliderFileName);
-    theCanvas = new canvas(world -> getRows(), world -> getCols(), background,
-        fontSize, playerPtr -> getSizeFactor());
-
-    //Get the list of entities
-
-    const Value& entities = json["entities"];
-    assert(entities.IsArray());
-
-    for (SizeType i = 0; i < entities.Size(); i++) {
-        const Value& entity = entities[i];
-        assert(entity.IsObject());
-
-        //Read in generic data values (almost all entities will have these)
-
-        string type = entity.HasMember("type") ? entity["type"].GetString() : "unknown entity";
-        cout << "Read in a " << type << endl;
-        
-        float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
-        float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
-        uint8_t R = entity.HasMember("R") ? entity["R"].GetInt() : 0;
-        uint8_t G = entity.HasMember("G") ? entity["G"].GetInt() : 0;
-        uint8_t B = entity.HasMember("B") ? entity["B"].GetInt() : 0;
-        uint8_t A = entity.HasMember("A") ? entity["A"].GetInt() : 0;
-        float sizeFactor = entity.HasMember("sizeFactor") ? entity["sizeFactor"].GetFloat() : 1.0;
-
-        if (type == "layer") {
-            string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "Error: No layer filename specified.";
-            gameLayer * L = new gameLayer(x, y, {R, G, B, A}, sizeFactor, fileName);
-            world -> addEntity(L);
-        }
-        else if (type == "endingGate") {
-            int width = entity.HasMember("width") ? entity["width"].GetInt() : 3;
-            int height = entity.HasMember("height") ? entity["height"].GetInt() : 3;
-            endingGate * E = new endingGate(x, y, {R, G, B, A}, sizeFactor, width, height);
-            world -> addCollideable(E);
-        }
-        else if (type == "door") {
-            string nextRoom = entity.HasMember("nextRoom") ? entity["nextRoom"].GetString() : "Error: No door destination specified.";
-            float destinationX = entity.HasMember("destinationX") ? entity["destinationX"].GetFloat() : 0.0;
-            float destinationY = entity.HasMember("destinationY") ? entity["destinationY"].GetFloat() : 0.0;
-            door * D = new door(x, y, {R, G, B, A}, sizeFactor, nextRoom, destinationX, destinationY);
-            world -> addCollideable(D);
-        }
-        else if (type == "savePoint") {
-            savePoint * S = new savePoint(x, y, {R, G, B, A}, sizeFactor);
-            world -> addCollideable(S);
-        }
-        else if (type == "player") {
-            playerPtr -> setColor({R, G, B, A});
-            playerPtr -> setSizeFactor(sizeFactor);
-            playerPtr -> spawn(x, y);
-            world -> addCollideable(playerPtr);
-        }
-        else if (type == "forceField") {
-            int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;
-            float power = entity.HasMember("power") ? entity["power"].GetFloat() : 0;
-            float range = entity.HasMember("range") ? entity["range"].GetFloat() : 0;
-            forceField * F = new forceField(x, y, {R, G, B, A}, sizeFactor, channel, power, range);
-            world -> addCollideable(F);
-        }
-        else if (type == "rain") {
-            float dropsPerTick = entity.HasMember("dropsPerTick") ? entity["dropsPerTick"].GetFloat() : 1.0;
-            float xMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat() : 0.0;
-            bool isSnow = entity.HasMember("snow") ? entity["snow"].GetBool() : 0;
-            rain * newRain = new rain(x, y, {R, G, B, A}, sizeFactor, dropsPerTick, xMomentum, isSnow);
-            world -> addEntity(newRain);
-        }
-        else if (type == "water") {
-            int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
-            float depth = entity.HasMember("depth") ? entity["depth"].GetFloat() : 1.0;
-            float wavelength = entity.HasMember("wavelength") ? entity["wavelength"].GetFloat() : 1.0;
-            float amplitude = entity.HasMember("amplitude") ? entity["amplitude"].GetFloat() : 1.0;
-            water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, width, depth, wavelength, amplitude);
-            world -> addCollideable(newWater);
-        }
-        else if (type == "gunPickUp") {
-            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!playerPtr -> isCollected(pickUpID)) {
-                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
-                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
-                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                gunPickUp * newGunPickUp = new gunPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID);
-                world -> addCollideable(newGunPickUp);
-            }
-        }
-        else if (type == "ammoPickUp") {
-            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!playerPtr -> isCollected(pickUpID)) {
-                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x25a7;
-                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
-                int ammoCount = entity.HasMember("ammoCount") ? entity["ammoCount"].GetInt() : 1;
-                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                ammoPickUp * newAmmoPickUp = new ammoPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, gunID, ammoCount);
-                world -> addCollideable(newAmmoPickUp);
-            }
-        }
-        else if (type == "healthPickUp") {
-            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!playerPtr -> isCollected(pickUpID)) {
-                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
-                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
-                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                healthPickUp * newHealthPickUp = new healthPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
-                world -> addCollideable(newHealthPickUp);
-            }
-        }
-        else if (type == "maxHealthPickUp") {
-            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!playerPtr -> isCollected(pickUpID)) {
-                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
-                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
-                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                maxHealthPickUp * newMaxHealthPickUp = new maxHealthPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, healthCount);
-                world -> addCollideable(newMaxHealthPickUp);
-            }
-        }
-        else if (type == "airPickUp") {
-            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!playerPtr -> isCollected(pickUpID)) {
-                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x02da;
-                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
-                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                airPickUp * newAirPickUp = new airPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, airCount);
-                world -> addCollideable(newAirPickUp);
-            }
-        }
-        else if (type == "maxAirPickUp") {
-            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!playerPtr -> isCollected(pickUpID)) {
-                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2299;
-                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
-                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                maxAirPickUp * newMaxAirPickUp = new maxAirPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, airCount);
-                world -> addCollideable(newMaxAirPickUp);
-            }
-        }
-        else if (type == "opPickUp") {
-            int pickUpID = entity.HasMember("pickUpID") ? entity["pickUpID"].GetInt() : -1;
-            if (!playerPtr -> isCollected(pickUpID)) {
-                int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0;
-                int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-
-                //Really hacky: Pass bitwise op and argument data via the "message" field in the collision
-
-                const Value& ops = entity["ops"];
-                const Value& args = entity["args"];
-                assert(ops.IsArray());
-                assert(args.IsArray());
-                string message;
-                for (SizeType i = 0; i < ops.Size(); i++) {
-                    string op = ops[i].GetString();
-                    if (op == "rotate") {
-                        message.append(1, 1);
-                        if (!displayChar) {
-                            if (args[i].GetInt() > 0) {
-                                displayChar = 0xab;
-                            }
-                            else {
-                                displayChar = 0xbb;
-                            }
-                        }
-                    }
-                    else if (op == "shift") {
-                        message.append(1, 2);
-                        if (!displayChar) {
-                            if (args[i].GetInt() > 0) {
-                                displayChar = '<';
-                            }
-                            else {
-                                displayChar = '>';
-                            }
-                        }
-                    }
-                    else if (op == "set") {
-                        message.append(1, 3);
-                        if (!displayChar) {
-                            displayChar = 0x25a3;
-                        }
-                    }
-                    else if (op == "reset") {
-                        message.append(1, 4);
-                        if (!displayChar) {
-                            displayChar = 0x2610;
-                        }
-                    }
-                    else if (op == "xor") {
-                        message.append(1, 5);
-                        if (!displayChar) {
-                            displayChar = 'X';
-                        }
-                    }
-                    else if (op == "load") {
-                        message.append(1, 6);
-                        if (!displayChar) {
-                            displayChar = 'L';
-                        }
-                    }
-                    else {
-                        message.append(1, 0);
-                        if (!displayChar) {
-                            displayChar = '?';
-                        }
-                    }
-                    message.append(1, args[i].GetInt());
-                }
-                opPickUp * newOpPickUp = new opPickUp(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickUpID, touch, message);
-                world -> addCollideable(newOpPickUp);
-            }
-        }
-        else {
-            cerr << "Bad entity type: " << type << endl;
-        }
-    }
-    free(buffer);
-}
 
 /******************************************************************************/
 /******************************************************************************/
@@ -288,112 +22,182 @@ int main(int argc, char** argv) {
     long total = 0, totalSecond = 0;
     int maxLoad = 0;
 
-    int won = 0;
-    string savedNextRoom;
-    bool shouldChangeRooms = false;
+    bool breakDead = true;
+    bool breakDoor = false;
+    bool breakSave = false;
+    bool quit = false;
     bool showInventory = false;
+    player thePlayer(0, 0, (Color){255, 255, 255, 255}, 1.0);
+    gameLevelData level;
+    saveData save;
+    bool loadedSave;
+    theCanvas = new canvas();
 
 //testing
 
-    while (!(won > 0 || WindowShouldClose())) {      //While we don't want to stop playing, and haven't won
+    while (!(quit || WindowShouldClose())) {      //While the game is running
 
-        //Initialize
+        /*
+        Three possible reasons to break from game loop:
+        Saving, death, or changing rooms (doors)
+        Also, initializing the game is treated as a death.
+        */
 
-        player* playerPtr = new player(0.0, 0.0, {255, 255, 255, 255}, 1);
-        if (argc == 1) {
-            if (playerPtr -> load("save")) {
-                cout << "Loaded save.\n";
+        //If we broke to save the game, then do so
+
+        if (breakSave) {
+            breakSave = false;
+            save.writeOutfit(thePlayer.getCurrentOutfit());
+            save.save(thePlayer.getPosition(), thePlayer.nextRoom);
+        }
+
+        //If we broke because we died (or first time), reload from save
+        //or reload default position if save doesn't exist
+
+        else if (breakDead) {
+            breakDead = false;
+            loadedSave = save.load("save.json");
+
+            //Determine which room we're going to be in next
+            if (loadedSave) {
+                thePlayer.nextRoom = save.getRoom();
+            }
+            else if (argc > 1) {
+                thePlayer.nextRoom = argv[1];
             }
             else {
-                playerPtr -> nextRoom = "test.txt";
+                thePlayer.nextRoom = "test.txt";
+            }
+
+            //Reload world
+
+            delete world;
+            //If necessary, reload from file & recreate layer cache
+            if (thePlayer.nextRoom != level.getFileName()) {
+                level.load(thePlayer.nextRoom);
+                level.generateLayerCache();
+            }
+            //Create world and canvas
+            level.initializeGame(thePlayer.getSizeFactor());
+            //Read in all non-player entities
+            level.readEntitiesGame(thePlayer.getCollectedPickups());
+            //Read in player appearance
+            level.readPlayer(&thePlayer);
+
+            //Set the player position from save or level as appropriate
+            if (loadedSave) {
+                thePlayer.moveTo(save.getPosition());
+            }
+            else {
+                thePlayer.moveTo(level.getPlayerPosition());
+            }
+
+            //Initialize the player outfit
+            outfit defaultOutfit = level.getOutfit("defaultOutfit");
+            if (loadedSave && save.hasOutfit(defaultOutfit.name)) {
+                outfit newOutfit = save.getOutfit(defaultOutfit.name);
+                newOutfit.merge(defaultOutfit);
+                thePlayer.setOutfit(newOutfit);
+            }
+            else {
+                thePlayer.setOutfit(defaultOutfit);
+            }
+        }
+
+        //If we're moving to a different level, perform a subset
+        //of the actions for death
+
+        else if (breakDoor) {
+            breakDoor = false;
+            save.writeOutfit(thePlayer.getCurrentOutfit());
+
+            //Reload world
+
+            delete world;
+            //If necessary, reload from file & recreate layer cache
+            if (thePlayer.nextRoom != level.getFileName()) {
+                level.load(thePlayer.nextRoom);
+                level.generateLayerCache();
+            }
+            //Create world and canvas
+            level.initializeGame(thePlayer.getSizeFactor());
+            //Read in all non-player entities
+            level.readEntitiesGame(thePlayer.getCollectedPickups());
+            //Read in player appearance
+            level.readPlayer(&thePlayer);
+
+            //Initialize the player outfit
+            outfit defaultOutfit = level.getOutfit("defaultOutfit");
+            if (save.hasOutfit(defaultOutfit.name)) {
+                outfit newOutfit = save.getOutfit(defaultOutfit.name);
+                newOutfit.merge(defaultOutfit);
+                thePlayer.setOutfit(newOutfit);
+            }
+            else {
+                thePlayer.setOutfit(defaultOutfit);
             }
         }
         else {
-            playerPtr -> nextRoom = argv[1];
+            cerr << "WTF!!??";
         }
 
-        while (!(won || WindowShouldClose())) {         //While we're still alive (playerPtr persists between rooms)
+        //Main game loop
 
-            //Read in entities, including colllider
+        while (!(breakSave || breakDoor || breakDead || quit || WindowShouldClose())) {
 
-            Color background;
-            int fontSize;
-            readEntities(background, fontSize, playerPtr, playerPtr -> nextRoom);
+            //Inventory screen?
 
-            cout << "Finished reading in entities\n";
-
-            shouldChangeRooms = false;
-
-            while (!(won || WindowShouldClose() || shouldChangeRooms)) {        //While we're in the same room
-
-                debugWatch = false;
-                won = playerPtr -> won;
-
-                //Inventory screen?
-
-                if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_I)) {
-                    showInventory = !showInventory;
-                }
-
-                if (showInventory) {
-                    theCanvas -> start(true);
-                    playerPtr -> drawTabScreen();
-                    theCanvas -> end();
-                }
-
-                //Otherwise, just show normally
-
-                else {
-
-                    tickStart = chrono::steady_clock::now();
-                    tickCounter++;
-
-                    //Update entities
-
-                    world -> tickSet();
-                    world -> tickGet();
-                    world -> finalize();
-
-                    //Display the world
-
-                    Vector2 playerPos = playerPtr -> getPos();
-                    theCanvas -> start(playerPos.x, playerPos.y, false);
-                    world -> print();
-
-                    //end the tick
-
-                    tickEnd = chrono::steady_clock::now();
-                    int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
-                    total += tickLength;
-                    totalSecond += tickLength;
-                    if (STATS && tickCounter % 60 == 0) {
-                        cout << "Load: " << totalSecond / 10000 << "%\n";
-                        if (totalSecond / 10000 > maxLoad) {
-                            maxLoad = totalSecond / 10000;
-                        }
-                        totalSecond = 0;
-                    }
-
-                    //Sleep until the next frame
-
-//                  this_thread::sleep_for(16666000ns - chrono::duration_cast<chrono::nanoseconds>(tickEnd - tickStart));
-
-
-                    theCanvas -> end();
-
-                    //Handle room changing
-
-                    if (playerPtr -> shouldChangeRooms) {
-                        shouldChangeRooms = true;
-                        playerPtr -> shouldChangeRooms = false;
-                    }
-                }
+            if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_I)) {
+                showInventory = !showInventory;
             }
-            delete world;
-            delete theCanvas;
+
+            if (showInventory) {
+                theCanvas -> start(true);
+                thePlayer.drawTabScreen();
+                theCanvas -> end();
+            }
+            else {
+
+                //start tick timer
+
+                tickStart = chrono::steady_clock::now();
+                tickCounter++;
+
+                //Update entities
+
+                world -> tickSet();
+                world -> tickGet();
+                world -> finalize();
+
+                //Display the world
+
+                Vector2 playerPos = thePlayer.getPos();
+                theCanvas -> start(playerPos.x, playerPos.y, false);
+                world -> print();
+
+                //end tick timer
+
+                tickEnd = chrono::steady_clock::now();
+                int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
+                total += tickLength;
+                totalSecond += tickLength;
+                if (STATS && tickCounter % 60 == 0) {
+                    cout << "Load: " << totalSecond / 10000 << "%\n";
+                    if (totalSecond / 10000 > maxLoad) {
+                        maxLoad = totalSecond / 10000;
+                    }
+                    totalSecond = 0;
+                }
+
+                theCanvas -> end();
+
+                //Loop break cases
+
+                breakSave = thePlayer.breakSave;
+                breakDoor = thePlayer.breakDoor;
+                breakDead = thePlayer.breakDead;
+            }
         }
-        delete playerPtr;
-        won = max(won, 0);
     }
 
 //final clean up

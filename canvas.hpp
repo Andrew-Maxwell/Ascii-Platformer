@@ -12,7 +12,7 @@ class canvas {
 
     int screenWidth = SCREENWIDTH;
     int screenHeight = SCREENHEIGHT;
-    int fontSize = 32;
+    int fontSize = 16;
     int screenRows, screenCols, cameraLagX, cameraLagY;
 
     Color background;
@@ -27,7 +27,9 @@ class canvas {
 
     public:
 
-    canvas(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor);
+    canvas();
+
+    void setParams(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor);
 
     int myGetGlyphIndex(int codepoint);
 

@@ -84,8 +84,8 @@ class collider;
 extern collider* world;
 class canvas;
 extern canvas* theCanvas;
-extern unsigned int entityCounter;
-extern unsigned int tickCounter;
+extern int entityCounter;
+extern int tickCounter;
 extern bool debugWatch;
 
 extern "C" {
@@ -111,6 +111,8 @@ float roundTo8th(float x);
 //Checks multiple locations for filename and sets string correctly so that
 //the file can be written back to later.
 /******************************************************************************/
+
+string findFile(string fileName);
 
 ifstream getLevelIFStream(string& fileName);
 

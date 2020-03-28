@@ -47,6 +47,9 @@
     }
 
     void forceField::tickSet() {
+    }
+
+    void forceField::tickGet() {
         if (world -> getChannel(channel)) {
             isOn = true;
             if (tickCount++ % (int)(1 / power) == 0) {
@@ -66,9 +69,6 @@
             isOn = false;
             tickCount = -1;
         }
-    }
-
-    void forceField::tickGet() {
     }
 
     bool forceField::finalize() {

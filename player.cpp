@@ -1,28 +1,6 @@
 #include "player.hpp"
 
 /******************************************************************************/
-//saveData
-//Used as a hack for saving player data.
-/******************************************************************************/
-
-struct saveData {
-    float x, y;
-    int health, maxHealth;
-    int air, maxAir;
-    bool gunUnlocked[16] = {false};
-    int gunAmmos[16] {0};
-    int gunMaxAmmos[16] = {0};
-    int gunDisplays[16];
-    int ops[16][4] = {{0}};
-    int args[16][4] = {{0}};
-    int opCount = 0;
-    bitset<8> channels[10];
-    char nextRoom[64] = "test.txt";
-    bool pickUpsCollected[512] = {false};
-};
-
-
-/******************************************************************************/
 //player
 //an entity controlled by the user
 //Also responsible for storing save data and drawing inventory screen
@@ -34,7 +12,6 @@ struct saveData {
                             entity(newX, newY, newTint, newSizeFactor),
                             physicalEntity(newX, newY, newTint, newSizeFactor, 1.0, 0.0, 0.0)
     {
-        shouldChangeRooms = false;
         yMomentum = 0;
         elasticity = 0;
         health = maxHealth = 8;
@@ -43,95 +20,60 @@ struct saveData {
         for (int i = 0; i < 10; i++) {
             channels[i] = bitset<8>("00000000");
         }
-
-        for (int i = 0; i < 16; i++) {
-            gunDisplayChars[i] = string(TextToUtf8(&gunDisplays[i], 1));
-        }
     }
 
     unsigned int player::type() {
         return PLAYERTYPE;
     }
 
-    void player::spawn(float spawnX, float spawnY) {
-        if (!spawned) {
-            spawned = true;
-            x = spawnX;
-            y = spawnY;
+//Outfit handling functions
+
+    outfit player::getCurrentOutfit() {
+        outfit toReturn;
+        toReturn.name = outfitName;
+        toReturn.health = health;
+        toReturn.maxHealth = maxHealth;
+        toReturn.air = air;
+        toReturn.maxAir = maxAir;
+        toReturn.guns = guns;
+        toReturn.ops = ops;
+        for (int i = 0; i < 10; i++) {
+            toReturn.channels[i] = channels[i];
         }
+        toReturn.collectedPickups = collectedPickups;
+        return toReturn;
     }
 
-    bool player::save(string fileName) {
-        saveData s;
-        s.x = x;
-        s.y = y;
-        s.health = health;
-        s.maxHealth = maxHealth;
-        s.air = air;
-        s.maxAir = maxAir;
-        copy(gunUnlocked, gunUnlocked + 16, s.gunUnlocked);
-        copy(gunAmmos, gunAmmos + 16, s.gunAmmos);
-        copy(gunMaxAmmos, gunMaxAmmos + 16, s.gunMaxAmmos);
-        copy(&ops[0][0], &ops[0][0] + 64, &s.ops[0][0]);
-        copy(&args[0][0], &args[0][0] + 64, &s.args[0][0]);
-        s.opCount = opCount;
-        copy(pickUpsCollected, pickUpsCollected + 512, s.pickUpsCollected);
-        copy(channels, channels + 10, s.channels);
-        copy(nextRoom.begin(), nextRoom.end(), s.nextRoom);
-
-        fstream saveOut;
-        saveOut.open(fileName, ios::out|ios::binary);
-        if (!saveOut) {
-            cerr << "Error writing save file.\n";
-            return false;
+    void player::setOutfit(outfit newOutfit) {
+        outfitName = newOutfit.name;
+        health = newOutfit.health;
+        maxHealth = newOutfit.maxHealth;
+        hurtTimer = -10000000;
+        air = newOutfit.air;
+        maxAir = newOutfit.maxAir;
+        guns = newOutfit.guns;
+        gunSelect = 0;
+        ops = newOutfit.ops;
+        for (int i = 0; i < 10; i++) {
+            channels[i] = newOutfit.channels[i];
         }
-        else {
-            saveOut.write((char*)&s, sizeof(s));
-            saveOut.close();
-            return true;
-        }
+        collectedPickups = newOutfit.collectedPickups;
     }
 
-    bool player::load(string fileName) {
-        saveData s;
-        fstream saveIn;
-        saveIn.open(fileName, ios::in|ios::binary);
-        if (!saveIn) {
-            cerr << "No save file found.\n";
-            return false;
-        }
-        else {
-            spawned = true;
-            saveIn.read((char*)&s, sizeof(s));
-            saveIn.close();
-            x = s.x;
-            y = s.y;
-            health = s.health;
-            maxHealth = s.maxHealth;
-            air = s.air;
-            maxAir = s.maxAir;
-            copy(s.gunUnlocked, s.gunUnlocked + 16, gunUnlocked);
-            copy(s.gunAmmos, s.gunAmmos + 16, gunAmmos);
-            copy(s.gunMaxAmmos, s.gunMaxAmmos + 16, gunMaxAmmos);
-            copy(&s.ops[0][0], &s.ops[0][0] + 64, &ops[0][0]);
-            copy(&s.args[0][0], &s.args[0][0] + 64, &args[0][0]);
-            copy(s.pickUpsCollected, s.pickUpsCollected + 512, pickUpsCollected);
-            opCount = s.opCount;
-            copy(s.channels, s.channels + 10, channels);
-            nextRoom = s.nextRoom;
-            return true;
-        }
+    void player::moveTo(Vector2 position) {
+        x = position.x;
+        y = position.y;
+    }
 
+    Vector2 player::getPosition() {
+        return (Vector2){x, y};
+    }
+
+    set<int> player::getCollectedPickups() {
+        return collectedPickups;
     }
 
 //Accessors
-
-    bool player::isCollected(int pickUpID) {
-        if (pickUpID >= 0 && pickUpID < 512) {
-            return pickUpsCollected[pickUpID];
-        }
-        return false;
-    }
 
     void player::setColor(Color newTint) {
         tint = newTint;
@@ -167,9 +109,41 @@ struct saveData {
         return false;
     }
 
+//Fire a gun
+
+    void player::fire(weapon& gun) {
+        if (gun.ammo > 0 && gun.unlocked) {
+            switch(gun.gunType) {
+                case 1:
+                    if (gun.lastFired + gun.cooldown < tickCounter) {
+                        Vector2 aim = theCanvas -> getMouseRelativeTo(x, y, sizeFactor);
+                        aim = Vector2Scale(Vector2Normalize(aim), 0.5);
+                        bullet* b = new bullet(x + 3 * aim.x, y + 3 * aim.y, tint, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10, -0.5, 20);
+                        world -> addCollideable(b);
+                        gun.lastFired = tickCounter;
+                        gun.ammo--;
+                    }
+                    else {
+                        //play cooldown noise
+                    }
+                    break;
+                default:
+                    cout << "Bad gun.\n";
+                    break;
+            }
+        }
+        else {
+            //play out of ammo noise
+        }
+    }
+
 //Tick functions
 
     void player::tickSet() {
+
+        //Reset break cases
+
+        breakDoor = breakSave = breakDead = false;
 
         //Explosions
 
@@ -178,6 +152,7 @@ struct saveData {
         }
 
         //Movement in air
+
 
         if (IsKeyPressed(KEY_W)) {
             if (world -> isSolid(x + (1 - width) / 2, y + 1) || world -> isSolid(x + (1 + width) / 2, y + 1))  {
@@ -250,85 +225,50 @@ struct saveData {
         //Channels
 
         if (IsKeyDown(KEY_ONE)) {
-            world -> setChannel(channels[1].to_ulong());
+            world -> setChannel(channels[0].to_ulong());
         }
         if (IsKeyDown(KEY_TWO)) {
-            world -> setChannel(channels[2].to_ulong());
+            world -> setChannel(channels[1].to_ulong());
         }
         if (IsKeyDown(KEY_THREE)) {
-            world -> setChannel(channels[3].to_ulong());
+            world -> setChannel(channels[2].to_ulong());
         }
         if (IsKeyDown(KEY_FOUR)) {
-            world -> setChannel(channels[4].to_ulong());
+            world -> setChannel(channels[3].to_ulong());
         }
         if (IsKeyDown(KEY_FIVE)) {
-            world -> setChannel(channels[5].to_ulong());
+            world -> setChannel(channels[4].to_ulong());
         }
         if (IsKeyDown(KEY_SIX)) {
-            world -> setChannel(channels[6].to_ulong());
+            world -> setChannel(channels[5].to_ulong());
         }
         if (IsKeyDown(KEY_SEVEN)) {
-            world -> setChannel(channels[7].to_ulong());
+            world -> setChannel(channels[6].to_ulong());
         }
         if (IsKeyDown(KEY_EIGHT)) {
-            world -> setChannel(channels[8].to_ulong());
+            world -> setChannel(channels[7].to_ulong());
         }
         if (IsKeyDown(KEY_NINE)) {
-            world -> setChannel(channels[9].to_ulong());
+            world -> setChannel(channels[8].to_ulong());
         }
         if (IsKeyDown(KEY_ZERO)) {
-            world -> setChannel(channels[0].to_ulong());
+            world -> setChannel(channels[9].to_ulong());
         }
         //Boollets
 
         //Switching guns
 
         if (IsKeyPressed(KEY_Q)) {
-            for (int i = 0; i < 16; i++) {
-                gunSelect--;
-                if (gunUnlocked[gunSelect % 16]) {
-                    break;
-                }
-            }
+            gunSelect = (gunSelect - 1) % guns.size();
         }
         if (IsKeyPressed(KEY_E)) {
-            for (int i = 0; i < 16; i++) {
-                gunSelect++;
-                if (gunUnlocked[gunSelect % 16]) {
-                    break;
-                }
-            }
-        }
-
-        //Cooldown
-
-        for (int i = 0; i < 16; i++) {
-            gunCoolDowns[i]--;
+            gunSelect = (gunSelect + 1) % guns.size();
         }
 
         //Shootin'
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && gunUnlocked[gunSelect]) {
-            gunSelect = gunSelect % 16;
-            if (gunAmmos[gunSelect] > 0 && gunCoolDowns[gunSelect] < 0) {
-                Vector2 aim = theCanvas -> getMouseRelativeTo(x, y, sizeFactor);
-                bullet* b;
-                switch(gunSelect) {
-                    case 0:
-                        aim = Vector2Scale(Vector2Normalize(aim), 0.5);
-                        b = new bullet(x + 3 * aim.x, y + 3 * aim.y, tint, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10, -0.5, 20);
-                        gunCoolDowns[0] = 60;
-                        gunAmmos[0]--;
-                        break;
-                    default:
-                        cerr << "Fired bullet with invalid gun\n";
-                        exit(EXIT_FAILURE);
-                        break;
-                }
-                b -> tickSet();
-                b -> tickSet();
-                world -> addCollideable(b);
-            }
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && guns.size() > 0) {
+            fire(guns[gunSelect]);
         }
 
         //Spikes, falling, and death
@@ -338,7 +278,10 @@ struct saveData {
             health = 0;
         }
         if (health <= 0) {
-            won = -1;
+            breakDead = true;
+            xMomentum = 0;
+            yMomentum = 0;
+            collisions.clear();
         }
 
         //spikes
@@ -364,14 +307,16 @@ struct saveData {
                     colIter = collisions.erase(colIter);
                     break;
                 case DOORTYPE:
-                    x = colIter -> xVal;
-                    y = colIter -> yVal;
-                    nextRoom = colIter -> message;
-                    shouldChangeRooms = true;
+                    if (IsKeyPressed(KEY_S)) {
+                        x = colIter -> xVal;
+                        y = colIter -> yVal;
+                        nextRoom = colIter -> message;
+                        breakDoor = true;
+                    }
                     colIter = collisions.erase(colIter);
                     break;
                 case SAVEPOINTTYPE: {
-                    save("save");
+                    breakSave = true;
                     colIter = collisions.erase(colIter);
                     break;
                 }
@@ -386,35 +331,38 @@ struct saveData {
                     colIter = collisions.erase(colIter);
                     break;
                 case GUNPICKUPTYPE: {
-                    int gunID = colIter -> damage;
-                    gunUnlocked[gunID] = true;  // damage is actually the gunID
-                    switch(gunID) {
-                        case 0:
-                            gunAmmos[gunID] = 3;
-                            gunMaxAmmos[gunID] = 6;
+                    int pickupgunID = colIter -> damage;
+                    for (int i = 0; i < guns.size(); i++) {
+                        if (guns[i].gunID == pickupgunID) {
+                            guns[i].unlocked = true;
                             break;
-                        default:
-                            cerr << "Error: Gun Pickup contains invalid gunID.";
-                            break;
+                        }
                     }
-                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
-                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    if (int(colIter -> yVal)) {
+                        collectedPickups.insert(int(colIter -> yVal));
                     }
                     colIter = collisions.erase(colIter);
                     break;
+                }
+                case AMMOPICKUPTYPE: {
+                    int pickupgunID = colIter -> damage;
+                    for (int i = 0; i < guns.size(); i++) {
+                        if (guns[i].gunID == pickupgunID) {
+                            guns[i].ammo = min(guns[i].maxAmmo, guns[i].ammo + int(colIter -> xVal));
+                            break;
+                        }
                     }
-                case AMMOPICKUPTYPE:
-                    gunAmmos[colIter -> damage] = min(gunMaxAmmos[colIter -> damage], (int)(gunAmmos[colIter -> damage] + colIter -> xVal));
-                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
-                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    if (int(colIter -> yVal)) {
+                        collectedPickups.insert(int(colIter -> yVal));
                     }
                     colIter = collisions.erase(colIter);
                     break;
+                }
                 case HEALTHPICKUPTYPE:
                     damageIndicator(colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
                     health = min(maxHealth, health + colIter -> damage);
-                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
-                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    if (int(colIter -> yVal)) {
+                        collectedPickups.insert(int(colIter -> yVal));
                     }
                     colIter = collisions.erase(colIter);
                     break;
@@ -422,16 +370,16 @@ struct saveData {
                     health += (colIter -> damage);
                     damageIndicator(colIter -> damage, x, y, HEALTHCOLOR, sizeFactor);
                     maxHealth += (colIter -> damage);
-                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
-                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    if (int(colIter -> yVal)) {
+                        collectedPickups.insert(int(colIter -> yVal));
                     }
                     colIter = collisions.erase(colIter);
                     break;
                 case AIRPICKUPTYPE:
                     air = min(maxAir, air + colIter -> damage);
                     damageIndicator(colIter -> damage, x, y, AIRCOLOR, sizeFactor);
-                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
-                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    if (int(colIter -> yVal)) {
+                        collectedPickups.insert(int(colIter -> yVal));
                     }
                     colIter = collisions.erase(colIter);
                     break;
@@ -439,20 +387,19 @@ struct saveData {
                     air += (colIter -> damage);
                     damageIndicator(colIter -> damage, x, y, AIRCOLOR, sizeFactor);
                     maxAir += (colIter -> damage);
-                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
-                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    if (int(colIter -> yVal)) {
+                        collectedPickups.insert(int(colIter -> yVal));
                     }
                     colIter = collisions.erase(colIter);
                     break;
                 case OPPICKUPTYPE: {
-                    string message = colIter -> message;
-                    for (int i = 0; i < 8; i+= 2) {
-                        ops[opCount][i / 2] = message[i];
-                        args[opCount][i / 2] = message[i + 1];
+                    for (int i = 0; i < ops.size(); i++) {
+                        if (ops[i].opID == colIter -> damage) {
+                            ops[i].unlocked = true;
+                        }
                     }
-                    opCount++;
-                    if (0 < colIter -> yVal && colIter -> yVal < 512) {
-                        pickUpsCollected[(int)(colIter -> yVal)] = true;
+                    if (int(colIter -> yVal)) {
+                        collectedPickups.insert(int(colIter -> yVal));
                     }
                     colIter = collisions.erase(colIter);
                     break;
@@ -469,11 +416,13 @@ struct saveData {
     }
 
     void player::print() {
-        if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
-            theCanvas -> draw(x, y, HURTCOLOR, sizeFactor, "@");
-        }
-        else {
-            theCanvas -> draw(x, y, tint, sizeFactor, "@");
+        if (!breakDoor) {   //Fix teleporting for one frame after going through door
+            if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
+                theCanvas -> draw(x, y, HURTCOLOR, sizeFactor, "@");
+            }
+            else {
+                theCanvas -> draw(x, y, tint, sizeFactor, "@");
+            }
         }
         drawHud();
     }
@@ -483,15 +432,15 @@ struct saveData {
         //Print gun info
 
         int rowCount = 0;
-        for (int i = 0; i < 16; i++) {
-            if (gunUnlocked[i]) {
-                if (gunCoolDowns[i] > 0 || gunAmmos[i] < 1) {
-                    theCanvas -> drawHud(1, ++rowCount + 3, gunColorsFaded[i], gunDisplayChars[i]);
-                    theCanvas -> drawHud(2, rowCount + 3, gunColorsFaded[i], to_string(gunAmmos[i]));
+        for (int i = 0; i < guns.size(); i++) {
+            if (guns[i].unlocked) {
+                if (tickCounter < guns[i].lastFired + guns[i].cooldown || guns[i].ammo < 1) {
+                    theCanvas -> drawHud(1, ++rowCount + 3, guns[i].tintFaded, guns[i].display);
+                    theCanvas -> drawHud(2, rowCount + 3, guns[i].tintFaded, to_string(guns[i].ammo));
                 }
                 else {
-                    theCanvas -> drawHud(1, ++rowCount + 3, gunColors[i], gunDisplayChars[i]);
-                    theCanvas -> drawHud(2, rowCount + 3, gunColors[i], to_string(gunAmmos[i]));
+                    theCanvas -> drawHud(1, ++rowCount + 3, guns[i].tint, guns[i].display);
+                    theCanvas -> drawHud(2, rowCount + 3, guns[i].tint, to_string(guns[i].ammo));
                 }
             }
         }
@@ -571,7 +520,6 @@ struct saveData {
 
     void player::drawTabScreen() {
 
-        int keys[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
         int icons[] = {' ', 0xab, '<', 0x25a3, 0x2610, 'X', 'L'};
 
         drawHud();
@@ -580,22 +528,16 @@ struct saveData {
         //Print out all of the channel bitsets + all available ops, one per row.
 
         for (int i = 0; i < 10; i++) {
-            listNum[0] = '0' + keys[i];
+            int key = (i + 1) % 10;   //Print out the channels labeled like keyboard keys, 0 at the end
+            listNum[0] = '0' + key;
             theCanvas -> drawHud(1, 10 + 2 * i, UIFOREGROUND, listNum);
-            for (int j = 0; j < 8; j++) {
-                if (channels[keys[i]][j]) {
-                    theCanvas -> drawHud(j + 4, 10 + 2 * i, UIFOREGROUND, "1");
+            theCanvas -> drawHud(4, 10 + 2 * i, UIFOREGROUND, channels[i].to_string());
+            for (int j = 0; j < ops.size(); j++) {;
+                if (ops[j].unlocked) {
+                    theCanvas -> drawHud(j * 3 + 15, 10 + 2 * i, UIFOREGROUND, ops[j].display);
                 }
                 else {
-                    theCanvas -> drawHud(j + 4, 10 + 2 * i, UIFOREGROUND, "0");
-                }
-            }
-            for (int k = 0; k < 16; k++) {
-                char* temp = TextToUtf8(&icons[ops[k][0]], 1);
-                theCanvas -> drawHud(k * 3 + 15, 10 + 2 * i, UIFOREGROUND, temp);
-                free(temp);
-                if (ops[k][1] != 0) {
-                    theCanvas -> drawHud(k * 3 + 16, 10 + 2 * i, UIFOREGROUND, "+");
+                    theCanvas -> drawHud(j * 3 + 15, 10 + 2 * i, UIFOREGROUND, "?");
                 }
             }
         }
@@ -607,9 +549,9 @@ struct saveData {
             int lineSelect = (mouse.y / theCanvas -> getFontSize() - 10) / 2;
             if (0 <= lineSelect && lineSelect <= 9) {
                 int opSelect = (mouse.x / theCanvas -> getFontSize() - 15) / 3;
-                if (0 <= opSelect && opSelect < 16) {
-                    for (int i = 0; i < 4; i++) {
-                        apply(&channels[keys[lineSelect]], ops[opSelect][i], args[opSelect][i]);
+                if (0 <= opSelect && opSelect < ops.size()) {
+                    for (int i = 0; i < ops[opSelect].operations.size(); i++) {
+                        apply(&channels[lineSelect], ops[opSelect].operations[i], ops[opSelect].operands[i]);
                     }
                 }
             }
