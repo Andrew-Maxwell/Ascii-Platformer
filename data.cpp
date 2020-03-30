@@ -23,6 +23,7 @@ using namespace rapidjson;
             FileReadStream entityReadStream(entityFile, buffer, sizeof(buffer));
             if (json.ParseStream(entityReadStream).HasParseError()) {
                 cerr << "Error parsing json.\n" << endl;
+                exit(EXIT_FAILURE);
             }
             fclose(entityFile);
             free(buffer);
@@ -61,11 +62,25 @@ using namespace rapidjson;
                 const Value& gunData = guns[i];
                 weapon newGun;
                 newGun.unlocked = gunData.HasMember("unlocked") ? gunData["unlocked"].GetBool() : false;
+                newGun.hitWall = gunData.HasMember("hitWall") ? gunData["hitWall"].GetBool() : true;
+                newGun.hitWater = gunData.HasMember("hitWater") ? gunData["hitWater"].GetBool() : true;
+                newGun.hitEntity = gunData.HasMember("hitEntity") ? gunData["hitEntity"].GetBool() : true;
+                newGun.sticky = gunData.HasMember("sticky") ? gunData["sticky"].GetBool() : false;
+                newGun.automatic = gunData.HasMember("automatic") ? gunData["automatic"].GetBool() : false;
+                newGun.explosionRange = gunData.HasMember("explosionRange") ? gunData["explosionRange"].GetFloat() : 0.0f;
+                newGun.explosionPower = gunData.HasMember("explosionPower") ? gunData["explosionPower"].GetFloat() : 0.0f;
+                newGun.lifetime = gunData.HasMember("lifetime") ? gunData["lifetime"].GetInt() : 60;
+                newGun.speed = gunData.HasMember("speed") ? gunData["speed"].GetFloat() : 1.0f;
+                newGun.damage = gunData.HasMember("damage") ? gunData["damage"].GetInt() : 1;
+                newGun.gravity = gunData.HasMember("gravity") ? gunData["gravity"].GetFloat() : GRAVITY;
+                newGun.elasticity = gunData.HasMember("elasticity") ? gunData["elasticity"].GetFloat() : 0.0f;
+                newGun.bulletDisplay = gunData.HasMember("bulletDisplay") ? gunData["bulletDisplay"].GetInt() : 0;
+                newGun.particleCount = gunData.HasMember("particleCount") ? gunData["particleCount"].GetInt() : 0;
                 assert(gunData.HasMember("gunID"));
                 newGun.gunID = gunData["gunID"].GetInt();
                 newGun.gunType = gunData["gunType"].GetInt();
                 newGun.ammo = gunData.HasMember("ammo") ? gunData["ammo"].GetInt() : 1;
-                newGun.maxAmmo = gunData.HasMember("maxAmmo") ? gunData["maxAmmo"].GetInt() : 1;
+                newGun.maxAmmo = gunData.HasMember("maxAmmo") ? gunData["maxAmmo"].GetInt() : -1;
                 newGun.lastFired = -1 * 10000000;
                 newGun.cooldown = gunData.HasMember("cooldown") ? gunData["cooldown"].GetInt() : 0;
                 if (gunData.HasMember("display")) {

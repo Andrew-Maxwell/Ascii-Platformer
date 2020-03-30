@@ -29,7 +29,11 @@ class gameLevelData : public outfitData {
 
     //Initialize global world and theCanvas pointers
 
-    void initializeGame(float playerSizeFactor);
+    Color getBackgroundColor();
+
+    string getWorldFileName();
+
+    int getFontSize();
 
     //Read all of the entities into the global world collider
 

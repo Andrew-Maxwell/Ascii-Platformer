@@ -14,12 +14,23 @@ using namespace rapidjson;
 
 struct weapon {
     bool unlocked = false;
+    bool automatic;
+    bool hitWall, hitWater, hitEntity;
+    bool sticky;
+    float explosionRange, explosionPower;
+    int lifetime;
+    float speed;
+    int damage;
+    float gravity;
+    float elasticity;
     int gunID;
     int gunType;
     int ammo = 0;
     int maxAmmo = 0;
     int lastFired = 0;
     int cooldown = 60;
+    int bulletDisplay;
+    int particleCount;
     string display = "";
     Color tint, tintFaded;
 
@@ -77,7 +88,8 @@ class player : protected physicalEntity, virtual public collideable {
 
     string outfitName;
 
-    int health, maxHealth, hurtTimer = 0;
+    int health, maxHealth;
+    int hurtTimer = -1000;
     int air, maxAir;
 
     vector<weapon> guns;

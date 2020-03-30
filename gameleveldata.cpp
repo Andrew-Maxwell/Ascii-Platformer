@@ -37,20 +37,20 @@
 
     //Initialize global world and theCanvas pointers
 
-    void gameLevelData::initializeGame(float playerSizeFactor) {
-
-        //Read level meta information: background color and collider file name
-
+    Color gameLevelData::getBackgroundColor() {
         uint8_t backgroundR = json.HasMember("R") ? json["R"].GetInt() : 255;
         uint8_t backgroundG = json.HasMember("G") ? json["G"].GetInt() : 255;
         uint8_t backgroundB = json.HasMember("B") ? json["B"].GetInt() : 255;
         uint8_t backgroundA = json.HasMember("A") ? json["A"].GetInt() : 255;
-        string colliderFileName = json.HasMember("collider") ? json["collider"].GetString() : "test_collider.txt";
-        int fontSize = json.HasMember("fontSize") ? json["fontSize"].GetInt() : 16;
-        Color background = {backgroundR, backgroundG, backgroundB, backgroundA};
-        world = new collider(0.0, 0.0, colliderFileName);
-        theCanvas -> setParams(world -> getRows(), world -> getCols(), background,
-            fontSize, playerSizeFactor);
+        return (Color){backgroundR, backgroundG, backgroundB, backgroundA};
+    }
+
+    string gameLevelData::getWorldFileName() {
+        return json.HasMember("collider") ? json["collider"].GetString() : "test_collider.txt";
+    }
+
+    int gameLevelData::getFontSize() {
+        return json.HasMember("fontSize") ? json["fontSize"].GetInt() : 16;
     }
 
     //Read in entities to global world collider
@@ -127,82 +127,51 @@
                 water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, width, depth, wavelength, amplitude);
                 world -> addCollideable(newWater);
             }
-            else if (type == "gunPickup") {
+            else if (type == "gunPickup" || type == "ammoPickup" || type == "healthPickup" ||
+                     type == "maxHealthPickup" || type == "airPickup" || type == "maxAirPickup" ||
+                     type == "opPickup") {
                 int pickupID = entity.HasMember("pickupID") ? entity["pickupID"].GetInt() : 0;
                 if (!(collectedPickups.count(pickupID))) {
-                    int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
-                    int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                    int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
-                    bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                    gunPickup * newGunPickup = new gunPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, gunID);
-                    world -> addCollideable(newGunPickup);
-                }
-            }
-            else if (type == "ammoPickup") {
-                int pickupID = entity.HasMember("pickupID") ? entity["pickupID"].GetInt() : 0;
-                if (!(collectedPickups.count(pickupID))) {
-                    int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x25a7;
-                    int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                    int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
-                    int ammoCount = entity.HasMember("ammoCount") ? entity["ammoCount"].GetInt() : 1;
-                    bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                    ammoPickup * newAmmoPickup = new ammoPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, gunID, ammoCount);
-                    world -> addCollideable(newAmmoPickup);
-                }
-            }
-            else if (type == "healthPickup") {
-                int pickupID = entity.HasMember("pickupID") ? entity["pickupID"].GetInt() : 0;
-                if (!(collectedPickups.count(pickupID))) {
-                    int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
-                    int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                    int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
-                    bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                    healthPickup * newHealthPickup = new healthPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, healthCount);
-                    world -> addCollideable(newHealthPickup);
-                }
-            }
-            else if (type == "maxHealthPickup") {
-                int pickupID = entity.HasMember("pickupID") ? entity["pickupID"].GetInt() : 0;
-                if (!(collectedPickups.count(pickupID))) {
-                    int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
-                    int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                    int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
-                    bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                    maxHealthPickup * newMaxHealthPickup = new maxHealthPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, healthCount);
-                    world -> addCollideable(newMaxHealthPickup);
-                }
-            }
-            else if (type == "airPickup") {
-                int pickupID = entity.HasMember("pickupID") ? entity["pickupID"].GetInt() : 0;
-                if (!(collectedPickups.count(pickupID))) {
-                    int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x02da;
-                    int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                    int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
-                    bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                    airPickup * newAirPickup = new airPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, airCount);
-                    world -> addCollideable(newAirPickup);
-                }
-            }
-            else if (type == "maxAirPickup") {
-                int pickupID = entity.HasMember("pickupID") ? entity["pickupID"].GetInt() : 0;
-                if (!(collectedPickups.count(pickupID))) {
-                    int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2299;
-                    int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
-                    int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
-                    bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                    maxAirPickup * newMaxAirPickup = new maxAirPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, airCount);
-                    world -> addCollideable(newMaxAirPickup);
-                }
-            }
-            else if (type == "opPickup") {
-                int pickupID = entity.HasMember("pickupID") ? entity["pickupID"].GetInt() : 0;
-                if (!(collectedPickups.count(pickupID))) {
-                    int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 'O';
                     int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                     bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
-                    int opID = entity.HasMember("opID") ? entity["opID"].GetInt() : -1;
-                    opPickup * newOpPickup = new opPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, opID);
-                    world -> addCollideable(newOpPickup);
+                    pickup* newPickup;
+                    if (type == "gunPickup") {
+                        int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
+                        int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
+                        newPickup = new gunPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, gunID);
+                    }
+                    else if (type == "ammoPickup") {
+                        int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
+                        int ammoCount = entity.HasMember("ammoCount") ? entity["ammoCount"].GetInt() : 1;
+                        int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
+                        newPickup = new ammoPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, gunID, ammoCount);
+                    }
+                    else if (type == "healthPickup") {
+                        int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
+                        int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
+                        newPickup = new healthPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, healthCount);
+                    }
+                    else if (type == "maxHealthPickup") {
+                        int healthCount = entity.HasMember("healthCount") ? entity["healthCount"].GetInt() : 4;
+                        int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2665;
+                        newPickup = new maxHealthPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, healthCount);
+                    }
+                    else if (type == "airPickup") {
+                        int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
+                        int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x02da;
+                        newPickup = new airPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, airCount);
+                    }
+                    else if (type == "maxAirPickup") {
+                        int airCount = entity.HasMember("airCount") ? entity["airCount"].GetInt() : 4;
+                        int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2299;
+                        newPickup = new maxAirPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, airCount);
+                    }
+                    else if (type == "opPickup") {
+                        int opID = entity.HasMember("opID") ? entity["opID"].GetInt() : -1;
+                        int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x00b1;
+                        newPickup = new opPickup(x, y, {R, G, B, A}, sizeFactor, displayChar, lifetime, pickupID, touch, opID);
+                    }
+                    world -> addCollideable(newPickup);
                 }
             }
             else {
@@ -229,7 +198,6 @@
                 float sizeFactor = entity.HasMember("sizeFactor") ? entity["sizeFactor"].GetFloat() : 1.0;
                 playerPtr -> setColor({R, G, B, A});
                 playerPtr -> setSizeFactor(sizeFactor);
-                world -> addCollideable(playerPtr);
             }
         }
     }

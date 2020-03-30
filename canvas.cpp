@@ -19,10 +19,10 @@
         cameraY = worldRows / 2;
         screenRows = screenHeight / fontSize;
         screenCols = screenWidth / fontSize;
-        moveCameraX = (worldCols > screenCols * playerSizeFactor);
-        moveCameraY = (worldRows > screenRows * playerSizeFactor);
-        cameraLagX = screenCols * 3 / 16;
-        cameraLagY = screenRows * 3 / 16;
+        moveCameraX = (worldCols > screenCols / playerSizeFactor);
+        moveCameraY = (worldRows > screenRows / playerSizeFactor);
+        cameraLagX = screenCols / playerSizeFactor * 3 / 16;
+        cameraLagY = screenRows / playerSizeFactor * 3 / 16;
     }
 
 //Optimized functions

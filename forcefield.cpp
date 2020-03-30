@@ -86,23 +86,27 @@
 
     explosion::explosion(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange) :
         entity(newX, newY, newTint, newSizeFactor),
-        forceField(newX, newY, newTint, newSizeFactor, newChannel, newPower, newRange) {}
+        forceField(newX, newY, newTint, newSizeFactor, newChannel, newPower, newRange)
+        {
+            isOn = true;
+        }
 
     bool explosion::doesCollide(float otherX, float otherY, int otherType) {
-        isOn = true;
-        return forceField::doesCollide(otherX, otherY, otherType);
+        return exploding && forceField::doesCollide(otherX, otherY, otherType);
     }
 
     bool explosion::stopColliding() {
-        return true;
+        return exploding;
     }
 
-    void explosion::tickSet() {}
+    void explosion::tickSet() {
+        exploding = true;    //Delete the explosion after its first full tick.
+    }
 
     void explosion::tickGet() {}
 
     bool explosion::finalize() {
-        return true;
+        return exploding;
     }
 
     void explosion::print() {}

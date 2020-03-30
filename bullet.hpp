@@ -19,20 +19,24 @@ using namespace rapidjson;
 
 class bullet : public physicalEntity, public particle {
 
-    int damage;
-    bool hit = false;
-    bool exploded = false;
+    int damage, explosionDamage;
+    float explosionPower, explosionRange;
+    bool hitWall, hitWater, hitEntity, sticky;
+    bool bulletHit = false;
+    bool stuck = false;
     bool dynamicChar;
-    
+    int particleCount;
+
     float width = 0.8;
     int lifetime;
-    float power, range;
 
     public:
 
     bullet(float newX, float newY, Color newTint, float newSizeFactor, 
-                   float newXMomentum, float newYMomentum, int c, int newLifeTime, float newElasticity,
-                   float newMaxSpeed, float newGravity, float newFriction, int newDamage, float power, float range);
+           float newXMomentum, float newYMomentum, int c, int particleCount, int newLifeTime,
+           float newElasticity, float newMaxSpeed, float newGravity, float newFriction,
+           int newDamage, float newExplosionPower, float newExplosionRange,
+           bool hitWall, bool hitWater, bool hitEntity, bool sticky);
 
     unsigned int type();
 

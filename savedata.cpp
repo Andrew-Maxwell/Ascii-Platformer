@@ -38,11 +38,25 @@
         for (int i = 0; i < o.guns.size(); i++) {
             Value newGun(kObjectType);
             newGun.AddMember("unlocked", Value(o.guns[i].unlocked).Move(), a);
+            newGun.AddMember("automatic", Value(o.guns[i].automatic).Move(), a);
+            newGun.AddMember("hitWall", Value(o.guns[i].hitWall).Move(), a);
+            newGun.AddMember("hitWater", Value(o.guns[i].hitWater).Move(), a);
+            newGun.AddMember("hitEntity", Value(o.guns[i].hitEntity).Move(), a);
+            newGun.AddMember("sticky", Value(o.guns[i].sticky).Move(), a);
+            newGun.AddMember("explosionRange", Value(o.guns[i].explosionRange).Move(), a);
+            newGun.AddMember("explosionPower", Value(o.guns[i].explosionPower).Move(), a);
+            newGun.AddMember("lifetime", Value(o.guns[i].lifetime).Move(), a);
+            newGun.AddMember("speed", Value(o.guns[i].speed).Move(), a);
+            newGun.AddMember("damage", Value(o.guns[i].damage).Move(), a);
+            newGun.AddMember("gravity", Value(o.guns[i].gravity).Move(), a);
+            newGun.AddMember("elasticity", Value(o.guns[i].elasticity).Move(), a);
             newGun.AddMember("gunID", Value(o.guns[i].gunID).Move(), a);
             newGun.AddMember("gunType", Value(o.guns[i].gunType).Move(), a);
             newGun.AddMember("ammo", Value(o.guns[i].ammo).Move(), a);
             newGun.AddMember("maxAmmo", Value(o.guns[i].maxAmmo).Move(), a);
             newGun.AddMember("cooldown", Value(o.guns[i].cooldown).Move(), a);
+            newGun.AddMember("bulletDisplay", Value(o.guns[i].bulletDisplay).Move(), a);
+            newGun.AddMember("particleCount", Value(o.guns[i].particleCount).Move(), a);
             Value display;
             display.SetString(o.guns[i].display.c_str(), o.guns[i].display.length(), a);
             newGun.AddMember("display", display, a);

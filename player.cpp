@@ -53,6 +53,18 @@
         maxAir = newOutfit.maxAir;
         guns = newOutfit.guns;
         gunSelect = 0;
+
+        //Kludge to make sure we don't leave gunSelect on a locked gun
+        //if an unlocked gun is available
+
+        if (guns[gunSelect].unlocked == false) {
+            for (int i = 0; i < guns.size(); i++) {
+                gunSelect = (gunSelect + 1) % guns.size();
+                if (guns[gunSelect].unlocked) {
+                    break;
+                }
+            }
+        }
         ops = newOutfit.ops;
         for (int i = 0; i < 10; i++) {
             channels[i] = newOutfit.channels[i];
@@ -112,28 +124,35 @@
 //Fire a gun
 
     void player::fire(weapon& gun) {
-        if (gun.ammo > 0 && gun.unlocked) {
-            switch(gun.gunType) {
-                case 1:
-                    if (gun.lastFired + gun.cooldown < tickCounter) {
+        if (gun.unlocked) {
+            if (gun.ammo > 0 || gun.maxAmmo == -1) {
+                if (gun.lastFired + gun.cooldown < tickCounter) {
+                    if (gun.automatic || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         Vector2 aim = theCanvas -> getMouseRelativeTo(x, y, sizeFactor);
-                        aim = Vector2Scale(Vector2Normalize(aim), 0.5);
-                        bullet* b = new bullet(x + 3 * aim.x, y + 3 * aim.y, tint, sizeFactor, aim.x, aim.y, 0, 120, 0, 10, GRAVITY, 0, -10, -0.5, 20);
+                        aim = Vector2Normalize(aim);
+                        bullet* b = new bullet(
+                            //x, y, color, sizeFactor
+                            x + 1.5 * aim.x, y + 1.5 * aim.y, tint, sizeFactor,
+                            //xMomentum, yMomentum, character, particleCount, lifetime
+                            aim.x * gun.speed, aim.y * gun.speed, gun.bulletDisplay, gun.particleCount, gun.lifetime,
+                            //Elasticity, max speed, gravity, friction
+                            gun.elasticity, 10, gun.gravity, 0.5,
+                            //Bullet damage, explosion power, explosion range
+                            gun.damage, gun.explosionPower, gun.explosionRange,
+                            //Does bullet explode upon wall? water? any entities? 
+                            gun.hitWall, gun.hitWater, gun.hitEntity, gun.sticky);
                         world -> addCollideable(b);
                         gun.lastFired = tickCounter;
                         gun.ammo--;
                     }
-                    else {
-                        //play cooldown noise
-                    }
-                    break;
-                default:
-                    cout << "Bad gun.\n";
-                    break;
+                }
+                else if (!gun.automatic) {
+                    //gun cooldown indicator (noise?)
+                }
             }
-        }
-        else {
-            //play out of ammo noise
+            else {
+                //Gun ammo indicator (noise?)
+            }
         }
     }
 
@@ -259,15 +278,25 @@
         //Switching guns
 
         if (IsKeyPressed(KEY_Q)) {
-            gunSelect = (gunSelect - 1) % guns.size();
+            for (int i = 0; i < guns.size(); i++) {
+                gunSelect = (gunSelect - 1) % guns.size();
+                if (guns[gunSelect].unlocked) {
+                    break;
+                }
+            }
         }
         if (IsKeyPressed(KEY_E)) {
-            gunSelect = (gunSelect + 1) % guns.size();
+            for (int i = 0; i < guns.size(); i++) {
+                gunSelect = (gunSelect + 1) % guns.size();
+                if (guns[gunSelect].unlocked) {
+                    break;
+                }
+            }
         }
 
         //Shootin'
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && guns.size() > 0) {
+        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && guns.size() > 0) {
             fire(guns[gunSelect]);
         }
 
@@ -335,6 +364,17 @@
                     for (int i = 0; i < guns.size(); i++) {
                         if (guns[i].gunID == pickupgunID) {
                             guns[i].unlocked = true;
+
+                            //Kludge to make sure we select a locked gun if one is available
+
+                            if (guns[gunSelect].unlocked == false) {
+                                for (int i = 0; i < guns.size(); i++) {
+                                    gunSelect = (gunSelect + 1) % guns.size();
+                                    if (guns[gunSelect].unlocked) {
+                                        break;
+                                    }
+                                }
+                            }
                             break;
                         }
                     }
@@ -436,11 +476,15 @@
             if (guns[i].unlocked) {
                 if (tickCounter < guns[i].lastFired + guns[i].cooldown || guns[i].ammo < 1) {
                     theCanvas -> drawHud(1, ++rowCount + 3, guns[i].tintFaded, guns[i].display);
-                    theCanvas -> drawHud(2, rowCount + 3, guns[i].tintFaded, to_string(guns[i].ammo));
+                    if (guns[i].maxAmmo != -1) {
+                        theCanvas -> drawHud(2, rowCount + 3, guns[i].tintFaded, to_string(guns[i].ammo));
+                    }
                 }
                 else {
                     theCanvas -> drawHud(1, ++rowCount + 3, guns[i].tint, guns[i].display);
-                    theCanvas -> drawHud(2, rowCount + 3, guns[i].tint, to_string(guns[i].ammo));
+                    if (guns[i].maxAmmo != -1) {
+                        theCanvas -> drawHud(2, rowCount + 3, guns[i].tint, to_string(guns[i].ammo));
+                    }
                 }
             }
         }

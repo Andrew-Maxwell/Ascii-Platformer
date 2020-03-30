@@ -18,6 +18,7 @@ class physicalEntity : virtual public collideable {
 
     protected:
 
+    bool hit = false;
     bool isUnderWater = false, lastTickUnderWater = false;
     float elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction;
     float width = 0.8;

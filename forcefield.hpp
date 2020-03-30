@@ -54,6 +54,8 @@ class forceField : public collideable {
 
 class explosion : public forceField {
 
+    bool exploding = false;
+
     public:
 
     explicit explosion(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange);

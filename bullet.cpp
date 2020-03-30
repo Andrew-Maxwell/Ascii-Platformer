@@ -5,27 +5,32 @@
 //a physicalParticle that deals damage
 /*****************************************************************************/
 
-    bullet::bullet(float newX, float newY, Color newTint, float newSizeFactor, 
-                   float newXMomentum, float newYMomentum, int c, int newLifetime, float newElasticity,
-                   float newMaxSpeed, float newGravity, float newFriction, int newDamage, float newPower, float newRange) :
+    bullet::bullet( float newX, float newY, Color newTint, float newSizeFactor, 
+                    float newXMomentum, float newYMomentum, int c, int newParticleCount, int newLifetime,
+                    float newElasticity, float newMaxSpeed, float newGravity, float newFriction,
+                    int newDamage, float newExplosionPower, float newExplosionRange,
+                    bool newHitWall, bool newHitWater, bool newHitEntity, bool newSticky) :
         entity(newX, newY, newTint, newSizeFactor),
         physicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXMomentum, newYMomentum, 
             newMaxSpeed, newGravity, newFriction),
         particle(newX, newY, newTint, newSizeFactor, 0, 0, c, newLifetime),
         damage(newDamage),
         dynamicChar(c == 0),
+        particleCount(newParticleCount),
         lifetime(newLifetime),
-        power(newPower),
-        range(newRange)
-    {}
+        explosionPower(newExplosionPower),
+        explosionRange(newExplosionRange),
+        hitWall(newHitWall),
+        hitWater(newHitWater),
+        hitEntity(newHitEntity),
+        sticky(newSticky) {}
 
     unsigned int bullet::type() {
         return BULLETTYPE;
     }
 
     bool bullet::doesCollide(float otherX, float otherY, int otherType) {
-        if (physicalEntity::doesCollide(otherX, otherY, otherType) && !hit) {
-            hit = true;
+        if (physicalEntity::doesCollide(otherX, otherY, otherType)) {
             return true;
         }
         return false;
@@ -39,33 +44,52 @@
     }
 
     bool bullet::stopColliding() {
-        return hit;
+        return bulletHit;
     }
 
     void bullet::tickSet() {
-        physicalEntity::tickSet();
-        if (xMomentum == 0 || lifetime < 0) {   //If hit a wall during physicalParticle::tickSet()
-            hit = true;
+        if (!stuck) {
+            physicalEntity::tickSet();
         }
-
-        if (hit && !exploded) {
-            exploded = true;
-            explode (60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
-            explosion* e = new explosion(x, y, tint, sizeFactor, 0, -1.0, 30);
-            world -> addCollideable(e);
+        if ((physicalEntity::hit && hitWall) || lifetime-- < 0) {   //If hit a wall during physicalParticle::tickSet()
+            bulletHit = true;
+        }
+        if (physicalEntity::hit && sticky) {
+            stuck = true;
+            xMomentum = 0;
+            yMomentum = 0;
         }
     }
 
     void bullet::tickGet() {
-        physicalEntity::tickGet();
+        if (!bulletHit) {
+            for (auto c : collisions) {
+                if (hitWater && c.type == WATERTYPE) {
+                    bulletHit = true;
+                    break;
+                }
+                if (hitEntity && c.type != WATERTYPE) {
+                    bulletHit = true;
+                    break;
+                }
+            }
+        }
+        if (!stuck) {
+            physicalEntity::tickGet();
+        }
+        if (bulletHit && explosionRange > 0) {
+            explode (particleCount, x, y, tint, sizeFactor, 0.02, 0, 600, 0.5);
+            explosion* e = new explosion(x, y, tint, sizeFactor, 0, explosionPower, explosionRange);
+            world -> addCollideable(e);
+        }
     }
 
     bool bullet::finalize() {
-        return hit;
+        return bulletHit;
     }
 
     void bullet::print() {
-         if (!hit) {
+         if (!bulletHit) {
             if (dynamicChar) {
                 xSpeed = xMomentum;
                 ySpeed = yMomentum;

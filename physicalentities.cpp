@@ -39,6 +39,7 @@
     void physicalEntity::tickSet() {}
 
     void physicalEntity::tickGet() {
+        hit = false;
         float waterMoveX = 0, waterMoveY = 0;
         lastTickUnderWater = isUnderWater;
         isUnderWater = false;
@@ -74,6 +75,7 @@
             if (world -> isSolid((int)(x + xStep) + (xStep > 0), (int)y)) {// || world -> isSolid((int)y + 0.5, (int)(x + xStep) + (xStep > 0))) {
                 x = floor(x + xStep) + (xStep < 0);
                 xMomentum *= (-1 * elasticity);
+                hit = true;
                 break;
             }
             else {
@@ -87,6 +89,7 @@
                 y = floor(y + yStep) + (yStep < 0);
                 yMomentum *= (-1 * elasticity);
                 xMomentum *= friction;
+                hit = true;
                 break;
             }
             else {
