@@ -55,7 +55,15 @@ Ideas:
     - You have a computer companion which is what allows you to broadcast codes. It has a test level which acts as
         the tutorial, also has randomly-generated puzzles with small bonuses.
     - Command line graphical effect when logging into a terminal.
-
+    - Setting similar to New York 2140
+        - Flooded coastal city decades from now after a climate apocalypse
+        - Lowlands mostly abandoned, but buildings are hardened against the elements and continue to function
+            - Robotic maintenance crews
+            - Small-scale fission reactors
+            - Internal networks functioning, external ones not so much
+        - Circumstances of abandonment suspicious; possibly the gov't brought down the network and forced
+            the city to be abandoned because an AGI was developed in one of the buildings, deemed too dangerous
+            to interact with
 
 inspiration/vague visual ideas:
     - Giant drum machine like washing machine
