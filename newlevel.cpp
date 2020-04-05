@@ -1,11 +1,11 @@
 #include <fstream>
 #include <iostream>
-#include <rapidjson/document.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/filewritestream.h>
-#include <rapidjson/filereadstream.h>
-#include <rapidjson/prettywriter.h>
+#include <document.h>
+#include <writer.h>
+#include <stringbuffer.h>
+#include <filewritestream.h>
+#include <filereadstream.h>
+#include <prettywriter.h>
 
 using namespace std;
 using namespace rapidjson;

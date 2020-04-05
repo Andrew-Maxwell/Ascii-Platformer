@@ -1,0 +1,55 @@
+{
+    "test_outfit": {
+        "name": "test_outfit",
+        "health": 16,
+        "maxHealth": 24,
+        "air": 64,
+        "maxAir": 64,
+        "guns": [
+            {
+                "unlocked": false,
+                "automatic": true,
+                "hitWall": true,
+                "hitWater": false,
+                "hitEntity": false,
+                "sticky": true,
+                "explosionRange": 20.0,
+                "explosionPower": 1.0,
+                "lifetime": 90,
+                "speed": 1.0,
+                "damage": 1,
+                "gravity": 0.009999999776482582,
+                "elasticity": 0.0,
+                "gunID": 1,
+                "gunType": 1,
+                "ammo": 100,
+                "maxAmmo": 200,
+                "cooldown": 15,
+                "bulletDisplay": 1012,
+                "particleCount": 0,
+                "display": "☼",
+                "R": 100,
+                "G": 100,
+                "B": 255,
+                "A": 255
+            }
+        ],
+        "ops": [],
+        "collectedPickups": [],
+        "channels": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "x": 33.570518493652347,
+    "y": 20.0,
+    "room": "test.txt"
+}

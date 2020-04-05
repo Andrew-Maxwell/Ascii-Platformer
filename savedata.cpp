@@ -102,7 +102,7 @@
 
         Value channels(kArrayType);
         for (int i = 0; i < 10; i++) {
-            channels.PushBack(Value(o.channels[i].to_ulong()).Move(), a);
+            channels.PushBack(Value(int(o.channels[i].to_ulong())).Move(), a);
         }
         newOutfit.AddMember("channels", channels, a);
 

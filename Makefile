@@ -82,7 +82,11 @@ CXXFLAGS := -std=c++11
 # C/C++ flags
 CPPFLAGS := -g -Wall -Wextra -c -I/opt/raylib/src -O3 $(NOWARN)
 # linker flags
-LDFLAGS := -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux  -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -O3 $(NOWARN)
+ifeq ($(OS),Windows_NT)
+	LDFLAGS :=  -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux -O3 -lraylib -lopengl32 -lgdi32 -lwinmm -Iexternal -lwinpthread -static-libgcc -static-libstdc++ $(NOWARN)
+else
+	LDFLAGS := -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux  -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -O3 $(NOWARN)
+endif
 # flags required for dependency generation; passed to compilers
 DEPFLAGS = -MT $@ -MD -MP -MF $(DEPDIR)/$*.Td
 

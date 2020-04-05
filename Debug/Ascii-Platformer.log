@@ -1,0 +1,60 @@
+﻿  bullet.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  canvas.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  charfills.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  data.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  door.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  dummyentity.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  editables.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  editorleveldata.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  editor_main.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  effects.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  endinggate.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  entity.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  forcefield.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  gamelayer.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  gameleveldata.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  game_main.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  layer.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  meta.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  newlevel.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\newlevel.cpp(3,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  objtest.cpp
+  Generating Code...
+  Compiling...
+  particles.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  physicalentities.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  pickups.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  player.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  rain.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  savedata.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  savepoint.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  water.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  world.cpp
+C:\Users\Andrew\Documents\GitHub\Ascii-Platformer\meta.hpp(23,10): fatal error C1083: Cannot open include file: 'rapidjson/document.h': No such file or directory
+  Generating Code...

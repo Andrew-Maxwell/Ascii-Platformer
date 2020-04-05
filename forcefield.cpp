@@ -54,12 +54,12 @@
             isOn = true;
             if (tickCount++ % (int)(1 / power) == 0) {
                 if (power > 0) { //Attractor force field
-                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 50)) {
+                    for (float angle = 0; angle < 2 * PI; angle += (2 * PI / 50)) {
                         world -> addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
                     }
                 }
                 else {  //repeller force field
-                    for (float angle = 0; angle < 2 * M_PI; angle += (2 * M_PI / 50)) {
+                    for (float angle = 0; angle < 2 * PI; angle += (2 * PI / 50)) {
                         world -> addEntity(new particle(x, y, tint, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
                     }
                 }
