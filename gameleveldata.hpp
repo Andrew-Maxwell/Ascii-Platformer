@@ -18,6 +18,7 @@
 #include "water.hpp"
 #include "canvas.hpp"
 #include "world.hpp"
+#include "enemy.hpp"
 
 class gameLevelData : public outfitData {
 

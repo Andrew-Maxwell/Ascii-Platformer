@@ -29,7 +29,8 @@ GAMESRCS := \
     canvas.cpp \
     data.cpp \
     gameleveldata.cpp \
-    savedata.cpp
+    savedata.cpp \
+	enemy.cpp
 
 EDTRSRCS := \
 	meta.cpp \
