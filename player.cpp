@@ -350,12 +350,23 @@
                     break;
                 }
                 case BULLETTYPE:
-                    if ((hurtTimer < 0)) {
+                    if (hurtTimer < 0) {
                         yMomentum += colIter -> yVal * 0.3;
                         xMomentum += colIter -> xVal * 0.3;
                         health += (colIter -> damage);
                         hurtTimer = 60;
                         damageIndicator(colIter -> damage, x, y, HURTCOLOR, sizeFactor);
+                    }
+                    colIter = collisions.erase(colIter);
+                    break;
+                case ENEMYTYPE:
+                    if (hurtTimer < 0) {
+                        health += (colIter -> damage);
+                        hurtTimer = 60;
+                        damageIndicator(colIter -> damage, x, y, HURTCOLOR, sizeFactor);
+                        Vector2 newMomentum = Vector2Scale(Vector2Negate(Vector2Normalize({xMomentum, yMomentum})), 0.7);
+                        xMomentum = newMomentum.x;
+                        yMomentum = newMomentum.y / 3;
                     }
                     colIter = collisions.erase(colIter);
                     break;

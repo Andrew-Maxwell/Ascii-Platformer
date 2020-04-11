@@ -116,4 +116,4 @@ Bugs:
 - touch pickups sometimes collected (?) randomly
 - Markers appearing in wrong place in level editor
 - "Not a valid choice!" error appears when using op screen
-- Bullets disappear on contact with particles such as raindrops
+- Raindrops becoming zero-G

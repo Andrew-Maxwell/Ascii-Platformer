@@ -137,7 +137,7 @@
                 float newFriction = entity.HasMember("friction") ? entity["friction"].GetFloat(): FRICTION;
                 if (type == "newTestEntity") {
                     int maxHealth = entity.HasMember("maxHealth") ? entity["maxHealth"].GetInt(): 20;
-                    int newDamage = entity.HasMember("newDamage") ? entity["newDamage"].GetInt(): 5;
+                    int newDamage = entity.HasMember("damage") ? entity["damage"].GetInt(): -5;
                     newTestEntity * newNTE = new newTestEntity(x, y, {R, G, B, A}, sizeFactor, displayChar, elasticity, newXMomentum,
                         newYMomentum, newMaxSpeed, newGravity, newFriction, maxHealth, newDamage);
                     world -> addCollideable(newNTE);

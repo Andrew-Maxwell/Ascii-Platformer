@@ -9,12 +9,13 @@
         {
             "type": "newTestEntity",
             "x": 15.0,
-            "y": 19.0,
+            "y": 0.0,
             "R": 100,
             "G": 200,
             "B": 100,
             "A": 255,
-            "sizeFactor": 1.0
+            "sizeFactor": 1.0,
+            "damage": -1
         },
         {
             "type": "door",
