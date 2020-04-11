@@ -1,5 +1,6 @@
 *.exe
 *.o
+*.d
 rapidjson\\*
 rapidjson/writer.h
 rapidjson/stringbuffer.h
