@@ -30,7 +30,7 @@ GAMESRCS := \
     data.cpp \
     gameleveldata.cpp \
     savedata.cpp \
-	enemy.cpp
+    newtestentity.cpp
 
 EDTRSRCS := \
 	meta.cpp \

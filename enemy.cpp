@@ -47,6 +47,7 @@
                 health += colIter -> damage;
                 break;
             }
+            colIter = collisions.erase(colIter);
         }
     }
 

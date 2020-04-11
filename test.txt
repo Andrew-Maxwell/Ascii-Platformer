@@ -7,6 +7,16 @@
     "fontSize": 16,
     "entities": [
         {
+            "type": "newTestEntity",
+            "x": 15.0,
+            "y": 19.0,
+            "R": 100,
+            "G": 200,
+            "B": 100,
+            "A": 255,
+            "sizeFactor": 1.0
+        },
+        {
             "type": "door",
             "x": 15.0,
             "y": 19.0,

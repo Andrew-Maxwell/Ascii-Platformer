@@ -127,7 +127,7 @@
                 water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, width, depth, wavelength, amplitude);
                 world -> addCollideable(newWater);
             }
-            else if (type == "enemy") {
+            else if (type == "newTestEntity") {
                 int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt(): '?';
                 float elasticity = entity.HasMember("elasticity") ? entity["elasticity"].GetFloat(): 0.0;
                 float newXMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat(): 0.0;
@@ -135,12 +135,12 @@
                 float newMaxSpeed = entity.HasMember("maxSpeed") ? entity["maxSpeed"].GetFloat(): 100.0;
                 float newGravity = entity.HasMember("gravity") ? entity["gravity"].GetFloat(): GRAVITY;
                 float newFriction = entity.HasMember("friction") ? entity["friction"].GetFloat(): FRICTION;
-                if (type == "enemy") {
+                if (type == "newTestEntity") {
                     int maxHealth = entity.HasMember("maxHealth") ? entity["maxHealth"].GetInt(): 20;
                     int newDamage = entity.HasMember("newDamage") ? entity["newDamage"].GetInt(): 5;
-                    enemy * newEnemy = new enemy(x, y, {R, G, B, A}, sizeFactor, displayChar, elasticity, newXMomentum,
-                     newYMomentum, newMaxSpeed, newGravity, newFriction, maxHealth, newDamage);
-                    world -> addCollideable(newEnemy);
+                    newTestEntity * newNTE = new newTestEntity(x, y, {R, G, B, A}, sizeFactor, displayChar, elasticity, newXMomentum,
+                        newYMomentum, newMaxSpeed, newGravity, newFriction, maxHealth, newDamage);
+                    world -> addCollideable(newNTE);
                 }
             }
             else if (type == "gunPickup" || type == "ammoPickup" || type == "healthPickup" ||

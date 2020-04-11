@@ -19,6 +19,7 @@
 #include "canvas.hpp"
 #include "world.hpp"
 #include "enemy.hpp"
+#include "newtestentity.hpp"
 
 class gameLevelData : public outfitData {
 
