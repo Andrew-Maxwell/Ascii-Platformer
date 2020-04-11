@@ -1,0 +1,61 @@
+{
+    "collider": "test2_collider.lyr",
+    "R": 0,
+    "G": 0,
+    "B": 0,
+    "A": 0,
+    "fontSize": 16,
+    "entities": [
+        {
+            "type": "player",
+            "x": 14.0,
+            "y": 7.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 50,
+            "G": 255,
+            "B": 50,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "test2_collider.lyr"
+        },
+        {
+            "type": "door",
+            "x": 14.5,
+            "y": 9.0,
+            "R": 0,
+            "G": 0,
+            "B": 255,
+            "A": 255,
+            "sizeFactor": 2.0,
+            "nextRoom": "test.txt",
+            "destinationX": 15.0,
+            "destinationY": 19.0
+        }
+    ],
+    "defaultOutfit": {
+        "name": "test_outfit",
+        "guns": [
+            {
+                "unlocked": true,
+                "gunID": 2,
+                "gunType": 1,
+                "ammo": 100,
+                "maxAmmo": 200,
+                "cooldown": 30,
+                "R": 255,
+                "G": 0,
+                "B": 0,
+                "A": 255
+            }
+        ]
+    }
+}

@@ -1,0 +1,32 @@
+#include "newtestentity.hpp"
+
+    newTestEntity::newTestEntity(  float newX, float newY, Color newTint, float newSizeFactor) :
+                        entity(newX, newY, newTint, newSizeFactor) {}
+
+    unsigned int newTestEntity::type() {
+        return 1000;
+    }
+
+    bool newTestEntity::doesCollide(float otherX, float otherY, int otherType) {
+        return false;
+    }
+
+    collision newTestEntity::getCollision(float otherX, float otherY, int otherType) {
+        return collision(type());
+    }
+
+    bool newTestEntity::stopColliding() {
+        return true;
+    }
+
+    void newTestEntity::tickSet() {}
+
+    void newTestEntity::tickGet() {}
+
+    bool newTestEntity::finalize() {
+        return false;
+    }
+
+    void newTestEntity::print() {
+        theCanvas -> draw(x, y, tint, sizeFactor, "test");
+    }
