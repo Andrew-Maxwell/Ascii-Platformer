@@ -51,6 +51,10 @@ Features:
     ? Inventory
 - Overhaul movement: tweak everything. Decide how you want it to be *before* you start making levels.
     - Lower gravity = more time to manouver in air
+- Sound effects
+- Music: see http://dig.ccmixter.org for free music, or contact noise, or try to make your own!
+- Menus
+- Controller support
 ? Wind/current object
 ? leaf physicalParticles that fly eratically
 ? Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
