@@ -78,8 +78,9 @@
         }
     }
 
-    void canvas::myDrawText(const char *text, Vector2 position, float fontSize, float spacing, Color tint)
-    {
+    void canvas::myDrawText(const char *text, Vector2 position, float fontSize, float spacing, Color tint) {
+        DrawTextEx(displayFont, text, position, fontSize, spacing, tint);
+/*
         int length = strlen(text);      // Total length in bytes of the text, scanned by codepoints in loop
 
         int textOffsetY = 0;            // Offset between lines (on line break '\n')
@@ -122,7 +123,7 @@
             }
             
             i += (codepointByteCount - 1);   // Move text bytes counter to next codepoint
-        }
+        }*/
     }
 
     void canvas::start(float playerX, float playerY, bool tabScreen) {

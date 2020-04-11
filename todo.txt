@@ -29,23 +29,35 @@ Features:
     - Intercepted codes
     - Colored based on code value
     - Broadcast animation
-    - Indicators showing how many codes you've collected/total in the level
 - Puzzle elements:
     - Switches
     - Triggers
     - Color changing/other effect layers
     - AND/OR/Timer relays
     - Doors
-    - Moving platforms
-    - Guns/turrets/enemies
+    - Disappearing platforms
+- Combat elements:
+    - Gun/turret enemies
+    - Fast-moving enemies
+- Story elements:
+    - persistent plot variables.
+    - Separate global- and outfit- scope? (e.g. beating boss = global scope, key = outfit scope)
+    - An inventory. Can probably be purely cosmetic.
+    - Doors that can be locked or unlocked depending on plot variables from either scope.
+        - More generally, want entity state to depend on plot variables. 
+    - Potential implementation: Global- and outfit- scope implemented as a set of ints, similar to the system for keeping track of which pickups have been collected already. They are stored in the save but           loaded into the collider and can be accessed the same way as broadcast codes.
+    - NPCS and bosses which can modify plot variables.
+    - Dialog
+    ? Inventory
 - Overhaul movement: tweak everything. Decide how you want it to be *before* you start making levels.
     - Lower gravity = more time to manouver in air
-- Wind/current object (or maybe put it in the collider?)
-- leaf physicalParticles that fly eratically
-- Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
+? Wind/current object
+? leaf physicalParticles that fly eratically
+? Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
     original.
-- Lightning bolt, fire (spreads via embers), huge fireballs
-- Snakes (like in snake game) that move around and you can jump on them (platforming puzzle element)
+? Lightning bolt, fire (spreads via embers), huge fireballs
+? Snakes (like in snake game) that move around and you can jump on them (platforming puzzle element)
+- transition visual effect
 
 Ideas:
     - Cyberpunk theme: Parallel digital and physical realms, distinct visual style, distinct puzzle types
@@ -64,6 +76,9 @@ Ideas:
         - Circumstances of abandonment suspicious; possibly the gov't brought down the network and forced
             the city to be abandoned because an AGI was developed in one of the buildings, deemed too dangerous
             to interact with
+    - Tutorial level: Older bro got you your neural interface hacking device, rewrote an abandoned building's
+        network to teach you how to use it. Later he disappears, and you need to travel deeper into the abandoned
+        city to find him...
 
 inspiration/vague visual ideas:
     - Giant drum machine like washing machine
