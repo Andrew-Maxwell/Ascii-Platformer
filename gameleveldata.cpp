@@ -121,10 +121,10 @@
             }
             else if (type == "water") {
                 int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
-                float depth = entity.HasMember("depth") ? entity["depth"].GetFloat() : 1.0;
+                float height = entity.HasMember("height") ? entity["height"].GetFloat() : 1.0;
                 float wavelength = entity.HasMember("wavelength") ? entity["wavelength"].GetFloat() : 1.0;
                 float amplitude = entity.HasMember("amplitude") ? entity["amplitude"].GetFloat() : 1.0;
-                water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, width, depth, wavelength, amplitude);
+                water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, width, height, wavelength, amplitude);
                 world -> addCollideable(newWater);
             }
             else if (type == "newTestEntity") {

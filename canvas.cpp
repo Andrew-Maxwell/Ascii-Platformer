@@ -317,10 +317,7 @@
         return HUDFONTSIZE;
     }
 
-    editableCanvas::editableCanvas(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor) :
-        canvas() {
-        canvas::setParams(newWorldRows, newWorldCols, newBackground, newFontSize, newPlayerSizeFactor);
-    }
+    editableCanvas::editableCanvas() : canvas() {}
 
     void editableCanvas::moveCamera() {
 

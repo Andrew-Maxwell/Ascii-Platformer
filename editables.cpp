@@ -8,9 +8,11 @@ using namespace rapidjson;
 //Also used to represent other entities (isLayer = false.) Not all of the same editing functions apply.
 /*****************************************************************************/
 
-    editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson) :
+    editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value* newJson) :
         entity(newX, newY, newTint, newSizeFactor),
         layer(newX, newY, newTint, newSizeFactor, newFileName),
+        displayWidth(newDisplayWidth),
+        displayHeight(newDisplayHeight),
         isLayer(newIsLayer)
     {
 
@@ -56,7 +58,9 @@ using namespace rapidjson;
         }
 
         else {
-            canvas.push_back(string(1, display));
+            for (int i = 0; i < displayHeight; i++) {
+                canvas.push_back(string(displayWidth, display));
+            }
         }
         tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
         render();
@@ -637,15 +641,17 @@ using namespace rapidjson;
         }
         if (visible) {
             layer::print();
-            Vector2 camera = theCanvas -> getCamera();
-            int screenRows = theCanvas -> getScreenRows();
-            int screenCols = theCanvas -> getScreenCols();
-            if (selected && isLayer) {  //Boundary indicators (helps with editing)
-                int imin = max((int)(camera.y - y - screenRows / sizeFactor / 2), 0);
-                int imax = min((int)(camera.y - y + screenRows / sizeFactor / 2) + 1, (int)canvas.size());
-                for (int i = 0; i < imax - imin; i++) {
-                    theCanvas -> draw(x - 1, y + i, RED, sizeFactor, "#");
-                    theCanvas -> draw(x + knownWidth, y + i, RED, sizeFactor, "#");
+            if (isLayer) {
+                Vector2 camera = theCanvas -> getCamera();
+                int screenRows = theCanvas -> getScreenRows();
+                int screenCols = theCanvas -> getScreenCols();
+                if (selected) {  //Boundary indicators (helps with editing)
+                    int imin = max((int)(camera.y - y - screenRows / sizeFactor / 2), 0);
+                    int imax = min((int)(camera.y - y + screenRows / sizeFactor / 2) + 1, (int)canvas.size());
+                    for (int i = 0; i < imax - imin; i++) {
+                        theCanvas -> draw(x - 1, y + i, RED, sizeFactor, "#");
+                        theCanvas -> draw(x + knownWidth, y + i, RED, sizeFactor, "#");
+                    }
                 }
             }
         }
@@ -658,7 +664,7 @@ using namespace rapidjson;
 
     editableCollider::editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson) :
         entity(newX, newY, newTint, newSizeFactor),
-        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, newFileName, display, dummyJson) {}
+        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, newFileName, display, 0, 0, dummyJson) {}
 
 /*****************************************************************************/
 //Dummy functions which don't do anything for the collider

@@ -9,8 +9,8 @@ Loose ends:
 - Helpful error message when running editor with no argument.
 - Layers still getting deleted multiple times under some circumstances?
 FIX LEVEL EDITOR:
-    - Bring up to date with editorLevelData object
     - Small levels displayed flipped???
+    - Only load each file once
 
 Features:
 - Editor misc:

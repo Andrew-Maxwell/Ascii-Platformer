@@ -96,7 +96,7 @@ class editableCanvas : public canvas {
 
     public:
 
-    explicit editableCanvas(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor);
+    explicit editableCanvas();
 
     void moveCamera();
 

@@ -7,16 +7,16 @@
 //Animates the surface of water
 /*****************************************************************************/
 
-    water:: water(float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newDepth, float newWavelength, float newAmplitude) :
+    water:: water(float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newheight, float newWavelength, float newAmplitude) :
         entity (newX, newY, newTint, newSizeFactor),
         width (newWidth),
-        depth (newDepth),
+        height (newheight),
         wavelength (newWavelength),
         amplitude (newAmplitude) {
             surface.resize(width, 0.0);
             lastSurface.resize(width, 0.0);
             k = 2 * PI / wavelength;
-            omega = sqrt(GRAVITY * k * tanh(k * depth));
+            omega = sqrt(GRAVITY * k * tanh(k * height));
             pulseSpeed = omega / k;
         }
 
@@ -52,7 +52,7 @@
 
 
     bool water::doesCollide(float otherX, float otherY, int otherType) {
-        return (otherX >= x && otherX <= x + width && otherY >= y - surface[otherX - x] + 0.5 && otherY <= y + depth);
+        return (otherX >= x && otherX <= x + width && otherY >= y - surface[otherX - x] - 0.5 && otherY <= y + height);
     }
 
     collision water::getCollision(float otherX, float otherY, int otherType) {
@@ -60,11 +60,11 @@
         /*We calculate y force as d/dt (surface) so that objects move up and down
         more or less as fast as the water surface does.
         force is d/dx (d/dt (surface)).
-        Also, the forces are smaller at deeper depths.*/
+        Also, the forces are smaller at deeper heights.*/
 
-        float depthFactor = min(1.0, pow(2, (y - otherY - 1) / abs(wavelength) * 9));
-        float yForce1 = -1 * depthFactor * (surface[otherX - x] - lastSurface[otherX - x]);
-        float yForce2 = -1 * depthFactor * (surface[otherX - x + 1] - lastSurface[otherX - x + 1]);
+        float heightFactor = min(1.0, pow(2, (y - otherY - 1) / abs(wavelength) * 9));
+        float yForce1 = -1 * heightFactor * (surface[otherX - x] - lastSurface[otherX - x]);
+        float yForce2 = -1 * heightFactor * (surface[otherX - x + 1] - lastSurface[otherX - x + 1]);
         float xForce = 3 * (yForce1 - yForce2);
 
         return collision(WATERTYPE, 0, xForce, (yForce1 + yForce2) / 2);
@@ -143,8 +143,8 @@
     void water::print() {
         Vector2 camera = theCanvas -> getCamera();
         for (int i = max(0, (int)(camera.x - x - theCanvas -> getScreenCols() / sizeFactor / 2.0f));
-                i < min(width - 1, (int)(camera.x - x + theCanvas -> getScreenCols() / sizeFactor / 2.0f + 1));
+                i < min(width, (int)(camera.x - x + theCanvas -> getScreenCols() / sizeFactor / 2.0f + 1));
                 i++) {
-            theCanvas -> drawBarUp(x + i, y + depth + 1, tint, sizeFactor, depth + surface[i]);
+            theCanvas -> drawBarUp(x + i, y + height, tint, sizeFactor, height + surface[i]);
         }
     }

@@ -10,6 +10,8 @@
 
 class editorLevelData : public data {
 
+    set<string> loadedLayers;
+
     public:
 
     //Initialize global world and theCanvas pointers

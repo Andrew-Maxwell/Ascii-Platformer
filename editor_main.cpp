@@ -3,6 +3,7 @@
 #include "editables.hpp"
 #include "charfills.hpp"
 #include "world.hpp"
+#include "editorleveldata.hpp"
 
 using namespace rapidjson;
 
@@ -126,9 +127,11 @@ int main(int argc, char** argv) {
     Color background;
     int fontSize;
     string fileName(argv[1]);
-    Document json;
+    editorLevelData level;
+    level.load(fileName);
     cout << "Starting loading entities...\n";
-    readEntities(layers, col, background, fontSize, fileName, json);
+    level.initializeEditor(layers);
+    level.readEntitiesEditor(layers);
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
     cout << "Finished loading.\n";
@@ -282,7 +285,7 @@ int main(int argc, char** argv) {
                         mayNeedToSave = true;
                     }
                     if (IsKeyPressed(KEY_S)) {
-                        writeEntities(layers, fileName, json);
+                        level.writeEntities(layers);
                         mayNeedToSave = false;
                     }
                     if (IsKeyPressed(KEY_X) && (*thisLayer) -> getIsLayer() && mousePos.size() > 1) {
@@ -580,7 +583,7 @@ int main(int argc, char** argv) {
             theCanvas -> drawHud(1, 1, UIFOREGROUND, "You didn't save the level. Do you want to save? Y/S or N/ESC.");
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
-                writeEntities(layers, fileName, json);
+                level.writeEntities(layers);
                 mayNeedToSave = false;
             }
             if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_N)) {

@@ -32,8 +32,8 @@
         },
         {
             "type": "water",
-            "x": 1.0,
-            "y": 53.0,
+            "x": 16.0,
+            "y": 54.0,
             "R": 0,
             "G": 0,
             "B": 255,
@@ -41,8 +41,8 @@
             "sizeFactor": 1.0,
             "wavelength": -30.0,
             "amplitude": 0,
-            "width": 198,
-            "depth": 40
+            "width": 25,
+            "height": 8
         },
         {
             "type": "airPickup",
