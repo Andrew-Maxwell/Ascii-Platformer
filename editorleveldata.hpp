@@ -14,13 +14,11 @@ class editorLevelData : public data {
 
     public:
 
-    //Initialize global world and theCanvas pointers
+    //Initialize global world and theCanvas pointers and read in editables
 
     void initializeEditor(list<editableLayer*>& layers);
 
-    //Read all of the entities in as editableLayers
-
-    void readEntitiesEditor(list<editableLayer*>& layers);
+    void addEntity(float x, float y, float sizeFactor);
 
     //Save changes to entities
 

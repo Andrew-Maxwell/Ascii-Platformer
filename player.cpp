@@ -31,10 +31,25 @@
     outfit player::getCurrentOutfit() {
         outfit toReturn;
         toReturn.name = outfitName;
+        toReturn.display = display;
         toReturn.health = health;
         toReturn.maxHealth = maxHealth;
         toReturn.air = air;
         toReturn.maxAir = maxAir;
+        toReturn.elasticity = elasticity;
+        toReturn.gravity = gravity;
+
+        toReturn.groundSpeed = groundSpeed;
+        toReturn.airSpeed = airSpeed;
+        toReturn.waterSpeed = waterSpeed;
+        toReturn.groundFriction = groundFriction;
+        toReturn.airFriction = airFriction;
+        toReturn.waterFriction = waterFriction;
+
+        toReturn.jumpSpeed = jumpSpeed;
+        toReturn.jumpCount = jumpCount;
+        toReturn.autoRejump = autoRejump;
+        toReturn.walljump = walljump;
         toReturn.guns = guns;
         toReturn.ops = ops;
         for (int i = 0; i < 10; i++) {
@@ -46,11 +61,27 @@
 
     void player::setOutfit(outfit newOutfit) {
         outfitName = newOutfit.name;
+        display = newOutfit.display;
+        displayStr = string(TextToUtf8(&display, 1));
         health = newOutfit.health;
         maxHealth = newOutfit.maxHealth;
         hurtTimer = -10000000;
         air = newOutfit.air;
         maxAir = newOutfit.maxAir;
+        elasticity = newOutfit.elasticity;
+        gravity = newOutfit.gravity;
+
+        groundSpeed = newOutfit.groundSpeed;
+        airSpeed = newOutfit.airSpeed;
+        waterSpeed = newOutfit.waterSpeed;
+        groundFriction = newOutfit.groundFriction;
+        airFriction = newOutfit.airFriction;
+        waterFriction = newOutfit.waterFriction;
+
+        jumpSpeed = newOutfit.jumpSpeed;
+        jumpCount = newOutfit.jumpCount;
+        autoRejump = newOutfit.autoRejump;
+        walljump = newOutfit.walljump;
         guns = newOutfit.guns;
         gunSelect = 0;
 
@@ -125,7 +156,7 @@
 
     void player::fire(weapon& gun) {
         if (gun.unlocked) {
-            if (gun.ammo > 0 || gun.maxAmmo == -1) {
+            if (gun.ammo != 0) {
                 if (gun.lastFired + gun.cooldown < tickCounter) {
                     if (gun.automatic || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         Vector2 aim = theCanvas -> getMouseRelativeTo(x, y, sizeFactor);
@@ -160,6 +191,19 @@
 
     void player::tickSet() {
 
+
+        bool onGround = world -> isSolid(x + (1 - width) / 2, y + 1) ||
+            world -> isSolid(x + (1 + width) / 2, y + 1);
+        float useFriction, useSpeed;
+        if (onGround) {
+            useFriction = groundFriction;
+            useSpeed = groundSpeed;
+        }
+        else {
+            useFriction = airFriction;
+            useSpeed = airSpeed;
+        }
+
         //Reset break cases
 
         breakDoor = breakSave = breakDead = false;
@@ -170,43 +214,60 @@
             explode (60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
         }
 
-        //Movement in air
-
-
-        if (IsKeyPressed(KEY_W)) {
-            if (world -> isSolid(x + (1 - width) / 2, y + 1) || world -> isSolid(x + (1 + width) / 2, y + 1))  {
-                yMomentum -= JUMPSPEED;
-            }
-        }
-
-
         if (!isUnderWater) {
-            if (IsKeyDown(KEY_D)) {
-                if (xMomentum < 0) {
-                    xMomentum /= 2;
-                    xMomentum += PLAYERSPEED;
+
+            //Vertical movement
+
+            if ((IsKeyPressed(KEY_W) || IsKeyDown(KEY_W) && autoRejump)) {  //If the jump key is pressed
+                if (onGround) {                                         //If we're on a surface we can jump from
+                    yMomentum -= jumpSpeed;                                 //then jump, and also reset jump counter
+                    jumpsUsed = jumpCount;
+                    justJumped = true;
                 }
-                else if (xMomentum < PLAYERMAXSPEED) {
-                    xMomentum = min(xMomentum + PLAYERSPEED, PLAYERMAXSPEED);
+                else if (walljump && hit) {
+                    yMomentum -= jumpSpeed;
+                    xMomentum += copysign(airSpeed * (jumpSpeed / gravity), xMomentum);
+                    jumpsUsed = jumpCount;
+                    justJumped = true;
                 }
-            }
-            if (IsKeyDown(KEY_A)) {
-                if (xMomentum > 0) {
-                    xMomentum /= 2;
-                    xMomentum -= PLAYERSPEED;
+                else if (jumpsUsed != 0) {                                //Else, if jumps remaining,
+                    jumpsUsed--;
+                    yMomentum -= jumpSpeed;                                 //jump and decrement jump counter
+                    if (IsKeyPressed(KEY_W)) {
+                        justJumped = true;
+                    }
                 }
-                else if (xMomentum > 0 - PLAYERMAXSPEED) {
-                    xMomentum = max(xMomentum - PLAYERSPEED, 0 - PLAYERMAXSPEED);
-                }
-            }
-            else if (IsKeyUp(KEY_A) && IsKeyUp(KEY_D)) {
-                xMomentum *= 0.85;
             }
 
           	//Short jumps
 
-            if (IsKeyReleased(KEY_W)) {
-                yMomentum = max(0.0f, yMomentum);
+            if (IsKeyReleased(KEY_W) && yMomentum < 0 && justJumped) {
+                yMomentum *= 0.3;
+                justJumped = false;
+            }
+
+
+            //Lateral movement
+
+            //Friction applies if the player is not pressing any buttons, or if
+            //they're trying to slow down.
+
+            if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A) && xMomentum < 0.2f) {
+                xMomentum = min(0.2f, xMomentum + useSpeed);
+                jumpControl = true;
+                if (xMomentum < -0.2f) {
+                    xMomentum *= useFriction;
+                }
+            }
+            else if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && xMomentum > -0.2f) {
+                xMomentum = max(-0.2f, xMomentum - useSpeed);
+                jumpControl = true;
+                if (xMomentum > 0.2f) {
+                    xMomentum *= useFriction;
+                }
+            }
+            else if (jumpControl) {
+                xMomentum *= useFriction;
             }
 
             //Air recovery
@@ -216,19 +277,21 @@
         }
         else {
 
+            jumpsUsed = jumpCount;
+
             //Moving underwater
 
             if (IsKeyDown(KEY_W)) {
-                yMomentum -= SWIMSPEED;
+                yMomentum -= waterSpeed;
             }
             if (IsKeyDown(KEY_S)) {
-                yMomentum += SWIMSPEED;
+                yMomentum += waterSpeed;
             }
             if (IsKeyDown(KEY_A)) {
-                xMomentum -= SWIMSPEED;
+                xMomentum -= waterSpeed;
             }
             if (IsKeyDown(KEY_D)) {
-                xMomentum += SWIMSPEED;
+                xMomentum += waterSpeed;
             }
 
             //Drowning
@@ -455,6 +518,11 @@
                     colIter = collisions.erase(colIter);
                     break;
                 }
+                case FORCEFIELDTYPE: {
+                    jumpControl = false;
+                    colIter++;
+                    break;
+                }
                 default:
                     colIter++;
             }
@@ -469,10 +537,10 @@
     void player::print() {
         if (!breakDoor) {   //Fix teleporting for one frame after going through door
             if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
-                theCanvas -> draw(x, y, HURTCOLOR, sizeFactor, "@");
+                theCanvas -> draw(x, y, HURTCOLOR, sizeFactor, displayStr);
             }
             else {
-                theCanvas -> draw(x, y, tint, sizeFactor, "@");
+                theCanvas -> draw(x, y, tint, sizeFactor, displayStr);
             }
         }
         drawHud();
@@ -487,13 +555,13 @@
             if (guns[i].unlocked) {
                 if (tickCounter < guns[i].lastFired + guns[i].cooldown || guns[i].ammo < 1) {
                     theCanvas -> drawHud(1, ++rowCount + 3, guns[i].tintFaded, guns[i].display);
-                    if (guns[i].maxAmmo != -1) {
+                    if (guns[i].ammo >= 0) {
                         theCanvas -> drawHud(2, rowCount + 3, guns[i].tintFaded, to_string(guns[i].ammo));
                     }
                 }
                 else {
                     theCanvas -> drawHud(1, ++rowCount + 3, guns[i].tint, guns[i].display);
-                    if (guns[i].maxAmmo != -1) {
+                    if (guns[i].ammo >= 0) {
                         theCanvas -> drawHud(2, rowCount + 3, guns[i].tint, to_string(guns[i].ammo));
                     }
                 }

@@ -131,7 +131,6 @@ int main(int argc, char** argv) {
     level.load(fileName);
     cout << "Starting loading entities...\n";
     level.initializeEditor(layers);
-    level.readEntitiesEditor(layers);
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
     cout << "Finished loading.\n";
@@ -235,6 +234,11 @@ int main(int argc, char** argv) {
                     brushID = 9;
                     brushClickCount = 1;
                 }
+                if (IsKeyPressed(KEY_W)) {
+                    brushName = "Add Placeholder Entities";
+                    brushID = 10;
+                    brushClickCount = 1;
+                }
                 if (IsKeyPressed(KEY_X) && density > 0) {
                     if (IsKeyDown(KEY_LEFT_SHIFT)) {
                         density -= 0.05;
@@ -321,21 +325,21 @@ int main(int argc, char** argv) {
 
                     //switch to prev layer, then flash
 
-                    if (IsKeyPressed(KEY_X)) {
+                    if (IsKeyPressed(KEY_Q)) {
                         (*thisLayer) -> deselect();
                         if (thisLayer != layers.begin()) {
                             thisLayer--;
                         }
                         (*thisLayer) -> select();
                         (*thisLayer) -> flash();
-                        paletteSwitch = 0;
                         markers.clear();
                         mousePos.clear();
+                        paletteSwitch = 0;
                     }
 
                     //switch to next layer, then flash
 
-                    if (IsKeyPressed(KEY_C)) {
+                    if (IsKeyPressed(KEY_E)) {
                         (*thisLayer) -> deselect();
                         if (++thisLayer == layers.end()) {
                             thisLayer--;
@@ -513,7 +517,11 @@ int main(int argc, char** argv) {
 
                     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         intVector2 tile = (*thisLayer) -> getMouseTile();
-                        if ((*thisLayer) -> getIsLayer() || brushID == 3) {
+                        if (brushID == 10) {
+                            level.addEntity(tile.x, tile.y, (*thisLayer) -> getSizeFactor());
+                            world -> addEntity(new dummyEntity(tile.x, tile.y, {0, 0, 255, 255}, (*thisLayer) -> getSizeFactor(), '?'));
+                        }
+                        else if ((*thisLayer) -> getIsLayer() || brushID == 3) {
                             mousePos.push_back(tile);
                             markers.addEntity(new dummyEntity(tile.x, tile.y, {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
                         }

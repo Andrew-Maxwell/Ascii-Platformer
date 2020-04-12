@@ -23,14 +23,6 @@
         world = new collider();
         theCanvas -> setParams(col -> getRows(), col -> getCols(), background, fontSize, 1.0f);
 
-        //Want collider layer on top
-
-        world -> addEntity(col);
-        layers.push_back(col);
-    }
-
-    void editorLevelData::readEntitiesEditor(list<editableLayer*>& layers) {
-
         Value& entities = json["entities"];
         assert(entities.IsArray());
 
@@ -63,8 +55,27 @@
                 world -> addEntity(L);
             }
         }
+
+        //Want collider layer on top
+
+        world -> addEntity(col);
+        layers.push_back(col);
+
     }
 
+    void editorLevelData::addEntity(float x, float y, float sizeFactor) {
+        Document::AllocatorType& a = json.GetAllocator();
+        Value newEntity(kObjectType);
+        newEntity.AddMember("type", Value("placeholder").Move(), a);
+        newEntity.AddMember("x", Value(x).Move(), a);
+        newEntity.AddMember("y", Value(y).Move(), a);
+        newEntity.AddMember("R", Value(255).Move(), a);
+        newEntity.AddMember("G", Value(0).Move(), a);
+        newEntity.AddMember("B", Value(0).Move(), a);
+        newEntity.AddMember("A", Value(255).Move(), a);
+        newEntity.AddMember("sizeFactor", Value(sizeFactor).Move(), a);
+        json["entities"].PushBack(newEntity, a);
+    }
 
     void editorLevelData::writeEntities(list<editableLayer*>& layers) {
         cout << "Saving file...\n";

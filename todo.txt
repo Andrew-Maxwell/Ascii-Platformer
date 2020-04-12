@@ -1,16 +1,12 @@
 Loose ends:
-- Thoroughly test new outfit system with >2 levels.
-- Add player configuration options to the outfit system
-    - elasticity, gravity, friction, jump speed, double/triple+ jumping/jetpacks, walljumps using physicalentity::hit
 - Entities are loaded out-of-order.
     - Need to re-integrate player loading into gameleveldata::readEntities
     - Newly added entities currently go on top/bottom: Could solve this by having the "parent" entity contain and pass a list iterator pointing to itself to collider::addEntity, or could keep collider sorted by sizeFactor (?)
     - HUD is not always printing on top! Add a separate printHUD function?
 - Helpful error message when running editor with no argument.
 - Layers still getting deleted multiple times under some circumstances?
-FIX LEVEL EDITOR:
-    - Small levels displayed flipped???
-    - Only load each file once
+- Gun selection indicator
+- Allow for infinite ammo in guns if ammo = -1
 
 Features:
 - Editor misc:
@@ -62,6 +58,7 @@ Features:
 ? Lightning bolt, fire (spreads via embers), huge fireballs
 ? Snakes (like in snake game) that move around and you can jump on them (platforming puzzle element)
 - transition visual effect
+? Wave and rocket guns
 
 Ideas:
     - Cyberpunk theme: Parallel digital and physical realms, distinct visual style, distinct puzzle types
@@ -83,6 +80,7 @@ Ideas:
     - Tutorial level: Older bro got you your neural interface hacking device, rewrote an abandoned building's
         network to teach you how to use it. Later he disappears, and you need to travel deeper into the abandoned
         city to find him...
+    - Level where you're really bouncy, elasticity = 1.05 or something like that, but there are pools of water around and you need to use them to stop...
 
 inspiration/vague visual ideas:
     - Giant drum machine like washing machine

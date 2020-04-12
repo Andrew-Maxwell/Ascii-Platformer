@@ -47,10 +47,26 @@ using namespace rapidjson;
         assert(outfitValue.IsObject());
         assert(outfitValue.HasMember("name"));
         toReturn.name = outfitValue["name"].GetString();
+        toReturn.display = outfitValue.HasMember("display") ? outfitValue["display"].GetInt() : '@';
         toReturn.health = outfitValue.HasMember("health") ? outfitValue["health"].GetInt() : 8;
         toReturn.maxHealth = outfitValue.HasMember("maxHealth") ? outfitValue["maxHealth"].GetInt() : 8;
         toReturn.air = outfitValue.HasMember("air") ? outfitValue["air"].GetInt() : 600;
         toReturn.maxAir = outfitValue.HasMember("maxAir") ? outfitValue["maxAir"].GetInt() : 600;
+
+        toReturn.elasticity = outfitValue.HasMember("elasticity") ? outfitValue["elasticity"].GetFloat() : 0.0;
+        toReturn.gravity = outfitValue.HasMember("gravity") ? outfitValue["gravity"].GetFloat() : GRAVITY;
+
+        toReturn.groundFriction = outfitValue.HasMember("groundFriction") ? outfitValue["groundFriction"].GetFloat() : FRICTION;
+        toReturn.airFriction = outfitValue.HasMember("airFriction") ? outfitValue["airFriction"].GetFloat() : 0.9;
+        toReturn.waterFriction = outfitValue.HasMember("waterFriction") ? outfitValue["waterFriction"].GetFloat() : 0.95;
+        toReturn.groundSpeed = outfitValue.HasMember("groundSpeed") ? outfitValue["groundSpeed"].GetFloat() : PLAYERSPEED;
+        toReturn.airSpeed = outfitValue.HasMember("moveSpeed") ? outfitValue["moveSpeed"].GetFloat() : PLAYERSPEED;
+        toReturn.waterSpeed = outfitValue.HasMember("swimSpeed") ? outfitValue["swimSpeed"].GetFloat() : SWIMSPEED;
+
+        toReturn.jumpSpeed = outfitValue.HasMember("jumpSpeed") ? outfitValue["jumpSpeed"].GetFloat() : JUMPSPEED;
+        toReturn.jumpCount = outfitValue.HasMember("jumpCount") ? outfitValue["jumpCount"].GetInt() : 1;
+        toReturn.autoRejump = outfitValue.HasMember("autoRejump") ? outfitValue["autoRejump"].GetBool() : false;
+        toReturn.walljump = outfitValue.HasMember("walljump") ? outfitValue["walljump"].GetBool() : false;
 
         //Get the list of guns
 
