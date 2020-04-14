@@ -1,0 +1,25 @@
+Goals, stated in terms of other games:
+- Movement-based puzzles, (a little) like Portal (using forcefields mostly)
+- Bit puzzles, like bitpuzzler
+- Beautiful, minimalist graphics and an engaging industrial world, like Rain World
+- Twitchy, satisfying combat, like Hyper Light Drifter
+- Story and exploration driven, like Cave Story or rain world.
+
+SUMMARY
+
+Ascii-Platformer is a side-scrolling platformer with an emphasis on story and exploration.
+
+GRAPHICS
+
+The graphics are entirely rendered using Unicode. This does not preclude dynamic special effects. So far I have particles and water working satsifactorily, and I intend to add elements such as smoke, fire, windblown leaves, lightning, explosions, etc.
+
+GAMEPLAY
+
+Gameplay has both combat and puzzle elements. The puzzles consist of finding ways to reach new areas using moving platforms, forcefields, and special abilities to propel or fling the player in the direction they wish to go. Some puzzle elements are controlled by broadcasting a code. The code must be assembled from elements the player finds in the level. Combat features both traditional elements (shooting and dodging) and creative puzzle-solving elements (such as using a forcefield to push an enemy off of a platform into a pit of spikes.)
+
+STORY
+
+The PC lives in a high-elevation suburb of a city flooded by a climate apocalypse. The lowlands downtown, referred to only as "downtown", are separated by a huge seawall and illegal to enter. However, intepred scavengers such as the PC's older brother make a comfortable living by looting the untouched upper floors of downtown for valuables. Many of the buildings have automated security systems which are still functional, making this a dangerous enterprise for the unwary.
+The story begins with the PC's brother walking them through the process of bypassing the security of a small building. (This area functions as a tutorial.) The PC's mother worries for both siblings. However, when the brother disappears into the city and the PC decides to launch a rescue mission, the mother insists on acting as a radio lifeline. Alone except from this single contact, the PC must travel deep into the abandoned downtown, searching for their brother and uncovering bigger secrets along the way.
+Possibility: Secret is lots of crazy/advanced AIs running more or less unrestricted in downtown; could make them silly like e.g Gunnerkrigg robots, play it for laughs. Campy.
+
