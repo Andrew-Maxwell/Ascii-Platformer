@@ -47,6 +47,8 @@ class canvas {
 
     void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t);
 
+    virtual void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected) {}
+
     void drawHud(float x, float y, Color tint, string text);
 
     void drawBarLeft(float x, float y, Color tint, float sizeFactor, float length);
@@ -99,6 +101,8 @@ class editableCanvas : public canvas {
     explicit editableCanvas();
 
     void moveCamera();
+
+    void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected);
 
 };
 

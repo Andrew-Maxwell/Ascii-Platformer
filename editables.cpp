@@ -200,14 +200,15 @@ using namespace rapidjson;
 
             case 1: {   //Square brush
 
-                int tileX1 = min(knownWidth, max(0, min((int)mousePos[0].x, (int)mousePos[1].x)));
-                int tileX2 = min(knownWidth, max(0, max((int)mousePos[0].x, (int)mousePos[1].x)));
-                int tileY1 = min((int)intCanvas.size(), max(0, min((int)mousePos[0].y, (int)mousePos[1].y)));
-                int tileY2 = min((int)intCanvas.size(), max(0, max((int)mousePos[0].y, (int)mousePos[1].y)));
-                for (int i = 0; i <= tileY2 - tileY1; i++) {
-                    for (int j = 0; j <= tileX2 - tileX1; j++) {
+                int x1 = max(0, min(mousePos[0].x, mousePos[1].x));
+                int x2 = min(getCols() - 1, max(mousePos[0].x, mousePos[1].x));
+                int y1 = max(0, min(mousePos[0].y, mousePos[1].y));
+                int y2 = min(getRows() - 1, max(mousePos[0].y, mousePos[1].y));
+
+                for (int i = 0; i <= y2 - y1; i++) {
+                    for (int j = 0; j <= x2 - x1; j++) {
                         if (GetRandomValue(0, 1000) / 1000.0 <= density) {
-                            intCanvas[tileY1 + i][tileX1 + j] = F -> get(tileX1 + j - tileXOrig, tileY1 + i - tileYOrig);
+                            intCanvas[y1 + i][x1 + j] = F -> get(x1 + j - tileXOrig, y1 + i - tileYOrig);
                         }
                     }
                 }
@@ -461,6 +462,54 @@ using namespace rapidjson;
         update();
     }
 
+/*****************************************************************************/
+//erase
+/*****************************************************************************/
+
+    void editableLayer::erase(vector<intVector2> mousePos) {
+
+        //Create new frame
+
+        vector<int*> intCanvas;
+        for (int* line : frames[currentFrame]) {
+            int* newLine = new int[knownWidth];
+            for (int i = 0; i < knownWidth; i++) {
+                newLine[i] = line[i];
+            }
+            intCanvas.push_back(newLine);
+        }
+
+        //Get position to cut
+
+        int x1 = max(0, min(mousePos[0].x, mousePos[1].x));
+        int x2 = min(getCols() - 1, max(mousePos[0].x, mousePos[1].x));
+        int y1 = max(0, min(mousePos[0].y, mousePos[1].y));
+        int y2 = min(getRows() - 1, max(mousePos[0].y, mousePos[1].y));
+
+        //Fill with space character
+
+        for (int yIter = 0; yIter <= y2 - y1; yIter++) {
+            for (int xIter = 0; xIter <= x2 - x1; xIter++) {
+                intCanvas[yIter + y1][xIter + x1] = ' ';
+            }
+        }
+
+        //Discard any frames more recent than the new one (any redo frames)
+
+        while (frames.size() > currentFrame + 1) {
+            frames.pop_back();
+        }
+
+        //Push the new frame
+
+        currentFrame++;
+        frames.push_back(intCanvas);
+
+        //Update the visible canvas
+
+        update();
+    }
+
 
 /*****************************************************************************/
 //Cut
@@ -481,10 +530,10 @@ using namespace rapidjson;
 
         //Get position to cut
 
-        int x1 = min(mousePos[0].x, mousePos[1].x);
-        int x2 = max(mousePos[0].x, mousePos[1].x);
-        int y1 = min(mousePos[0].y, mousePos[1].y);
-        int y2 = max(mousePos[0].y, mousePos[1].y);
+        int x1 = max(0, min(mousePos[0].x, mousePos[1].x));
+        int x2 = min(getCols() - 1, max(mousePos[0].x, mousePos[1].x));
+        int y1 = max(0, min(mousePos[0].y, mousePos[1].y));
+        int y2 = min(getRows() - 1, max(mousePos[0].y, mousePos[1].y));
 
         //Copy and fill with space character
 
@@ -519,10 +568,10 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     vector<vector<int>> editableLayer::copy(vector<intVector2> mousePos) {
-        int x1 = min(mousePos[0].x, mousePos[1].x);
-        int x2 = max(mousePos[0].x, mousePos[1].x);
-        int y1 = min(mousePos[0].y, mousePos[1].y);
-        int y2 = max(mousePos[0].y, mousePos[1].y);
+        int x1 = max(0, min(mousePos[0].x, mousePos[1].x));
+        int x2 = min(getCols() - 1, max(mousePos[0].x, mousePos[1].x));
+        int y1 = max(0, min(mousePos[0].y, mousePos[1].y));
+        int y2 = min(getRows() - 1, max(mousePos[0].y, mousePos[1].y));
         vector<vector<int>> toReturn(y2 - y1 + 1, vector<int>(x2 - x1 + 1, ' '));
         for (int yIter = 0; yIter <= y2 - y1; yIter++) {
             for (int xIter = 0; xIter <= x2 - x1; xIter++) {
@@ -640,20 +689,7 @@ using namespace rapidjson;
             tint = original;
         }
         if (visible) {
-            layer::print();
-            if (isLayer) {
-                Vector2 camera = theCanvas -> getCamera();
-                int screenRows = theCanvas -> getScreenRows();
-                int screenCols = theCanvas -> getScreenCols();
-                if (selected) {  //Boundary indicators (helps with editing)
-                    int imin = max((int)(camera.y - y - screenRows / sizeFactor / 2), 0);
-                    int imax = min((int)(camera.y - y + screenRows / sizeFactor / 2) + 1, (int)canvas.size());
-                    for (int i = 0; i < imax - imin; i++) {
-                        theCanvas -> draw(x - 1, y + i, RED, sizeFactor, "#");
-                        theCanvas -> draw(x + knownWidth, y + i, RED, sizeFactor, "#");
-                    }
-                }
-            }
+            theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture, selected);
         }
     }
 

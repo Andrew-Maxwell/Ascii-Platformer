@@ -13,6 +13,11 @@ using namespace rapidjson;
 
 int main(int argc, char** argv) {
 
+    if (argc != 2) {
+        cout << "Usage: ./editor [main level file name]\n";
+        exit(EXIT_FAILURE);
+    }
+
     //Initialize raylib
 
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer - level editor");
@@ -322,6 +327,15 @@ int main(int argc, char** argv) {
                 }
                 
                 else {  //Control is not down
+
+                    //Delete selection
+
+                    if (IsKeyPressed(KEY_DELETE) && mousePos.size() >= 2) {
+                        (*thisLayer) -> erase(mousePos);
+                        markers.clear();
+                        mousePos.clear();
+                        mayNeedToSave = true;
+                    }
 
                     //switch to prev layer, then flash
 

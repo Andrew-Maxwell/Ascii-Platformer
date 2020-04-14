@@ -10,10 +10,11 @@
 
     player::player(  float newX, float newY, Color newTint, float newSizeFactor) :
                             entity(newX, newY, newTint, newSizeFactor),
-                            physicalEntity(newX, newY, newTint, newSizeFactor, 1.0, 0.0, 0.0)
+                            physicalEntity(newX, newY, newTint, newSizeFactor, 1.0, 0.0, 1.0)
     {
         yMomentum = 0;
         elasticity = 0;
+        friction = 1.0f;
         health = maxHealth = 8;
         air = maxAir = 600;
 
@@ -39,11 +40,11 @@
         toReturn.elasticity = elasticity;
         toReturn.gravity = gravity;
 
-        toReturn.groundSpeed = groundSpeed;
-        toReturn.airSpeed = airSpeed;
+        toReturn.acceleration = acceleration;
+        toReturn.speed = speed;
+        toReturn.friction = playerFriction;
+        toReturn.waterAcceleration = waterAcceleration;
         toReturn.waterSpeed = waterSpeed;
-        toReturn.groundFriction = groundFriction;
-        toReturn.airFriction = airFriction;
         toReturn.waterFriction = waterFriction;
 
         toReturn.jumpSpeed = jumpSpeed;
@@ -71,11 +72,11 @@
         elasticity = newOutfit.elasticity;
         gravity = newOutfit.gravity;
 
-        groundSpeed = newOutfit.groundSpeed;
-        airSpeed = newOutfit.airSpeed;
+        acceleration = newOutfit.acceleration;
+        speed = newOutfit.speed;
+        playerFriction = newOutfit.friction;
+        waterAcceleration = newOutfit.waterAcceleration;
         waterSpeed = newOutfit.waterSpeed;
-        groundFriction = newOutfit.groundFriction;
-        airFriction = newOutfit.airFriction;
         waterFriction = newOutfit.waterFriction;
 
         jumpSpeed = newOutfit.jumpSpeed;
@@ -88,13 +89,11 @@
         //Kludge to make sure we don't leave gunSelect on a locked gun
         //if an unlocked gun is available
 
-        if (guns[gunSelect].unlocked == false) {
-            for (int i = 0; i < guns.size(); i++) {
-                gunSelect = (gunSelect + 1) % guns.size();
-                if (guns[gunSelect].unlocked) {
-                    break;
-                }
+        for (int i = 0; i < guns.size(); i++) {
+            if (guns[gunSelect].unlocked) {
+                break;
             }
+            gunSelect = (gunSelect + 1) % guns.size();
         }
         ops = newOutfit.ops;
         for (int i = 0; i < 10; i++) {
@@ -192,17 +191,12 @@
     void player::tickSet() {
 
 
-        bool onGround = world -> isSolid(x + (1 - width) / 2, y + 1) ||
+        bool onGround =
+            world -> isSolid(x + (1 - width) / 2, y + 1) ||
             world -> isSolid(x + (1 + width) / 2, y + 1);
-        float useFriction, useSpeed;
-        if (onGround) {
-            useFriction = groundFriction;
-            useSpeed = groundSpeed;
-        }
-        else {
-            useFriction = airFriction;
-            useSpeed = airSpeed;
-        }
+        bool onWall =
+            world -> isSolid(x + (1 - width) / 2 - 0.5, y) ||
+            world -> isSolid(x + (1 + width) / 2 + 0.5, y);
 
         //Reset break cases
 
@@ -211,7 +205,7 @@
         //Explosions
 
         if (IsKeyPressed(KEY_R)) {
-            explode (60, x, y, tint, sizeFactor, 1, 0, 600, 0.5);
+            explode (60, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5);
         }
 
         if (!isUnderWater) {
@@ -220,13 +214,13 @@
 
             if ((IsKeyPressed(KEY_W) || IsKeyDown(KEY_W) && autoRejump)) {  //If the jump key is pressed
                 if (onGround) {                                         //If we're on a surface we can jump from
-                    yMomentum -= jumpSpeed;                                 //then jump, and also reset jump counter
+                    yMomentum  -= jumpSpeed;                                 //then jump, and also reset jump counter
                     jumpsUsed = jumpCount;
                     justJumped = true;
                 }
-                else if (walljump && hit) {
+                else if (walljump && onWall) {
                     yMomentum -= jumpSpeed;
-                    xMomentum += copysign(airSpeed * (jumpSpeed / gravity), xMomentum);
+                    xMomentum += copysign(acceleration * (jumpSpeed / gravity + 10), xMomentum);
                     jumpsUsed = jumpCount;
                     justJumped = true;
                 }
@@ -252,22 +246,22 @@
             //Friction applies if the player is not pressing any buttons, or if
             //they're trying to slow down.
 
-            if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A) && xMomentum < 0.2f) {
-                xMomentum = min(0.2f, xMomentum + useSpeed);
+            if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A) && xMomentum < speed) {
+                xMomentum = min(speed, xMomentum + acceleration);
                 jumpControl = true;
-                if (xMomentum < -0.2f) {
-                    xMomentum *= useFriction;
+                if (xMomentum < -1 * speed) {
+                    xMomentum *= playerFriction;
                 }
             }
-            else if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && xMomentum > -0.2f) {
-                xMomentum = max(-0.2f, xMomentum - useSpeed);
+            else if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && xMomentum > -1 * speed) {
+                xMomentum = max(-1 * speed, xMomentum - acceleration);
                 jumpControl = true;
-                if (xMomentum > 0.2f) {
-                    xMomentum *= useFriction;
+                if (xMomentum > speed) {
+                    xMomentum *= playerFriction;
                 }
             }
-            else if (jumpControl) {
-                xMomentum *= useFriction;
+            else if (jumpControl || onGround) {
+                xMomentum *= playerFriction;
             }
 
             //Air recovery
@@ -281,17 +275,18 @@
 
             //Moving underwater
 
+            bool swimming = false;
             if (IsKeyDown(KEY_W)) {
-                yMomentum -= waterSpeed;
-            }
-            if (IsKeyDown(KEY_S)) {
-                yMomentum += waterSpeed;
+                yMomentum = max(-1 * waterSpeed, yMomentum - waterAcceleration);
             }
             if (IsKeyDown(KEY_A)) {
-                xMomentum -= waterSpeed;
+                xMomentum = max(-1 * waterSpeed, xMomentum - waterAcceleration);
+            }
+            if (IsKeyDown(KEY_S)) {
+                yMomentum = min(waterSpeed, yMomentum + waterAcceleration);
             }
             if (IsKeyDown(KEY_D)) {
-                xMomentum += waterSpeed;
+                xMomentum = min(waterSpeed, xMomentum + waterAcceleration);
             }
 
             //Drowning
@@ -306,36 +301,16 @@
 
         //Channels
 
-        if (IsKeyDown(KEY_ONE)) {
-            world -> setChannel(channels[0].to_ulong());
+        for (int i = 0; i < 10; i++) {
+            if (IsKeyDown(KEY_ZERO + i)) {
+                world -> setChannel(channels[i].to_ulong());
+                lastChannel = i;
+            }
         }
-        if (IsKeyDown(KEY_TWO)) {
-            world -> setChannel(channels[1].to_ulong());
+        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+            world -> setChannel(channels[lastChannel].to_ulong());
         }
-        if (IsKeyDown(KEY_THREE)) {
-            world -> setChannel(channels[2].to_ulong());
-        }
-        if (IsKeyDown(KEY_FOUR)) {
-            world -> setChannel(channels[3].to_ulong());
-        }
-        if (IsKeyDown(KEY_FIVE)) {
-            world -> setChannel(channels[4].to_ulong());
-        }
-        if (IsKeyDown(KEY_SIX)) {
-            world -> setChannel(channels[5].to_ulong());
-        }
-        if (IsKeyDown(KEY_SEVEN)) {
-            world -> setChannel(channels[6].to_ulong());
-        }
-        if (IsKeyDown(KEY_EIGHT)) {
-            world -> setChannel(channels[7].to_ulong());
-        }
-        if (IsKeyDown(KEY_NINE)) {
-            world -> setChannel(channels[8].to_ulong());
-        }
-        if (IsKeyDown(KEY_ZERO)) {
-            world -> setChannel(channels[9].to_ulong());
-        }
+
         //Boollets
 
         //Switching guns

@@ -364,6 +364,16 @@
 
     }
 
+    void editableCanvas::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected) {
+        Rectangle sourceRec = {0.0f, 0.0f, (float)t.width, -1 * (float)t.height};
+        Vector2 origin = { (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
+            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor };
+        Rectangle destRec = {origin.x, origin.y, t.width * fontSize / 8 * sizeFactor, t.height * fontSize / 8 * sizeFactor};
+        myDrawTexture(t, sourceRec, destRec, (Vector2){0.0f, 0.0f}, 0.0f, tint);
+        if (selected) {
+            DrawRectangleLines(destRec.x, destRec.y, destRec.width, destRec.height, RED);
+        }
+    }
 
 //I don't know how the compiler is actually doing this, but
 //this seems like the fastest implementation, ugly as it is.

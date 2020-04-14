@@ -60,7 +60,8 @@ struct outfit {
     int maxAir;
 
     float elasticity, gravity, jumpSpeed;
-    float groundSpeed, airSpeed, waterSpeed, groundFriction, airFriction, waterFriction;
+    float acceleration, speed, friction;
+    float waterAcceleration, waterSpeed, waterFriction;
     int jumpCount;
     bool autoRejump; //Creates a jetpack-like effect
     bool walljump;
@@ -101,7 +102,8 @@ class player : protected physicalEntity, virtual public collideable {
     int hurtTimer = -1000;
     int air, maxAir;
 
-    float groundSpeed, airSpeed, waterSpeed, groundFriction, airFriction, waterFriction;
+    float acceleration, speed, playerFriction;
+    float waterAcceleration, waterSpeed, waterFriction;
     float jumpSpeed;
     int jumpCount;
     int jumpsUsed;
@@ -116,6 +118,7 @@ class player : protected physicalEntity, virtual public collideable {
 
     vector<puzzleOp> ops;
     bitset<8> channels[10];
+    int lastChannel = 0;
 
     set<int> collectedPickups;
 

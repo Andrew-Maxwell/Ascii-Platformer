@@ -1,0 +1,89 @@
+{
+    "collider": "dark_collider.lyr",
+    "R": 35,
+    "G": 20,
+    "B": 10,
+    "A": 0,
+    "fontSize": 16,
+    "entities": [
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 59,
+            "G": 37,
+            "B": 30,
+            "A": 255,
+            "sizeFactor": 0.97,
+            "fileName": "dark_layer0.lyr"
+        },
+        {
+            "type": "layer",
+            "x": 0.5,
+            "y": 0.5,
+            "R": 148,
+            "G": 254,
+            "B": 166,
+            "A": 255,
+            "sizeFactor": 0.97,
+            "fileName": "dark_layer1.lyr"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 0.99,
+            "fileName": "dark_layer2.lyr"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 102,
+            "G": 18,
+            "B": 31,
+            "A": 255,
+            "sizeFactor": 0.99,
+            "fileName": "dark_layer3.lyr"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 254,
+            "G": 137,
+            "B": 40,
+            "A": 255,
+            "sizeFactor": 0.99,
+            "fileName": "dark_layer4.lyr"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 0.9999999403953552,
+            "fileName": "dark_layer2.lyr"
+        },
+        {
+            "type": "player",
+            "x": 27.0,
+            "y": 24.0,
+            "R": 50,
+            "G": 255,
+            "B": 50,
+            "A": 255,
+            "sizeFactor": 1.0
+        }
+    ],
+    "defaultOutfit": {
+        "name": "x"
+    }
+}

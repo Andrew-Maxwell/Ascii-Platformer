@@ -3,24 +3,20 @@ Loose ends:
     - Need to re-integrate player loading into gameleveldata::readEntities
     - Newly added entities currently go on top/bottom: Could solve this by having the "parent" entity contain and pass a list iterator pointing to itself to collider::addEntity, or could keep collider sorted by sizeFactor (?)
     - HUD is not always printing on top! Add a separate printHUD function?
-- Helpful error message when running editor with no argument.
 - Layers still getting deleted multiple times under some circumstances?
 - Gun selection indicator
-- Allow for infinite ammo in guns if ammo = -1
 
 Features:
-- Editor misc:
+? Editor misc:
     - Allow changing background color
     - Display, allow changing palette selection (don't ignore number keys) in tab screen
-    - Press delete to fill selection with space chars
-    - Layer Boundary indicators getting cut off
     - Add a layer indicator which shows all of the layers and which one is selected
-    - Make layer swap keys be q and e
     - Fix the default palette
+    - Displaying and resizing variable-size entities (e.g. water, particle spawner) in editor.
+    - Need to be able to correspond entities in the file to entities in the editor more easily.
 - Need maxAmmoPickup
 - Config file: Resolution, scaling
-- Displaying and resizing variable-size entities (e.g. water, particle spawner) in editor.
-- Generic physicalEntity parameters (density/volume/mass)
+? Generic physicalEntity parameters (density/volume/mass)
 - Improved code interface
     - Intercepted codes
     - Colored based on code value
@@ -45,8 +41,6 @@ Features:
     - NPCS and bosses which can modify plot variables.
     - Dialog
     ? Inventory
-- Overhaul movement: tweak everything. Decide how you want it to be *before* you start making levels.
-    - Lower gravity = more time to manouver in air
 - Sound effects
 - Music: see http://dig.ccmixter.org for free music, or contact noise, or try to make your own!
 - Menus
@@ -114,4 +108,5 @@ Bugs:
 - touch pickups sometimes collected (?) randomly
 - Markers appearing in wrong place in level editor
 - "Not a valid choice!" error appears when using op screen
-- Raindrops becoming zero-G
+- particles becoming zero-G
+- Some of the files in "dark" getting loaded as wrong width

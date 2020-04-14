@@ -34,12 +34,14 @@
         newOutfit.AddMember("maxAir", Value(o.maxAir).Move(), a);
         newOutfit.AddMember("elasticity", Value(o.elasticity), a);
         newOutfit.AddMember("gravity", Value(o.gravity), a);
-        newOutfit.AddMember("groundSpeed", Value(o.groundSpeed), a);
-        newOutfit.AddMember("airSpeed", Value(o.airSpeed), a);
+
+        newOutfit.AddMember("acceleration", Value(o.acceleration), a);
+        newOutfit.AddMember("speed", Value(o.speed), a);
+        newOutfit.AddMember("friction", Value(o.friction), a);
+        newOutfit.AddMember("waterAcceleration", Value(o.waterAcceleration), a);
         newOutfit.AddMember("waterSpeed", Value(o.waterSpeed), a);
-        newOutfit.AddMember("groundFriction", Value(o.groundFriction), a);
-        newOutfit.AddMember("airFriction", Value(o.airFriction), a);
         newOutfit.AddMember("waterFriction", Value(o.waterFriction), a);
+
         newOutfit.AddMember("jumpSpeed", Value(o.jumpSpeed), a);
         newOutfit.AddMember("jumpCount", Value(o.jumpCount), a);
         newOutfit.AddMember("autoRejump", Value(o.autoRejump), a);

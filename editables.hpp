@@ -76,6 +76,8 @@ class editableLayer : public layer {
 
     //Cut, copy, and paste
 
+    void erase(vector<intVector2> mousePos);
+
     vector<vector<int>> cut(vector<intVector2> mousePos);
 
     vector<vector<int>> copy(vector<intVector2> mousePos);
