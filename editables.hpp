@@ -28,11 +28,11 @@ class editableLayer : public layer {
     int tileX1, tileY1, tileX2, tileY2;
     int currentFrame = 0, lastFrame = 0;
     bool isColorChanged = false, selected = false;
-    
+    int displayWidth, displayHeight;
 
     public:
 
-    editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* newJson);
+    editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value* newJson);
 
     //Accessors
     
@@ -75,6 +75,8 @@ class editableLayer : public layer {
     void leftBrush(vector<intVector2> mousePos, int brushID, charFill* F, float density, bool absolute);
 
     //Cut, copy, and paste
+
+    void erase(vector<intVector2> mousePos);
 
     vector<vector<int>> cut(vector<intVector2> mousePos);
 

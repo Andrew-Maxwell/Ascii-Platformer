@@ -19,13 +19,13 @@ class water : public collideable {
     deque<float> splashTimes, splashPositions, splashSizes;
     vector<float> surface, lastSurface;
     int width;
-    float depth, wavelength, amplitude, k, omega, pulseSpeed;
+    float height, wavelength, amplitude, k, omega, pulseSpeed;
     bool reverse;
     float sTime;
 
     public:
 
-    explicit water (float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newDepth, float newWavelength, float newAmplitude);
+    explicit water (float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newheight, float newWavelength, float newAmplitude);
 
     unsigned int type ();
 

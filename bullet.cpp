@@ -30,10 +30,7 @@
     }
 
     bool bullet::doesCollide(float otherX, float otherY, int otherType) {
-        if (physicalEntity::doesCollide(otherX, otherY, otherType)) {
-            return true;
-        }
-        return false;
+        return physicalEntity::doesCollide(otherX, otherY, otherType);
     }
 
     collision bullet::getCollision(float otherX, float otherY, int otherType) {

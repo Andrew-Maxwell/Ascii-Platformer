@@ -1,5 +1,16 @@
 *.exe
 *.o
+*.d
+*.save
+*.swp
+.cccc/*
+perf.data
+backup/*
+tests/*
+deprecated/*
+editor
+newlevel
+platformer
 rapidjson\\*
 rapidjson/writer.h
 rapidjson/stringbuffer.h

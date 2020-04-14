@@ -53,10 +53,18 @@ struct puzzleOp {
 
 struct outfit {
     string name;
+    int display;
     int health = 8;
     int maxHealth;
     int air;
     int maxAir;
+
+    float elasticity, gravity, jumpSpeed;
+    float acceleration, speed, friction;
+    float waterAcceleration, waterSpeed, waterFriction;
+    int jumpCount;
+    bool autoRejump; //Creates a jetpack-like effect
+    bool walljump;
 
     vector<weapon> guns;
 
@@ -87,10 +95,21 @@ struct outfit {
 class player : protected physicalEntity, virtual public collideable {
 
     string outfitName;
+    int display;
+    string displayStr;
 
     int health, maxHealth;
     int hurtTimer = -1000;
     int air, maxAir;
+
+    float acceleration, speed, playerFriction;
+    float waterAcceleration, waterSpeed, waterFriction;
+    float jumpSpeed;
+    int jumpCount;
+    int jumpsUsed;
+    bool autoRejump; //Creates a jetpack-like effect
+    bool walljump;
+    bool justJumped = false, jumpControl;
 
     vector<weapon> guns;
     int gunSelect = 0;
@@ -99,6 +118,7 @@ class player : protected physicalEntity, virtual public collideable {
 
     vector<puzzleOp> ops;
     bitset<8> channels[10];
+    int lastChannel = 0;
 
     set<int> collectedPickups;
 

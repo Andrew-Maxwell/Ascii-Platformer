@@ -1,0 +1,186 @@
+{
+    "collider": "fun_collider.lyr",
+    "R": 0,
+    "G": 0,
+    "B": 0,
+    "A": 0,
+    "fontSize": 16,
+    "entities": [
+        {
+            "type": "player",
+            "x": 17.0,
+            "y": 345.0,
+            "R": 50,
+            "G": 255,
+            "B": 50,
+            "A": 255,
+            "sizeFactor": 1.0
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 50,
+            "G": 255,
+            "B": 50,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "fun_collider.lyr"
+        },
+        {
+            "type": "forceField",
+            "x": 33.0,
+            "y": 245.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "power": 0.015,
+            "range": 8
+        },
+        {
+            "type": "forceField",
+            "x": 88.0,
+            "y": 221.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "power": 0.015,
+            "range": 15
+        },
+        {
+            "type": "forceField",
+            "x": 70.0,
+            "y": 244.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "power": -0.015,
+            "range": 15
+        },
+        {
+            "type": "savePoint",
+            "x": 69.0,
+            "y": 198.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0
+        },
+        {
+            "type": "forceField",
+            "x": 47.0,
+            "y": 334.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 8,
+            "power": 0.015
+        },
+        {
+            "type": "forceField",
+            "x": 55.0,
+            "y": 321.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 6,
+            "power": -0.015
+        },
+        {
+            "type": "forceField",
+            "x": 18.0,
+            "y": 312.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 15,
+            "power": -0.015
+        },
+        {
+            "type": "savePoint",
+            "x": 22.0,
+            "y": 262.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0
+        },
+        {
+            "type": "forceField",
+            "x": 6.0,
+            "y": 186.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 10,
+            "power": 0.015
+        },
+        {
+            "type": "forceField",
+            "x": 26.0,
+            "y": 165.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 15,
+            "power": 0.015
+        },
+        {
+            "type": "forceField",
+            "x": 67.0,
+            "y": 144.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 15,
+            "power": -0.015
+        },
+        {
+            "type": "savePoint",
+            "x": 62.0,
+            "y": 130.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0
+        },
+        {
+            "type": "forceField",
+            "x": 71.0,
+            "y": 185.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 15,
+            "power": -0.015
+        }
+    ],
+    "defaultOutfit": {
+        "name": "notx",
+        "jumpSpeed": 0.15,
+        "gravity": 0.005
+    }
+}

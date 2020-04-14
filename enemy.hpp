@@ -16,14 +16,15 @@ using namespace rapidjson;
 //what it sounds like, I guess.
 /******************************************************************************/
 
-class enemy : public physicalEntity, virtual public collideable {  // exists in entityList AND collidableList
+class enemy : protected physicalEntity, virtual public collideable {  // exists in entityList AND collidableList
 
     int health, hurtTimer = 0;
     int damage;
     bool isDead = false;
 
 public:
-    enemy(  float newX, float newY, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+
+    explicit enemy(  float newX, float newY, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int maxHealth, int newDamage);
 
     unsigned int type();

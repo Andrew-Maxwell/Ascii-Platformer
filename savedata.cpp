@@ -27,10 +27,26 @@
         Value name;
         name.SetString(o.name.c_str(), o.name.length(), a);
         newOutfit.AddMember("name", name, a);
+        newOutfit.AddMember("display", Value(o.display), a);
         newOutfit.AddMember("health", Value(o.health).Move(), a);
         newOutfit.AddMember("maxHealth", Value(o.maxHealth).Move(), a);
         newOutfit.AddMember("air", Value(o.air).Move(), a);
         newOutfit.AddMember("maxAir", Value(o.maxAir).Move(), a);
+        newOutfit.AddMember("elasticity", Value(o.elasticity), a);
+        newOutfit.AddMember("gravity", Value(o.gravity), a);
+
+        newOutfit.AddMember("acceleration", Value(o.acceleration), a);
+        newOutfit.AddMember("speed", Value(o.speed), a);
+        newOutfit.AddMember("friction", Value(o.friction), a);
+        newOutfit.AddMember("waterAcceleration", Value(o.waterAcceleration), a);
+        newOutfit.AddMember("waterSpeed", Value(o.waterSpeed), a);
+        newOutfit.AddMember("waterFriction", Value(o.waterFriction), a);
+
+        newOutfit.AddMember("jumpSpeed", Value(o.jumpSpeed), a);
+        newOutfit.AddMember("jumpCount", Value(o.jumpCount), a);
+        newOutfit.AddMember("autoRejump", Value(o.autoRejump), a);
+        newOutfit.AddMember("walljump", Value(o.walljump), a);
+
         Value gunsArray(kArrayType);
 
         //copy weapons

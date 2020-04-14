@@ -19,6 +19,7 @@
 #include "canvas.hpp"
 #include "world.hpp"
 #include "enemy.hpp"
+#include "newtestentity.hpp"
 
 class gameLevelData : public outfitData {
 
@@ -38,9 +39,7 @@ class gameLevelData : public outfitData {
 
     //Read all of the entities into the global world collider
 
-    void readEntitiesGame(set<int> collectedPickups);
-
-    void readPlayer(player* playerPtr);
+   void readEntitiesGame(set<int> collectedPickups, player* playerPtr);
 
     Vector2 getPlayerPosition();
 

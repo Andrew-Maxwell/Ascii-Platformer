@@ -45,9 +45,11 @@
             switch(colIter -> type) {
                 case 6: // bullet
                 health += colIter -> damage;
+                colIter = collisions.erase(colIter);
                 break;
             }
         }
+        physicalEntity::tickGet();
     }
 
     bool enemy::finalize() {

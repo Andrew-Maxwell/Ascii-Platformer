@@ -55,7 +55,7 @@
 
     //Read in entities to global world collider
 
-    void gameLevelData::readEntitiesGame(set<int> collectedPickups) {
+    void gameLevelData::readEntitiesGame(set<int> collectedPickups, player* thePlayer) {
 
         auto layerIter = layerCache.begin();
 
@@ -103,7 +103,9 @@
                 world -> addCollideable(S);
             }
             else if (type == "player") {
-                //Do nothing
+                thePlayer -> setColor((Color){R, G, B, A});
+                thePlayer -> setSizeFactor(sizeFactor);
+                world -> addCollideable(thePlayer);
             }
             else if (type == "forceField") {
                 int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;
@@ -121,13 +123,13 @@
             }
             else if (type == "water") {
                 int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
-                float depth = entity.HasMember("depth") ? entity["depth"].GetFloat() : 1.0;
+                float height = entity.HasMember("height") ? entity["height"].GetFloat() : 1.0;
                 float wavelength = entity.HasMember("wavelength") ? entity["wavelength"].GetFloat() : 1.0;
                 float amplitude = entity.HasMember("amplitude") ? entity["amplitude"].GetFloat() : 1.0;
-                water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, width, depth, wavelength, amplitude);
+                water * newWater = new water(x, y, {R, G, B, A}, sizeFactor, width, height, wavelength, amplitude);
                 world -> addCollideable(newWater);
             }
-            else if (type == "enemy") {
+            else if (type == "newTestEntity") {
                 int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt(): '?';
                 float elasticity = entity.HasMember("elasticity") ? entity["elasticity"].GetFloat(): 0.0;
                 float newXMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat(): 0.0;
@@ -135,12 +137,12 @@
                 float newMaxSpeed = entity.HasMember("maxSpeed") ? entity["maxSpeed"].GetFloat(): 100.0;
                 float newGravity = entity.HasMember("gravity") ? entity["gravity"].GetFloat(): GRAVITY;
                 float newFriction = entity.HasMember("friction") ? entity["friction"].GetFloat(): FRICTION;
-                if (type == "enemy") {
+                if (type == "newTestEntity") {
                     int maxHealth = entity.HasMember("maxHealth") ? entity["maxHealth"].GetInt(): 20;
-                    int newDamage = entity.HasMember("newDamage") ? entity["newDamage"].GetInt(): 5;
-                    enemy * newEnemy = new enemy(x, y, {R, G, B, A}, sizeFactor, displayChar, elasticity, newXMomentum,
-                     newYMomentum, newMaxSpeed, newGravity, newFriction, maxHealth, newDamage);
-                    world -> addCollideable(newEnemy);
+                    int newDamage = entity.HasMember("damage") ? entity["damage"].GetInt(): -5;
+                    newTestEntity * newNTE = new newTestEntity(x, y, {R, G, B, A}, sizeFactor, displayChar, elasticity, newXMomentum,
+                        newYMomentum, newMaxSpeed, newGravity, newFriction, maxHealth, newDamage);
+                    world -> addCollideable(newNTE);
                 }
             }
             else if (type == "gunPickup" || type == "ammoPickup" || type == "healthPickup" ||
@@ -195,27 +197,6 @@
             }
         }
 
-    }
-
-    void gameLevelData::readPlayer(player* playerPtr) {
-        const Value& entities = json["entities"];
-        assert(entities.IsArray());
-
-        for (SizeType i = 0; i < entities.Size(); i++) {
-            const Value& entity = entities[i];
-            assert(entity.IsObject());
-            string type = entity.HasMember("type") ? entity["type"].GetString() : "unknown entity";
-
-            if (type == "player") {
-                uint8_t R = entity.HasMember("R") ? entity["R"].GetInt() : 0;
-                uint8_t G = entity.HasMember("G") ? entity["G"].GetInt() : 0;
-                uint8_t B = entity.HasMember("B") ? entity["B"].GetInt() : 0;
-                uint8_t A = entity.HasMember("A") ? entity["A"].GetInt() : 0;
-                float sizeFactor = entity.HasMember("sizeFactor") ? entity["sizeFactor"].GetFloat() : 1.0;
-                playerPtr -> setColor({R, G, B, A});
-                playerPtr -> setSizeFactor(sizeFactor);
-            }
-        }
     }
 
     Vector2 gameLevelData::getPlayerPosition() {

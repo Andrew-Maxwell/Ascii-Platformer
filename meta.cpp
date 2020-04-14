@@ -30,7 +30,6 @@ ifstream getLevelIFStream(string& fileName) {
             levelFile.open(attempt3);
             if (!levelFile) {
                 cerr << "Could not open " << fileName << endl;
-                exit(EXIT_FAILURE);
             }
             else {
                 fileName = attempt3;
@@ -54,7 +53,6 @@ FILE* getLevelFileP(string& fileName) {
             levelFile = fopen(attempt3.c_str(), "rb");
             if (!levelFile) {
                 cerr << "Could not open " << fileName << endl;
-                exit(EXIT_FAILURE);
             }
             else {
                 fileName = attempt3;

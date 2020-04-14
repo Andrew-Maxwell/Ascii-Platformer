@@ -77,15 +77,12 @@ int main(int argc, char** argv) {
                 level.load(thePlayer.nextRoom);
                 level.generateLayerCache();
             }
-            //Read in player appearance
-            level.readPlayer(&thePlayer);
             //Initialize global handlers
             world = new collider(0.0, 0.0, level.getWorldFileName());
-            world -> addCollideable(&thePlayer);
+            //Read in entities
+            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer);
             theCanvas -> setParams(world -> getRows(), world -> getCols(),
                level.getBackgroundColor(), level.getFontSize(), thePlayer.getSizeFactor());
-            //Read in all non-player entities
-            level.readEntitiesGame(thePlayer.getCollectedPickups());
 
             //Set the player position from save or level as appropriate
             if (loadedSave) {
@@ -122,15 +119,12 @@ int main(int argc, char** argv) {
                 level.load(thePlayer.nextRoom);
                 level.generateLayerCache();
             }
-            //Read in player appearance
-            level.readPlayer(&thePlayer);
             //Initialize global handlers
             world = new collider(0.0, 0.0, level.getWorldFileName());
-            world -> addCollideable(&thePlayer);
+            //Read in entities
+            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer);
             theCanvas -> setParams(world -> getRows(), world -> getCols(),
                level.getBackgroundColor(), level.getFontSize(), thePlayer.getSizeFactor());
-            //Read in all non-player entities
-            level.readEntitiesGame(thePlayer.getCollectedPickups());
 
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");

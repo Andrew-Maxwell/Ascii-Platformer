@@ -12,23 +12,21 @@ using namespace rapidjson;
 
     bool data::load(string newFileName) {
         fileName = newFileName;
-        FILE* entityFile = fopen(fileName.c_str(), "r");
-        if (entityFile == NULL) {
+        FILE* jsonFile = getLevelFileP(fileName);
+        if (jsonFile == NULL) {
             return false;
         }
-        else {
-            fseek (entityFile, 0, SEEK_END);
-            char * buffer = new char[ftell (entityFile)];
-            fseek (entityFile, 0, SEEK_SET);
-            FileReadStream entityReadStream(entityFile, buffer, sizeof(buffer));
-            if (json.ParseStream(entityReadStream).HasParseError()) {
-                cerr << "Error parsing json.\n" << endl;
-                exit(EXIT_FAILURE);
-            }
-            fclose(entityFile);
-            free(buffer);
-            return true;
+        fseek (jsonFile, 0, SEEK_END);
+        char * buffer = new char[ftell (jsonFile)];
+        fseek (jsonFile, 0, SEEK_SET);
+        FileReadStream entityReadStream(jsonFile, buffer, sizeof(buffer));
+        if (json.ParseStream(entityReadStream).HasParseError()) {
+            cerr << "Error parsing json.\n" << endl;
+            exit(EXIT_FAILURE);
         }
+        fclose(jsonFile);
+        free(buffer);
+        return true;
     }
 
     string data::getFileName() {
@@ -47,10 +45,26 @@ using namespace rapidjson;
         assert(outfitValue.IsObject());
         assert(outfitValue.HasMember("name"));
         toReturn.name = outfitValue["name"].GetString();
+        toReturn.display = outfitValue.HasMember("display") ? outfitValue["display"].GetInt() : '@';
         toReturn.health = outfitValue.HasMember("health") ? outfitValue["health"].GetInt() : 8;
         toReturn.maxHealth = outfitValue.HasMember("maxHealth") ? outfitValue["maxHealth"].GetInt() : 8;
         toReturn.air = outfitValue.HasMember("air") ? outfitValue["air"].GetInt() : 600;
         toReturn.maxAir = outfitValue.HasMember("maxAir") ? outfitValue["maxAir"].GetInt() : 600;
+
+        toReturn.elasticity = outfitValue.HasMember("elasticity") ? outfitValue["elasticity"].GetFloat() : 0.0;
+        toReturn.gravity = outfitValue.HasMember("gravity") ? outfitValue["gravity"].GetFloat() : GRAVITY;
+
+        toReturn.acceleration = outfitValue.HasMember("acceleration") ? outfitValue["acceleration"].GetFloat() : 0.018;
+        toReturn.speed = outfitValue.HasMember("speed") ? outfitValue["speed"].GetFloat() : 0.2;
+        toReturn.friction = outfitValue.HasMember("friction") ? outfitValue["friction"].GetFloat() : 0.5;
+        toReturn.waterAcceleration = outfitValue.HasMember("waterAcceleration") ? outfitValue["waterAcceleration"].GetFloat() : 0.01;
+        toReturn.waterSpeed = outfitValue.HasMember("swimSpeed") ? outfitValue["swimSpeed"].GetFloat() : 0.12;
+        toReturn.waterFriction = outfitValue.HasMember("waterFriction") ? outfitValue["waterFriction"].GetFloat() : 0.95;
+
+        toReturn.jumpSpeed = outfitValue.HasMember("jumpSpeed") ? outfitValue["jumpSpeed"].GetFloat() : 0.2;
+        toReturn.jumpCount = outfitValue.HasMember("jumpCount") ? outfitValue["jumpCount"].GetInt() : 0;
+        toReturn.autoRejump = outfitValue.HasMember("autoRejump") ? outfitValue["autoRejump"].GetBool() : false;
+        toReturn.walljump = outfitValue.HasMember("walljump") ? outfitValue["walljump"].GetBool() : false;
 
         //Get the list of guns
 
