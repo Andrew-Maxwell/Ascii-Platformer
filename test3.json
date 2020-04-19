@@ -1,0 +1,57 @@
+{
+    "collider": "test3_collider.lyr",
+    "R": 0,
+    "G": 0,
+    "B": 0,
+    "A": 0,
+    "fontSize": 16,
+    "entities": [
+        {
+            "type": "player",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 50,
+            "G": 255,
+            "B": 50,
+            "A": 255,
+            "sizeFactor": 1.0
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 50,
+            "G": 255,
+            "B": 50,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "test3_collider.lyr"
+        },
+        {
+            "type": "door",
+            "x": 6.0,
+            "y": 4.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "nextRoom": "test2.json",
+            "destinationX": 17.0,
+            "destinationY": 9.0
+        },
+        {
+            "type": "door",
+            "x": 9.0,
+            "y": 58.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0
+        }
+    ],
+    "defaultOutfit": {
+        "name": "test_outfit"
+    }
+}

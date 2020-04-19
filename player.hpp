@@ -92,7 +92,17 @@ struct outfit {
 //what it sounds like, I guess.
 /******************************************************************************/
 
-class player : protected physicalEntity, virtual public collideable {
+class player : virtual public collideable {
+
+    //Formerly part of the physicalEntity inheritance
+    bool hit = false;
+    bool isUnderWater = false, lastTickUnderWater = false;
+    float elasticity = 0, maxSpeed = 100, gravity, friction;
+    float width = 0.8;
+
+    float xMovement, yMovement;
+    float xMoveWater, yMoveWater;
+    float xInertia, yInertia;
 
     string outfitName;
     int display;

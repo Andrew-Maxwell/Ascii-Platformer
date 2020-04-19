@@ -20,20 +20,6 @@
             "destinationY": 9.0
         },
         {
-            "type": "water",
-            "x": 16.0,
-            "y": 54.0,
-            "R": 0,
-            "G": 0,
-            "B": 255,
-            "A": 200,
-            "sizeFactor": 1.0,
-            "wavelength": -30.0,
-            "amplitude": 0,
-            "width": 25,
-            "height": 8
-        },
-        {
             "type": "airPickup",
             "x": 20.0,
             "y": 65.0,
@@ -169,11 +155,49 @@
             "sizeFactor": 1.0,
             "touch": true,
             "opID": 100
+        },
+        {
+            "type": "water",
+            "x": 1.0,
+            "y": 77.0,
+            "R": 255,
+            "G": 50,
+            "B": 0,
+            "A": 200,
+            "sizeFactor": 1.0,
+            "width": 197,
+            "height": 21,
+            "amplitude": 0,
+            "wavelength": 50
+        },
+        {
+            "type": "forceField",
+            "x": 48.0,
+            "y": 66.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 20,
+            "power": 0.05
+        },
+        {
+            "type": "forceField",
+            "x": 105.0,
+            "y": 66.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "range": 20,
+            "power": -0.05
         }
     ],
     "defaultOutfit": {
         "name": "test_outfit",
-        "gravity": 0.005,
+        "gravity": 0.01,
         "jumpSpeed": 0.2,
         "display": 2,
         "groundSpeed": 0.018,
@@ -182,13 +206,14 @@
         "airFriction": 0.5,
         "waterSpeed": 0.01,
         "waterFriction": 0.95,
-        "autoRejump": true,
-        "jumpCount": 0,
+        "waterAcceleration": 0.05,
+        "autoRejump": false,
+        "jumpCount": 4,
         "walljump": true,
         "health": 16,
         "maxHealth": 24,
         "air": 64,
-        "maxAir": 64,
+        "maxAir": 640,
         "ops": [
             {
                 "opID": 100,

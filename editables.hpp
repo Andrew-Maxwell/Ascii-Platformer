@@ -68,6 +68,8 @@ class editableLayer : public layer {
 
     //Apply changes using left mouse button.
 
+    bool mouseOn();
+
     intVector2 getMouseTile();
 
     virtual void move(vector<intVector2> mousePos);

@@ -274,8 +274,6 @@ int main(int argc, char** argv) {
             }
             else {
 
-                theCanvas -> moveCamera();
-
                 //Meta: Undo, redo, save
 
                 if (IsKeyDown(KEY_LEFT_CONTROL)) {
@@ -328,6 +326,8 @@ int main(int argc, char** argv) {
                 
                 else {  //Control is not down
 
+                    theCanvas -> moveCamera();
+
                     //Delete selection
 
                     if (IsKeyPressed(KEY_DELETE) && mousePos.size() >= 2) {
@@ -376,71 +376,15 @@ int main(int argc, char** argv) {
 
                     //select brush character
 
-                    if (IsKeyPressed(KEY_F1)) {
-                        paletteSelection = 0;
+                    for (int i = 0; i < 12; i++) {
+                        if (IsKeyPressed(KEY_F1 + i)) {
+                            paletteSelection = i;
+                        }
                     }
-                    if (IsKeyPressed(KEY_F2)) {
-                        paletteSelection = 1;
-                    }
-                    if (IsKeyPressed(KEY_F3)) {
-                        paletteSelection = 2;
-                    }
-                    if (IsKeyPressed(KEY_F4)) {
-                        paletteSelection = 3;
-                    }
-                    if (IsKeyPressed(KEY_F5)) {
-                        paletteSelection = 4;
-                    }
-                    if (IsKeyPressed(KEY_F6)) {
-                        paletteSelection = 5;
-                    }
-                    if (IsKeyPressed(KEY_F7)) {
-                        paletteSelection = 6;
-                    }
-                    if (IsKeyPressed(KEY_F8)) {
-                        paletteSelection = 7;
-                    }
-                    if (IsKeyPressed(KEY_F9)) {
-                        paletteSelection = 8;
-                    }
-                    if (IsKeyPressed(KEY_F10)) {
-                        paletteSelection = 9;
-                    }
-                    if (IsKeyPressed(KEY_F11)) {
-                        paletteSelection = 10;
-                    }
-                    if (IsKeyPressed(KEY_F12)) {
-                        paletteSelection = 11;
-                    }
-                    if (IsKeyPressed(KEY_ONE)) {
-                        paletteSelection = 12;
-                    }
-                    if (IsKeyPressed(KEY_TWO)) {
-                        paletteSelection = 13;
-                    }
-                    if (IsKeyPressed(KEY_THREE)) {
-                        paletteSelection = 14;
-                    }
-                    if (IsKeyPressed(KEY_FOUR)) {
-                        paletteSelection = 15;
-                    }
-                    if (IsKeyPressed(KEY_FIVE)) {
-                        paletteSelection = 16;
-                    }
-                    if (IsKeyPressed(KEY_SIX)) {
-                        paletteSelection = 17;
-                    }
-                    if (IsKeyPressed(KEY_SEVEN)) {
-                        paletteSelection = 18;
-                    }
-                    if (IsKeyPressed(KEY_EIGHT)) {
-                        paletteSelection = 19;
-                    }
-                    if (IsKeyPressed(KEY_NINE)) {
-                        paletteSelection = 20;
-                    }
-                    if (IsKeyPressed(KEY_ZERO)) {
-                        paletteSelection = 21;
+                    for (int i = 0; i < 10; i++) {
+                        if (IsKeyPressed(KEY_ZERO + i)) {
+                            paletteSelection = 12 + i;
+                        }
                     }
 
                     //Adjusting color
@@ -527,20 +471,50 @@ int main(int argc, char** argv) {
                         palette[paletteSelection + 22 * paletteSwitch] = theCanvas -> myGetGlyphIndex((*thisLayer) -> sample(tile.x, tile.y));
                     }
 
-                    //Left click to add a brush input point
+                    //Left click to add a brush input point or shift to select topmost object
 
                     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        intVector2 tile = (*thisLayer) -> getMouseTile();
-                        if (brushID == 10) {
-                            level.addEntity(tile.x, tile.y, (*thisLayer) -> getSizeFactor());
-                            world -> addEntity(new dummyEntity(tile.x, tile.y, {0, 0, 255, 255}, (*thisLayer) -> getSizeFactor(), '?'));
+                        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                            auto listIter = thisLayer;
+                            listIter++;
+                            if (listIter == layers.end()) {
+                                listIter = layers.begin();
+                            }
+                            while ((*listIter) != (*thisLayer) && !(*listIter) -> mouseOn()) {
+                                listIter++;
+                                if (listIter == layers.end()) {
+                                    listIter = layers.begin();
+                                }
+                            }
+                            (*thisLayer) -> deselect();
+                            thisLayer = listIter;
+                            if (++thisLayer == layers.end()) {
+                                paletteSwitch = 1;
+                            }
+                            else {
+                                paletteSwitch = 0;
+                            }
+                            thisLayer--;
+                            (*thisLayer) -> select();
+                            (*thisLayer) -> flash();
+                            markers.clear();
+                            mousePos.clear();
                         }
-                        else if ((*thisLayer) -> getIsLayer() || brushID == 3) {
-                            mousePos.push_back(tile);
-                            markers.addEntity(new dummyEntity(tile.x, tile.y, {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
-                        }
+
                         else {
-                            markers.addEntity(new dummyEntity(tile.x, tile.y, {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), '?', 30));
+                            intVector2 tile = (*thisLayer) -> getMouseTile();
+                            if (brushID == 10) {
+                                level.addEntity(tile.x, tile.y, (*thisLayer) -> getSizeFactor());
+                                world -> addEntity(new dummyEntity(tile.x, tile.y, {0, 0, 255, 255}, (*thisLayer) -> getSizeFactor(), '?'));
+                                mayNeedToSave = true;
+                            }
+                            else if ((*thisLayer) -> getIsLayer() || brushID == 3) {
+                                mousePos.push_back(tile);
+                                markers.addEntity(new dummyEntity(tile.x + (*thisLayer) -> getX(), tile.y + (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
+                            }
+                            else {
+                                markers.addEntity(new dummyEntity(tile.x + (*thisLayer) -> getX(), tile.y + (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), '?', 30));
+                            }
                         }
                     }
 

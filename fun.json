@@ -5,14 +5,22 @@
     "B": 0,
     "A": 0,
     "fontSize": 16,
+    "defaultOutfit": {
+        "name": "notx",
+        "jumpSpeed": 0.28,
+        "gravity": 0.009,
+        "friction": 0.75,
+        "acceleration": 0.0035,
+        "speed": 0.2
+    },
     "entities": [
         {
             "type": "player",
             "x": 17.0,
             "y": 345.0,
-            "R": 50,
+            "R": 255,
             "G": 255,
-            "B": 50,
+            "B": 255,
             "A": 255,
             "sizeFactor": 1.0
         },
@@ -36,7 +44,7 @@
             "B": 0,
             "A": 255,
             "sizeFactor": 1.0,
-            "power": 0.015,
+            "power": 0.033,
             "range": 8
         },
         {
@@ -48,7 +56,7 @@
             "B": 0,
             "A": 255,
             "sizeFactor": 1.0,
-            "power": 0.015,
+            "power": 0.033,
             "range": 15
         },
         {
@@ -60,7 +68,7 @@
             "B": 0,
             "A": 255,
             "sizeFactor": 1.0,
-            "power": -0.015,
+            "power": -0.033,
             "range": 15
         },
         {
@@ -83,19 +91,7 @@
             "A": 255,
             "sizeFactor": 1.0,
             "range": 8,
-            "power": 0.015
-        },
-        {
-            "type": "forceField",
-            "x": 55.0,
-            "y": 321.0,
-            "R": 255,
-            "G": 0,
-            "B": 0,
-            "A": 255,
-            "sizeFactor": 1.0,
-            "range": 6,
-            "power": -0.015
+            "power": 0.033
         },
         {
             "type": "forceField",
@@ -107,7 +103,7 @@
             "A": 255,
             "sizeFactor": 1.0,
             "range": 15,
-            "power": -0.015
+            "power": -0.033
         },
         {
             "type": "savePoint",
@@ -129,7 +125,7 @@
             "A": 255,
             "sizeFactor": 1.0,
             "range": 10,
-            "power": 0.015
+            "power": 0.033
         },
         {
             "type": "forceField",
@@ -141,7 +137,7 @@
             "A": 255,
             "sizeFactor": 1.0,
             "range": 15,
-            "power": 0.015
+            "power": 0.033
         },
         {
             "type": "forceField",
@@ -153,7 +149,7 @@
             "A": 255,
             "sizeFactor": 1.0,
             "range": 15,
-            "power": -0.015
+            "power": -0.033
         },
         {
             "type": "savePoint",
@@ -175,12 +171,20 @@
             "A": 255,
             "sizeFactor": 1.0,
             "range": 15,
-            "power": -0.015
+            "power": -0.033
+        },
+        {
+            "type": "linearField",
+            "x": 50.0,
+            "y": 316.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "width": 10,
+            "height": 5,
+            "yPower": -0.033
         }
-    ],
-    "defaultOutfit": {
-        "name": "notx",
-        "jumpSpeed": 0.15,
-        "gravity": 0.005
-    }
+    ]
 }

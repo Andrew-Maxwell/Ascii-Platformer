@@ -3,7 +3,7 @@
 #ifndef CANVAS_HPP
 #define CANVAS_HPP
 
-#define NUMCHARS 875
+#define NUMCHARS 879
 #define FONTNAME "PxPlus_IBM_BIOS2.ttf"
 
 class canvas {

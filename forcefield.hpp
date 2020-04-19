@@ -10,9 +10,51 @@
 
 using namespace rapidjson;
 
+
+/*****************************************************************************/
+//linearField
+//Forces entities in a certain direction when activated
+/*****************************************************************************/
+
+class linearField : public collideable {
+
+    protected:
+
+    int channel;
+    bool isOn;
+    float xPower, yPower;
+    int width, height;
+    RenderTexture2D tex;
+
+    collision nextCollision;
+    int tickCount;
+
+    public:
+
+    explicit linearField(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight);
+
+    ~linearField();
+
+    unsigned int type();
+
+    bool doesCollide(float otherX, float otherY, int otherType);
+
+    collision getCollision(float otherX, float otherY, int otherType);
+
+    bool stopColliding();
+
+    void tickSet();
+
+    void tickGet();
+
+    bool finalize();
+
+    void print();
+};
+
 /*****************************************************************************/
 //forceField
-//Attracts or repels physical entities within its influende
+//Attracts or repels physical entities within its influence 
 /*****************************************************************************/
 
 class forceField : public collideable {

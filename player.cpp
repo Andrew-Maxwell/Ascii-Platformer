@@ -9,10 +9,9 @@
 //Constructor
 
     player::player(  float newX, float newY, Color newTint, float newSizeFactor) :
-                            entity(newX, newY, newTint, newSizeFactor),
-                            physicalEntity(newX, newY, newTint, newSizeFactor, 1.0, 0.0, 1.0)
+                            entity(newX, newY, newTint, newSizeFactor)
     {
-        yMomentum = 0;
+        yInertia = 0;
         elasticity = 0;
         friction = 1.0f;
         health = maxHealth = 8;
@@ -136,15 +135,14 @@
 //Collision functions
 
     bool player::doesCollide(float otherX, float otherY, int otherType) {
-        return (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1) || physicalEntity::doesCollide(otherX, otherY, otherType);
+        return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1));
     }
 
     collision player::getCollision(float otherX, float otherY, int otherType) {
         if (otherType == WATERTYPE) {
-            return physicalEntity::getCollision(otherX, otherY, otherType);
+            return collision(PHYSICALENTITYTYPE, 0, x, yInertia);
         }
-        collision c(1);
-        return c;
+        return collision(PLAYERTYPE);
     }
 
     bool player::stopColliding() {
@@ -163,7 +161,7 @@
                         bullet* b = new bullet(
                             //x, y, color, sizeFactor
                             x + 1.5 * aim.x, y + 1.5 * aim.y, tint, sizeFactor,
-                            //xMomentum, yMomentum, character, particleCount, lifetime
+                            //xInertia, yInertia, character, particleCount, lifetime
                             aim.x * gun.speed, aim.y * gun.speed, gun.bulletDisplay, gun.particleCount, gun.lifetime,
                             //Elasticity, max speed, gravity, friction
                             gun.elasticity, 10, gun.gravity, 0.5,
@@ -190,107 +188,124 @@
 
     void player::tickSet() {
 
+        //Reset break cases
+        breakDoor = breakSave = breakDead = false;
 
+        //Detect solid blocks
         bool onGround =
             world -> isSolid(x + (1 - width) / 2, y + 1) ||
             world -> isSolid(x + (1 + width) / 2, y + 1);
         bool onWall =
-            world -> isSolid(x + (1 - width) / 2 - 0.5, y) ||
-            world -> isSolid(x + (1 + width) / 2 + 0.5, y);
+            world -> isSolid(x + (1 - width) / 2 - 0.1, y) ||
+            world -> isSolid(x + (1 + width) / 2 + 0.1, y);
 
-        //Reset break cases
-
-        breakDoor = breakSave = breakDead = false;
-
-        //Explosions
-
-        if (IsKeyPressed(KEY_R)) {
-            explode (60, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5);
-        }
-
+        //Keyboard movement handling
         if (!isUnderWater) {
-
-            //Vertical movement
-
+            //Gravity
+            yInertia = min(yInertia + gravity, 0.3f);
+            yMovement = 0;
+            //Jumping
             if ((IsKeyPressed(KEY_W) || IsKeyDown(KEY_W) && autoRejump)) {  //If the jump key is pressed
                 if (onGround) {                                         //If we're on a surface we can jump from
-                    yMomentum  -= jumpSpeed;                                 //then jump, and also reset jump counter
+                    yInertia  = -1 * jumpSpeed;                                 //then jump, and also reset jump counter
                     jumpsUsed = jumpCount;
                     justJumped = true;
                 }
                 else if (walljump && onWall) {
-                    yMomentum -= jumpSpeed;
-                    xMomentum += copysign(acceleration * (jumpSpeed / gravity + 10), xMomentum);
+                    yInertia = -1 * jumpSpeed;
                     jumpsUsed = jumpCount;
                     justJumped = true;
                 }
                 else if (jumpsUsed != 0) {                                //Else, if jumps remaining,
                     jumpsUsed--;
-                    yMomentum -= jumpSpeed;                                 //jump and decrement jump counter
+                    yInertia = -1 * jumpSpeed;                                 //jump and decrement jump counter
                     if (IsKeyPressed(KEY_W)) {
                         justJumped = true;
                     }
                 }
             }
-
-          	//Short jumps
-
-            if (IsKeyReleased(KEY_W) && yMomentum < 0 && justJumped) {
-                yMomentum *= 0.3;
+            if (IsKeyReleased(KEY_W) && yInertia < 0 && justJumped) {
+                yInertia *= 0.3;
                 justJumped = false;
             }
 
-
             //Lateral movement
-
-            //Friction applies if the player is not pressing any buttons, or if
-            //they're trying to slow down.
-
-            if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A) && xMomentum < speed) {
-                xMomentum = min(speed, xMomentum + acceleration);
-                jumpControl = true;
-                if (xMomentum < -1 * speed) {
-                    xMomentum *= playerFriction;
+            if (IsKeyDown(KEY_D)) {
+                xMovement = speed;
+                if (xInertia < 0) {
+                    xInertia *= 0.9;
                 }
             }
-            else if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && xMomentum > -1 * speed) {
-                xMomentum = max(-1 * speed, xMomentum - acceleration);
-                jumpControl = true;
-                if (xMomentum > speed) {
-                    xMomentum *= playerFriction;
+            else if (IsKeyDown(KEY_A)) {
+                xMovement = -1 * speed;
+                if (xInertia > 0) {
+                    xInertia *= 0.9;
                 }
             }
-            else if (jumpControl || onGround) {
-                xMomentum *= playerFriction;
+            else {
+                xMovement = 0;
+                xInertia *= 0.9;
             }
 
             //Air recovery
-
             air = min(maxAir, air + AIRRECOVERYRATE);
-
         }
-        else {
-
+        else {  //Is underwater
             jumpsUsed = jumpCount;
 
             //Moving underwater
-
-            bool swimming = false;
             if (IsKeyDown(KEY_W)) {
-                yMomentum = max(-1 * waterSpeed, yMomentum - waterAcceleration);
+                yMovement = -1 * speed;
+                if (yInertia > 0) {
+                    yInertia *= 0.9;
+                }
+            }
+            else if (IsKeyDown(KEY_S)) {
+                yMovement = speed;
+                if (yInertia < 0) {
+                    yInertia *= 0.9;
+                }
+            }
+            else {
+                yMovement = 0;
+                yInertia *= 0.9;
+            }
+
+            if (IsKeyDown(KEY_A)) {
+                xMovement = -1 * speed;
+                if (xInertia > 0) {
+                    xInertia *= 0.9;
+                }
+            }
+            else if (IsKeyDown(KEY_D)) {
+                xMovement = speed;
+                if (xInertia < 0) {
+                    xInertia *= 0.9;
+                }
+            }
+            else {
+                xMovement = 0;
+                xInertia *= 0.9;
+            }
+
+/*
+            xMovement = 0;
+            yMovement = 0;
+            if (IsKeyDown(KEY_W)) {
+                yInertia = max(-1 * waterSpeed, yInertia - waterAcceleration);
             }
             if (IsKeyDown(KEY_A)) {
-                xMomentum = max(-1 * waterSpeed, xMomentum - waterAcceleration);
+                xInertia = max(-1 * waterSpeed, xInertia - waterAcceleration);
             }
             if (IsKeyDown(KEY_S)) {
-                yMomentum = min(waterSpeed, yMomentum + waterAcceleration);
+                yInertia = min(waterSpeed, yInertia + waterAcceleration);
             }
             if (IsKeyDown(KEY_D)) {
-                xMomentum = min(waterSpeed, xMomentum + waterAcceleration);
+                xInertia = min(waterSpeed, xInertia + waterAcceleration);
             }
+*/
 
             //Drowning
-
             if (air == 0) {
                 health--;
             }
@@ -300,7 +315,6 @@
         }
 
         //Channels
-
         for (int i = 0; i < 10; i++) {
             if (IsKeyDown(KEY_ZERO + i)) {
                 world -> setChannel(channels[i].to_ulong());
@@ -311,10 +325,7 @@
             world -> setChannel(channels[lastChannel].to_ulong());
         }
 
-        //Boollets
-
         //Switching guns
-
         if (IsKeyPressed(KEY_Q)) {
             for (int i = 0; i < guns.size(); i++) {
                 gunSelect = (gunSelect - 1) % guns.size();
@@ -333,45 +344,52 @@
         }
 
         //Shootin'
-
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && guns.size() > 0) {
             fire(guns[gunSelect]);
         }
 
-        //Spikes, falling, and death
-        
+        //Explosions
+        if (IsKeyPressed(KEY_R)) {
+            explode (60, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5);
+        }
+
+        //Death
         hurtTimer--;
         if (y > world -> getRows() + 25) {
             health = 0;
         }
         if (health <= 0) {
             breakDead = true;
-            xMomentum = 0;
-            yMomentum = 0;
+            xInertia = 0;
+            yInertia = 0;
             collisions.clear();
         }
+    }
+
+    void player::tickGet() {
+        hit = false;
+        lastTickUnderWater = isUnderWater;
+        isUnderWater = false;
+        xMoveWater = 0;
+        yMoveWater = 0;
 
         //spikes
-        
         int spikeDamage = world -> getPlayerDamage((int)(x + 0.5), (int)(y + 0.5));
         if (hurtTimer < 0 && spikeDamage) {
             health += spikeDamage;
             hurtTimer = 60;
-            Vector2 newMomentum = Vector2Scale(Vector2Negate(Vector2Normalize({xMomentum, yMomentum})), 0.7);
-            xMomentum = newMomentum.x;
-            yMomentum = newMomentum.y / 3;
+            Vector2 newInertia = Vector2Scale(Vector2Negate(Vector2Normalize({xInertia, yInertia})), 0.7);
+            xInertia = newInertia.x;
+            yInertia = newInertia.y / 3;
             damageIndicator(spikeDamage, x, y, HURTCOLOR, sizeFactor);
         }
-        physicalEntity::tickSet();;
-    }
 
-    void player::tickGet() {
+        //Handling collisions
         list<collision>::iterator colIter = collisions.begin();
         while (colIter != collisions.end()) {
             switch(colIter -> type) {
                 case ENDINGGATETYPE:
                     won = 1;
-                    colIter = collisions.erase(colIter);
                     break;
                 case DOORTYPE:
                     if (IsKeyPressed(KEY_S)) {
@@ -380,42 +398,36 @@
                         nextRoom = colIter -> message;
                         breakDoor = true;
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 case SAVEPOINTTYPE: {
                     breakSave = true;
-                    colIter = collisions.erase(colIter);
                     break;
                 }
                 case BULLETTYPE:
                     if (hurtTimer < 0) {
-                        yMomentum += colIter -> yVal * 0.3;
-                        xMomentum += colIter -> xVal * 0.3;
+                        yInertia += colIter -> yVal * 0.3;
+                        xInertia += colIter -> xVal * 0.3;
                         health += (colIter -> damage);
                         hurtTimer = 60;
                         damageIndicator(colIter -> damage, x, y, HURTCOLOR, sizeFactor);
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 case ENEMYTYPE:
                     if (hurtTimer < 0) {
                         health += (colIter -> damage);
                         hurtTimer = 60;
                         damageIndicator(colIter -> damage, x, y, HURTCOLOR, sizeFactor);
-                        Vector2 newMomentum = Vector2Scale(Vector2Negate(Vector2Normalize({xMomentum, yMomentum})), 0.7);
-                        xMomentum = newMomentum.x;
-                        yMomentum = newMomentum.y / 3;
+                        Vector2 newInertia = Vector2Scale(Vector2Negate(Vector2Normalize({xInertia, yInertia})), 0.7);
+                        xInertia = newInertia.x;
+                        yInertia = newInertia.y / 3;
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 case GUNPICKUPTYPE: {
                     int pickupgunID = colIter -> damage;
                     for (int i = 0; i < guns.size(); i++) {
                         if (guns[i].gunID == pickupgunID) {
                             guns[i].unlocked = true;
-
                             //Kludge to make sure we select a locked gun if one is available
-
                             if (guns[gunSelect].unlocked == false) {
                                 for (int i = 0; i < guns.size(); i++) {
                                     gunSelect = (gunSelect + 1) % guns.size();
@@ -430,7 +442,6 @@
                     if (int(colIter -> yVal)) {
                         collectedPickups.insert(int(colIter -> yVal));
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 }
                 case AMMOPICKUPTYPE: {
@@ -444,7 +455,6 @@
                     if (int(colIter -> yVal)) {
                         collectedPickups.insert(int(colIter -> yVal));
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 }
                 case HEALTHPICKUPTYPE:
@@ -453,7 +463,6 @@
                     if (int(colIter -> yVal)) {
                         collectedPickups.insert(int(colIter -> yVal));
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 case MAXHEALTHPICKUPTYPE:
                     health += (colIter -> damage);
@@ -462,7 +471,6 @@
                     if (int(colIter -> yVal)) {
                         collectedPickups.insert(int(colIter -> yVal));
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 case AIRPICKUPTYPE:
                     air = min(maxAir, air + colIter -> damage);
@@ -470,7 +478,6 @@
                     if (int(colIter -> yVal)) {
                         collectedPickups.insert(int(colIter -> yVal));
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 case MAXAIRPICKUPTYPE:
                     air += (colIter -> damage);
@@ -479,7 +486,6 @@
                     if (int(colIter -> yVal)) {
                         collectedPickups.insert(int(colIter -> yVal));
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 case OPPICKUPTYPE: {
                     for (int i = 0; i < ops.size(); i++) {
@@ -490,19 +496,60 @@
                     if (int(colIter -> yVal)) {
                         collectedPickups.insert(int(colIter -> yVal));
                     }
-                    colIter = collisions.erase(colIter);
                     break;
                 }
                 case FORCEFIELDTYPE: {
                     jumpControl = false;
-                    colIter++;
+                    justJumped = false;
+                    xInertia += colIter -> xVal;
+                    yInertia += colIter -> yVal;
                     break;
                 }
-                default:
-                    colIter++;
+                case WATERTYPE: {
+                    isUnderWater = true;
+                    xMoveWater += colIter -> xVal * 2;
+                    yMoveWater += colIter -> yVal;
+                }
+            }
+            colIter++;
+        }
+        collisions.clear();
+        if (xMoveWater != 0) {
+            cout << xMoveWater << endl;
+        }
+
+        //Allow for jumping out of the water
+
+        if (lastTickUnderWater && !isUnderWater) {
+            yInertia = yMovement + yMoveWater;
+            yMovement = 0;
+        }
+
+        //Update X and Y position based on 3 movement variables
+        float numSteps = max(int(abs(xInertia + xMoveWater + xMovement)) + 1, int(abs(yInertia + yMoveWater + yMovement)) + 1);
+        float xStep = (xInertia + xMoveWater + xMovement) / numSteps;
+        float yStep = (yInertia + yMoveWater + yMovement) / numSteps;
+        for (int i = 0; i < numSteps; i++) {
+            if (world -> isSolid((int)(x + xStep) + (xStep > 0), (int)y) || world -> isSolid((int)(x + xStep) + (xStep > 0), int(y + 0.9))) {
+                x = floor(x + xStep) + (xStep < 0);
+                xInertia *= (-1 * elasticity);
+                hit = true;
+                xStep = 0;
+            }
+            else {
+                x += xStep;
+            }
+            if (world -> isSolid((int)(x + 0.5 - width / 2), (int)(y + yStep) + (yStep > 0)) || world -> isSolid((int)(x + 0.5 + width / 2), (int)(y + yStep) + (yStep > 0))) {
+                y = floor(y + yStep) + (yStep < 0);
+                yInertia *= (-1 * elasticity);
+                xInertia *= friction;
+                hit = true;
+                yStep = 0;
+            }
+            else {
+                y += yStep;
             }
         }
-        physicalEntity::tickGet();
     }
 
     bool player::finalize() {

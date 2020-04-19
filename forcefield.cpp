@@ -1,5 +1,100 @@
 #include "forcefield.hpp"
 
+
+/*****************************************************************************/
+//linearField
+//propels physical entities in a given direction
+/*****************************************************************************/
+
+    linearField::linearField(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight) :
+        entity(newX, newY, newTint, newSizeFactor),
+        channel(newChannel),
+        xPower(newXPower),
+        yPower(newYPower),
+        width(newWidth),
+        height(newHeight)
+    {
+        int arrowChar;
+        if (xPower > 0) {
+            if (yPower > 0) {
+                arrowChar = 0x2198;
+            }
+            else if (yPower < 0) {
+                arrowChar = 0x2197;
+            }
+            else {
+                arrowChar = 0x2192;
+            }
+        }
+        else if (xPower < 0) {
+            if (yPower > 0) {
+                arrowChar = 0x2199;
+            }
+            else if (yPower < 0) {
+                arrowChar = 0x2196;
+            }
+            else {
+                arrowChar = 0x2190;
+            }
+        }
+        else { //xPower == 0
+            if (yPower > 0) {
+                arrowChar = 0x2193;
+            }
+            else if (yPower < 0) {
+                arrowChar = 0x2191;
+            }
+            else {
+                arrowChar = '?';
+            }
+        }
+        char* arrowUnicode = TextToUtf8(&arrowChar, 1);
+        tex = LoadRenderTexture(width * 8, height * 8);
+        BeginTextureMode(tex);
+        ClearBackground((Color){0, 0, 0, 0});
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                theCanvas -> myDrawText(arrowUnicode, (Vector2){j * 8, i * 8}, 8, 0, (Color){255, 255, 255, 255});
+            }
+        }
+        EndTextureMode();
+        free(arrowUnicode);
+    }
+
+    linearField::~linearField() {
+        UnloadRenderTexture(tex);
+    }
+
+    unsigned int linearField::type() {
+        return FORCEFIELDTYPE;
+    }
+
+    bool linearField::doesCollide(float otherX, float otherY, int otherType) {
+        return (isOn && otherX >= x && otherX <= x + width && otherY >= y && otherY <= y + height && otherType != WATERTYPE);
+    }
+
+    collision linearField::getCollision(float otherX, float otherY, int otherType) {
+        return collision(type(), 0, xPower, yPower);
+    }
+
+    bool linearField::stopColliding() {
+        return false;
+    }
+
+    void linearField::tickSet() {}
+
+    void linearField::tickGet() {
+        isOn = world -> getChannel(channel);
+    }
+
+    bool linearField::finalize() {
+        return false;
+    }
+
+    void linearField::print() {
+        theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture);
+    }
+
 /*****************************************************************************/
 //forceField
 //Attracts or repels physical entities within its influence

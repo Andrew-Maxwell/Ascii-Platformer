@@ -114,6 +114,15 @@
                 forceField * F = new forceField(x, y, {R, G, B, A}, sizeFactor, channel, power, range);
                 world -> addCollideable(F);
             }
+            else if (type == "linearField") {
+                int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;
+                float xPower = entity.HasMember("xPower") ? entity["xPower"].GetFloat() : 0;
+                float yPower = entity.HasMember("yPower") ? entity["yPower"].GetFloat() : 0;
+                int width = entity.HasMember("width") ? entity["width"].GetInt() : 5;
+                int height = entity.HasMember("height") ? entity["height"].GetInt() : 5;
+                linearField * L = new linearField(x, y, {R, G, B, A}, sizeFactor, channel, xPower, yPower, width, height);
+                world -> addCollideable(L);
+            }
             else if (type == "rain") {
                 float dropsPerTick = entity.HasMember("dropsPerTick") ? entity["dropsPerTick"].GetFloat() : 1.0;
                 float xMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat() : 0.0;

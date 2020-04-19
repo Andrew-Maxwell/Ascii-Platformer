@@ -1,3 +1,84 @@
+Next hurdle: Make a good movement system!
+
+Lessons from Tim's playtest session:
+Movement system and level design must mesh. Maybe more important than either alone.
+Make it visually intuitive.
+Forcefield is visually misleading: Tim thought tapping forcefield made it more powerful.
+Force direction not visually clear.
+
+What makes a good movement system?
+1. Not frustrating
+	Not too hard to master; not too much learning curve
+	Things that look easy, are easy; no "gotchas"
+	Predictable
+2. *Enables* the player to do "extra" things: Not always? But can be
+3. Not exploitable; not hard to design levels around
+	Things that look hard / are designed to be, are hard
+4. Intangibly satisfying, like Warning Forever or multidash in HLD.
+The current movement system breaks ALL of these rules!
+
+Case studies:
+
+Cave Story: Base movement system satisfies 1, 2, 3.
+Booster v1 is not frustrating, enabling, somewhat satisfying
+Booster v2 has a steeper learning curve, but is much more satisfying, rewards the optional additional effort
+Principle: More challenging movement systems are OK if they're optional for advanced players and reward the extra effort.
+
+Rain world: Satisfies 3 only, but fits very well thematically. Can be satisfying at times, but not very good IMO.
+Exception: Combat is a major strength. Throwing spears is thrilling in a way that makes cave story's button-mashing seem meaningless.
+
+Hyper Light Drifter: Timing is everything, but this isn't taught to the player. Can be frustrating.
+Enabling
+Not exploitable
+Satisfying
+
+Celeste: Not frustrating: Gives you powerful, intuitive tools, but asks you to do hard things quickly with them.
+Not frustrating
+*very* enabling
+Exploitable, to a limited extent
+*very* satisfying
+
+Within A Deep Forest: Novel movement system requires a lot of getting used to, but can pay off.
+Takes time to master; can be frustrating; things that look easy are hard.
+Enables the player: Not really? Strictly weaker than a normal movement system.
+Not exploitable
+Not really satisfying
+
+Portal: Intertia-based puzzle movement system. Just gets around the problem by being puzzle-focused without much hard platforming at all.
+
+I think I'm too afraid to surprise the player. Learning a new movement system isn't all bad; in fact,
+buying a new game and discovering you already know how to play it would be kinda frustrating. Just as long
+as it has an acceptable learning curve.
+
+Goals:
+- Platformable:
+	- Release jump button early to limit jump height
+	- Change direction in midair
+	- Crisp movement
+	- Walljumps, double jumps, etc.
+But also:
+	- Can be flung long distances by forcefields
+
+Major options:
+- Fully inertia-based in X and Y axes
+- Fully inertia-based, but allow player to stop in midair by pressing down
+- Fully inertia-based in Y axis, give player full control in X axis.
+- Fully inertia-based until player takes control again by pressing a movement button, and then add X friction.
+- Like Gris or Portal, make all platforming challenges optional, and only solving puzzles is necessary to progress. Challenge by choice.
+
+Can also play with:
+- Speed: Slowing things down makes a challenging movement system much more palatable.
+- Max fall speed (might mess with fun stuff like trampolines)
+
+Probably want to (in general) have single-direction forcefields, since they're more intuitive to
+reason about. Probably want a system which is fully inertia-based in Y axis, gives player full control
+in X axis (basically, behaves as closely to a traditional platformer as possible) in the absence of
+a horizontal force. Not sure how horizontal forces should be handled, but they can be used minimally/
+as an optional extra challenge.
+
+At least early on, forcefields should be clearly delineated with arrow markers. Could even have
+them light up when activated! Could do some neat stuff with black and yellow hazard stripes.
+
 Loose ends:
 - Entities are loaded out-of-order.
     - Need to re-integrate player loading into gameleveldata::readEntities
@@ -5,6 +86,7 @@ Loose ends:
     - HUD is not always printing on top! Add a separate printHUD function?
 - Layers still getting deleted multiple times under some circumstances?
 - Gun selection indicator
+- Revise physicalEntity movement code to be xyxyxy instead of xxxyyy
 
 Features:
 ? Editor misc:
@@ -110,3 +192,6 @@ Bugs:
 - "Not a valid choice!" error appears when using op screen
 - particles becoming zero-G
 - Some of the files in "dark" getting loaded as wrong width
+- Water appears weird when player is moving very slowly in the vertical direction
+- If there are two water objects with one above the other, they tend to interfere.
+- Particles don't appear right next to walls

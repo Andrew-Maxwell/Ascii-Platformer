@@ -46,12 +46,12 @@
         for (auto c : collisions) {
             if (c.type == WATERTYPE) {
                 isUnderWater = true;
-                waterMoveX += c.xVal * 0.8;
-                waterMoveY += c.yVal * 0.8;
+                waterMoveX += c.xVal;
+                waterMoveY += c.yVal;
             }
             else if (c.type == FORCEFIELDTYPE) {
-                xMomentum += c.xVal;
-                yMomentum += c.yVal;
+                xMomentum += c.xVal * 0.8;
+                yMomentum += c.yVal * 0.8;
             }
         }
         collisions.clear();
@@ -111,10 +111,12 @@
     physicalParticle::physicalParticle( float newX, float newY, Color newTint, float newSizeFactor, int displayChar, float newElasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int newLifetime) :
                                   entity(newX, newY, newTint, newSizeFactor),
-                                  particle(newX, newY, newTint, newSizeFactor, newXMomentum, newYMomentum, displayChar, newLifetime),
                                   physicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXMomentum, newYMomentum, newMaxSpeed, newGravity, newFriction),
+                                  particle(newX, newY, newTint, newSizeFactor, newXMomentum, newYMomentum, displayChar, newLifetime),
                                   dynamicChar(displayChar == 0),
-                                  lifetime(newLifetime) {}
+                                  lifetime(newLifetime) {
+        elasticity = newElasticity;
+    }
 
     unsigned int physicalParticle::type() {
         return PHYSICALPARTICLETYPE;

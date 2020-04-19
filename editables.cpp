@@ -154,6 +154,16 @@ using namespace rapidjson;
         y += mousePos[1].y - mousePos[0].y;
     }
 
+
+/*****************************************************************************/
+//Get whether the mouse is over this tile
+/*****************************************************************************/
+
+    bool editableLayer::mouseOn() {
+        intVector2 tile = intVector2(theCanvas -> getMouseRelativeTo(x, y, sizeFactor));
+        return (tile.x >= 0 && tile.x <= getCols() && tile.y >= 0 && tile.y <= getRows());
+    }
+
 /*****************************************************************************/
 //Get which tile the mouse is on
 /*****************************************************************************/

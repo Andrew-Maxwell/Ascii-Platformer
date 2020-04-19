@@ -59,11 +59,11 @@ int main(int argc, char** argv) {
             loadedSave = save.load("save.json");
 
             //Determine which room we're going to be in next
-            if (loadedSave) {
-                thePlayer.nextRoom = save.getRoom();
-            }
-            else if (argc > 1) {
+            if (argc > 1) {
                 thePlayer.nextRoom = argv[1];
+            }
+            else if (loadedSave) {
+                thePlayer.nextRoom = save.getRoom();
             }
             else {
                 thePlayer.nextRoom = "test.txt";
