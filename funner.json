@@ -1,0 +1,51 @@
+{
+    "collider": "funner_collider.lyr",
+    "R": 0,
+    "G": 0,
+    "B": 0,
+    "A": 0,
+    "fontSize": 24,
+    "defaultOutfit": {
+        "name": "notx",
+        "jumpSpeed": 0.28,
+        "gravity": 0.009,
+        "friction": 0.75,
+        "acceleration": 0.0035,
+        "speed": 0.2
+    },
+    "entities": [
+        {
+            "type": "player",
+            "x": 4.0,
+            "y": 198.0,
+            "R": 50,
+            "G": 255,
+            "B": 50,
+            "A": 255,
+            "sizeFactor": 1.0
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 50,
+            "G": 255,
+            "B": 50,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "fileName": "funner_collider.lyr"
+        },
+        {
+            "type": "savePoint",
+            "x": 87.0,
+            "y": 143.0,
+            "R": 255,
+            "G": 0,
+            "B": 255,
+            "A": 255,
+            "width": 1,
+            "height": 1,
+            "sizeFactor": 1.0
+        }
+    ]
+}

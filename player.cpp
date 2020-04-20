@@ -530,7 +530,8 @@
         float xStep = (xInertia + xMoveWater + xMovement) / numSteps;
         float yStep = (yInertia + yMoveWater + yMovement) / numSteps;
         for (int i = 0; i < numSteps; i++) {
-            if (world -> isSolid((int)(x + xStep) + (xStep > 0), (int)y) || world -> isSolid((int)(x + xStep) + (xStep > 0), int(y + 0.9))) {
+            if (world -> isSolid(int(x + xStep + 0.05 + 0.9 * (xStep > 0)), int(y + 0.05))
+            || world -> isSolid(int(x + xStep + 0.05 + 0.9 * (xStep > 0)), int(y + 0.95))) {
                 x = floor(x + xStep) + (xStep < 0);
                 xInertia *= (-1 * elasticity);
                 hit = true;
@@ -539,7 +540,8 @@
             else {
                 x += xStep;
             }
-            if (world -> isSolid((int)(x + 0.5 - width / 2), (int)(y + yStep) + (yStep > 0)) || world -> isSolid((int)(x + 0.5 + width / 2), (int)(y + yStep) + (yStep > 0))) {
+            if (world -> isSolid(int(x + 0.05), int(y + yStep + 0.05 + 0.9 * (yStep > 0)))
+            || world -> isSolid(int(x + 0.95), int(y + yStep + 0.05 + 0.9 * (yStep > 0)))) {
                 y = floor(y + yStep) + (yStep < 0);
                 yInertia *= (-1 * elasticity);
                 xInertia *= friction;
