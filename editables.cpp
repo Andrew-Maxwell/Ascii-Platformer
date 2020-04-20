@@ -8,16 +8,18 @@ using namespace rapidjson;
 //Also used to represent other entities (isLayer = false.) Not all of the same editing functions apply.
 /*****************************************************************************/
 
-    editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value* newJson) :
+    editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, bool newIsEditable, string newFileName, char newDisplay, int newDisplayWidth, int newDisplayHeight, Value& newJson) :
         entity(newX, newY, newTint, newSizeFactor),
         layer(newX, newY, newTint, newSizeFactor, newFileName),
         displayWidth(newDisplayWidth),
         displayHeight(newDisplayHeight),
-        isLayer(newIsLayer)
+        isLayer(newIsLayer),
+        isEditable(newIsEditable)
     {
 
         //Set original color to reset to after flashing
 
+        display = newDisplay;
         original = newTint;
         json = newJson;
 
@@ -66,12 +68,35 @@ using namespace rapidjson;
         render();
     }
 
+    editableLayer::editableLayer(editableLayer& other) : 
+        entity(other.x, other.y, other.tint, other.sizeFactor),
+        layer(other.x, other.y, other.tint, other.sizeFactor, other.fileName) {
+        display = other.display;
+        json.CopyFrom(other.json, doc.GetAllocator());
+        visible = true;
+        isLayer = other.isLayer;
+        original = other.original;
+        frames = other.frames;
+        width = other.width;
+        knownWidth = other.knownWidth;
+        currentFrame = other.currentFrame;
+        lastFrame = other.lastFrame;
+        isColorChanged = other.isColorChanged;
+        selected = false;
+        displayWidth = other.displayWidth;
+        displayHeight = other.displayHeight;
+        canvas = other.canvas;
+        tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
+        render();
+    }
+
+
 /*****************************************************************************/
 //Accessors
 /*****************************************************************************/
 
-    bool editableLayer::getIsLayer() {
-        return isLayer;
+    bool editableLayer::getIsEditable() {
+        return isEditable && isLayer;
     }
 
     float editableLayer::getX() {
@@ -99,14 +124,16 @@ using namespace rapidjson;
         original = newColor;
     }
 
-    //Used to display boundary around selected layer
-
     void editableLayer::select() {
         selected = true;
     }
 
     void editableLayer::deselect() {
         selected = false;
+    }
+
+    Value& editableLayer::getJson() {
+        return json;
     }
 
 /*****************************************************************************/
@@ -161,7 +188,7 @@ using namespace rapidjson;
 
     bool editableLayer::mouseOn() {
         intVector2 tile = intVector2(theCanvas -> getMouseRelativeTo(x, y, sizeFactor));
-        return (tile.x >= 0 && tile.x <= getCols() && tile.y >= 0 && tile.y <= getRows());
+        return (visible && tile.x >= 0 && tile.x <= getCols() && tile.y >= 0 && tile.y <= getRows());
     }
 
 /*****************************************************************************/
@@ -472,6 +499,30 @@ using namespace rapidjson;
         update();
     }
 
+
+/*****************************************************************************/
+//setArea()
+/*****************************************************************************/
+
+    void editableLayer::setArea() {
+        if (json.HasMember("height") && json.HasMember("width")) {
+            intVector2 newArea = intVector2(theCanvas -> getMouseRelativeTo(x, y, sizeFactor));
+            newArea.x++;
+            newArea.y++;
+            if (newArea.x >= 1 && newArea.y >= 1) {
+                displayWidth = newArea.x;
+                displayHeight = newArea.y;
+                canvas.clear();
+                for (int i = 0; i < displayHeight; i++) {
+                    canvas.push_back(string(displayWidth, display));
+                }
+                UnloadRenderTexture(tex);
+                tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
+                render();
+            }
+        }
+    }
+
 /*****************************************************************************/
 //erase
 /*****************************************************************************/
@@ -672,7 +723,7 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     void editableLayer::save() {
-        if (isLayer) {
+        if (isLayer && isEditable) {
             cout << "Saving layer " << fileName << endl;
             ofstream layerOut;
             layerOut.open(fileName);
@@ -681,13 +732,19 @@ using namespace rapidjson;
             }
             layerOut.close();
         }
-        (*json)["R"] = tint.r;
-        (*json)["G"] = tint.g;
-        (*json)["B"] = tint.b;
-        (*json)["A"] = tint.a;
-        (*json)["x"] = x;
-        (*json)["y"] = y;
-        (*json)["sizeFactor"] = sizeFactor;
+        json["R"] = tint.r;
+        json["G"] = tint.g;
+        json["B"] = tint.b;
+        json["A"] = tint.a;
+        json["x"] = x;
+        json["y"] = y;
+        json["sizeFactor"] = sizeFactor;
+        if (json.HasMember("width")) {
+            json["width"] = getCols();
+        }
+        if (json.HasMember("height")) {
+            json["height"] = getRows();
+        }
     }
 
 /*****************************************************************************/
@@ -708,9 +765,9 @@ using namespace rapidjson;
 //Constructor
 /*****************************************************************************/
 
-    editableCollider::editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson) :
+    editableCollider::editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value& dummyJson) :
         entity(newX, newY, newTint, newSizeFactor),
-        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, newFileName, display, 0, 0, dummyJson) {}
+        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, true, newFileName, display, 0, 0, dummyJson) {}
 
 /*****************************************************************************/
 //Dummy functions which don't do anything for the collider

@@ -43,17 +43,6 @@
             "touch": true
         },
         {
-            "type": "layer",
-            "x": 0.0,
-            "y": 0.0,
-            "R": 0,
-            "G": 0,
-            "B": 0,
-            "A": 80,
-            "sizeFactor": 1.0,
-            "fileName": "test_collider.txt"
-        },
-        {
             "type": "player",
             "x": 20.0,
             "y": 19.0,

@@ -18,10 +18,12 @@ class editableLayer : public layer {
 
     protected:
 
-    Value* json;
+    char display;
+    Document doc;
+    Value json;
     int flashCount = -1;
     bool visible = true;
-    bool isLayer;
+    bool isLayer, isEditable;
     Color original;
     vector<vector<int*>> frames;
     int width, knownWidth;
@@ -32,11 +34,13 @@ class editableLayer : public layer {
 
     public:
 
-    editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value* newJson);
+    editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, bool newIsEditable, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value& newJson);
+
+    editableLayer(editableLayer& other);
 
     //Accessors
     
-    bool getIsLayer();
+    bool getIsEditable();
 
     float getX();
 
@@ -53,6 +57,8 @@ class editableLayer : public layer {
     void select();
 
     void deselect();
+
+    Value& getJson();
 
     //Propogate changes from intCanvas to the ordinary canvas (which is only used for display.)
 
@@ -75,6 +81,8 @@ class editableLayer : public layer {
     virtual void move(vector<intVector2> mousePos);
 
     void leftBrush(vector<intVector2> mousePos, int brushID, charFill* F, float density, bool absolute);
+
+    void setArea();
 
     //Cut, copy, and paste
 
@@ -115,7 +123,7 @@ class editableCollider : virtual public editableLayer {
 
     public:
 
-    editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value* dummyJson);
+    editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value& dummyJson);
 
     //Dummy functions which don't do anything
 

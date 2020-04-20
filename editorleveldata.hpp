@@ -6,7 +6,6 @@
 #include "layer.hpp"
 #include "editables.hpp"
 #include "canvas.hpp"
-#include "world.hpp"
 
 class editorLevelData : public data {
 
@@ -14,11 +13,11 @@ class editorLevelData : public data {
 
     public:
 
-    //Initialize global world and theCanvas pointers and read in editables
+    //Initialize global theCanvas and read in editables
 
     void initializeEditor(list<editableLayer*>& layers);
 
-    void addEntity(float x, float y, float sizeFactor);
+    Value& getNewEntity(float x, float y, float sizeFactor, int count);
 
     //Save changes to entities
 

@@ -75,9 +75,9 @@
             "type": "savePoint",
             "x": 69.0,
             "y": 198.0,
-            "R": 255,
+            "R": 0,
             "G": 0,
-            "B": 0,
+            "B": 255,
             "A": 255,
             "sizeFactor": 1.0
         },
@@ -94,24 +94,12 @@
             "power": 0.033
         },
         {
-            "type": "forceField",
-            "x": 18.0,
-            "y": 312.0,
-            "R": 255,
-            "G": 0,
-            "B": 0,
-            "A": 255,
-            "sizeFactor": 1.0,
-            "range": 15,
-            "power": -0.033
-        },
-        {
             "type": "savePoint",
             "x": 22.0,
             "y": 262.0,
-            "R": 255,
+            "R": 0,
             "G": 0,
-            "B": 0,
+            "B": 255,
             "A": 255,
             "sizeFactor": 1.0
         },
@@ -155,9 +143,9 @@
             "type": "savePoint",
             "x": 62.0,
             "y": 130.0,
-            "R": 255,
+            "R": 0,
             "G": 0,
-            "B": 0,
+            "B": 255,
             "A": 255,
             "sizeFactor": 1.0
         },
@@ -184,6 +172,19 @@
             "sizeFactor": 1.0,
             "width": 10,
             "height": 5,
+            "yPower": -0.033
+        },
+        {
+            "type": "linearField",
+            "x": 17.0,
+            "y": 301.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "width": 3,
+            "height": 12,
+            "sizeFactor": 1.0,
             "yPower": -0.033
         }
     ]

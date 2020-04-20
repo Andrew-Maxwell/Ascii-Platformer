@@ -2,7 +2,6 @@
 #include "dummyentity.hpp"
 #include "editables.hpp"
 #include "charfills.hpp"
-#include "world.hpp"
 #include "editorleveldata.hpp"
 
 using namespace rapidjson;
@@ -127,8 +126,9 @@ int main(int argc, char** argv) {
 
     //Level data
 
+    int placeHoldersAdded = 0;
     list<editableLayer*> layers;
-    editableCollider* col;
+    editableLayer* layerClipboard = NULL;
     Color background;
     int fontSize;
     string fileName(argv[1]);
@@ -244,6 +244,11 @@ int main(int argc, char** argv) {
                     brushID = 10;
                     brushClickCount = 1;
                 }
+                if (IsKeyPressed(KEY_H)) {
+                    brushName = "Adjust (H)eight and Width";
+                    brushID = 11;
+                    brushClickCount = 1;
+                }
                 if (IsKeyPressed(KEY_X) && density > 0) {
                     if (IsKeyDown(KEY_LEFT_SHIFT)) {
                         density -= 0.05;
@@ -282,12 +287,12 @@ int main(int argc, char** argv) {
                             mousePos.clear();
                             markers.clear();
                         }
-                        else if ((*thisLayer) -> getIsLayer()) {
+                        else if ((*thisLayer) -> getIsEditable()) {
                             (*thisLayer) -> undo();
                             mayNeedToSave = true;
                         }
                     }
-                    if (IsKeyPressed(KEY_Y) && (*thisLayer) -> getIsLayer()) {
+                    if (IsKeyPressed(KEY_Y) && (*thisLayer) -> getIsEditable()) {
                         (*thisLayer) -> redo();
                         mayNeedToSave = true;
                     }
@@ -295,18 +300,18 @@ int main(int argc, char** argv) {
                         level.writeEntities(layers);
                         mayNeedToSave = false;
                     }
-                    if (IsKeyPressed(KEY_X) && (*thisLayer) -> getIsLayer() && mousePos.size() > 1) {
+                    if (IsKeyPressed(KEY_X) && (*thisLayer) -> getIsEditable() && mousePos.size() > 1) {
                         clipboard = (*thisLayer) -> cut(mousePos);
                         markers.clear();
                         mousePos.clear();
                         mayNeedToSave = true;
                     }
-                    if (IsKeyPressed(KEY_C) && (*thisLayer) -> getIsLayer() && mousePos.size() > 1) {
+                    if (IsKeyPressed(KEY_C) && (*thisLayer) -> getIsEditable() && mousePos.size() > 1) {
                         clipboard = (*thisLayer) -> copy(mousePos);
                         markers.clear();
                         mousePos.clear();
                     }
-                    if (IsKeyPressed(KEY_V) && (*thisLayer) -> getIsLayer()) {
+                    if (IsKeyPressed(KEY_V) && (*thisLayer) -> getIsEditable()) {
                         if (mousePos.size() == 0) {
                             mousePos.push_back((Vector2){0, 0});    //Paste in upper right by default
                         }
@@ -315,15 +320,41 @@ int main(int argc, char** argv) {
                         mousePos.clear();
                         mayNeedToSave = true;
                     }
-                    if (IsKeyPressed(KEY_A) && (*thisLayer) -> getIsLayer()) {
+                    if (IsKeyPressed(KEY_A) && (*thisLayer) -> getIsEditable()) {
                         brushName = "Select";
                         brushID = 8;
                         brushClickCount = 100000;
                         mousePos.push_back((Vector2){0, 0});
                         mousePos.push_back((Vector2){(*thisLayer) -> getCols() - 1, (*thisLayer) -> getRows() - 1});
                     }
+                    if (IsKeyDown(KEY_LEFT_SHIFT)) {
+                        auto endCheck = thisLayer;
+                        if (++endCheck != layers.end()) {   //Don't allow the user to change collider (at last pos)
+                            if (IsKeyPressed(KEY_DELETE)) {
+                                delete *thisLayer;
+                                thisLayer = layers.erase(thisLayer);
+                            }
+                            if (IsKeyPressed(KEY_X)) {
+                                delete layerClipboard;
+                                layerClipboard = *thisLayer;
+                                thisLayer = layers.erase(thisLayer);
+                            }
+                            if (IsKeyPressed(KEY_C)) {
+                                delete layerClipboard;
+                                layerClipboard = new editableLayer(**thisLayer);
+                            }
+                            if (IsKeyPressed(KEY_V) && layerClipboard != NULL) {
+                                layers.insert(thisLayer, new editableLayer(*layerClipboard));
+                                (*thisLayer) -> deselect();
+                                thisLayer++;
+                                (*thisLayer) -> select();
+                                (*thisLayer) -> flash();
+                                markers.clear();
+                                mousePos.clear();
+                            }
+                        }
+                    }
                 }
-                
                 else {  //Control is not down
 
                     theCanvas -> moveCamera();
@@ -466,7 +497,7 @@ int main(int argc, char** argv) {
 
                     //mouse input: Right click to sample character
 
-                    if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) && (*thisLayer) -> getIsLayer()) {
+                    if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) && (*thisLayer) -> getIsEditable()) {
                         intVector2 tile = (*thisLayer) -> getMouseTile();
                         palette[paletteSelection + 22 * paletteSwitch] = theCanvas -> myGetGlyphIndex((*thisLayer) -> sample(tile.x, tile.y));
                     }
@@ -502,17 +533,26 @@ int main(int argc, char** argv) {
                         }
 
                         else {
-                            intVector2 tile = (*thisLayer) -> getMouseTile();
                             if (brushID == 10) {
-                                level.addEntity(tile.x, tile.y, (*thisLayer) -> getSizeFactor());
-                                world -> addEntity(new dummyEntity(tile.x, tile.y, {0, 0, 255, 255}, (*thisLayer) -> getSizeFactor(), '?'));
+                                intVector2 tile = theCanvas -> getMouseRelativeTo(0, 0, 1);
+                                Value& newJson = level.getNewEntity(tile.x, tile.y, (*thisLayer) -> getSizeFactor(), placeHoldersAdded);
+                                editableLayer* newEntity = new editableLayer(tile.x, tile.y, {0, 0, 255, 255}, (*thisLayer) -> getSizeFactor(), false, false, "", 'A' + placeHoldersAdded, 1, 1, newJson);
+                                placeHoldersAdded++;
+                                layers.push_back(newEntity);
+                                thisLayer = layers.end();
+                                thisLayer--;
                                 mayNeedToSave = true;
                             }
-                            else if ((*thisLayer) -> getIsLayer() || brushID == 3) {
+                            else if (brushID == 11) {
+                                (*thisLayer) -> setArea();
+                            }
+                            else if ((*thisLayer) -> getIsEditable() || brushID == 3) {
+                                intVector2 tile = (*thisLayer) -> getMouseTile();
                                 mousePos.push_back(tile);
                                 markers.addEntity(new dummyEntity(tile.x + (*thisLayer) -> getX(), tile.y + (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), 'X'));
                             }
                             else {
+                                intVector2 tile = (*thisLayer) -> getMouseTile();
                                 markers.addEntity(new dummyEntity(tile.x + (*thisLayer) -> getX(), tile.y + (*thisLayer) -> getY(), {255, 0, 0, 255}, (*thisLayer) -> getSizeFactor(), '?', 30));
                             }
                         }
@@ -525,7 +565,7 @@ int main(int argc, char** argv) {
                             (*thisLayer) -> move(mousePos);
                             mayNeedToSave = true;
                         }
-                        else if ((*thisLayer) -> getIsLayer()) {
+                        else if ((*thisLayer) -> getIsEditable()) {
                             (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]], density, absoluteBrush);
                             mayNeedToSave = true;
                         }
@@ -537,8 +577,9 @@ int main(int argc, char** argv) {
                 //display the world
 
                 theCanvas -> start(false);
-                world -> print();
-
+                for (auto printIter = layers.begin(); printIter != layers.end(); printIter++) {
+                    (*printIter) -> print();
+                }
 
                 //display brush palette
 
