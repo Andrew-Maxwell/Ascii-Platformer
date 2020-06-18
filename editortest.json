@@ -1,0 +1,57 @@
+{
+    "collider": "fun_collider.lyr",
+    "R": 0,
+    "G": 0,
+    "B": 0,
+    "A": 0,
+    "fontSize": 16,
+    "defaultOutfit": {
+        "name": "notx",
+        "jumpSpeed": 0.28,
+        "gravity": 0.009,
+        "friction": 0.75,
+        "acceleration": 0.0035,
+        "speed": 0.2
+    },
+    "entities": [
+        {
+            "type": "linearField",
+            "x": 7.0,
+            "y": 24.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "width": 21,
+            "height": 12,
+            "yPower": -0.033
+        },
+        {
+            "type": "linearField",
+            "x": 0.0,
+            "y": 0.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "width": 10,
+            "height": 5,
+            "yPower": -0.033
+        },
+        {
+            "type": "linearField",
+            "x": 20.0,
+            "y": 14.0,
+            "R": 255,
+            "G": 0,
+            "B": 0,
+            "A": 255,
+            "sizeFactor": 1.0,
+            "width": 10,
+            "height": 5,
+            "yPower": -0.033
+        }
+    ]
+}

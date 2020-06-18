@@ -1,0 +1,40 @@
+{
+    "notx": {
+        "name": "notx",
+        "display": 64,
+        "health": 8,
+        "maxHealth": 8,
+        "air": 600,
+        "maxAir": 600,
+        "elasticity": 0.0,
+        "gravity": 0.008999999612569809,
+        "acceleration": 0.0035000001080334188,
+        "speed": 0.20000000298023225,
+        "friction": 0.75,
+        "waterAcceleration": 0.009999999776482582,
+        "waterSpeed": 0.11999999731779099,
+        "waterFriction": 0.949999988079071,
+        "jumpSpeed": 0.2800000011920929,
+        "jumpCount": 0,
+        "autoRejump": false,
+        "walljump": false,
+        "guns": [],
+        "ops": [],
+        "collectedPickups": [],
+        "channels": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "x": 86.39994812011719,
+    "y": 143.00900268554688,
+    "room": "funner.json"
+}

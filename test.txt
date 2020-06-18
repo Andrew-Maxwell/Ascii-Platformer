@@ -7,6 +7,17 @@
     "fontSize": 16,
     "entities": [
         {
+            "type": "layer",
+            "fileName": "test_collider.txt",
+            "x": 0,
+            "y": 0,
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 150,
+            "sizeFactor": 1.0
+        },
+        {
             "type": "door",
             "x": 15.0,
             "y": 19.0,

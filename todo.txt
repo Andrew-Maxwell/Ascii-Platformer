@@ -1,3 +1,20 @@
+Maybe the story doesn't need to be so complicated. Maybe it's something like:
+Brother is training you.
+Brother disappears on scavenging trip.
+Mom helps you look for him.
+You discover an AGI which bootstrapped itself from building security systems, then
+    managed to build nuclear missiles from reactor fuel (buildings have small reactors) and used it to
+    blackmail the government into declaring the city off limits.
+The AGI would have killed you too, but your mother figures out what's going on almost immediately and creates
+    deadman data caches which will publicize its existence if you are killed.
+Maybe the AGI offers you money, or a robot with your brother's mind in exchange for you don't publicize its existence?
+
+Tim's feedback from session 2:
+Visual difference between spikes and solid
+Visual diff between attractors and repulsors
+Early fun.json, and funner.json are calibrated as intro levels
+Rebindable keys
+
 Next hurdle: Make a good movement system!
 
 Lessons from Tim's playtest session:
@@ -84,9 +101,7 @@ Loose ends:
     - Need to re-integrate player loading into gameleveldata::readEntities
     - Newly added entities currently go on top/bottom: Could solve this by having the "parent" entity contain and pass a list iterator pointing to itself to collider::addEntity, or could keep collider sorted by sizeFactor (?)
     - HUD is not always printing on top! Add a separate printHUD function?
-- Layers still getting deleted multiple times under some circumstances?
 - Gun selection indicator
-- Revise physicalEntity movement code to be xyxyxy instead of xxxyyy
 
 Features:
 ? Editor misc:
@@ -99,6 +114,7 @@ Features:
 - Need maxAmmoPickup
 - Config file: Resolution, scaling
 ? Generic physicalEntity parameters (density/volume/mass)
+? Map system: Use render test code on the collider texture
 - Improved code interface
     - Intercepted codes
     - Colored based on code value
@@ -195,3 +211,5 @@ Bugs:
 - Water appears weird when player is moving very slowly in the vertical direction
 - If there are two water objects with one above the other, they tend to interfere.
 - Particles don't appear right next to walls
+- Layers still getting deleted multiple times under some circumstances?
+- Player vibrates when standing on a surface

@@ -1,9 +1,116 @@
-Goals, stated in terms of other games:
-- Movement-based puzzles, (a little) like Portal (using forcefields mostly)
-- Bit puzzles, like bitpuzzler
-- Beautiful, minimalist graphics and an engaging industrial world, like Rain World
-- Twitchy, satisfying combat, like Hyper Light Drifter
-- Story and exploration driven, like Cave Story or rain world.
+GOALS:
+
+I want Ascii-Platformer to be a puzzle platformer with Unicode graphics.
+
+Stated in terms of other games:
+- Responsive and intuitive, yet challenging platforming mechanics, similar to Celeste
+- Combination of movement-based and environment-based puzzles, similar to Portal or Talos Principle
+- Beautiful world that makes you want to explore, like Rain World
+- Compelling story, like Cave Story
+
+FEATURES
+
+Infrastructure
+    Core entity system
+        done: System for loading entities when level is loaded
+        done: Entities can spawn other entities
+            NEED: Entities spawn at same level as parent
+        done: Entities can interact
+        done: Entities can delete themselves
+        NEED: system for dealing with multiple player entities (e.g. player remotely controlling drone)
+    Saving
+        done: "Outfit" system: Player abilities are stored on a per-room basis
+        NEED: Story variables
+    Multiple rooms
+        done: Doors allow loading new room
+        done: outfit system
+
+Gameplay
+    Pickups
+        done: One-use or regenerating pickups
+        done: Pickups for air, health, ammunition, puzzle ops
+            NEED: max ammo pickup
+    Platforming
+        WIP: Highly configurable movement system which compromises between inertia and control
+            NEED: Set which variables are actually configurable
+            NEED: Playtest combinations of variables you think you're likely to use, in combination with water and forcefields
+        done: radial forcefields
+        done: linear forcefields
+        NEED: disappearing/moving platforms
+    Puzzles
+        done: Bit puzzles with pickups
+        NEED: Switches/triggers (trigger on player interaction, player enters trigger space,
+                or anything enters trigger space, or on force applied)
+        NEED: Relays (timers, OR, AND)
+        NEED: "wires" (color changing layers)
+        NEED: Lockable doors, controlled by code
+        WANT: Carryable objects
+        WANT: Improved code interface: Colored codes, code broadcast animation
+        MAYBE: Longer codes possible
+    Guns
+        done: Highly customizeable, physics abilities, outfit-based guns
+        MAYBE: Bullets that appear at cursor without needing to travel through space?
+        MAYBE: Gun that aims in opposite direction to cursor?
+        MAYBE: Rockets
+        MAYBE: Bullets with wave animations that travel through walls?
+    Enemies
+        MAYBE
+    HUD
+        done: air, health indicators
+        done: Ammo indicators
+            NEED: gun selection indicator (if you want to have guns)
+        NEED: Always printed on top of all layers
+        NEED: Highlights for interactable objects/more intuitive visuals in general
+
+Story
+    NEED: Persistent plot variables which effect entity loading and dialog
+    NEED: Dialog
+    MAYBE: Cutscenes?
+    WANT: Inventory
+    WANT: Boss fights
+
+Editor
+    NEED: Can change background color
+    NEED: Miscellaneous small fixes
+        - Allow changing background color
+        - Display, allow changing palette selection (don't ignore number keys) in tab screen
+        - Add a layer indicator which shows all of the layers and which one is selected
+        - Fix the default palette
+        - Displaying and resizing variable-size entities (e.g. water, particle spawner) in editor.
+        - Need to be able to correspond entities in the file to entities in the editor more easily.
+
+Menus
+    NEED: Config
+        - Resolution
+        - Pixel scaling
+        - Controls
+        - Audio settings
+    NEED: Multiple save file support
+
+Visuals
+    done: Colored text "Layers" which display at different sizes, create 3D effect
+    Visual effects
+        done: Water
+        done: Rain, snow
+            want: Generalized particle spawner
+        done: Explosions
+        WANT: leaf particles
+        WANT: Digital corruption
+        WANT: Lightning bolt
+        WANT: fire/fireballs
+        WANT: Layer special effects like shaking
+        NEED: Transitions
+        WANT: Creepy giant animated face in ASCII
+        WANT: Scrolling marquee and other animated billboards
+        WANT: Glitch effects (see glitch art subreddit)
+            
+
+Story
+
+Quality of life
+        
+    
+           
 
 SUMMARY
 

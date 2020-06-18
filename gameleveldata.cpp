@@ -72,7 +72,7 @@
 
             string type = entity.HasMember("type") ? entity["type"].GetString() : "unknown entity";
             cout << "Read in a " << type << endl;
-            
+
             float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
             float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
             uint8_t R = entity.HasMember("R") ? entity["R"].GetInt() : 0;
@@ -105,6 +105,9 @@
             else if (type == "player") {
                 thePlayer -> setColor((Color){R, G, B, A});
                 thePlayer -> setSizeFactor(sizeFactor);
+                float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
+                float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
+                thePlayer -> moveTo ((Vector2){x, y});
                 world -> addCollideable(thePlayer);
             }
             else if (type == "forceField") {
@@ -207,22 +210,3 @@
         }
 
     }
-
-    Vector2 gameLevelData::getPlayerPosition() {
-        const Value& entities = json["entities"];
-        assert(entities.IsArray());
-
-        for (SizeType i = 0; i < entities.Size(); i++) {
-            const Value& entity = entities[i];
-            assert(entity.IsObject());
-            string type = entity.HasMember("type") ? entity["type"].GetString() : "unknown entity";
-
-            if (type == "player") {
-                float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
-                float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
-                return (Vector2){x, y};
-            }
-        }
-        return (Vector2){0.0, 0.0};
-    }
-

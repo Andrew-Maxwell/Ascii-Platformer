@@ -4,7 +4,7 @@
     "G": 20,
     "B": 10,
     "A": 0,
-    "fontSize": 16,
+    "fontSize": 24,
     "entities": [
         {
             "type": "layer",

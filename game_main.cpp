@@ -88,9 +88,6 @@ int main(int argc, char** argv) {
             if (loadedSave) {
                 thePlayer.moveTo(save.getPosition());
             }
-            else {
-                thePlayer.moveTo(level.getPlayerPosition());
-            }
 
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");
