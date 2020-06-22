@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
 
     int palette[44] = {767, 768, 769, 770, 771, 772, 773, 774,775, 776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 115, 46, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57};
     int paletteSelection = 0;
-    int paletteSwitch = 0;
+    int colliderSelected = 0;
 
     //Brush variables - analogous to brush shape, size, etc. in an image editor
 
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
     editorLevelData level;
     level.load(fileName);
     cout << "Starting loading entities...\n";
-    level.initializeEditor(layers);
+    level.initializeEditor(layers, background);
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
     cout << "Finished loading.\n";
@@ -154,7 +154,6 @@ int main(int argc, char** argv) {
 
             if (IsKeyDown(KEY_TAB)) {
 
-                tickCounter++;
                 mousePos.clear();
                 theCanvas -> start(true);
 
@@ -183,7 +182,7 @@ int main(int argc, char** argv) {
                     int selection = (int)mouse.y / (2 * theCanvas -> getHudFontSize()) *
                         (theCanvas -> getHudCols() / 2) + (int)mouse.x / (2 * theCanvas -> getHudFontSize());
                     if (selection > 0 && selection < charFills.size()) {
-                        palette[paletteSelection + 22 * paletteSwitch] = selection;
+                        palette[paletteSelection + 22 * colliderSelected] = selection;
                     }
                 }
 
@@ -279,6 +278,8 @@ int main(int argc, char** argv) {
             }
             else {
 
+                tickCounter++;
+
                 //Meta: Undo, redo, save
 
                 if (IsKeyDown(KEY_LEFT_CONTROL)) {
@@ -297,7 +298,7 @@ int main(int argc, char** argv) {
                         mayNeedToSave = true;
                     }
                     if (IsKeyPressed(KEY_S)) {
-                        level.writeEntities(layers);
+                        level.writeEntities(layers, background);
                         mayNeedToSave = false;
                     }
                     if (IsKeyPressed(KEY_X) && (*thisLayer) -> getIsEditable() && mousePos.size() > 1) {
@@ -379,7 +380,7 @@ int main(int argc, char** argv) {
                         (*thisLayer) -> flash();
                         markers.clear();
                         mousePos.clear();
-                        paletteSwitch = 0;
+                        colliderSelected = 0;
                     }
 
                     //switch to next layer, then flash
@@ -390,7 +391,7 @@ int main(int argc, char** argv) {
                             thisLayer--;
                         }
                         if (++thisLayer == layers.end()) {
-                            paletteSwitch = 1;
+                            colliderSelected = 1;
                         }
                         thisLayer--;
                         (*thisLayer) -> select();
@@ -418,56 +419,53 @@ int main(int argc, char** argv) {
                         }
                     }
 
+                    //Change lighting
+                    if (IsKeyPressed(KEY_L)) {
+                        theCanvas -> changeLighting();
+                    }
+
                     //Adjusting color
+                    //accessing Color object like a uint8_t array
 
+                    int componentIndex = -1;
                     if (IsKeyDown(KEY_R)) {
-                        Color newTint = (*thisLayer) -> getColor();
-                        if (IsKeyDown(KEY_LEFT_SHIFT) && newTint.r < 255) {
-                            newTint.r++;
+                        componentIndex = 0;
+                    }
+                    else if (IsKeyDown(KEY_G)) {
+                        componentIndex = 1;
+                    }
+                    else if (IsKeyDown(KEY_B)) {
+                        componentIndex = 2;
+                    }
+                    else if (IsKeyDown(KEY_T)) {
+                        componentIndex = 3;
+                    }
+                    if (componentIndex != -1) {
+                        if (colliderSelected) {
+                            uint8_t* componentPtr = &((uint8_t*)&background)[componentIndex];
+                            if (IsKeyDown(KEY_LEFT_SHIFT) && *componentPtr > 0) {
+                                (*componentPtr)--;
+                            }
+                            else if (*componentPtr < 255) {
+                                (*componentPtr)++;
+                            }
+                            (*thisLayer) -> setColor((Color){255 - background.r, 255 - background.g, 255 - background.b, 255 - background.a});
+                            theCanvas -> setColor(background);
                         }
-                        else if (newTint.r > 0){
-                            newTint.r--;
+                        else {
+                            Color newTint = (*thisLayer) -> getColor();
+                            uint8_t* componentPtr = &((uint8_t*)&newTint)[componentIndex];
+                            if (IsKeyDown(KEY_LEFT_SHIFT) && *componentPtr > 0) {
+                                (*componentPtr)--;
+                            }
+                            else if (*componentPtr < 255) {
+                                (*componentPtr)++;
+                            }
+                            (*thisLayer) -> setColor(newTint);
                         }
-                        (*thisLayer) -> setColor(newTint);
                         mayNeedToSave = true;
                     }
 
-                    if (IsKeyDown(KEY_G)) {
-                        Color newTint = (*thisLayer) -> getColor();
-                        if (IsKeyDown(KEY_LEFT_SHIFT) && newTint.g < 255) {
-                            newTint.g++;
-                        }
-                        else if (newTint.g > 0){
-                            newTint.g--;
-                        }
-                        (*thisLayer) -> setColor(newTint);
-                        mayNeedToSave = true;
-                    }
-
-                    if (IsKeyDown(KEY_B)) {
-                        Color newTint = (*thisLayer) -> getColor();
-                        if (IsKeyDown(KEY_LEFT_SHIFT) && newTint.b < 255) {
-                            newTint.b++;
-                        }
-                        else if (newTint.b > 0) {
-                            newTint.b--;
-                        }
-                        (*thisLayer) -> setColor(newTint);
-                        mayNeedToSave = true;
-                    }
-
-                    if (IsKeyDown(KEY_T)) {
-                        Color newTint = (*thisLayer) -> getColor();
-                        if (IsKeyDown(KEY_LEFT_SHIFT) && newTint.a < 255) {
-                            newTint.a++;
-                        }
-                        else if (newTint.a > 0) {
-                            newTint.a--;
-                        }
-                        (*thisLayer) -> setColor(newTint);
-                        mayNeedToSave = true;
-                    }
-                    
                     //Adjusting size
                     
                     if (IsKeyPressed(KEY_V)) {
@@ -499,7 +497,7 @@ int main(int argc, char** argv) {
 
                     if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) && (*thisLayer) -> getIsEditable()) {
                         intVector2 tile = (*thisLayer) -> getMouseTile();
-                        palette[paletteSelection + 22 * paletteSwitch] = theCanvas -> myGetGlyphIndex((*thisLayer) -> sample(tile.x, tile.y));
+                        palette[paletteSelection + 22 * colliderSelected] = theCanvas -> myGetGlyphIndex((*thisLayer) -> sample(tile.x, tile.y));
                     }
 
                     //Left click to add a brush input point or shift to select topmost object
@@ -520,10 +518,10 @@ int main(int argc, char** argv) {
                             (*thisLayer) -> deselect();
                             thisLayer = listIter;
                             if (++thisLayer == layers.end()) {
-                                paletteSwitch = 1;
+                                colliderSelected = 1;
                             }
                             else {
-                                paletteSwitch = 0;
+                                colliderSelected = 0;
                             }
                             thisLayer--;
                             (*thisLayer) -> select();
@@ -566,7 +564,7 @@ int main(int argc, char** argv) {
                             mayNeedToSave = true;
                         }
                         else if ((*thisLayer) -> getIsEditable()) {
-                            (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * paletteSwitch]], density, absoluteBrush);
+                            (*thisLayer) -> leftBrush(mousePos, brushID, charFills[palette[paletteSelection + 22 * colliderSelected]], density, absoluteBrush);
                             mayNeedToSave = true;
                         }
                         markers.clear();
@@ -584,7 +582,7 @@ int main(int argc, char** argv) {
                 //display brush palette
 
                 for (int i = 0; i < 12; i++) {
-                    int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
+                    int codePointToDisplay = charFills[palette[i + 22 * colliderSelected]] -> get(-1, -1);
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
                     if (i == paletteSelection) {
                         theCanvas -> drawHud(i * 2 + 1, 1, (Color){255, 0, 0, 255}, temp);
@@ -596,7 +594,7 @@ int main(int argc, char** argv) {
                 }
 
                 for (int i = 12; i < 22; i++) {
-                    int codePointToDisplay = charFills[palette[i + 22 * paletteSwitch]] -> get(-1, -1);
+                    int codePointToDisplay = charFills[palette[i + 22 * colliderSelected]] -> get(-1, -1);
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
                     if (i == paletteSelection) {
                         theCanvas -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 0, 0, 255}, temp);
@@ -620,7 +618,7 @@ int main(int argc, char** argv) {
             theCanvas -> drawHud(1, 1, UIFOREGROUND, "You didn't save the level. Do you want to save? Y/S or N/ESC.");
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
-                level.writeEntities(layers);
+                level.writeEntities(layers, background);
                 mayNeedToSave = false;
             }
             if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_N)) {

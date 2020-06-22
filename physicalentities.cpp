@@ -153,6 +153,6 @@
                 toPrint[0] = '.';
             }
         }
-        theCanvas -> draw(x, y, tint, sizeFactor, toPrint);
+        theCanvas -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
     }
 

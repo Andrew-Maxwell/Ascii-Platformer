@@ -15,13 +15,19 @@ using namespace rapidjson;
 //Splash() spawns drops specifically
 /******************************************************************************/
 
-void explode(int count, float x, float y, Color tint,
-                float newSizeFactor, float speed, int c, int lifespan, float elasticity);
+void explode(int count, float x, float y, Color tint, float newSizeFactor, float speed, int c, int lifespan,
+             float elasticity, list<entity*>::iterator zPosition, bool doLighting = false);
 
 
-void splash(int count, float x, float y, Color tint,
-                float newSizeFactor, float speed, int c, int lifespan, float elasticity);
+void splash(int count, float x, float y, Color tint, float newSizeFactor, float speed, int c, int lifespan,
+            float elasticity, list<entity*>::iterator zPosition);
 
+/******************************************************************************/
+//Broadcast()
+//Spawns an expanding non-physical bubble of radio waves
+/******************************************************************************/
+
+void broadcast(int count, float x, float y, Color tint, float sizeFactor, bool high = true);
 
 /******************************************************************************/
 //DamageIndicator()

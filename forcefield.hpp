@@ -25,13 +25,14 @@ class linearField : public collideable {
     float xPower, yPower;
     int width, height;
     RenderTexture2D tex;
+    Color onTint;
 
     collision nextCollision;
     int tickCount;
 
     public:
 
-    explicit linearField(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight);
+    explicit linearField(float newX, float newY, Color newTint, Color newOnTint, float newSizeFactor,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight);
 
     ~linearField();
 
@@ -57,20 +58,20 @@ class linearField : public collideable {
 //Attracts or repels physical entities within its influence 
 /*****************************************************************************/
 
-class forceField : public collideable {
+class forceField : public collideable, public entityParent {
 
     protected:
 
     int channel;
     bool isOn;
     float power, range;
-    
     collision nextCollision;
     int tickCount;
+    Color onTint;
 
     public:
 
-    explicit forceField(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange);
+    explicit forceField(float newX, float newY, Color newTint, Color newOnTint, float newSizeFactor,  int newChannel, float newPower, float newRange);
 
     unsigned int type();
 

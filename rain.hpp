@@ -32,9 +32,8 @@ class drop : public physicalParticle {
 //Constantly spawns particles above the top of the screen
 /******************************************************************************/
 
-class rain : public entity {
+class rain : public entity, public entityParent {
 
-    
     float dropsPerTick, dropBuffer = 0, xMomentum;
     bool isSnow;
 

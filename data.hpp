@@ -22,6 +22,18 @@ class data {
     bool load(string fileName);
 
     string getFileName();
+
+    Color getColor(const Value& tintJson);
+};
+
+class levelData : virtual public data {
+
+    public:
+
+    void initializeColors(canvas* toInit);
+
+    int getDayLength();
+
 };
 
 class outfitData : virtual public data {

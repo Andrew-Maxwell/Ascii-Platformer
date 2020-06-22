@@ -75,7 +75,7 @@
             physicalEntity::tickGet();
         }
         if (bulletHit && explosionRange > 0) {
-            explode (particleCount, x, y, tint, sizeFactor, 0.02, 0, 600, 0.5);
+            explode (particleCount, x, y, tint, sizeFactor, 0.02, 0, 600, 0.5, zPosition);
             explosion* e = new explosion(x, y, tint, sizeFactor, 0, explosionPower, explosionRange);
             world -> addCollideable(e);
         }

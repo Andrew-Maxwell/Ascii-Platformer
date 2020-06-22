@@ -173,6 +173,11 @@
             (*e) -> print();
             e++;
         }
+        list<hudEntity*>::iterator h = hudEntities.begin();
+        while (h != hudEntities.end()) {
+            (*h) -> printHud();
+            h++;
+        }
     }
 
     //Add functions
@@ -181,14 +186,40 @@
         entities.push_back(toAdd);
     }
 
+    void collider::addEntity(entity* toAdd, list<entity*>::iterator zPosition) {
+        entities.insert(zPosition, toAdd);
+    }
+
+    void collider::addHudEntity(hudEntity* toAdd) {
+        hudEntities.push_back(toAdd);
+    }
+
     void collider::addCollideable(collideable* newCollideable) {
         collideables.push_back(newCollideable);
         entities.push_back(newCollideable);
     }
 
+    void collider::addCollideable(collideable* newCollideable, list<entity*>::iterator zPosition) {
+        collideables.push_back(newCollideable);
+        entities.insert(zPosition, newCollideable);
+    }
+
     void collider::addParticle(collideable* newParticle) {
         particles.push_back(newParticle);
         entities.push_back(newParticle);
+    }
+
+    void collider::addParticle(collideable* newParticle, list<entity*>::iterator zPosition) {
+        particles.push_back(newParticle);
+        entities.insert(zPosition, newParticle);
+    }
+
+    //Used to tell entities where they are in the list at creation time
+
+    list<entity*>::iterator collider::getZPosition() {
+        list<entity*>::iterator zPosition = entities.end();
+        zPosition--;
+        return zPosition;
     }
 
     //Physical tilemap functions

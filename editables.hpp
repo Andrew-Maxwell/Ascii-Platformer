@@ -127,8 +127,6 @@ class editableCollider : virtual public editableLayer {
 
     //Dummy functions which don't do anything
 
-    void setColor (Color newColor);
-
     void setSizeFactor (float newSizeFactor);
 
     void move (vector<intVector2> mousePos);
@@ -136,6 +134,10 @@ class editableCollider : virtual public editableLayer {
     //Reduced functionality.
 
     void save();
+
+    //Changes color to opposite background color.
+
+    void print();
 
 };
 

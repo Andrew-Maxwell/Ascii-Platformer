@@ -10,11 +10,11 @@
 using namespace rapidjson;
 
 /*****************************************************************************/
-//pickup
+//pickup parent class
 //Any sort of collectable bonus
 /*****************************************************************************/
 
-class pickup : public collideable {
+class pickup : public collideable, public entityParent {
 
     protected:
 
@@ -29,7 +29,7 @@ class pickup : public collideable {
 
     int displayChar;
 
-    explicit pickup(  float newX, float newY,  Color newTint,
+    explicit pickup(float newX, float newY, Color newTint,
                     float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch);
 
     ~pickup();
@@ -47,6 +47,27 @@ class pickup : public collideable {
     bool finalize();
 
     void print();
+};
+
+/*****************************************************************************/
+//Outfit pickup
+//Modifies any variable in the outfit, by name.
+/*****************************************************************************/
+
+class outfitPickup : public pickup {
+
+    string key;
+    double value;
+    bool add;
+
+    public:
+
+    explicit outfitPickup(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool add);
+
+    unsigned int type();
+
+    collision getCollision(float otherX, float otherY, int otherType);
+
 };
 
 /*****************************************************************************/

@@ -21,7 +21,7 @@
 #include "enemy.hpp"
 #include "newtestentity.hpp"
 
-class gameLevelData : public outfitData {
+class gameLevelData : public outfitData, public levelData {
 
     list<layer*> layerCache;
 
@@ -31,17 +31,13 @@ class gameLevelData : public outfitData {
 
     //Initialize global world and theCanvas pointers
 
-    Color getBackgroundColor();
-
     string getWorldFileName();
 
     int getFontSize();
 
     //Read all of the entities into the global world collider
 
-   void readEntitiesGame(set<int> collectedPickups, player* playerPtr);
-
-    Vector2 getPlayerPosition();
+    void readEntitiesGame(set<int> collectedPickups, player* playerPtr, bool movePlayerToStart);
 
 };
 

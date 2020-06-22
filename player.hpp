@@ -92,7 +92,7 @@ struct outfit {
 //what it sounds like, I guess.
 /******************************************************************************/
 
-class player : virtual public collideable {
+class player : virtual public collideable, public entityParent, public hudEntity {
 
     //Formerly part of the physicalEntity inheritance
     bool hit = false;
@@ -128,6 +128,7 @@ class player : virtual public collideable {
 
     vector<puzzleOp> ops;
     bitset<8> channels[10];
+    Color channelColors[10];
     int lastChannel = 0;
 
     set<int> collectedPickups;
@@ -145,29 +146,25 @@ class player : virtual public collideable {
 
     unsigned int type ();
 
-    //Outfit handling functions
+    //In accessor file: Outfit handling + save/load functions
 
-    outfit getCurrentOutfit();
+        outfit getCurrentOutfit();
 
-    void setOutfit(outfit newOutfit);
+        void setOutfit(outfit newOutfit);
 
-    //Accessors used for save/load system
+        void moveTo(Vector2 position);
 
-    void moveTo(Vector2 position);
+        Vector2 getPosition();
 
-    Vector2 getPosition();
+        set<int> getCollectedPickups();
 
-    set<int> getCollectedPickups();
+        void setColor(Color newTint);
 
-    //Special accessors because playerEntity must read data from save file as well
+        void setSizeFactor(float newSizeFactor);
 
-    void setColor(Color newTint);
+        float getSizeFactor();
 
-    void setSizeFactor(float newSizeFactor);
-
-    float getSizeFactor();
-
-    Vector2 getPos();
+        Vector2 getPos();
 
     //Collision functions
 
@@ -187,17 +184,21 @@ class player : virtual public collideable {
 
     void tickGet();
 
+    //In collision file: tickGet() helper functions
+
+        void handleCollision(collision& col);
+
+        void handlePickup(collision& col);
+
     bool finalize();
 
     void print();
 
-    //Draw the HUD
+    //In HUD file
 
-    void drawHud();
+        void printHud();
 
-    //Draw a GUI inventory/byte editor screen
-
-    void drawTabScreen();
+        void drawTabScreen();
 
 };
 

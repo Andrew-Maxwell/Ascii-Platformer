@@ -29,9 +29,9 @@
     void savePoint::tickSet() {}
 
     void savePoint::tickGet() {
-        if (savedGame) {;
+        if (savedGame) {
             savedGame = false;
-            explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
+            explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
         }
     }
 
@@ -40,5 +40,5 @@
     }
 
     void savePoint::print() {
-        theCanvas -> draw(x, y, tint, sizeFactor, "S");
+        theCanvas -> draw(x, y, tint, sizeFactor, "S", doLighting);
     }

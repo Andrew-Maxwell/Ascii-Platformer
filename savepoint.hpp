@@ -13,7 +13,7 @@ using namespace rapidjson;
 //Saves the game when interacted with.
 /*****************************************************************************/
 
-class savePoint : public collideable {
+class savePoint : public collideable, public entityParent {
 
     bool savedGame = false;
 

@@ -17,7 +17,7 @@ using namespace rapidjson;
 //Also self-explanatory
 /*****************************************************************************/
 
-class bullet : public physicalEntity, public particle {
+class bullet : public physicalEntity, public particle, public entityParent {
 
     int damage, explosionDamage;
     float explosionPower, explosionRange;

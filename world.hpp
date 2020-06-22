@@ -16,16 +16,16 @@ struct collision {
     int damage;
     float xVal;
     float yVal;
-    float magnitude;
+    double magnitude;
     string message;
 
-    collision(int newType = 0, int newDamage = 0, float newXVal = 0, float newYVal = 0, string newMessage = "", float newMagnitude = 0) :
+    collision(int newType = 0, int newDamage = 0, float newXVal = 0, float newYVal = 0, string newMessage = "", double newMagnitude = 0) :
         type(newType),
         damage(newDamage),
         xVal(newXVal),
         yVal(newYVal),
-        magnitude(newMagnitude),
-        message(newMessage) {}
+        message(newMessage),
+        magnitude(newMagnitude) {}
 };
 
 /******************************************************************************/
@@ -76,6 +76,7 @@ class collider : public layer {
 
     bool deleted = false;
     list<entity*> entities;
+    list<hudEntity*> hudEntities;
     list<collideable*> collideables;
     list<collideable*> particles;
     bool channel[512] = {false};
@@ -106,9 +107,21 @@ class collider : public layer {
 
     void addEntity(entity* toAdd);
 
+    void addEntity(entity* toAdd, list<entity*>::iterator zPosition);
+
+    void addHudEntity(hudEntity* toAdd);
+
     void addCollideable(collideable* newCollideable);
 
+    void addCollideable(collideable* newCollideable, list<entity*>::iterator zPosition);
+
     void addParticle(collideable* newParticle);
+
+    void addParticle(collideable* newParticle, list<entity*>::iterator zPosition);
+
+    //Used exclusively when creating entities to be added
+
+    list<entity*>::iterator getZPosition();
 
     //physical tilemap functions
 

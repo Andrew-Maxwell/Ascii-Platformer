@@ -11,3 +11,7 @@ entity::entity(float newx, float newy, Color newTint, float newSizeFactor) {
     sizeFactor = newSizeFactor;
     id = ++entityCounter;
 }
+
+void entity::setDoLighting(bool newDoLighting) {
+    doLighting = newDoLighting;
+}

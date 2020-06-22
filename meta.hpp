@@ -78,6 +78,7 @@
 #define AIRPICKUPTYPE 25
 #define MAXAIRPICKUPTYPE 26
 #define OPPICKUPTYPE 27
+#define OUTFITPICKUPTYPE 28
 
 //Globally accessible stuff
 

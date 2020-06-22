@@ -6,13 +6,14 @@
 //propels physical entities in a given direction
 /*****************************************************************************/
 
-    linearField::linearField(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight) :
+    linearField::linearField(float newX, float newY, Color newTint, Color newOnTint, float newSizeFactor,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight) :
         entity(newX, newY, newTint, newSizeFactor),
         channel(newChannel),
         xPower(newXPower),
         yPower(newYPower),
         width(newWidth),
-        height(newHeight)
+        height(newHeight),
+        onTint(newOnTint)
     {
         int arrowChar;
         if (xPower > 0) {
@@ -92,7 +93,12 @@
     }
 
     void linearField::print() {
-        theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture);
+        if (isOn) {
+            theCanvas -> drawLayer(x, y, onTint, sizeFactor, tex.texture, false);
+        }
+        else {
+            theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture, doLighting);
+        }
     }
 
 /*****************************************************************************/
@@ -100,12 +106,13 @@
 //Attracts or repels physical entities within its influence
 /*****************************************************************************/
 
-    forceField::forceField(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange) :
+    forceField::forceField(float newX, float newY, Color newTint, Color newOnTint, float newSizeFactor,  int newChannel, float newPower, float newRange) :
         entity(newX, newY, newTint, newSizeFactor),
         channel(newChannel),
         power(newPower),
         isOn(false),
-        range(newRange) {
+        range(newRange),
+        onTint(newOnTint) {
             nextCollision.type = FORCEFIELDTYPE;
         }
 
@@ -147,18 +154,16 @@
     void forceField::tickGet() {
         if (world -> getChannel(channel)) {
             isOn = true;
-            if (tickCount++ % (int)(1 / power) == 0) {
-                if (power > 0) { //Attractor force field
-                    for (float angle = 0; angle < 2 * PI; angle += (2 * PI / 50)) {
-                        world -> addEntity(new particle(x + cos(angle) * range, y + sin(angle) * range, tint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40));
-                    }
-                }
-                else {  //repeller force field
-                    for (float angle = 0; angle < 2 * PI; angle += (2 * PI / 50)) {
-                        world -> addEntity(new particle(x, y, tint, sizeFactor, cos(angle) * power * 40, sin(angle) * power * 40, 0, range / abs(power) / 40));
-                    }
-                }
+            float angle = GetRandomValue(0, 2 * PI * 1000) / 1000.0;
+            particle* p;
+            if (power > 0) { //Attractor force field
+                p = new particle(x + cos(angle) * range, y + sin(angle) * range, onTint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40);
             }
+            else {  //repeller force field
+                p = new particle(x, y, onTint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / -40);
+            }
+            p -> setDoLighting(false);
+            world -> addEntity(p);
         }
         else {
             isOn = false;
@@ -171,7 +176,12 @@
     }
 
     void forceField::print() {
-        theCanvas -> draw(x, y, tint, sizeFactor, "F");
+        if (isOn) {
+            theCanvas -> draw(x, y, onTint, sizeFactor, "F", false);
+        }
+        else {
+            theCanvas -> draw(x, y, tint, sizeFactor, "F", doLighting);
+        }
     }
 
 /*****************************************************************************/
@@ -181,7 +191,7 @@
 
     explosion::explosion(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange) :
         entity(newX, newY, newTint, newSizeFactor),
-        forceField(newX, newY, newTint, newSizeFactor, newChannel, newPower, newRange)
+        forceField(newX, newY, newTint, newTint, newSizeFactor, newChannel, newPower, newRange)
         {
             isOn = true;
         }

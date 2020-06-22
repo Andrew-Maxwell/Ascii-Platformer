@@ -5,7 +5,7 @@
 //Any sort of item that can be collected by the player once
 /*****************************************************************************/
 
-    pickup::pickup(  float newX, float newY,  Color newTint,
+    pickup::pickup(  float newX, float newY, Color newTint,
                     float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch) :
         entity(newX, newY, newTint, newSizeFactor),
         displayChar(newDisplayChar),
@@ -42,7 +42,7 @@
     void pickup::tickGet() {
         if (collected && !exploded) {
             exploded = true;
-            explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5);
+            explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
         }
     }
 
@@ -52,8 +52,29 @@
 
     void pickup::print() {
         if (!collected) {
-            theCanvas -> draw(x, y, tint, sizeFactor, toPrint);
+            theCanvas -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
         }
+    }
+
+
+/*****************************************************************************/
+//outfitPickup
+//Modifies any value according to the name used in the save JSON
+/*****************************************************************************/
+
+    outfitPickup::outfitPickup(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool newAdd) :
+                        entity(newX, newY, newTint, newSizeFactor),
+                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifetime, newID, newTouch),
+                        key(newKey),
+                        value(newValue),
+                        add (newAdd) {}
+
+    unsigned int outfitPickup::type() {
+        return OUTFITPICKUPTYPE;
+    }
+
+    collision outfitPickup::getCollision(float otherX, float otherY, int otherType) {
+        return collision(OUTFITPICKUPTYPE, add ? 1 : 0, 0.0, 0.0, key, value);
     }
 
 /*****************************************************************************/

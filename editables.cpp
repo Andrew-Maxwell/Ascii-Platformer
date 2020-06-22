@@ -732,10 +732,10 @@ using namespace rapidjson;
             }
             layerOut.close();
         }
-        json["R"] = tint.r;
-        json["G"] = tint.g;
-        json["B"] = tint.b;
-        json["A"] = tint.a;
+        json["tint"][0] = tint.r;
+        json["tint"][1] = tint.g;
+        json["tint"][2] = tint.b;
+        json["tint"][3] = tint.a;
         json["x"] = x;
         json["y"] = y;
         json["sizeFactor"] = sizeFactor;
@@ -756,7 +756,7 @@ using namespace rapidjson;
             tint = original;
         }
         if (visible) {
-            theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture, selected);
+            theCanvas -> drawLayerEditor(x, y, tint, sizeFactor, tex.texture, selected, (flashCount <= 0 && doLighting));
         }
     }
 
@@ -772,8 +772,6 @@ using namespace rapidjson;
 /*****************************************************************************/
 //Dummy functions which don't do anything for the collider
 /*****************************************************************************/
-
-    void editableCollider::setColor (Color newColor) {}
 
     void editableCollider::setSizeFactor (float newSizeFactor) {}
 
@@ -792,3 +790,14 @@ using namespace rapidjson;
         }
         layerOut.close();
     }
+
+    void editableCollider::print() {
+        if (flashCount-- <= 0) {
+            Color background = theCanvas -> getColor();
+            tint = (Color){255 - background.r, 255 - background.g, 255 - background.b, 255};
+        }
+        if (visible) {
+            theCanvas -> drawLayerEditor(x, y, tint, sizeFactor, tex.texture, selected, false);
+        }
+    }
+

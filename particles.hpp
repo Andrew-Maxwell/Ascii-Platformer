@@ -18,14 +18,16 @@ class particle : virtual public entity {
     protected:
 
     float xSpeed, ySpeed;
-    int lifetime;
+    int lifetime, startLifetime;
     char* toPrint;
+    bool fade;
+    uint8_t startA;
 
     void setDirection();
 
     public:
 
-    particle(  float newX, float newY, Color newTint, float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime);
+    particle(float newX, float newY, Color newTint, float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime, bool newFade = false);
 
     ~particle();
 

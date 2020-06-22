@@ -16,6 +16,11 @@ class canvas {
     int screenRows, screenCols, cameraLagX, cameraLagY;
 
     Color background;
+    Color light;
+    Color dayLight = WHITE, sunsetLight = WHITE, nightLight = WHITE, dawnLight = WHITE;
+    Color dayBackground = WHITE, sunsetBackground = WHITE, nightBackground = WHITE, dawnBackground = WHITE;
+    int dayLength = 2880;
+
     int worldRows, worldCols;
     float playerSizeFactor;
 
@@ -23,13 +28,20 @@ class canvas {
     bool moveCameraX, moveCameraY;
     Font displayFont;
 
-    //Raylib functions I optimized to run faster in my use case
-
     public:
 
     canvas();
 
-    void setParams(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor);
+    void setParams(int newWorldRows, int newWorldCols, int newFontSize, float newPlayerSizeFactor, int newDayLength);
+
+    Color getColor();
+
+    void setColor(Color newColor);
+
+    void setAllColors(Color newDayLight, Color newSunsetLight, Color newNightLight, Color newDawnLight, Color newDayBackground, Color newSunsetBackground, Color newNightBackground, Color newDawnBackground);
+
+    //Raylib functions I optimized to run faster in my use case
+    //Not really necessary anymore
 
     int myGetGlyphIndex(int codepoint);
 
@@ -37,27 +49,43 @@ class canvas {
 
     void myDrawText(const char *text, Vector2 position, float fontSize, float spacing, Color tint);
 
+    //Lighting/time-of-day functions
+
+    float dayLevel();
+
+    float sunsetLevel();
+
+    float nightLevel();
+
+    float dawnLevel();
+
+    void calculateLighting();
+
+    virtual void changeLighting() {}
+
+    Color lighting(Color original);
+
     //Drawing functions
 
     void start(float playerX, float playerY, bool tabScreen);
 
     void start(bool tabScreen);
 
-    void draw(float x, float y, Color tint, float sizeFactor, string text);
+    void draw(float x, float y, Color tint, float sizeFactor, string text, bool doLight = true);
 
-    void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t);
+    void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight = true);
 
-    virtual void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected) {}
+    virtual void drawLayerEditor(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected, bool doLight = true) {}
 
     void drawHud(float x, float y, Color tint, string text);
 
-    void drawBarLeft(float x, float y, Color tint, float sizeFactor, float length);
+    void drawBarLeft(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
 
-    void drawBarRight(float x, float y, Color tint, float sizeFactor, float length);
+    void drawBarRight(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
 
-    void drawBarDown(float x, float y, Color tint, float sizeFactor, float length);
+    void drawBarDown(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
 
-    void drawBarUp(float x, float y, Color tint, float sizeFactor, float length);
+    void drawBarUp(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
 
     void drawHudBarLeft(float x, float y, Color tint, float length);
 
@@ -95,14 +123,17 @@ class editableCanvas : public canvas {
 
     float speedMult, oldCameraX, oldCameraY, oldMouseX, oldMouseY;
     float cameraSpeed = 1;
+    int lightingSelection;
 
     public:
 
     explicit editableCanvas();
 
+    void changeLighting();
+
     void moveCamera();
 
-    void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected);
+    void drawLayerEditor(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected, bool doLight = true);
 
 };
 

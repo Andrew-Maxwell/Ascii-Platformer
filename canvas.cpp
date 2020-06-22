@@ -6,12 +6,12 @@
         displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
     }
 
-    void canvas::setParams(int newWorldRows, int newWorldCols, Color newBackground, int newFontSize, float newPlayerSizeFactor) {
-        background = newBackground;
+    void canvas::setParams(int newWorldRows, int newWorldCols, int newFontSize, float newPlayerSizeFactor, int newDayLength) {
         worldRows = newWorldRows;
         worldCols = newWorldCols;
         fontSize = newFontSize;
         playerSizeFactor = newPlayerSizeFactor;
+        dayLength = newDayLength;
 
         //Camera initializations
 
@@ -23,6 +23,25 @@
         moveCameraY = (worldRows > screenRows / playerSizeFactor);
         cameraLagX = screenCols / playerSizeFactor * 3 / 16;
         cameraLagY = screenRows / playerSizeFactor * 3 / 16;
+    }
+
+    Color canvas::getColor() {
+        return background;
+    }
+
+    void canvas::setColor(Color newColor) {
+        background = newColor;
+    }
+
+    void canvas::setAllColors(Color newDayLight, Color newSunsetLight, Color newNightLight, Color newDawnLight, Color newDayBackground, Color newSunsetBackground, Color newNightBackground, Color newDawnBackground) {
+        dayLight = newDayLight;
+        sunsetLight = newSunsetLight;
+        nightLight = newNightLight;
+        dawnLight = newDawnLight;
+        dayBackground = newDayBackground;
+        sunsetBackground = newSunsetBackground;
+        nightBackground = newNightBackground;
+        dawnBackground = newDawnBackground;
     }
 
 //Optimized functions
@@ -126,6 +145,65 @@
         }*/
     }
 
+
+    //Handle world lighting (e.g. for time of day...)
+
+    float canvas::dayLevel() {
+        int time = tickCounter % dayLength;
+        if (time > dayLength / 3 && time < dayLength * 2 / 3) {
+            return 1;
+        }
+        else if (time > dayLength / 4 && time < dayLength * 3 / 4) {
+            return (1 + cos(PI * tickCounter / (dayLength / 12.0))) / 2.0;
+        }
+        return 0;
+    }
+
+    float canvas::sunsetLevel() {
+        int time = tickCounter % dayLength;
+        if (time > dayLength * 2 / 3 && time < dayLength * 5 / 6) {
+            return (1 - cos(PI * tickCounter / (dayLength / 12.0))) / 2.0;
+        }
+        return 0;
+    }
+
+    float canvas::nightLevel() {
+        int time = tickCounter % dayLength;
+        if (time > dayLength / 4 && time < dayLength * 3 / 4) {
+            return 0;
+        }
+        else if (time > dayLength / 6 && time < dayLength * 5 / 6) {
+            return (1 + cos(PI * tickCounter / (dayLength / 12.0))) / 2.0;
+        }
+        return 1;
+    }
+
+    float canvas::dawnLevel() {
+        int time = tickCounter % dayLength;
+        if (time > dayLength / 6 && time < dayLength / 3) {
+            return (1 - cos(PI * tickCounter / (dayLength / 12.0))) / 2.0;
+        }
+        return 0;
+    }
+
+    Color addColor(Color c1, Color c2) {
+        return (Color){c1.r + c2.r, c1.g + c2.g, c1.b + c2.b, c1.a + c2.a};
+    }
+
+    Color scaleColor(Color c, float x) {
+        return (Color){c.r * x, c.g * x, c.b * x, c.a * x};
+    }
+
+    void canvas::calculateLighting() {
+        light = addColor(addColor(addColor(scaleColor(dayLight, dayLevel()), scaleColor(nightLight, nightLevel())), scaleColor(sunsetLight, sunsetLevel())), scaleColor(dawnLight, dawnLevel()));
+        background = addColor(addColor(addColor(scaleColor(dayBackground, dayLevel()), scaleColor(nightBackground, nightLevel())), scaleColor(sunsetBackground, sunsetLevel())), scaleColor(dawnBackground, dawnLevel()));
+    }
+
+    Color canvas::lighting(Color c) {
+        return (Color){c.r * light.r / 255.0, c.g * light.g / 255.0, c.b * light.b / 255.0, c.a * light.a / 255.0};
+    }
+
+
     void canvas::start(float playerX, float playerY, bool tabScreen) {
 
         //Update camera; round value to nearest pixel
@@ -147,8 +225,6 @@
             }
         }
 
-        //Round camera to a larger value to mitigate pixel flashing effects
-
         BeginDrawing();
         if (tabScreen) {
             ClearBackground(UIBACKGROUND);
@@ -159,6 +235,7 @@
     }
 
     void canvas::start(bool tabScreen) {
+
         BeginDrawing();
         if (tabScreen) {
             ClearBackground(UIBACKGROUND);
@@ -168,14 +245,27 @@
         }
     }
 
-    void canvas::draw(float x, float y, Color tint, float sizeFactor, string text) {
+    void canvas::end() {
+        if (DRAWFPS) {
+            myDrawText(to_string(GetFPS()).c_str(), (Vector2){0, 0}, 16, 0, WHITE);
+        }
+        EndDrawing();
+    }
+
+    void canvas::draw(float x, float y, Color tint, float sizeFactor, string text, bool doLight) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
         myDrawText(text.c_str(),
             (Vector2){ (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
             (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor },
             fontSize * sizeFactor, 0, tint);
     }
 
-    void canvas::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t) {
+    void canvas::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
         Rectangle sourceRec = {0.0f, 0.0f, (float)t.width, -1 * (float)t.height};
         Vector2 origin = { (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
             (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor };
@@ -193,7 +283,10 @@
     //Due to character limitations, for down and left, rounds to four pixels.
     /******************************************************************************/
 
-    void canvas::drawBarLeft(float x, float y, Color tint, float sizeFactor, float length) {
+    void canvas::drawBarLeft(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
@@ -208,7 +301,10 @@
         DrawRectangle(xPixel - width, yPixel, width, height, tint);
     }
 
-    void canvas::drawBarRight(float x, float y, Color tint, float sizeFactor, float length) {
+    void canvas::drawBarRight(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
@@ -221,7 +317,10 @@
     }
 
 
-    void canvas::drawBarDown(float x, float y, Color tint, float sizeFactor, float length) {
+    void canvas::drawBarDown(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
@@ -233,7 +332,10 @@
         DrawRectangle(xPixel, yPixel, width, height, tint);
     }
 
-    void canvas::drawBarUp(float x, float y, Color tint, float sizeFactor, float length) {
+    void canvas::drawBarUp(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
         length = roundTo8th(length);
         double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
         double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
@@ -276,12 +378,9 @@
         DrawRectangle(x * HUDFONTSIZE, (y - length) * HUDFONTSIZE, HUDFONTSIZE, length * HUDFONTSIZE, tint);
     }
 
-    void canvas::end() {
-        if (DRAWFPS) {
-            myDrawText(to_string(GetFPS()).c_str(), (Vector2){0, 0}, 16, 0, WHITE);
-        }
-        EndDrawing();
-    }
+/******************************************************************************/
+//Canvas access functions
+/******************************************************************************/
 
     Vector2 canvas::getCamera() {
         return (Vector2){cameraX, cameraY};
@@ -317,7 +416,37 @@
         return HUDFONTSIZE;
     }
 
+/******************************************************************************/
+//editableCanvas
+/******************************************************************************/
+
     editableCanvas::editableCanvas() : canvas() {}
+
+    void editableCanvas::changeLighting() {
+        lightingSelection++;
+        switch (lightingSelection % 4) {
+            case 0: {
+                light = dayLight;
+                background = dayBackground;
+                break;
+            }
+            case 1: {
+                light = sunsetLight;
+                background = sunsetBackground;
+                break;
+            }
+            case 2: {
+                light = nightLight;
+                background = nightBackground;
+                break;
+            }
+            case 3: {
+                light = dawnLight;
+                background = dawnBackground;
+                break;
+            }
+        }
+    }
 
     void editableCanvas::moveCamera() {
 
@@ -364,7 +493,10 @@
 
     }
 
-    void editableCanvas::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected) {
+    void editableCanvas::drawLayerEditor(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected, bool doLight) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
         Rectangle sourceRec = {0.0f, 0.0f, (float)t.width, -1 * (float)t.height};
         Vector2 origin = { (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
             (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor };

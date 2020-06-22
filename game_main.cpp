@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
                 thePlayer.nextRoom = save.getRoom();
             }
             else {
-                thePlayer.nextRoom = "test.txt";
+                thePlayer.nextRoom = "test.json";
             }
 
             //Reload world
@@ -80,9 +80,9 @@ int main(int argc, char** argv) {
             //Initialize global handlers
             world = new collider(0.0, 0.0, level.getWorldFileName());
             //Read in entities
-            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer);
-            theCanvas -> setParams(world -> getRows(), world -> getCols(),
-               level.getBackgroundColor(), level.getFontSize(), thePlayer.getSizeFactor());
+            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, true);
+            theCanvas -> setParams(world -> getRows(), world -> getCols(), level.getFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
+            level.initializeColors(theCanvas);
 
             //Set the player position from save or level as appropriate
             if (loadedSave) {
@@ -119,9 +119,10 @@ int main(int argc, char** argv) {
             //Initialize global handlers
             world = new collider(0.0, 0.0, level.getWorldFileName());
             //Read in entities
-            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer);
+            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, false);
             theCanvas -> setParams(world -> getRows(), world -> getCols(),
-               level.getBackgroundColor(), level.getFontSize(), thePlayer.getSizeFactor());
+               level.getFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
+            level.initializeColors(theCanvas);
 
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");
@@ -149,6 +150,7 @@ int main(int argc, char** argv) {
             }
 
             if (showInventory) {
+                theCanvas -> calculateLighting();
                 theCanvas -> start(true);
                 thePlayer.drawTabScreen();
                 theCanvas -> end();
@@ -169,6 +171,7 @@ int main(int argc, char** argv) {
                 //Display the world
 
                 Vector2 playerPos = thePlayer.getPos();
+                theCanvas -> calculateLighting();
                 theCanvas -> start(playerPos.x, playerPos.y, false);
                 world -> print();
 

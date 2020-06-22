@@ -33,7 +33,56 @@ using namespace rapidjson;
         return fileName;
     }
 
+    Color data::getColor (const Value& tintJson) {
+        assert(tintJson.IsArray());
+        Color toReturn;
+        toReturn.r = tintJson[0].GetInt();
+        toReturn.g = tintJson[1].GetInt();
+        toReturn.b = tintJson[2].GetInt();
+        toReturn.a = tintJson[3].GetInt();
+        return toReturn;
+    }
+
 /******************************************************************************/
+//levelData
+//Includes one method related to loading levels
+/******************************************************************************/
+
+    int levelData::getDayLength() {
+        return json.HasMember("dayLength") ? json["dayLength"].GetInt(): 18000;
+    }
+
+    void levelData::initializeColors(canvas* toInit) {
+        Color newDayLight = WHITE, newSunsetLight = WHITE, newNightLight = WHITE, newDawnLight = WHITE, newDayBackground = WHITE, newSunsetBackground = WHITE, newNightBackground = WHITE, newDawnBackground  = WHITE;
+        if (json.HasMember("dayLight")) {
+            newDayLight = newSunsetLight = newNightLight = newDawnLight = getColor(json["dayLight"]);
+        }
+        if (json.HasMember("nightLight")) {
+            newNightLight = newSunsetLight = getColor(json["nightLight"]);
+        }
+        if (json.HasMember("dawnLight")) {
+            newDawnLight = getColor(json["dawnLight"]);
+        }
+        if (json.HasMember("sunsetLight")) {
+            newSunsetLight = getColor(json["sunsetLight"]);
+        }
+        if (json.HasMember("dayBackground")) {
+            newDayBackground = newSunsetBackground = newNightBackground = newDawnBackground = getColor(json["dayBackground"]);
+        }
+        if (json.HasMember("nightBackground")) {
+            newNightBackground = newSunsetBackground = getColor(json["nightBackground"]);
+        }
+        if (json.HasMember("dawnBackground")) {
+            newDawnBackground = getColor(json["dawnBackground"]);
+        }
+        if (json.HasMember("sunsetBackground")) {
+            newSunsetBackground = getColor(json["sunsetBackground"]);
+        }
+        toInit -> setAllColors(newDayLight, newSunsetLight, newNightLight, newDawnLight, newDayBackground, newSunsetBackground, newNightBackground, newDawnBackground);
+    }
+
+/******************************************************************************/
+//outfitData
 //Includes one method for reading outfits (player abilities)
 /******************************************************************************/
 
@@ -106,12 +155,8 @@ using namespace rapidjson;
                         newGun.display = gunData["display"].GetString();
                     }
                 }
-                uint8_t R = gunData.HasMember("R") ? gunData["R"].GetInt() : 255;
-                uint8_t G = gunData.HasMember("G") ? gunData["G"].GetInt() : 255;
-                uint8_t B = gunData.HasMember("B") ? gunData["B"].GetInt() : 255;
-                uint8_t A = gunData.HasMember("A") ? gunData["A"].GetInt() : 255;
-                newGun.tint = {R, G, B, A};
-                newGun.tintFaded = {(R + 122) / 2, (G + 122) / 2, (B + 122) / 2, (A + 122) / 2};
+                newGun.tint = gunData.HasMember("tint") ? getColor(gunData["tint"]) : (Color){255, 0, 0, 255};
+                newGun.tintFaded = (Color){(newGun.tint.r + 122) / 2, (newGun.tint.g + 122) / 2, (newGun.tint.b + 122) / 2, (newGun.tint.a + 122) / 2};
                 toReturn.guns.push_back(newGun);
             }
         }

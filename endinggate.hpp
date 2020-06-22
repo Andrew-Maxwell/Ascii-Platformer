@@ -14,9 +14,8 @@ using namespace rapidjson;
 //an imposing gate that spawns particles that float slowly upwards.
 /*****************************************************************************/
 
-class endingGate : public collideable {
+class endingGate : public collideable, public entityParent {
 
-    
     int width, height;
     vector<string> toPrint;
 

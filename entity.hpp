@@ -16,6 +16,7 @@ class entity {
     protected:
 
     Color tint;
+    bool doLighting = true;
     float sizeFactor = 1;
 
     public:
@@ -50,6 +51,32 @@ class entity {
     //Display the entity.
 
     virtual void print() {cout << "Error: entity::print() should be overloaded.";}
+
+    //In lieu of adding a new term to 20+ constructors
+
+    void setDoLighting(bool newDoLighting);
+};
+
+class entityParent {
+
+    protected:
+
+    list<entity*>::iterator zPosition;
+
+    public:
+
+    void setZPosition(list<entity*>::iterator newZPosition) {
+        zPosition = newZPosition;
+    }
+
+};
+
+class hudEntity {
+
+    public:
+
+    virtual void printHud() = 0;
+
 };
 
 #endif //ENTITY_HPP

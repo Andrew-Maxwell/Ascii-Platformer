@@ -8,11 +8,14 @@
 /******************************************************************************/
 
     particle::particle(  float newX, float newY, Color newTint,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime) :
+                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime, bool newFade) :
                         entity(newX, newY, newTint, newSizeFactor),
                         xSpeed(newXSpeed),
                         ySpeed(newYSpeed),
-                        lifetime(newLifetime) {
+                        lifetime(newLifetime),
+                        startLifetime(newLifetime),
+                        startA(tint.a),
+                        fade(newFade) {
         if (c == 0) {
             toPrint = new char[2];
             setDirection();
@@ -58,6 +61,9 @@
         x += xSpeed;
         y += ySpeed;
         lifetime--;
+        if (fade) {
+            tint.a = startA * (float)lifetime/(float)startLifetime;
+        }
     }
 
     void particle::tickGet() {}
@@ -67,5 +73,5 @@
     }
 
     void particle::print() {
-        theCanvas -> draw(x, y, tint, sizeFactor, toPrint);
+        theCanvas -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
     }

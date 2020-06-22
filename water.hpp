@@ -14,7 +14,7 @@ using namespace std;
 //Animates the surface of water
 /*****************************************************************************/
 
-class water : public collideable {
+class water : public collideable, public entityParent {
 
     deque<float> splashTimes, splashPositions, splashSizes;
     vector<float> surface, lastSurface;

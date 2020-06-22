@@ -33,7 +33,7 @@
 
     void endingGate::tickSet() {
         if (GetRandomValue(0, 10) == 0) {
-            world -> addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, sizeFactor, 0, -0.01, '*', (height - 1.5) * 100));
+            world -> addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, sizeFactor, 0, -0.01, '*', (height - 1.5) * 100), zPosition);
         }
     }
 
@@ -46,7 +46,7 @@
 
     void endingGate::print() {
         for (int i = 0; i < height; i++) {
-            theCanvas -> draw(x, y + i, tint, sizeFactor, toPrint[i]);
+            theCanvas -> draw(x, y + i, tint, sizeFactor, toPrint[i], doLighting);
         }
     }
 

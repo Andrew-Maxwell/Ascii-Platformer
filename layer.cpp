@@ -55,7 +55,7 @@
     }
 
     void layer::print() {
-        theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture);
+        theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture, doLighting);
 //        for (int i = 0; i < canvas.size(); i++) {
 //            theCanvas -> draw(x, y + i, tint, sizeFactor, canvas[i]);
 //        }

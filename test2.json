@@ -36,7 +36,7 @@
             "B": 255,
             "A": 255,
             "sizeFactor": 2.0,
-            "nextRoom": "test.txt",
+            "nextRoom": "test.json",
             "destinationX": 15.0,
             "destinationY": 19.0
         },
