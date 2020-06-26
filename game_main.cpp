@@ -1,20 +1,17 @@
 #include "gameleveldata.hpp"
 #include "savedata.hpp"
+#include "game_menu.hpp"
 
 using namespace rapidjson;
-
-/******************************************************************************/
-/******************************************************************************/
-/******************************************************************************/
-
 
 int main(int argc, char** argv) {
 
 //Initialize raylib
 
-    SetConfigFlags(FLAG_VSYNC_HINT);
-    InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer");
+    SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "ASCII Platformer");    //TODO: allow selecting monitor
     SetTargetFPS(60);
+    SetExitKey(-1);
 
 //misc initializations
 
@@ -22,44 +19,34 @@ int main(int argc, char** argv) {
     long total = 0, totalSecond = 0;
     int maxLoad = 0;
 
-    bool breakDead = true;
-    bool breakDoor = false;
-    bool breakSave = false;
-    bool quit = false;
-    bool showInventory = false;
+    int status = breakMenu;
     player thePlayer(0, 0, (Color){255, 255, 255, 255}, 1.0);
     gameLevelData level;
     saveData save;
     bool loadedSave;
+    bool argRoom = argc > 1;    //If room is defined by argument
     theCanvas = new canvas();
 
-//testing
+    while (!(status == breakQuit || WindowShouldClose())) {      //While the game is running
 
-    while (!(quit || WindowShouldClose())) {      //While the game is running
+        //Menu logic
 
-        /*
-        Three possible reasons to break from game loop:
-        Saving, death, or changing rooms (doors)
-        Also, initializing the game is treated as a death.
-        */
-
-        //If we broke to save the game, then do so
-
-        if (breakSave) {
-            breakSave = false;
-            save.writeOutfit(thePlayer.getCurrentOutfit());
-            save.save(thePlayer.getPosition(), thePlayer.nextRoom);
+        if (status == breakMenu) {
+            mainMenu(status);
+        }
+        else if (status == options) {
+            optionsMenu(status, breakMenu);
         }
 
         //If we broke because we died (or first time), reload from save
         //or reload default position if save doesn't exist
 
-        else if (breakDead) {
-            breakDead = false;
+        else if (status == breakDead) {
+            status = run;
             loadedSave = save.load("save.json");
 
             //Determine which room we're going to be in next
-            if (argc > 1) {
+            if (argRoom) {
                 thePlayer.nextRoom = argv[1];
             }
             else if (loadedSave) {
@@ -85,7 +72,7 @@ int main(int argc, char** argv) {
             level.initializeColors(theCanvas);
 
             //Set the player position from save or level as appropriate
-            if (loadedSave) {
+            if (loadedSave && !argRoom) {
                 thePlayer.moveTo(save.getPosition());
             }
 
@@ -104,8 +91,8 @@ int main(int argc, char** argv) {
         //If we're moving to a different level, perform a subset
         //of the actions for death
 
-        else if (breakDoor) {
-            breakDoor = false;
+        else if (status == breakDoor) {
+            status = run;
             save.writeOutfit(thePlayer.getCurrentOutfit());
 
             //Reload world
@@ -135,67 +122,100 @@ int main(int argc, char** argv) {
                 thePlayer.setOutfit(defaultOutfit);
             }
         }
-        else {
-            cerr << "WTF!!??";
+
+        else if (status == breakSave) {
+            status = run;
+            argRoom = false;
+            save.writeOutfit(thePlayer.getCurrentOutfit());
+            save.save(thePlayer.getPosition(), thePlayer.nextRoom);
         }
 
-        //Main game loop
+        else {
+            while ((status == run || status == pause || status == options) && !WindowShouldClose()) {
 
-        while (!(breakSave || breakDoor || breakDead || quit || WindowShouldClose())) {
+                //Buttons modifying status
 
-            //Inventory screen?
-
-            if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_I)) {
-                showInventory = !showInventory;
-            }
-
-            if (showInventory) {
-                theCanvas -> calculateLighting();
-                theCanvas -> start(true);
-                thePlayer.drawTabScreen();
-                theCanvas -> end();
-            }
-            else {
-
-                //start tick timer
-
-                tickStart = chrono::steady_clock::now();
-                tickCounter++;
-
-                //Update entities
-
-                world -> tickSet();
-                world -> tickGet();
-                world -> finalize();
-
-                //Display the world
-
-                Vector2 playerPos = thePlayer.getPos();
-                theCanvas -> calculateLighting();
-                theCanvas -> start(playerPos.x, playerPos.y, false);
-                world -> print();
-
-                //end tick timer
-
-                tickEnd = chrono::steady_clock::now();
-                int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
-                total += tickLength;
-                totalSecond += tickLength;
-                if (STATS && tickCounter % 60 == 0) {
-                    cout << "Load: " << totalSecond / 10000 << "%\n";
-                    if (totalSecond / 10000 > maxLoad) {
-                        maxLoad = totalSecond / 10000;
+                if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_I)) {
+                    if (status == showInventory) {
+                        status = run;
                     }
-                    totalSecond = 0;
+                    else if (status == run) {
+                        status = showInventory;
+                    }
+                }
+                if (IsKeyPressed(KEY_ESCAPE)) {
+                    if (status == pause || status == showInventory) {
+                        status = run;
+                    }
+                    if (status == run) {
+                        status = pause;
+                    }
+                }
+                if (IsWindowMinimized() || IsWindowHidden()) {
+                    status = pause;
                 }
 
-                theCanvas -> end();
+                //take appropriate action for status
 
-                //Loop break cases
+                if (status == pause) {
+                    pauseMenu(status);
+                }
+                else if (status == options) {
+                    optionsMenu(status, pause);
+                }
+                else if (status == showInventory) {
+                    theCanvas -> start(true);
+                    thePlayer.drawTabScreen();
+                    theCanvas -> end();
+                }
+                else {  //status is run
 
-                breakSave = thePlayer.breakSave;
-                breakDoor = thePlayer.breakDoor;
-                breakDead = thePlayer.breakDead;
+                    //start tick timer
+
+                    tickStart = chrono::steady_clock::now();
+                    tickCounter++;
+
+                    //Update entities
+
+                    world -> tickSet();
+                    world -> tickGet();
+                    world -> finalize();
+
+                    //Display the world
+
+                    Vector2 playerPos = thePlayer.getPos();
+                    theCanvas -> calculateLighting();
+                    theCanvas -> start(playerPos.x, playerPos.y, false);
+                    world -> print();
+
+                    //end tick timer
+
+                    tickEnd = chrono::steady_clock::now();
+                    int tickLength = chrono::duration_cast<chrono::microseconds>(tickEnd - tickStart).count();
+                    total += tickLength;
+                    totalSecond += tickLength;
+                    if (STATS && tickCounter % 60 == 0) {
+                        cout << "Load: " << totalSecond / 10000 << "%\n";
+                        if (totalSecond / 10000 > maxLoad) {
+                            maxLoad = totalSecond / 10000;
+                        }
+                        totalSecond = 0;
+                    }
+
+                    theCanvas -> end();
+
+                    //Loop break cases
+
+                    if (thePlayer.breakDead) {
+                        status = breakDead;
+                    }
+                    else if (thePlayer.breakSave) {
+                        status = breakSave;
+                    }
+                    else if (thePlayer.breakDoor) {
+                        status = breakDoor;
+                    }
+                }
             }
         }
     }

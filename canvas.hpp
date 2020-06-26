@@ -10,9 +10,8 @@ class canvas {
 
     protected:
 
-    int screenWidth = SCREENWIDTH;
-    int screenHeight = SCREENHEIGHT;
     int fontSize = 16;
+    int hudFontSize = 16;
     int screenRows, screenCols, cameraLagX, cameraLagY;
 
     Color background;
@@ -65,6 +64,10 @@ class canvas {
 
     Color lighting(Color original);
 
+    //Button
+
+    bool button(float x, float y, string text);
+
     //Drawing functions
 
     void start(float playerX, float playerY, bool tabScreen);
@@ -73,11 +76,15 @@ class canvas {
 
     void draw(float x, float y, Color tint, float sizeFactor, string text, bool doLight = true);
 
+    void drawHud(float x, float y, Color tint, string text);
+
+    void drawScaleTest(float x, float y, Color tint, string text);
+
     void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight = true);
 
     virtual void drawLayerEditor(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected, bool doLight = true) {}
 
-    void drawHud(float x, float y, Color tint, string text);
+    //Bars (world)
 
     void drawBarLeft(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
 
@@ -86,6 +93,8 @@ class canvas {
     void drawBarDown(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
 
     void drawBarUp(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
+
+    //Bars (HUD)
 
     void drawHudBarLeft(float x, float y, Color tint, float length);
 
@@ -116,6 +125,10 @@ class canvas {
     int getHudCols();
 
     int getHudFontSize();
+
+    void tweakHudScale();
+
+    void tweakGameScale();
 
 };
 

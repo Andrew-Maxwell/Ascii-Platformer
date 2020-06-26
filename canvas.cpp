@@ -1,7 +1,5 @@
 #include "canvas.hpp"
 
-#define HUDFONTSIZE 16
-
     canvas::canvas() {
         displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
     }
@@ -17,8 +15,8 @@
 
         cameraX = worldCols / 2;
         cameraY = worldRows / 2;
-        screenRows = screenHeight / fontSize;
-        screenCols = screenWidth / fontSize;
+        screenRows = GetScreenHeight() / fontSize;
+        screenCols = GetScreenWidth() / fontSize;
         moveCameraX = (worldCols > screenCols / playerSizeFactor);
         moveCameraY = (worldRows > screenRows / playerSizeFactor);
         cameraLagX = screenCols / playerSizeFactor * 3 / 16;
@@ -203,6 +201,28 @@
         return (Color){c.r * light.r / 255.0, c.g * light.g / 255.0, c.b * light.b / 255.0, c.a * light.a / 255.0};
     }
 
+    //BUTTON
+
+    bool canvas::button(float x, float y, string text) {
+        Vector2 mouse = GetMousePosition();
+        if (mouse.x > x * hudFontSize && mouse.x < (x + text.size()) * hudFontSize && mouse.y > y * hudFontSize && mouse.y < (y + 1) * hudFontSize) {
+            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                drawHudBarRight(x, y, DARKBACKGROUND, text.length());
+                drawHud(x, y, DARKFOREGROUND, text);
+            }
+            else {
+                drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
+                drawHud(x, y, LIGHTFOREGROUND, text);
+            }
+            if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+                return true;
+            }
+        }
+        else {
+            drawHud(x, y, UIFOREGROUND, text);
+        }
+        return false;
+    }
 
     void canvas::start(float playerX, float playerY, bool tabScreen) {
 
@@ -225,16 +245,18 @@
             }
         }
 
-        BeginDrawing();
-        if (tabScreen) {
-            ClearBackground(UIBACKGROUND);
-        }
-        else {
-            ClearBackground(background);
-        }
+        start(tabScreen);
     }
 
     void canvas::start(bool tabScreen) {
+        if (IsWindowResized()) {
+            screenRows = GetScreenHeight() / fontSize;
+            screenCols = GetScreenWidth() / fontSize;
+            moveCameraX = (worldCols > screenCols / playerSizeFactor);
+            moveCameraY = (worldRows > screenRows / playerSizeFactor);
+            cameraLagX = screenCols / playerSizeFactor * 3 / 16;
+            cameraLagY = screenRows / playerSizeFactor * 3 / 16;
+        }
 
         BeginDrawing();
         if (tabScreen) {
@@ -262,6 +284,17 @@
             fontSize * sizeFactor, 0, tint);
     }
 
+    void canvas::drawHud(float x, float y, Color tint, string text) {
+        myDrawText(text.c_str(), (Vector2){x * hudFontSize, y * hudFontSize}, hudFontSize, 1, tint);
+    }
+
+    void canvas::drawScaleTest(float x, float y, Color tint, string text) {
+        myDrawText(text.c_str(), (Vector2){
+            x * hudFontSize + (text.size() / 2.0) * (hudFontSize - fontSize),
+            y * hudFontSize + 0.5 * (hudFontSize - fontSize)},
+            fontSize, 1, tint);
+    }
+
     void canvas::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
@@ -271,10 +304,6 @@
             (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor };
         Rectangle destRec = {origin.x, origin.y, t.width * fontSize / 8 * sizeFactor, t.height * fontSize / 8 * sizeFactor};
         myDrawTexture(t, sourceRec, destRec, (Vector2){0.0f, 0.0f}, 0.0f, tint);
-    }
-
-    void canvas::drawHud(float x, float y, Color tint, string text) {
-        myDrawText(text.c_str(), (Vector2){x * HUDFONTSIZE, y * HUDFONTSIZE}, HUDFONTSIZE, 1, tint);
     }
 
     /******************************************************************************/
@@ -354,28 +383,28 @@
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
-        DrawRectangle((x - length) * HUDFONTSIZE, y * HUDFONTSIZE, length * HUDFONTSIZE, HUDFONTSIZE, tint);
+        DrawRectangle((x - length) * hudFontSize, y * hudFontSize, length * hudFontSize, hudFontSize, tint);
     }
 
     void canvas::drawHudBarRight (float x, float y, Color tint, float length) {
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
-        DrawRectangle(x * HUDFONTSIZE, y * HUDFONTSIZE, length * HUDFONTSIZE, HUDFONTSIZE, tint);
+        DrawRectangle(x * hudFontSize, y * hudFontSize, length * hudFontSize, hudFontSize, tint);
     }
 
     void canvas::drawHudBarDown (float x, float y, Color tint, float length) {
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
-        DrawRectangle(x * HUDFONTSIZE, y * HUDFONTSIZE, HUDFONTSIZE, length * HUDFONTSIZE, tint);
+        DrawRectangle(x * hudFontSize, y * hudFontSize, hudFontSize, length * hudFontSize, tint);
     }
 
     void canvas::drawHudBarUp (float x, float y, Color tint, float length) {
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
-        DrawRectangle(x * HUDFONTSIZE, (y - length) * HUDFONTSIZE, HUDFONTSIZE, length * HUDFONTSIZE, tint);
+        DrawRectangle(x * hudFontSize, (y - length) * hudFontSize, hudFontSize, length * hudFontSize, tint);
     }
 
 /******************************************************************************/
@@ -401,11 +430,11 @@
     }
 
     int canvas::getHudRows() {
-        return screenHeight / HUDFONTSIZE;
+        return GetScreenHeight() / hudFontSize;
     }
 
     int canvas::getHudCols() {
-        return screenWidth / HUDFONTSIZE;
+        return GetScreenWidth() / hudFontSize;
     }
 
     int canvas::getFontSize() {
@@ -413,7 +442,27 @@
     }
 
     int canvas::getHudFontSize() {
-        return HUDFONTSIZE;
+        return hudFontSize;
+    }
+
+    void canvas::tweakHudScale() {
+        hudFontSize += 4;
+        if (hudFontSize > 24) {
+            hudFontSize = 8;
+        }
+    }
+
+    void canvas::tweakGameScale() {
+        fontSize += 4;
+        if (fontSize > 24) {
+            fontSize = 8;
+        }
+        screenRows = GetScreenHeight() / fontSize;
+        screenCols = GetScreenWidth() / fontSize;
+        moveCameraX = (worldCols > screenCols / playerSizeFactor);
+        moveCameraY = (worldRows > screenRows / playerSizeFactor);
+        cameraLagX = screenCols / playerSizeFactor * 3 / 16;
+        cameraLagY = screenRows / playerSizeFactor * 3 / 16;
     }
 
 /******************************************************************************/

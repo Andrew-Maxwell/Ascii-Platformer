@@ -1,3 +1,139 @@
+Constraints on story:
+    - Want it to be touching and homely like Studio Ghibli (instead of contrived stories of high adventure.), or at least believable and relateable.
+    - Want it to be adapted to the medium of the game I'm creating (can be told through text, dialog and environment only)
+    - Story pacing fits with puzzle/exploration gameplay
+    - Ideally, text visuals tie into the story somehow
+    - Write what you know!
+    - Want it to be about an abandoned city/industrial wasteland like Rain World
+
+Another story idea: A small crew of professional (licensed) scavengers/salvagers, exploring an abandoned planetary colony.
+- Planetary colony was abandoned due to large-scale disaster (solar flare? earthquake? Ecosystem/life support destabilization?) which
+    left infrastructure, heavy machinery more or less intact but made the area unliveable.
+    - Maybe a prion or some other type of sickness spread through the colony's farms, making it impossible to continue living there.
+        Colonists forced to leave before the food supply destabilized entirely.
+- Salvage technicians searching for mechanisms containing unobtanium. They spread out to search the colony separately, but remain in occasional radio contact.
+- Player is invited to explore the lives that were left behind when the colonists evacuated.
+- Due to near-lightspeed travel, each assignment for the scavengers is at most a few months, but the investors don't see returns
+    for decades. The scavengers have no communication with the outside world. 
+- There may be a few people living in this abandoned world, living off their own cultivars which were more expensive/less desirable
+    but not affected by the prion. These cultivars were not widely available enough to support the original colonists, and so the 
+    evacuation was still necessary.
+- Emotional arc related to reading a diary which was published, or you found, written by one of the survivors. Possibly the diary
+    helps the player character find catharsis with a loss of their own somehow. (I'm not sure I'm up to writing this...)
+Themes: Loss, isolation, abandonment. The sad sense you get walking through an empty airport where everyone is gone.
+
+Features:
+1 Puzzle elements:
+    - Intercepted codes
+    - Switches
+    - Triggers
+    - Color changing/other effect layers
+    - AND/OR/Timer relays
+    - Doors
+    - Disappearing platforms
+1 Story elements:
+    1 persistent plot variables.
+    2 Separate global- and outfit- scope? (e.g. beating boss = global scope, key = outfit scope)
+    2 An inventory. Can probably be purely cosmetic.
+    1 Doors that can be locked or unlocked depending on plot variables from either scope.
+        1 More generally, want entity state to depend on plot variables. 
+    1 Potential implementation: Global- and outfit- scope implemented as a set of ints, similar to the system for keeping track of which pickups have been collected already. They are stored in the save but           loaded into the collider and can be accessed the same way as broadcast codes.
+    2 NPCS and bosses which can modify plot variables.
+    1 Dialog
+    2 Inventory
+1 Sound effects
+1 Music: see http://dig.ccmixter.org for free music, or contact noise, or try to make your own!
+1 Controller support
+2 Gun pickups
+2 Gun selection indicator
+2 Map system: Use render test code on the collider texture
+2 Menus + config
+2 Wind/current object
+2 leaf physicalParticles that fly eratically
+2 Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
+    original.
+2 Lightning bolt, fire (spreads via embers), huge fireballs
+2 Snakes (like in snake game) that move around and you can jump on them (platforming puzzle element)
+2 transition visual effect
+2 Wave and rocket guns
+2 Explosions of sparks
+2 Dust/debris falling from the ceiling (to go with shaking layer effect)
+2 Plumes of steam
+? Multi-thread processing for water and particles
+? Editor misc:
+    3 Display, allow changing palette selection (don't ignore number keys) in tab screen
+    3 Add a layer indicator which shows all of the layers and which one is selected
+    3 Fix the default palette
+    3 Need to be able to correspond entities in the file to entities in the editor more easily.
+
+? Generic physicalEntity parameters (density/volume/mass)
+? Combat elements:
+    - Gun/turret enemies
+    - Fast-moving enemies
+
+Ideas:
+    - Cyberpunk theme: Parallel digital and physical realms, distinct visual style, distinct puzzle types
+    - Level where you find breath upgrades above water and ops below water - back and forth between those two
+    - Level that is completely dark, must use bouncing particle explosion effect to navigate
+    - WRT puzzles: Should give player feedback on plausible but wrong attempts, keep them entertained
+    - You have a computer companion which is what allows you to broadcast codes. It has a test level which acts as
+        the tutorial, also has randomly-generated puzzles with small bonuses.
+    - Command line graphical effect when logging into a terminal.
+    - Setting similar to New York 2140
+        - Flooded coastal city decades from now after a climate apocalypse
+        - Lowlands mostly abandoned, but buildings are hardened against the elements and continue to function
+            - Robotic maintenance crews
+            - Small-scale fission reactors
+            - Internal networks functioning, external ones not so much
+        - Circumstances of abandonment suspicious; possibly the gov't brought down the network and forced
+            the city to be abandoned because an AGI was developed in one of the buildings, deemed too dangerous
+            to interact with
+    - Tutorial level: Older bro got you your neural interface hacking device, rewrote an abandoned building's
+        network to teach you how to use it. Later he disappears, and you need to travel deeper into the abandoned
+        city to find him...
+    - Level where you're really bouncy, elasticity = 1.05 or something like that, but there are pools of water around and you need to use them to stop...
+
+inspiration/vague visual ideas:
+    - Giant drum machine like washing machine
+    - Submechanophobia
+    - Trippy AI face that speaks to you/watches you in the virtual world
+        - AI doesn't want you poking around, if you go to far into his world he threatens you then starts killing you
+            IRL and you have to get out of the level before he kills you entirely. Makes more sense if you don't usually
+            have a health bar in the virtual world. Making virtual world one-hit-kill makes sense for small, puzzle-oriented levels.
+    
+
+Housekeeping items (may never get to all of these):
+- Rewrite player::apply to be less confusing; maybe stop using bitsets, just use uint8_ts
+- Docs, including "lessons learned"
+- Replace x, y with Vector2 everywhere
+- Create configure() functions rather than having 10-argument constructors/standardize constructor argument order
+- Cap line lengths
+- change everything from camelCase to PascalCase - use Perl to identify variable names using declarations? what about scoping?
+- rename sizeFactor to Scale
+- make layer use char[][] for mild performance benefits
+- Convert rain to a generic random particle spawner that can spawn particles within a given box area
+- Come up with better names for everything
+- Several items which should be done together:
+    - Rewrite save system as JSON
+    - Rewrite player to not use so many fixed-size arrays
+    - Create gun and op objects in player, instead of having a bunch of arrays
+    - Guns and ops stored in player; pickups just unlock them.
+        - Op data can be passed to player in readEntities() in game_main.cpp
+- Split largest files (editables.cpp, player.cpp, editor_main.cpp) into smaller files, or at least improve structure
+
+Bugs:
+- player disappears when standing on tile right below top of level
+- touch pickups sometimes collected (?) randomly
+- Markers appearing in wrong place in level editor
+- "Not a valid choice!" error appears when using op screen
+- particles becoming zero-G
+- Some of the files in "dark" getting loaded as wrong width
+- Water appears weird when player is moving very slowly in the vertical direction
+- If there are two water objects with one above the other, they tend to interfere.
+- Particles don't appear right next to walls
+- Layers still getting deleted multiple times under some circumstances?
+- Player vibrates when standing on a surface
+
 Maybe the story doesn't need to be so complicated. Maybe it's something like:
 Brother is training you.
 Brother disappears on scavenging trip.
@@ -96,120 +232,3 @@ as an optional extra challenge.
 At least early on, forcefields should be clearly delineated with arrow markers. Could even have
 them light up when activated! Could do some neat stuff with black and yellow hazard stripes.
 
-Loose ends:
-- Entities are loaded out-of-order.
-    - Need to re-integrate player loading into gameleveldata::readEntities
-    - Newly added entities currently go on top/bottom: Could solve this by having the "parent" entity contain and pass a list iterator pointing to itself to collider::addEntity, or could keep collider sorted by sizeFactor (?)
-    - HUD is not always printing on top! Add a separate printHUD function?
-- Gun selection indicator
-
-Features:
-? Editor misc:
-    - Allow changing background color
-    - Display, allow changing palette selection (don't ignore number keys) in tab screen
-    - Add a layer indicator which shows all of the layers and which one is selected
-    - Fix the default palette
-    - Displaying and resizing variable-size entities (e.g. water, particle spawner) in editor.
-    - Need to be able to correspond entities in the file to entities in the editor more easily.
-- Need maxAmmoPickup
-- Config file: Resolution, scaling
-? Generic physicalEntity parameters (density/volume/mass)
-? Map system: Use render test code on the collider texture
-- Improved code interface
-    - Intercepted codes
-    - Colored based on code value
-    - Broadcast animation
-- Puzzle elements:
-    - Switches
-    - Triggers
-    - Color changing/other effect layers
-    - AND/OR/Timer relays
-    - Doors
-    - Disappearing platforms
-- Combat elements:
-    - Gun/turret enemies
-    - Fast-moving enemies
-- Story elements:
-    - persistent plot variables.
-    - Separate global- and outfit- scope? (e.g. beating boss = global scope, key = outfit scope)
-    - An inventory. Can probably be purely cosmetic.
-    - Doors that can be locked or unlocked depending on plot variables from either scope.
-        - More generally, want entity state to depend on plot variables. 
-    - Potential implementation: Global- and outfit- scope implemented as a set of ints, similar to the system for keeping track of which pickups have been collected already. They are stored in the save but           loaded into the collider and can be accessed the same way as broadcast codes.
-    - NPCS and bosses which can modify plot variables.
-    - Dialog
-    ? Inventory
-- Sound effects
-- Music: see http://dig.ccmixter.org for free music, or contact noise, or try to make your own!
-- Menus
-- Controller support
-? Wind/current object
-? leaf physicalParticles that fly eratically
-? Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
-    original.
-? Lightning bolt, fire (spreads via embers), huge fireballs
-? Snakes (like in snake game) that move around and you can jump on them (platforming puzzle element)
-- transition visual effect
-? Wave and rocket guns
-
-Ideas:
-    - Cyberpunk theme: Parallel digital and physical realms, distinct visual style, distinct puzzle types
-    - Level where you find breath upgrades above water and ops below water - back and forth between those two
-    - Level that is completely dark, must use bouncing particle explosion effect to navigate
-    - WRT puzzles: Should give player feedback on plausible but wrong attempts, keep them entertained
-    - You have a computer companion which is what allows you to broadcast codes. It has a test level which acts as
-        the tutorial, also has randomly-generated puzzles with small bonuses.
-    - Command line graphical effect when logging into a terminal.
-    - Setting similar to New York 2140
-        - Flooded coastal city decades from now after a climate apocalypse
-        - Lowlands mostly abandoned, but buildings are hardened against the elements and continue to function
-            - Robotic maintenance crews
-            - Small-scale fission reactors
-            - Internal networks functioning, external ones not so much
-        - Circumstances of abandonment suspicious; possibly the gov't brought down the network and forced
-            the city to be abandoned because an AGI was developed in one of the buildings, deemed too dangerous
-            to interact with
-    - Tutorial level: Older bro got you your neural interface hacking device, rewrote an abandoned building's
-        network to teach you how to use it. Later he disappears, and you need to travel deeper into the abandoned
-        city to find him...
-    - Level where you're really bouncy, elasticity = 1.05 or something like that, but there are pools of water around and you need to use them to stop...
-
-inspiration/vague visual ideas:
-    - Giant drum machine like washing machine
-    - Submechanophobia
-    - Trippy AI face that speaks to you/watches you in the virtual world
-        - AI doesn't want you poking around, if you go to far into his world he threatens you then starts killing you
-            IRL and you have to get out of the level before he kills you entirely. Makes more sense if you don't usually
-            have a health bar in the virtual world. Making virtual world one-hit-kill makes sense for small, puzzle-oriented levels.
-    
-
-Housekeeping items (may never get to all of these):
-- Rewrite player::apply to be less confusing; maybe stop using bitsets, just use uint8_ts
-- Docs, including "lessons learned"
-- Replace x, y with Vector2 everywhere
-- Create configure() functions rather than having 10-argument constructors/standardize constructor argument order
-- Cap line lengths
-- change everything from camelCase to PascalCase - use Perl to identify variable names using declarations? what about scoping?
-- rename sizeFactor to Scale
-- make layer use char[][] for mild performance benefits
-- Convert rain to a generic random particle spawner that can spawn particles within a given box area
-- Come up with better names for everything
-- Several items which should be done together:
-    - Rewrite save system as JSON
-    - Rewrite player to not use so many fixed-size arrays
-    - Create gun and op objects in player, instead of having a bunch of arrays
-    - Guns and ops stored in player; pickups just unlock them.
-        - Op data can be passed to player in readEntities() in game_main.cpp
-
-Bugs:
-- player disappears when standing on tile right below top of level
-- touch pickups sometimes collected (?) randomly
-- Markers appearing in wrong place in level editor
-- "Not a valid choice!" error appears when using op screen
-- particles becoming zero-G
-- Some of the files in "dark" getting loaded as wrong width
-- Water appears weird when player is moving very slowly in the vertical direction
-- If there are two water objects with one above the other, they tend to interfere.
-- Particles don't appear right next to walls
-- Layers still getting deleted multiple times under some circumstances?
-- Player vibrates when standing on a surface

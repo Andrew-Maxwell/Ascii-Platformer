@@ -1,0 +1,213 @@
+{
+    "collider": "snow_collider.txt",
+    "daylight": [
+        255,
+        255,
+        255,
+        255
+    ],
+    "sunsetLight": [
+        255,
+        100,
+        50,
+        255
+    ],
+    "nightLight": [
+        30,
+        30,
+        80,
+        255
+    ],
+    "dawnLight": [
+        255,
+        100,
+        50,
+        255
+    ],
+    "dayBackground": [
+        100,
+        100,
+        255,
+        255
+    ],
+    "sunsetBackground": [
+        20,
+        20,
+        80,
+        255
+    ],
+    "nightBackground": [
+        5,
+        5,
+        40,
+        255
+    ],
+    "dawnBackground": [
+        50,
+        50,
+        80,
+        255
+    ],
+    "dayLength": 3000,
+    "defaultOutfit": {
+        "name": "notx",
+        "jumpSpeed": 0.28,
+        "gravity": 0.009,
+        "friction": 0.75,
+        "acceleration": 0.0035,
+        "speed": 0.2
+    },
+    "entities": [
+        {
+            "type": "layer",
+            "x": -30.0,
+            "y": -30.0,
+            "tint": [0, 0, 0, 80],
+            "sizeFactor": 0.5999999046325684,
+            "fileName": "extraSnow_layer0.txt"
+        },
+        {
+            "type": "layer",
+            "x": -30.0,
+            "y": -30.0,
+            "tint": [150, 160, 195, 255],
+            "sizeFactor": 0.6000000238418579,
+            "fileName": "extraSnow_layer1.txt"
+        },
+        {
+            "type": "layer",
+            "x": 20.0,
+            "y": 20.0,
+            "tint": [160, 150, 170, 255],
+            "sizeFactor": 0.6499999761581421,
+            "fileName": "extraSnow_layer6.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [60, 80, 80, 255],
+            "sizeFactor": 0.75,
+            "fileName": "extraSnow_layer7.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [60, 80, 80, 255],
+            "sizeFactor": 0.800000011920929,
+            "fileName": "extraSnow_layer2.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [120, 145, 120, 255],
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer3.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [30, 40, 30, 255],
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer4.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [160, 150, 170, 255],
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer5.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [150, 170, 150, 255],
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer0.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [0, 0, 0, 255],
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer1.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [255, 200, 150, 255],
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer2.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [45, 60, 45, 255],
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer3.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [255, 255, 255, 255],
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer4.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [255, 0, 0, 255],
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer5.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [160, 150, 170, 255],
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer6.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [255, 255, 255, 255],
+            "sizeFactor": 1.0,
+            "fileName": "snow_layer7.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [149, 124, 110, 255],
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer8.txt"
+        },
+        {
+            "type": "layer",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [128, 106, 86, 255],
+            "sizeFactor": 1.0,
+            "fileName": "extraSnow_layer9.txt"
+        },
+        {
+            "type": "player",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [255, 255, 0, 255],
+            "sizeFactor": 1.0
+        }
+    ]
+}
