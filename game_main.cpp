@@ -1,6 +1,8 @@
 #include "gameleveldata.hpp"
 #include "savedata.hpp"
 #include "game_menu.hpp"
+#include "configdata.hpp"
+#include "meta.hpp"
 
 using namespace rapidjson;
 
@@ -8,10 +10,19 @@ int main(int argc, char** argv) {
 
 //Initialize raylib
 
+    configData config("config.json");
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
-    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "ASCII Platformer");    //TODO: allow selecting monitor
+    InitWindow(1024, 768, "ASCII Platformer");    //TODO: allow selecting monitor
+    SetWindowMinSize(1024, 768);
     SetTargetFPS(60);
     SetExitKey(-1);
+    if (config.getFullscreen()) {
+        int width = GetMonitorWidth(0);
+        int height = GetMonitorHeight(0);
+        ToggleFullscreen();
+        SetWindowSize(width, height);
+    }
+
 
 //misc initializations
 
@@ -25,9 +36,13 @@ int main(int argc, char** argv) {
     saveData save;
     bool loadedSave;
     bool argRoom = argc > 1;    //If room is defined by argument
-    theCanvas = new canvas();
+    theScreen = new screen();
+    theScreen -> setParams(0, 0, config.getGameFontSize(), config.getHudFontSize(), 1.0, 0);
+    keys = config.getKeys();
 
     while (!(status == breakQuit || WindowShouldClose())) {      //While the game is running
+
+        int transition = 7, transitionDirection = -1;
 
         //Menu logic
 
@@ -35,7 +50,8 @@ int main(int argc, char** argv) {
             mainMenu(status);
         }
         else if (status == options) {
-            optionsMenu(status, breakMenu);
+            optionsMenu(status, config);
+            status = breakMenu; //Return to main menu after options complete.
         }
 
         //If we broke because we died (or first time), reload from save
@@ -43,6 +59,7 @@ int main(int argc, char** argv) {
 
         else if (status == breakDead) {
             status = run;
+            thePlayer.breakDead = false;
             loadedSave = save.load("save.json");
 
             //Determine which room we're going to be in next
@@ -68,8 +85,8 @@ int main(int argc, char** argv) {
             world = new collider(0.0, 0.0, level.getWorldFileName());
             //Read in entities
             level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, true);
-            theCanvas -> setParams(world -> getRows(), world -> getCols(), level.getFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
-            level.initializeColors(theCanvas);
+            theScreen -> setParams(world -> getRows(), world -> getCols(), config.getGameFontSize(), config.getHudFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
+            level.initializeColors(theScreen);
 
             //Set the player position from save or level as appropriate
             if (loadedSave && !argRoom) {
@@ -93,6 +110,8 @@ int main(int argc, char** argv) {
 
         else if (status == breakDoor) {
             status = run;
+            thePlayer.breakDoor = false;
+            thePlayer.goToDoor();
             save.writeOutfit(thePlayer.getCurrentOutfit());
 
             //Reload world
@@ -107,9 +126,9 @@ int main(int argc, char** argv) {
             world = new collider(0.0, 0.0, level.getWorldFileName());
             //Read in entities
             level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, false);
-            theCanvas -> setParams(world -> getRows(), world -> getCols(),
-               level.getFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
-            level.initializeColors(theCanvas);
+            theScreen -> setParams(world -> getRows(), world -> getCols(),
+               config.getGameFontSize(), config.getHudFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
+            level.initializeColors(theScreen);
 
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");
@@ -126,16 +145,17 @@ int main(int argc, char** argv) {
         else if (status == breakSave) {
             status = run;
             argRoom = false;
+            thePlayer.breakSave = false;
             save.writeOutfit(thePlayer.getCurrentOutfit());
             save.save(thePlayer.getPosition(), thePlayer.nextRoom);
         }
 
         else {
-            while ((status == run || status == pause || status == options) && !WindowShouldClose()) {
+            while ((status == run || status == pause || status == options || status == showInventory) && !WindowShouldClose()) {
 
                 //Buttons modifying status
 
-                if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_I)) {
+                if (IsKeyPressed(keys.inventory)) {
                     if (status == showInventory) {
                         status = run;
                     }
@@ -161,12 +181,13 @@ int main(int argc, char** argv) {
                     pauseMenu(status);
                 }
                 else if (status == options) {
-                    optionsMenu(status, pause);
+                    optionsMenu(status, config);
+                    status = pause; //Return to pause menu after user is done w/ options.
                 }
                 else if (status == showInventory) {
-                    theCanvas -> start(true);
+                    theScreen -> start(true);
                     thePlayer.drawTabScreen();
-                    theCanvas -> end();
+                    theScreen -> end();
                 }
                 else {  //status is run
 
@@ -183,10 +204,18 @@ int main(int argc, char** argv) {
 
                     //Display the world
 
-                    Vector2 playerPos = thePlayer.getPos();
-                    theCanvas -> calculateLighting();
-                    theCanvas -> start(playerPos.x, playerPos.y, false);
+                    Vector2 playerPos = thePlayer.getPosition();
+                    theScreen -> calculateLighting();
+                    theScreen -> start(playerPos.x, playerPos.y, false);
                     world -> print();
+
+                    //transition
+                    if (transition >= 0 && transition < 8) {
+                        theScreen -> checkerboardTransition(transition);
+                        if (tickCounter % 3 == 0) {
+                            transition += transitionDirection;
+                        }
+                    }
 
                     //end tick timer
 
@@ -202,18 +231,35 @@ int main(int argc, char** argv) {
                         totalSecond = 0;
                     }
 
-                    theCanvas -> end();
+                    theScreen -> end();
 
                     //Loop break cases
 
                     if (thePlayer.breakDead) {
-                        status = breakDead;
+                        //theScreen -> dialog ("You are dead...");
+                        int keyPressed = myGetKeyPressed();
+                        if (keyPressed == KEY_ESCAPE) {
+                            status = pause;
+                        }
+                        else if (keyPressed != 0 && transition == -1) {
+                            transition = 0;
+                            transitionDirection = 1;
+                        }
+                        if (transition == 8) {
+                            status = breakDead;
+                        }
                     }
                     else if (thePlayer.breakSave) {
                         status = breakSave;
                     }
                     else if (thePlayer.breakDoor) {
-                        status = breakDoor;
+                        if (transition == -1) {
+                            transition = 0;
+                            transitionDirection = 1;
+                        }
+                        if (transition == 8) {
+                            status = breakDoor;
+                        }
                     }
                 }
             }

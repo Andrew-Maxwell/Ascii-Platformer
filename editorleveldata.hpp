@@ -5,7 +5,7 @@
 #include "meta.hpp"
 #include "layer.hpp"
 #include "editables.hpp"
-#include "canvas.hpp"
+#include "screen.hpp"
 
 class editorLevelData : public levelData {
 
@@ -13,7 +13,7 @@ class editorLevelData : public levelData {
 
     public:
 
-    //Initialize global theCanvas and read in editables
+    //Initialize global theScreen and read in editables
 
     void initializeEditor(list<editableLayer*>& layers, Color& background);
 

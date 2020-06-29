@@ -29,12 +29,13 @@ GAMESRCS := \
 	rain.cpp \
 	savepoint.cpp \
 	water.cpp \
-    canvas.cpp \
+    screen.cpp \
     data.cpp \
     gameleveldata.cpp \
     savedata.cpp \
     newtestentity.cpp \
-    game_menu.cpp
+    game_menu.cpp \
+    configdata.cpp
 
 EDTRSRCS := \
 	meta.cpp \
@@ -45,7 +46,7 @@ EDTRSRCS := \
 	editables.cpp \
 	charfills.cpp \
 	editor_main.cpp \
-    canvas.cpp \
+    screen.cpp \
     data.cpp \
     editorleveldata.cpp
 

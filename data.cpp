@@ -29,6 +29,15 @@ using namespace rapidjson;
         return true;
     }
 
+    void data::save() {
+        FILE* out = fopen(fileName.c_str(), "wb");
+        char buffer[65536];
+        FileWriteStream ws(out, buffer, 65536);
+        PrettyWriter<FileWriteStream> writer(ws);
+        json.Accept(writer);
+        fclose(out);
+    }
+
     string data::getFileName() {
         return fileName;
     }
@@ -52,7 +61,7 @@ using namespace rapidjson;
         return json.HasMember("dayLength") ? json["dayLength"].GetInt(): 18000;
     }
 
-    void levelData::initializeColors(canvas* toInit) {
+    void levelData::initializeColors(screen* toInit) {
         Color newDayLight = WHITE, newSunsetLight = WHITE, newNightLight = WHITE, newDawnLight = WHITE, newDayBackground = WHITE, newSunsetBackground = WHITE, newNightBackground = WHITE, newDawnBackground  = WHITE;
         if (json.HasMember("dayLight")) {
             newDayLight = newSunsetLight = newNightLight = newDawnLight = getColor(json["dayLight"]);

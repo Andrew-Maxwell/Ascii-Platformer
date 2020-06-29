@@ -6,9 +6,9 @@
                 won = 1;
                 break;
             case DOORTYPE:
-                if (IsKeyPressed(KEY_S)) {
-                    x = col.xVal;
-                    y = col.yVal;
+                if (IsKeyPressed(keys.down)) {
+                    nextX = col.xVal;
+                    nextY = col.yVal;
                     nextRoom = col.message;
                     breakDoor = true;
                 }

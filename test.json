@@ -1,7 +1,7 @@
 {
     "collider": "test_collider.txt",
     "dayLight": [255, 255, 255, 255],
-    "nightLight": [40, 40, 60, 255],
+    "nightLight": [100, 100, 150, 255],
     "dayBackground": [4, 119, 152, 67],
     "nightBackground": [0, 0, 0, 255],
     "dayLength": 1440,

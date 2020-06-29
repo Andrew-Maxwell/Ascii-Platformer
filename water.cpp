@@ -141,10 +141,10 @@
     }
 
     void water::print() {
-        Vector2 camera = theCanvas -> getCamera();
-        for (int i = max(0, (int)(camera.x - x - theCanvas -> getScreenCols() / sizeFactor / 2.0f));
-                i < min(width, (int)(camera.x - x + theCanvas -> getScreenCols() / sizeFactor / 2.0f + 1));
+        Vector2 camera = theScreen -> getCamera();
+        for (int i = max(0, (int)(camera.x - x - theScreen -> getScreenCols() / sizeFactor / 2.0f));
+                i < min(width, (int)(camera.x - x + theScreen -> getScreenCols() / sizeFactor / 2.0f + 1));
                 i++) {
-            theCanvas -> drawBarUp(x + i, y + height, tint, sizeFactor, height + surface[i], doLighting);
+            theScreen -> drawBarUp(x + i, y + height, tint, sizeFactor, height + surface[i], doLighting);
         }
     }

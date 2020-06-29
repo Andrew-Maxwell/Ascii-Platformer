@@ -6,7 +6,7 @@
 #define NUMCHARS 879
 #define FONTNAME "PxPlus_IBM_BIOS2.ttf"
 
-class canvas {
+class screen {
 
     protected:
 
@@ -29,9 +29,9 @@ class canvas {
 
     public:
 
-    canvas();
+    screen();
 
-    void setParams(int newWorldRows, int newWorldCols, int newFontSize, float newPlayerSizeFactor, int newDayLength);
+    void setParams(int newWorldRows, int newWorldCols, int newGameFontSize, int newHudFontSize, float newPlayerSizeFactor, int newDayLength);
 
     Color getColor();
 
@@ -64,9 +64,13 @@ class canvas {
 
     Color lighting(Color original);
 
+    //Transition function
+
+    void checkerboardTransition(int amountBlack);
+
     //Button
 
-    bool button(float x, float y, string text);
+    bool button(int position, string text, bool mouseMode, int selected);
 
     //Drawing functions
 
@@ -132,7 +136,7 @@ class canvas {
 
 };
 
-class editableCanvas : public canvas {
+class editableCanvas : public screen {
 
     float speedMult, oldCameraX, oldCameraY, oldMouseX, oldMouseY;
     float cameraSpeed = 1;

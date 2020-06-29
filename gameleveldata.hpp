@@ -16,7 +16,7 @@
 #include "rain.hpp"
 #include "savepoint.hpp"
 #include "water.hpp"
-#include "canvas.hpp"
+#include "screen.hpp"
 #include "world.hpp"
 #include "enemy.hpp"
 #include "newtestentity.hpp"
@@ -29,7 +29,7 @@ class gameLevelData : public outfitData, public levelData {
 
     void generateLayerCache();
 
-    //Initialize global world and theCanvas pointers
+    //Initialize global world and theScreen pointers
 
     string getWorldFileName();
 

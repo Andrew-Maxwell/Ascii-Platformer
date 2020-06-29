@@ -6,7 +6,7 @@
 #include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
-#include "canvas.hpp"
+#include "screen.hpp"
 
 using namespace rapidjson;
 

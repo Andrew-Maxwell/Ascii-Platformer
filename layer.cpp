@@ -19,11 +19,11 @@
     }
 
     bool layer::readLayer() {
-        canvas.clear();
+        screen.clear();
         string line;
         ifstream worldFile = getLevelIFStream(fileName);
         while (getline(worldFile, line)) {
-            canvas.push_back(line);
+            screen.push_back(line);
         }
         worldFile.close();
         return true;
@@ -32,18 +32,18 @@
     void layer::render() {
         BeginTextureMode(tex);
         ClearBackground((Color){0, 0, 0, 0});
-        for (int i = 0; i < canvas.size(); i++) {
-            theCanvas -> myDrawText(canvas[i].c_str(), (Vector2){0, i * 8}, 8, 0, (Color){255, 255, 255, 255});
+        for (int i = 0; i < screen.size(); i++) {
+            theScreen -> myDrawText(screen[i].c_str(), (Vector2){0, i * 8}, 8, 0, (Color){255, 255, 255, 255});
         }
         EndTextureMode();
     }
 
     int layer::getRows() {
-        return canvas.size();
+        return screen.size();
     }
 
     int layer::getCols() {
-        return canvas[0].length();
+        return screen[0].length();
     }
 
     void layer::tickSet() {}
@@ -55,15 +55,15 @@
     }
 
     void layer::print() {
-        theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture, doLighting);
-//        for (int i = 0; i < canvas.size(); i++) {
-//            theCanvas -> draw(x, y + i, tint, sizeFactor, canvas[i]);
+        theScreen -> drawLayer(x, y, tint, sizeFactor, tex.texture, doLighting);
+//        for (int i = 0; i < screen.size(); i++) {
+//            theScreen -> draw(x, y + i, tint, sizeFactor, screen[i]);
 //        }
-//        Vector2 camera = theCanvas -> getCamera();
-//        int iMin = max(int(camera.y - y - theCanvas -> getScreenRows() / sizeFactor / 2), 0);
-//        for (int i = iMin; i < min((int)(camera.y - y + theCanvas -> getScreenRows() / 2.0 / sizeFactor) + 1, (int)canvas.size()); i++) {
-//            theCanvas -> draw(x, y + i, tint, sizeFactor, canvas[i]);
+//        Vector2 camera = theScreen -> getCamera();
+//        int iMin = max(int(camera.y - y - theScreen -> getScreenRows() / sizeFactor / 2), 0);
+//        for (int i = iMin; i < min((int)(camera.y - y + theScreen -> getScreenRows() / 2.0 / sizeFactor) + 1, (int)screen.size()); i++) {
+//            theScreen -> draw(x, y + i, tint, sizeFactor, screen[i]);
 //        }
-//        theCanvas -> drawLayer(x, y, tint, sizeFactor, textTexture);
+//        theScreen -> drawLayer(x, y, tint, sizeFactor, textTexture);
     }
 

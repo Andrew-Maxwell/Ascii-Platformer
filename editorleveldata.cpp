@@ -13,11 +13,11 @@
         string colFileName = json.HasMember("collider") ? json["collider"].GetString() : "test_collider.txt";
         loadedLayers.insert(colFileName);
 
-        theCanvas = new editableCanvas();
+        theScreen = new editableCanvas();
         Value dummyValue(kObjectType);
         editableCollider* col = new editableCollider(0.0, 0.0, WHITE, 1, true, colFileName, '!', dummyValue);
-        theCanvas -> setParams(col -> getRows(), col -> getCols(), fontSize, 1.0f, getDayLength());
-        initializeColors(theCanvas);
+        theScreen -> setParams(col -> getRows(), col -> getCols(), fontSize, 16, 1.0f, getDayLength());
+        initializeColors(theScreen);
 
         Value& entities = json["entities"];
         assert(entities.IsArray());

@@ -35,6 +35,6 @@
     bool door::finalize() {return false;}
 
     void door::print() {
-        theCanvas -> draw(x, y, tint, sizeFactor, "D", doLighting);
+        theScreen -> draw(x, y, tint, sizeFactor, "D", doLighting);
     }
 

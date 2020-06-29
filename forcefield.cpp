@@ -55,7 +55,7 @@
         ClearBackground((Color){0, 0, 0, 0});
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                theCanvas -> myDrawText(arrowUnicode, (Vector2){j * 8, i * 8}, 8, 0, (Color){255, 255, 255, 255});
+                theScreen -> myDrawText(arrowUnicode, (Vector2){j * 8, i * 8}, 8, 0, (Color){255, 255, 255, 255});
             }
         }
         EndTextureMode();
@@ -94,10 +94,10 @@
 
     void linearField::print() {
         if (isOn) {
-            theCanvas -> drawLayer(x, y, onTint, sizeFactor, tex.texture, false);
+            theScreen -> drawLayer(x, y, onTint, sizeFactor, tex.texture, false);
         }
         else {
-            theCanvas -> drawLayer(x, y, tint, sizeFactor, tex.texture, doLighting);
+            theScreen -> drawLayer(x, y, tint, sizeFactor, tex.texture, doLighting);
         }
     }
 
@@ -177,10 +177,10 @@
 
     void forceField::print() {
         if (isOn) {
-            theCanvas -> draw(x, y, onTint, sizeFactor, "F", false);
+            theScreen -> draw(x, y, onTint, sizeFactor, "F", false);
         }
         else {
-            theCanvas -> draw(x, y, tint, sizeFactor, "F", doLighting);
+            theScreen -> draw(x, y, tint, sizeFactor, "F", doLighting);
         }
     }
 

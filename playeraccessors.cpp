@@ -109,6 +109,7 @@
         return sizeFactor;
     }
 
-    Vector2 player::getPos() {
-        return (Vector2){x, y};
+    void player::goToDoor() {
+        x = nextX;
+        y = nextY;
     }

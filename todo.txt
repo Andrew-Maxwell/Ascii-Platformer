@@ -1,26 +1,5 @@
-Constraints on story:
-    - Want it to be touching and homely like Studio Ghibli (instead of contrived stories of high adventure.), or at least believable and relateable.
-    - Want it to be adapted to the medium of the game I'm creating (can be told through text, dialog and environment only)
-    - Story pacing fits with puzzle/exploration gameplay
-    - Ideally, text visuals tie into the story somehow
-    - Write what you know!
-    - Want it to be about an abandoned city/industrial wasteland like Rain World
-
-Another story idea: A small crew of professional (licensed) scavengers/salvagers, exploring an abandoned planetary colony.
-- Planetary colony was abandoned due to large-scale disaster (solar flare? earthquake? Ecosystem/life support destabilization?) which
-    left infrastructure, heavy machinery more or less intact but made the area unliveable.
-    - Maybe a prion or some other type of sickness spread through the colony's farms, making it impossible to continue living there.
-        Colonists forced to leave before the food supply destabilized entirely.
-- Salvage technicians searching for mechanisms containing unobtanium. They spread out to search the colony separately, but remain in occasional radio contact.
-- Player is invited to explore the lives that were left behind when the colonists evacuated.
-- Due to near-lightspeed travel, each assignment for the scavengers is at most a few months, but the investors don't see returns
-    for decades. The scavengers have no communication with the outside world. 
-- There may be a few people living in this abandoned world, living off their own cultivars which were more expensive/less desirable
-    but not affected by the prion. These cultivars were not widely available enough to support the original colonists, and so the 
-    evacuation was still necessary.
-- Emotional arc related to reading a diary which was published, or you found, written by one of the survivors. Possibly the diary
-    helps the player character find catharsis with a loss of their own somehow. (I'm not sure I'm up to writing this...)
-Themes: Loss, isolation, abandonment. The sad sense you get walking through an empty airport where everyone is gone.
+Loose ends:
+- Make the max scale determined by screen size
 
 Features:
 1 Puzzle elements:
@@ -62,7 +41,7 @@ Features:
 ? Multi-thread processing for water and particles
 ? Editor misc:
     3 Display, allow changing palette selection (don't ignore number keys) in tab screen
-    3 Add a layer indicator which shows all of the layers and which one is selected
+    3 Add aB layer indicator which shows all of the layers and which one is selected
     3 Fix the default palette
     3 Need to be able to correspond entities in the file to entities in the editor more easily.
 
@@ -133,6 +112,99 @@ Bugs:
 - Particles don't appear right next to walls
 - Layers still getting deleted multiple times under some circumstances?
 - Player vibrates when standing on a surface
+
+Idea: Setting is a floating colony in the atmosphere of a gas giant. Modeled after a truly massive blimp?
+
+Zone ideas:
+    Greenhouses
+    Residencies
+    Commerical District
+    Park
+    Fabrication/Manufacturing 
+    Superstructure (outside of town)
+    Substructure/hull (bottom of station)
+    Antenna Array
+    Life Support/Environmental Conditioning
+    Atmospheric Monitoring
+    Power Distribution
+    Network
+    Computation
+    Transit Hub
+    Landing Port
+    Buoyancy Control
+    Reservoir
+
+Constraints on story:
+    - Want it to be adapted to the medium of the game I'm creating (can be told through text, dialog and environment only)
+    - Ideally, text (DOS?) visuals tie into the story somehow
+    - Makes sense with guns/outfit system
+    - Write what you know!
+    - Want it to be about an abandoned city/industrial wasteland like Rain World
+AND EITHER:
+    - Want it to be touching and homely like Studio Ghibli (instead of contrived stories of high adventure.), or at least believable and relateable.
+    - Story pacing fits with puzzle/exploration gameplay
+OR:
+    - Want it to have fighting robots!
+
+
+Another story idea: A small crew of professional (licensed) scavengers/salvagers, exploring an abandoned planetary colony.
+- Planetary colony was abandoned due to large-scale disaster (solar flare? earthquake? Ecosystem/life support destabilization?) which
+    left infrastructure, heavy machinery more or less intact but made the area unliveable.
+    - Maybe a prion or some other type of sickness spread through the colony's farms, making it impossible to continue living there.
+        Colonists forced to leave before the food supply destabilized entirely.
+- Salvage technicians searching for mechanisms containing unobtanium. They spread out to search the colony separately, but remain in occasional radio contact.
+- Player is invited to explore the lives that were left behind when the colonists evacuated.
+- Due to near-lightspeed travel, each assignment for the scavengers is at most a few months, but the investors don't see returns
+    for decades. The scavengers have no communication with the outside world. 
+- There may be a few people living in this abandoned world, living off their own cultivars which were more expensive/less desirable
+    but not affected by the prion. These cultivars were not widely available enough to support the original colonists, and so the 
+    evacuation was still necessary.
+- Emotional arc related to reading a diary which was published, or you found, written by one of the survivors. Possibly the diary
+    helps the player character find catharsis with a loss of their own somehow. (I'm not sure I'm up to writing this...)
+Themes: Loss, isolation, abandonment. The sad sense you get walking through an empty airport where everyone is gone.
+
+Another story idea: A popular, charismatic leader (A) takes with him a group of idealists to found a new colony in the upper 
+atmosphere of a gas giant, similar to a seastead today. The objective of the colony is perfect policy created by an advanced, 
+rigorously-tested quantum AI called (B). (A) dies unexpectedly, and (B) plans a huge state funeral for him. The population 
+mourns his loss but expect the experiment to continue without much change; nominallly, (A)'s role was just as interim leader 
+until (B) was tested thoroughly enough to take over.
+
+However, trouble is brewing. (C), a scientist who helped to design (B), and (D), another member of (A)'s inner circle, fight 
+over who should adopt (A)'s role. (D) wins, but fears a plot by (C) to depose him and take leadership for himself. (D) 
+modifies (B) to prevent this, ensuring (B)'s loyalty and putting it in charge of a huge robotic secret police tasked with 
+rooting out opposition to (D)'s leadership. (C), unaware of the modifications to (B), backs down and is allowed to remain head of 
+science/technology; (D) fears his clout too much to fire him completely.
+
+(C)'s lab detects a new crop disease which threatens to undermine the colony's food supply. (D) believes that it's a lie to undermine
+his leadership, so he suppresses the results and imprisons (C), installing a crony in charge of his lab.
+When the crop disease causes widespread food shortages, (D) calls for a new migration to another uninhabited planet, 
+attempting to imitate (A) as a popular visionary and gain some of the loyalty he enjoyed. Under his orders, (B) begins 
+preparing the colony ship for departure. However, the population deposes and imprisons (D) and installs (C) in his place,
+although a small minority still support (D).
+
+(C) is able to avert famine by carefully managing the crops not affected by the disease. Although this plan is workable and 
+nobody starves, it's very uncomfortable. In addition, (B) remains loyal to (D), and prevents access to 
+critical areas of the colony infrastructure while calling for (D)'s release. (C) makes a speech laying out a plan to 
+stabilize the colony's biosphere and reset (B) to a previous state. The plan requires hard work and deprivation, and instead 
+the population calls for the colony's ship to be relaunched, taking them back to civilization. (C) agrees and manages to 
+wrest control of the ship from (B), after which the colonists make their escape, returning to a nearby habitable planet. (D) elects
+to stay behind with (B), along with a small group who remain loyal to him; (C) allows this.
+
+The player (E) launches to the colony as assistant/grad student to a political scientist (F) who wants to study the colony as 
+an experiment in computer government. They enter cold sleep before (A)'s death and arrive after the departure of the ship 
+with the majority of the colonists. The remaining colonists, under (D), insist that they are the colony which (A) intended to 
+create. They tell you that the colony was abandoned by traitors who stole the ship belonging to them. They also tell you that 
+as trespassers in the colony, your ship is forfeit and they imprison you in the living space of the colony, preventing you 
+from thoroughly exploring the colony, searching out testimonies from the departed colonists (which they have also almost 
+entirely erased), or leaving on your ship. Obviously, you escape to do these three things, while secretly remaining in contact with
+your companion, who is able to help you work out the full story as you find artifacts left behind by the original colonists.
+
+However, your primary goal is still to escape with the scientist. The scientist accidentally lets it slip that you were in 
+contact, and as a result they are more thoroughly imprisoned. However, (D) does not know how to disable (F)'s advanced 
+embedded communication tech, and so decides to forcefully put (F) in cold sleep instead. Since the colony does not have any 
+cold sleep facilities itself, they put (F) into cold sleep on your ship! After you are able to figure out how to shut off 
+power to the security systems, you are able to escape in your ship.
+
 
 Maybe the story doesn't need to be so complicated. Maybe it's something like:
 Brother is training you.

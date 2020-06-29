@@ -73,5 +73,5 @@
     }
 
     void particle::print() {
-        theCanvas -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
+        theScreen -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
     }

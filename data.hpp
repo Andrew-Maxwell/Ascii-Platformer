@@ -2,7 +2,7 @@
 #define DATA_HPP
 
 #include "layer.hpp"
-#include "canvas.hpp"
+#include "screen.hpp"
 #include "editables.hpp"
 #include "player.hpp"
 
@@ -21,6 +21,8 @@ class data {
 
     bool load(string fileName);
 
+    void save();
+
     string getFileName();
 
     Color getColor(const Value& tintJson);
@@ -30,7 +32,7 @@ class levelData : virtual public data {
 
     public:
 
-    void initializeColors(canvas* toInit);
+    void initializeColors(screen* toInit);
 
     int getDayLength();
 

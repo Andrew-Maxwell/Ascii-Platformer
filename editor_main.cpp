@@ -155,15 +155,15 @@ int main(int argc, char** argv) {
             if (IsKeyDown(KEY_TAB)) {
 
                 mousePos.clear();
-                theCanvas -> start(true);
+                theScreen -> start(true);
 
                 //Print out all available charFills
 
                 for (int i = 0; i < charFills.size(); i++) {
                     int codePointToDisplay =  charFills[i] -> display();
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
-                    theCanvas -> drawHud(i % (theCanvas -> getHudCols() / 2) * 2,
-                                         i / (theCanvas -> getHudCols() / 2) * 2,
+                    theScreen -> drawHud(i % (theScreen -> getHudCols() / 2) * 2,
+                                         i / (theScreen -> getHudCols() / 2) * 2,
                                          UIFOREGROUND, string(temp));
                     free(temp);
                 }
@@ -171,16 +171,16 @@ int main(int argc, char** argv) {
                 //Print out currently selected brush
 
                 string brushLabel = brushName + " Density: " + to_string(density) + (absoluteBrush? " Absolute mode" : " Relative mode");
-                theCanvas -> drawHud(1, theCanvas -> getHudRows() - 2, UIFOREGROUND, brushLabel);
+                theScreen -> drawHud(1, theScreen -> getHudRows() - 2, UIFOREGROUND, brushLabel);
 
-                theCanvas -> end();
+                theScreen -> end();
 
                 //If a character is clicked, add it to the palette
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mouse = GetMousePosition();
-                    int selection = (int)mouse.y / (2 * theCanvas -> getHudFontSize()) *
-                        (theCanvas -> getHudCols() / 2) + (int)mouse.x / (2 * theCanvas -> getHudFontSize());
+                    int selection = (int)mouse.y / (2 * theScreen -> getHudFontSize()) *
+                        (theScreen -> getHudCols() / 2) + (int)mouse.x / (2 * theScreen -> getHudFontSize());
                     if (selection > 0 && selection < charFills.size()) {
                         palette[paletteSelection + 22 * colliderSelected] = selection;
                     }
@@ -358,7 +358,7 @@ int main(int argc, char** argv) {
                 }
                 else {  //Control is not down
 
-                    theCanvas -> moveCamera();
+                    theScreen -> moveCamera();
 
                     //Delete selection
 
@@ -421,7 +421,7 @@ int main(int argc, char** argv) {
 
                     //Change lighting
                     if (IsKeyPressed(KEY_L)) {
-                        theCanvas -> changeLighting();
+                        theScreen -> changeLighting();
                     }
 
                     //Adjusting color
@@ -450,7 +450,7 @@ int main(int argc, char** argv) {
                                 (*componentPtr)++;
                             }
                             (*thisLayer) -> setColor((Color){255 - background.r, 255 - background.g, 255 - background.b, 255 - background.a});
-                            theCanvas -> setColor(background);
+                            theScreen -> setColor(background);
                         }
                         else {
                             Color newTint = (*thisLayer) -> getColor();
@@ -497,7 +497,7 @@ int main(int argc, char** argv) {
 
                     if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) && (*thisLayer) -> getIsEditable()) {
                         intVector2 tile = (*thisLayer) -> getMouseTile();
-                        palette[paletteSelection + 22 * colliderSelected] = theCanvas -> myGetGlyphIndex((*thisLayer) -> sample(tile.x, tile.y));
+                        palette[paletteSelection + 22 * colliderSelected] = theScreen -> myGetGlyphIndex((*thisLayer) -> sample(tile.x, tile.y));
                     }
 
                     //Left click to add a brush input point or shift to select topmost object
@@ -532,7 +532,7 @@ int main(int argc, char** argv) {
 
                         else {
                             if (brushID == 10) {
-                                intVector2 tile = theCanvas -> getMouseRelativeTo(0, 0, 1);
+                                intVector2 tile = theScreen -> getMouseRelativeTo(0, 0, 1);
                                 Value& newJson = level.getNewEntity(tile.x, tile.y, (*thisLayer) -> getSizeFactor(), placeHoldersAdded);
                                 editableLayer* newEntity = new editableLayer(tile.x, tile.y, {0, 0, 255, 255}, (*thisLayer) -> getSizeFactor(), false, false, "", 'A' + placeHoldersAdded, 1, 1, newJson);
                                 placeHoldersAdded++;
@@ -574,7 +574,7 @@ int main(int argc, char** argv) {
 
                 //display the world
 
-                theCanvas -> start(false);
+                theScreen -> start(false);
                 for (auto printIter = layers.begin(); printIter != layers.end(); printIter++) {
                     (*printIter) -> print();
                 }
@@ -585,10 +585,10 @@ int main(int argc, char** argv) {
                     int codePointToDisplay = charFills[palette[i + 22 * colliderSelected]] -> get(-1, -1);
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
                     if (i == paletteSelection) {
-                        theCanvas -> drawHud(i * 2 + 1, 1, (Color){255, 0, 0, 255}, temp);
+                        theScreen -> drawHud(i * 2 + 1, 1, (Color){255, 0, 0, 255}, temp);
                     }
                     else {
-                        theCanvas -> drawHud(i * 2 + 1, 1, (Color){255, 255, 255, 255}, temp);
+                        theScreen -> drawHud(i * 2 + 1, 1, (Color){255, 255, 255, 255}, temp);
                     }
                     free(temp);
                 }
@@ -597,10 +597,10 @@ int main(int argc, char** argv) {
                     int codePointToDisplay = charFills[palette[i + 22 * colliderSelected]] -> get(-1, -1);
                     char* temp = TextToUtf8(&codePointToDisplay, 1);
                     if (i == paletteSelection) {
-                        theCanvas -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 0, 0, 255}, temp);
+                        theScreen -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 0, 0, 255}, temp);
                     }
                     else {
-                        theCanvas -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 255, 255, 255}, temp);
+                        theScreen -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 255, 255, 255}, temp);
                     }
                     free(temp);
                 }
@@ -608,14 +608,14 @@ int main(int argc, char** argv) {
                 //display cursor markers
 
                 markers.print();
-                theCanvas -> end();
+                theScreen -> end();
 
             }
         }
         if (mayNeedToSave) {
             BeginDrawing();
             ClearBackground(UIBACKGROUND);
-            theCanvas -> drawHud(1, 1, UIFOREGROUND, "You didn't save the level. Do you want to save? Y/S or N/ESC.");
+            theScreen -> drawHud(1, 1, UIFOREGROUND, "You didn't save the level. Do you want to save? Y/S or N/ESC.");
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
                 level.writeEntities(layers, background);

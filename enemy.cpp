@@ -72,5 +72,5 @@
 
     void enemy::print(float cameraX, float cameraY, Font displayFont)
     {
-       theCanvas -> draw(x, y, tint, sizeFactor, "@");
+       theScreen -> draw(x, y, tint, sizeFactor, "@");
     }

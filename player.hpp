@@ -104,6 +104,8 @@ class player : virtual public collideable, public entityParent, public hudEntity
     float xMoveWater, yMoveWater;
     float xInertia, yInertia;
 
+    float nextX, nextY;
+
     string outfitName;
     int display;
     string displayStr;
@@ -164,7 +166,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
 
         float getSizeFactor();
 
-        Vector2 getPos();
+        void goToDoor();
 
     //Collision functions
 

@@ -225,28 +225,28 @@
     //Physical tilemap functions
 
     bool collider::isSolid(int checkX, int checkY) {
-        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
-            return canvas[checkY][checkX] == 's' || canvas[checkY][checkX] == '8';
+        if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {
+            return screen[checkY][checkX] == 's' || screen[checkY][checkX] == '8';
         }
         return false;
     }
 
     bool collider::isLiquid(int checkX, int checkY) {
-        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
-            return canvas[checkY][checkX] == 'w';
+        if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {
+            return screen[checkY][checkX] == 'w';
         }
         return false;
     }
 
     int collider::getPlayerDamage(int checkX, int checkY) {
-        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
-            if (canvas[checkY][checkX] == 'x' || canvas[checkY][checkX] == 'y') {
+        if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {
+            if (screen[checkY][checkX] == 'x' || screen[checkY][checkX] == 'y') {
                 return -2;
             }
-            else if (canvas[checkY][checkX] == 'X' || canvas[checkY][checkX] == 'Y') {
+            else if (screen[checkY][checkX] == 'X' || screen[checkY][checkX] == 'Y') {
                 return -10;
             }
-            else if (canvas[checkY][checkX] == 'Z') {
+            else if (screen[checkY][checkX] == 'Z') {
                 return -500;
             }
         }
@@ -254,14 +254,14 @@
     }
     
     int collider::getDamage(int checkX, int checkY) {
-        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
-            if (canvas[checkY][checkX] == 'x') {
+        if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {
+            if (screen[checkY][checkX] == 'x') {
                 return -2;
             }
-            else if (canvas[checkY][checkX] == 'X') {
+            else if (screen[checkY][checkX] == 'X') {
                 return -10;
             }
-            else if (canvas[checkY][checkX] == 'Z') {
+            else if (screen[checkY][checkX] == 'Z') {
                 return -500;
             }
         }
@@ -283,14 +283,14 @@
     //Helper function for getFloorLevel. Used to check multiple points along the bottom of the entity.
 
     float collider::checkHeight(float checkX, float checkY) {
-        if (checkY >= 0 && checkY < canvas.size() && checkX >= 0 && checkX < canvas[checkY].size()) {
-            if (48 <= canvas[checkY][checkX] && canvas[checkY][checkX] < 56) {
-                return (canvas[checkY][checkX] - '0') / 8.0;
+        if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {
+            if (48 <= screen[checkY][checkX] && screen[checkY][checkX] < 56) {
+                return (screen[checkY][checkX] - '0') / 8.0;
             }
-            if (canvas[checkY][checkX] == 'R' || canvas[checkY][checkX] == 'r') {
+            if (screen[checkY][checkX] == 'R' || screen[checkY][checkX] == 'r') {
                 return fmod(checkX, 1.0);
             }
-            if (canvas[checkY][checkX] == 'L' || canvas[checkY][checkX] == 'l') {
+            if (screen[checkY][checkX] == 'L' || screen[checkY][checkX] == 'l') {
                 return 1 - fmod(checkX, 1.0);
             }
         }

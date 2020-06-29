@@ -70,5 +70,5 @@
     }
 
     void newTestEntity::print() {
-        theCanvas -> draw(x, y, tint, sizeFactor, "test");
+        theScreen -> draw(x, y, tint, sizeFactor, "test");
     }

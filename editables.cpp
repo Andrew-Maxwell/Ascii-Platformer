@@ -23,17 +23,17 @@ using namespace rapidjson;
         original = newTint;
         json = newJson;
 
-        //If layer Read in canvas information. Canvas stores the layer in UTF-8; intCanvas is in UTF-32 (?)
-        //Anyway, intCanvas is much easier to edit, and changes are propogated to canvas to display using update()
+        //If layer Read in screen information. Canvas stores the layer in UTF-8; intCanvas is in UTF-32 (?)
+        //Anyway, intCanvas is much easier to edit, and changes are propogated to screen to display using update()
         //intCanvas is stored in "frames" for undoing/redoing. Complete state is saved in each frame.
 
         if (isLayer) {
 
-            canvas.clear();
+            screen.clear();
             ifstream worldFile = getLevelIFStream(fileName);
             string line;
             getline(worldFile, line);
-            canvas.push_back(line);
+            screen.push_back(line);
             vector<int*> intCanvas;
             int* codepoints = GetCodepoints(line.c_str(), &knownWidth);
             int* newCodepoints = new int[knownWidth];
@@ -43,7 +43,7 @@ using namespace rapidjson;
             intCanvas.push_back(newCodepoints);
 
             while (getline(worldFile, line)) {
-                canvas.push_back(line);
+                screen.push_back(line);
                 vector<int> intLine;
                 int* codepoints = GetCodepoints(line.c_str(), &width);
                 if (width != knownWidth) {
@@ -61,7 +61,7 @@ using namespace rapidjson;
 
         else {
             for (int i = 0; i < displayHeight; i++) {
-                canvas.push_back(string(displayWidth, display));
+                screen.push_back(string(displayWidth, display));
             }
         }
         tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
@@ -85,7 +85,7 @@ using namespace rapidjson;
         selected = false;
         displayWidth = other.displayWidth;
         displayHeight = other.displayHeight;
-        canvas = other.canvas;
+        screen = other.screen;
         tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
         render();
     }
@@ -138,14 +138,14 @@ using namespace rapidjson;
 
 /*****************************************************************************/
 //update()
-//Propogate changes from intCanvas to the ordinary canvas (which is only used for display.)
+//Propogate changes from intCanvas to the ordinary screen (which is only used for display.)
 /*****************************************************************************/
 
     void editableLayer::update() {
-        canvas.clear();
+        screen.clear();
         for (int i = 0; i < frames[currentFrame].size(); i++) {
             char* lineC = TextToUtf8(frames[currentFrame][i], knownWidth);
-            canvas.push_back(lineC);
+            screen.push_back(lineC);
             free(lineC);
          //  cout << "\t" << intCanvas[i] << endl;
         }
@@ -187,7 +187,7 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     bool editableLayer::mouseOn() {
-        intVector2 tile = intVector2(theCanvas -> getMouseRelativeTo(x, y, sizeFactor));
+        intVector2 tile = intVector2(theScreen -> getMouseRelativeTo(x, y, sizeFactor));
         return (visible && tile.x >= 0 && tile.x <= getCols() && tile.y >= 0 && tile.y <= getRows());
     }
 
@@ -196,7 +196,7 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     intVector2 editableLayer::getMouseTile() {
-        return intVector2(theCanvas -> getMouseRelativeTo(x, y, sizeFactor));
+        return intVector2(theScreen -> getMouseRelativeTo(x, y, sizeFactor));
     }
 
 /*****************************************************************************/
@@ -494,7 +494,7 @@ using namespace rapidjson;
         currentFrame++;
         frames.push_back(intCanvas);
 
-        //Update the visible canvas
+        //Update the visible screen
 
         update();
     }
@@ -506,15 +506,15 @@ using namespace rapidjson;
 
     void editableLayer::setArea() {
         if (json.HasMember("height") && json.HasMember("width")) {
-            intVector2 newArea = intVector2(theCanvas -> getMouseRelativeTo(x, y, sizeFactor));
+            intVector2 newArea = intVector2(theScreen -> getMouseRelativeTo(x, y, sizeFactor));
             newArea.x++;
             newArea.y++;
             if (newArea.x >= 1 && newArea.y >= 1) {
                 displayWidth = newArea.x;
                 displayHeight = newArea.y;
-                canvas.clear();
+                screen.clear();
                 for (int i = 0; i < displayHeight; i++) {
-                    canvas.push_back(string(displayWidth, display));
+                    screen.push_back(string(displayWidth, display));
                 }
                 UnloadRenderTexture(tex);
                 tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
@@ -566,7 +566,7 @@ using namespace rapidjson;
         currentFrame++;
         frames.push_back(intCanvas);
 
-        //Update the visible canvas
+        //Update the visible screen
 
         update();
     }
@@ -617,7 +617,7 @@ using namespace rapidjson;
         currentFrame++;
         frames.push_back(intCanvas);
 
-        //Update the visible canvas
+        //Update the visible screen
 
         update();
 
@@ -683,7 +683,7 @@ using namespace rapidjson;
         currentFrame++;
         frames.push_back(intCanvas);
 
-        //Update the visible canvas
+        //Update the visible screen
 
         update();
     }
@@ -727,7 +727,7 @@ using namespace rapidjson;
             cout << "Saving layer " << fileName << endl;
             ofstream layerOut;
             layerOut.open(fileName);
-            for (string line : canvas) {
+            for (string line : screen) {
                 layerOut << line << endl;
             }
             layerOut.close();
@@ -756,7 +756,7 @@ using namespace rapidjson;
             tint = original;
         }
         if (visible) {
-            theCanvas -> drawLayerEditor(x, y, tint, sizeFactor, tex.texture, selected, (flashCount <= 0 && doLighting));
+            theScreen -> drawLayerEditor(x, y, tint, sizeFactor, tex.texture, selected, (flashCount <= 0 && doLighting));
         }
     }
 
@@ -785,7 +785,7 @@ using namespace rapidjson;
         cout << "Saving collider " << fileName << endl;
         ofstream layerOut;
         layerOut.open(fileName);
-        for (string line : canvas) {
+        for (string line : screen) {
             layerOut << line << endl;
         }
         layerOut.close();
@@ -793,11 +793,11 @@ using namespace rapidjson;
 
     void editableCollider::print() {
         if (flashCount-- <= 0) {
-            Color background = theCanvas -> getColor();
+            Color background = theScreen -> getColor();
             tint = (Color){255 - background.r, 255 - background.g, 255 - background.b, 255};
         }
         if (visible) {
-            theCanvas -> drawLayerEditor(x, y, tint, sizeFactor, tex.texture, selected, false);
+            theScreen -> drawLayerEditor(x, y, tint, sizeFactor, tex.texture, selected, false);
         }
     }
 

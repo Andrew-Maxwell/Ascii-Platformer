@@ -46,13 +46,21 @@
 #define GRAVITY 0.01
 #define FRICTION 0.95
 #define WATERRESISTANCE 0.9
-
+/*
 #define UIBACKGROUND {15, 15, 30, 255}
 #define UIFOREGROUND {255, 240, 200, 255}
 #define LIGHTBACKGROUND {30, 30, 60, 255}
 #define LIGHTFOREGROUND {255, 255, 255, 255}
 #define DARKBACKGROUND {0, 0, 0, 255}
 #define DARKFOREGROUND {200, 180, 150, 255}
+*/
+
+#define UIBACKGROUND {192, 192, 192, 255}
+#define UIFOREGROUND {0, 0, 255, 255}
+#define LIGHTBACKGROUND {192, 192, 192, 255}
+#define LIGHTFOREGROUND {255, 255, 255, 255}
+#define DARKBACKGROUND {192, 192, 192, 255}
+#define DARKFOREGROUND {0, 0, 0, 255}
 
 #define HEALTHCOLOR {50, 255, 150, 255}
 #define HURTCOLOR {255, 0, 0, 255}
@@ -87,19 +95,31 @@
 
 //Globally accessible stuff
 
+using namespace std;
+
+struct keyMapping {
+    int error = -1, up = KEY_W, down = KEY_S, left = KEY_A, right = KEY_D, inventory = KEY_TAB, nextWeapon = KEY_E, previousWeapon = KEY_Q, explode = KEY_R, lastCode = KEY_LEFT_SHIFT;
+    int code[10] = {KEY_ZERO, KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE, KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE};
+
+    int& operator[](int index);
+    
+    string name(int index);
+
+    int count();
+};
+
 class collider;
 extern collider* world;
-class canvas;
-extern canvas* theCanvas;
+class screen;
+extern screen* theScreen;
 extern int entityCounter;
 extern int tickCounter;
 extern bool debugWatch;
+extern keyMapping keys;
 
 extern "C" {
     extern int FONTCHARS[];
 }
-
-using namespace std;
 
 struct intVector2 {
     int x;
@@ -111,15 +131,17 @@ struct intVector2 {
     }
 };
 
+int myGetKeyPressed();
+
 float roundTo8th(float x);
+
+string findFile(string fileName);
 
 /******************************************************************************/
 //getLevelIFStream() and getLevelFileP()
 //Checks multiple locations for filename and sets string correctly so that
 //the file can be written back to later.
 /******************************************************************************/
-
-string findFile(string fileName);
 
 ifstream getLevelIFStream(string& fileName);
 

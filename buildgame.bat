@@ -17,7 +17,7 @@ IF EXIST player.o del /F player.o
 IF EXIST rain.o del /F rain.o
 IF EXIST savepoint.o del /F savepoint.o
 IF EXIST water.o del /F water.o
-IF EXIST canvas.o del /F canvas.o
+IF EXIST screen.o del /F screen.o
 IF EXIST data.o del /F data.o
 IF EXIST gameleveldata.o del /F gameleveldata.o
 IF EXIST savedata.o del /F savedata.o

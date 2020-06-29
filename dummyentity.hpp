@@ -1,6 +1,6 @@
 #include "meta.hpp"
 #include "entity.hpp"
-#include "canvas.hpp"
+#include "screen.hpp"
 
 #ifndef DUMMYENTITY_HPP
 #define DUMMYENTITY_HPP

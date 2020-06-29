@@ -48,7 +48,7 @@
             if (gun.ammo != 0) {
                 if (gun.lastFired + gun.cooldown < tickCounter) {
                     if (gun.automatic || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        Vector2 aim = theCanvas -> getMouseRelativeTo(x, y, sizeFactor);
+                        Vector2 aim = theScreen -> getMouseRelativeTo(x, y, sizeFactor);
                         aim = Vector2Normalize(aim);
                         bullet* b = new bullet(
                             //x, y, zPosition, color, sizeFactor
@@ -81,248 +81,252 @@
 
     void player::tickSet() {
 
-        //Reset break cases
-        breakDoor = breakSave = breakDead = false;
+        if (!breakDoor && !breakDead) {
 
-        //Detect solid blocks
-        bool onGround =
-            world -> isSolid(x + (1 - width) / 2, y + 1) ||
-            world -> isSolid(x + (1 + width) / 2, y + 1);
-        bool onWall =
-            world -> isSolid(x + (1 - width) / 2 - 0.1, y) ||
-            world -> isSolid(x + (1 + width) / 2 + 0.1, y);
+            //Detect solid blocks
+            bool onGround =
+                world -> isSolid(x + (1 - width) / 2, y + 1) ||
+                world -> isSolid(x + (1 + width) / 2, y + 1);
+            bool onWall =
+                world -> isSolid(x + (1 - width) / 2 - 0.1, y) ||
+                world -> isSolid(x + (1 + width) / 2 + 0.1, y);
 
-        //Keyboard movement handling
-        if (!isUnderWater) {
-            //Gravity
-            yInertia = min(yInertia + gravity, 0.3f);
-            yMovement = 0;
-            //Jumping
-            if ((IsKeyPressed(KEY_W) || IsKeyDown(KEY_W) && autoRejump)) {  //If the jump key is pressed
-                if (onGround) {                                         //If we're on a surface we can jump from
-                    yInertia  = -1 * jumpSpeed;                                 //then jump, and also reset jump counter
-                    jumpsUsed = jumpCount;
-                    justJumped = true;
-                }
-                else if (walljump && onWall) {
-                    yInertia = -1 * jumpSpeed;
-                    jumpsUsed = jumpCount;
-                    justJumped = true;
-                }
-                else if (jumpsUsed != 0) {                                //Else, if jumps remaining,
-                    jumpsUsed--;
-                    yInertia = -1 * jumpSpeed;                                 //jump and decrement jump counter
-                    if (IsKeyPressed(KEY_W)) {
+            //Keyboard movement handling
+            if (!isUnderWater) {
+                //Gravity
+                yInertia = min(yInertia + gravity, 0.3f);
+                yMovement = 0;
+                //Jumping
+                if (IsKeyPressed(keys.up) || (IsKeyDown(keys.up) && autoRejump)) {  //If the jump key is pressed
+                    if (onGround) {                                         //If we're on a surface we can jump from
+                        yInertia  = -1 * jumpSpeed;                                 //then jump, and also reset jump counter
+                        jumpsUsed = jumpCount;
                         justJumped = true;
+                    }
+                    else if (walljump && onWall) {
+                        yInertia = -1 * jumpSpeed;
+                        jumpsUsed = jumpCount;
+                        justJumped = true;
+                    }
+                    else if (jumpsUsed != 0) {                                //Else, if jumps remaining,
+                        jumpsUsed--;
+                        yInertia = -1 * jumpSpeed;                                 //jump and decrement jump counter
+                        if (IsKeyPressed(keys.up)) {
+                            justJumped = true;
+                        }
+                    }
+                }
+                if (IsKeyReleased(keys.up) && yInertia < 0 && justJumped) {
+                    yInertia *= 0.3;
+                    justJumped = false;
+                }
+
+                //Lateral movement
+                if (IsKeyDown(keys.right)) {
+                    xMovement = speed;
+                    if (xInertia < 0) {
+                        xInertia *= 0.9;
+                    }
+                }
+                else if (IsKeyDown(keys.left)) {
+                    xMovement = -1 * speed;
+                    if (xInertia > 0) {
+                        xInertia *= 0.9;
+                    }
+                }
+                else {
+                    xMovement = 0;
+                    xInertia *= 0.9;
+                }
+
+                //Air recovery
+                air = min(maxAir, air + AIRRECOVERYRATE);
+            }
+            else {  //Is underwater
+                jumpsUsed = jumpCount;
+
+                //Moving underwater
+                if (IsKeyDown(keys.up)) {
+                    yMovement = -1 * speed;
+                    if (yInertia > 0) {
+                        yInertia *= 0.9;
+                    }
+                }
+                else if (IsKeyDown(keys.down)) {
+                    yMovement = speed;
+                    if (yInertia < 0) {
+                        yInertia *= 0.9;
+                    }
+                }
+                else {
+                    yMovement = 0;
+                    yInertia *= 0.9;
+                }
+
+                if (IsKeyDown(keys.left)) {
+                    xMovement = -1 * speed;
+                    if (xInertia > 0) {
+                        xInertia *= 0.9;
+                    }
+                }
+                else if (IsKeyDown(keys.right)) {
+                    xMovement = speed;
+                    if (xInertia < 0) {
+                        xInertia *= 0.9;
+                    }
+                }
+                else {
+                    xMovement = 0;
+                    xInertia *= 0.9;
+                }
+
+    /*
+                xMovement = 0;
+                yMovement = 0;
+                if (IsKeyDown(KEY_W)) {
+                    yInertia = max(-1 * waterSpeed, yInertia - waterAcceleration);
+                }
+                if (IsKeyDown(KEY_A)) {
+                    xInertia = max(-1 * waterSpeed, xInertia - waterAcceleration);
+                }
+                if (IsKeyDown(KEY_S)) {
+                    yInertia = min(waterSpeed, yInertia + waterAcceleration);
+                }
+                if (IsKeyDown(KEY_D)) {
+                    xInertia = min(waterSpeed, xInertia + waterAcceleration);
+                }
+    */
+
+                //Drowning
+                if (air == 0) {
+                    health--;
+                }
+                else {
+                    air--;
+                }
+            }
+
+            //Channels
+            for (int i = 0; i < 10; i++) {
+                if (IsKeyDown(keys.code[i])) {
+                    world -> setChannel(channels[i].to_ulong());
+                    lastChannel = i;
+                    if (tickCounter % 8 == 0) {
+                        broadcast(10, x, y, channelColors[i], sizeFactor, channels[i][(tickCounter % 64) / 8]);
                     }
                 }
             }
-            if (IsKeyReleased(KEY_W) && yInertia < 0 && justJumped) {
-                yInertia *= 0.3;
-                justJumped = false;
-            }
-
-            //Lateral movement
-            if (IsKeyDown(KEY_D)) {
-                xMovement = speed;
-                if (xInertia < 0) {
-                    xInertia *= 0.9;
-                }
-            }
-            else if (IsKeyDown(KEY_A)) {
-                xMovement = -1 * speed;
-                if (xInertia > 0) {
-                    xInertia *= 0.9;
-                }
-            }
-            else {
-                xMovement = 0;
-                xInertia *= 0.9;
-            }
-
-            //Air recovery
-            air = min(maxAir, air + AIRRECOVERYRATE);
-        }
-        else {  //Is underwater
-            jumpsUsed = jumpCount;
-
-            //Moving underwater
-            if (IsKeyDown(KEY_W)) {
-                yMovement = -1 * speed;
-                if (yInertia > 0) {
-                    yInertia *= 0.9;
-                }
-            }
-            else if (IsKeyDown(KEY_S)) {
-                yMovement = speed;
-                if (yInertia < 0) {
-                    yInertia *= 0.9;
-                }
-            }
-            else {
-                yMovement = 0;
-                yInertia *= 0.9;
-            }
-
-            if (IsKeyDown(KEY_A)) {
-                xMovement = -1 * speed;
-                if (xInertia > 0) {
-                    xInertia *= 0.9;
-                }
-            }
-            else if (IsKeyDown(KEY_D)) {
-                xMovement = speed;
-                if (xInertia < 0) {
-                    xInertia *= 0.9;
-                }
-            }
-            else {
-                xMovement = 0;
-                xInertia *= 0.9;
-            }
-
-/*
-            xMovement = 0;
-            yMovement = 0;
-            if (IsKeyDown(KEY_W)) {
-                yInertia = max(-1 * waterSpeed, yInertia - waterAcceleration);
-            }
-            if (IsKeyDown(KEY_A)) {
-                xInertia = max(-1 * waterSpeed, xInertia - waterAcceleration);
-            }
-            if (IsKeyDown(KEY_S)) {
-                yInertia = min(waterSpeed, yInertia + waterAcceleration);
-            }
-            if (IsKeyDown(KEY_D)) {
-                xInertia = min(waterSpeed, xInertia + waterAcceleration);
-            }
-*/
-
-            //Drowning
-            if (air == 0) {
-                health--;
-            }
-            else {
-                air--;
-            }
-        }
-
-        //Channels
-        for (int i = 0; i < 10; i++) {
-            if (IsKeyDown(KEY_ZERO + i)) {
-                world -> setChannel(channels[i].to_ulong());
-                lastChannel = i;
+            if (IsKeyDown(keys.lastCode)) {
+                world -> setChannel(channels[lastChannel].to_ulong());
                 if (tickCounter % 8 == 0) {
-                    broadcast(10, x, y, channelColors[i], sizeFactor, channels[i][(tickCounter % 64) / 8]);
+                    broadcast(5, x, y, channelColors[lastChannel], sizeFactor, channels[lastChannel][(tickCounter % 64) / 8]);
                 }
             }
-        }
-        if (IsKeyDown(KEY_LEFT_SHIFT)) {
-            world -> setChannel(channels[lastChannel].to_ulong());
-            if (tickCounter % 8 == 0) {
-                broadcast(5, x, y, channelColors[lastChannel], sizeFactor, channels[lastChannel][(tickCounter % 64) / 8]);
-            }
-        }
 
-        //Switching guns
-        if (IsKeyPressed(KEY_Q)) {
-            for (int i = 0; i < guns.size(); i++) {
-                gunSelect = (gunSelect - 1) % guns.size();
-                if (guns[gunSelect].unlocked) {
-                    break;
+            //Switching guns
+            if (IsKeyPressed(keys.previousWeapon)) {
+                for (int i = 0; i < guns.size(); i++) {
+                    gunSelect = (gunSelect - 1) % guns.size();
+                    if (guns[gunSelect].unlocked) {
+                        break;
+                    }
                 }
             }
-        }
-        if (IsKeyPressed(KEY_E)) {
-            for (int i = 0; i < guns.size(); i++) {
-                gunSelect = (gunSelect + 1) % guns.size();
-                if (guns[gunSelect].unlocked) {
-                    break;
+            if (IsKeyPressed(keys.nextWeapon)) {
+                for (int i = 0; i < guns.size(); i++) {
+                    gunSelect = (gunSelect + 1) % guns.size();
+                    if (guns[gunSelect].unlocked) {
+                        break;
+                    }
                 }
             }
-        }
 
-        //Shootin'
-        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && guns.size() > 0) {
-            fire(guns[gunSelect]);
-        }
+            //Shootin'
+            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && guns.size() > 0) {
+                fire(guns[gunSelect]);
+            }
 
-        //Explosions
-        if (IsKeyPressed(KEY_R)) {
-            explode (60, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5, zPosition);
-        }
+            //Explosions
+            if (IsKeyPressed(keys.explode)) {
+                explode (60, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5, zPosition);
+            }
 
-        //Death
-        hurtTimer--;
-        if (y > world -> getRows() + 25) {
-            health = 0;
-        }
-        if (health <= 0) {
-            breakDead = true;
-            xInertia = 0;
-            yInertia = 0;
-            collisions.clear();
+            //Death
+            hurtTimer--;
+            if (y > world -> getRows() + 25) {
+                health = 0;
+            }
+            if (health <= 0) {
+                breakDead = true;
+                xInertia = 0;
+                yInertia = 0;
+                collisions.clear();
+            }
         }
     }
 
     void player::tickGet() {
-        hit = false;
-        lastTickUnderWater = isUnderWater;
-        isUnderWater = false;
-        xMoveWater = 0;
-        yMoveWater = 0;
 
-        //spikes
-        int spikeDamage = world -> getPlayerDamage((int)(x + 0.5), (int)(y + 0.5));
-        if (hurtTimer < 0 && spikeDamage) {
-            health += spikeDamage;
-            hurtTimer = 60;
-            Vector2 newInertia = Vector2Scale(Vector2Negate(Vector2Normalize({xInertia, yInertia})), 0.7);
-            xInertia = newInertia.x;
-            yInertia = newInertia.y / 3;
-            damageIndicator(spikeDamage, x, y, HURTCOLOR, sizeFactor);
-        }
+        if (!breakDoor && !breakDead) {
 
-        //Handling collisions
-        list<collision>::iterator colIter = collisions.begin();
-        while (colIter != collisions.end()) {
-            handleCollision(*colIter);
-            colIter++;
-        }
-        collisions.clear();
+            hit = false;
+            lastTickUnderWater = isUnderWater;
+            isUnderWater = false;
+            xMoveWater = 0;
+            yMoveWater = 0;
 
-        //Allow for jumping out of the water
-
-        if (lastTickUnderWater && !isUnderWater) {
-            yInertia = yMovement + yMoveWater;
-            yMovement = 0;
-        }
-
-        //Update X and Y position based on 3 movement variables
-        float numSteps = max(int(abs(xInertia + xMoveWater + xMovement)) + 1, int(abs(yInertia + yMoveWater + yMovement)) + 1);
-        float xStep = (xInertia + xMoveWater + xMovement) / numSteps;
-        float yStep = (yInertia + yMoveWater + yMovement) / numSteps;
-        for (int i = 0; i < numSteps; i++) {
-            if (world -> isSolid(int(x + xStep + 0.05 + 0.9 * (xStep > 0)), int(y + 0.05))
-            || world -> isSolid(int(x + xStep + 0.05 + 0.9 * (xStep > 0)), int(y + 0.95))) {
-                x = floor(x + xStep) + (xStep < 0);
-                xInertia *= (-1 * elasticity);
-                hit = true;
-                xStep = 0;
+            //spikes
+            int spikeDamage = world -> getPlayerDamage((int)(x + 0.5), (int)(y + 0.5));
+            if (hurtTimer < 0 && spikeDamage) {
+                health += spikeDamage;
+                hurtTimer = 60;
+                Vector2 newInertia = Vector2Scale(Vector2Negate(Vector2Normalize({xInertia, yInertia})), 0.7);
+                xInertia = newInertia.x;
+                yInertia = newInertia.y / 3;
+                damageIndicator(spikeDamage, x, y, HURTCOLOR, sizeFactor);
             }
-            else {
-                x += xStep;
+
+            //Handling collisions
+            list<collision>::iterator colIter = collisions.begin();
+            while (colIter != collisions.end()) {
+                handleCollision(*colIter);
+                colIter++;
             }
-            if (world -> isSolid(int(x + 0.05), int(y + yStep + 0.05 + 0.9 * (yStep > 0)))
-            || world -> isSolid(int(x + 0.95), int(y + yStep + 0.05 + 0.9 * (yStep > 0)))) {
-                y = floor(y + yStep) + (yStep < 0);
-                yInertia *= (-1 * elasticity);
-                xInertia *= friction;
-                hit = true;
-                yStep = 0;
+            collisions.clear();
+
+            //Allow for jumping out of the water
+
+            if (lastTickUnderWater && !isUnderWater) {
+                yInertia = yMovement + yMoveWater;
+                yMovement = 0;
             }
-            else {
-                y += yStep;
+
+            //Update X and Y position based on 3 movement variables
+            float numSteps = max(int(abs(xInertia + xMoveWater + xMovement)) + 1, int(abs(yInertia + yMoveWater + yMovement)) + 1);
+            float xStep = (xInertia + xMoveWater + xMovement) / numSteps;
+            float yStep = (yInertia + yMoveWater + yMovement) / numSteps;
+            for (int i = 0; i < numSteps; i++) {
+                if (world -> isSolid(int(x + xStep + 0.05 + 0.9 * (xStep > 0)), int(y + 0.05))
+                || world -> isSolid(int(x + xStep + 0.05 + 0.9 * (xStep > 0)), int(y + 0.95))) {
+                    x = floor(x + xStep) + (xStep < 0);
+                    xInertia *= (-1 * elasticity);
+                    hit = true;
+                    xStep = 0;
+                }
+                else {
+                    x += xStep;
+                }
+                if (world -> isSolid(int(x + 0.05), int(y + yStep + 0.05 + 0.9 * (yStep > 0)))
+                || world -> isSolid(int(x + 0.95), int(y + yStep + 0.05 + 0.9 * (yStep > 0)))) {
+                    y = floor(y + yStep) + (yStep < 0);
+                    yInertia *= (-1 * elasticity);
+                    xInertia *= friction;
+                    hit = true;
+                    yStep = 0;
+                }
+                else {
+                    y += yStep;
+                }
             }
         }
     }
@@ -332,12 +336,12 @@
     }
 
     void player::print() {
-        if (!breakDoor) {   //Fix teleporting for one frame after going through door
+        if (!breakDead) {
             if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
-                theCanvas -> draw(x, y, HURTCOLOR, sizeFactor, displayStr, false);
+                theScreen -> draw(x, y, HURTCOLOR, sizeFactor, displayStr, false);
             }
             else {
-                theCanvas -> draw(x, y, tint, sizeFactor, displayStr, doLighting);
+                theScreen -> draw(x, y, tint, sizeFactor, displayStr, doLighting);
             }
         }
     }

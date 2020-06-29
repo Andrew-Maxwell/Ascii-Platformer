@@ -1,13 +1,14 @@
-#include "canvas.hpp"
+#include "screen.hpp"
 
-    canvas::canvas() {
+    screen::screen() {
         displayFont = LoadFontEx(FONTNAME, 8, FONTCHARS, NUMCHARS);
     }
 
-    void canvas::setParams(int newWorldRows, int newWorldCols, int newFontSize, float newPlayerSizeFactor, int newDayLength) {
+    void screen::setParams(int newWorldRows, int newWorldCols, int newGameFontSize, int newHudFontSize, float newPlayerSizeFactor, int newDayLength) {
         worldRows = newWorldRows;
         worldCols = newWorldCols;
-        fontSize = newFontSize;
+        fontSize = newGameFontSize;
+        hudFontSize = newHudFontSize;
         playerSizeFactor = newPlayerSizeFactor;
         dayLength = newDayLength;
 
@@ -23,15 +24,15 @@
         cameraLagY = screenRows / playerSizeFactor * 3 / 16;
     }
 
-    Color canvas::getColor() {
+    Color screen::getColor() {
         return background;
     }
 
-    void canvas::setColor(Color newColor) {
+    void screen::setColor(Color newColor) {
         background = newColor;
     }
 
-    void canvas::setAllColors(Color newDayLight, Color newSunsetLight, Color newNightLight, Color newDawnLight, Color newDayBackground, Color newSunsetBackground, Color newNightBackground, Color newDawnBackground) {
+    void screen::setAllColors(Color newDayLight, Color newSunsetLight, Color newNightLight, Color newDawnLight, Color newDayBackground, Color newSunsetBackground, Color newNightBackground, Color newDawnBackground) {
         dayLight = newDayLight;
         sunsetLight = newSunsetLight;
         nightLight = newNightLight;
@@ -45,7 +46,7 @@
 //Optimized functions
 //myGetGlyphIndex is long, so placed at bottom of the file
 
-    void canvas::myDrawTexture(Texture2D& texture, Rectangle& sourceRec, Rectangle& destRec, Vector2 origin, float rotation, Color tint)
+    void screen::myDrawTexture(Texture2D& texture, Rectangle& sourceRec, Rectangle& destRec, Vector2 origin, float rotation, Color tint)
     {
         // Check if texture is valid
         if (texture.id > 0)
@@ -95,7 +96,7 @@
         }
     }
 
-    void canvas::myDrawText(const char *text, Vector2 position, float fontSize, float spacing, Color tint) {
+    void screen::myDrawText(const char *text, Vector2 position, float fontSize, float spacing, Color tint) {
         DrawTextEx(displayFont, text, position, fontSize, spacing, tint);
 /*
         int length = strlen(text);      // Total length in bytes of the text, scanned by codepoints in loop
@@ -146,7 +147,7 @@
 
     //Handle world lighting (e.g. for time of day...)
 
-    float canvas::dayLevel() {
+    float screen::dayLevel() {
         int time = tickCounter % dayLength;
         if (time > dayLength / 3 && time < dayLength * 2 / 3) {
             return 1;
@@ -157,7 +158,7 @@
         return 0;
     }
 
-    float canvas::sunsetLevel() {
+    float screen::sunsetLevel() {
         int time = tickCounter % dayLength;
         if (time > dayLength * 2 / 3 && time < dayLength * 5 / 6) {
             return (1 - cos(PI * tickCounter / (dayLength / 12.0))) / 2.0;
@@ -165,7 +166,7 @@
         return 0;
     }
 
-    float canvas::nightLevel() {
+    float screen::nightLevel() {
         int time = tickCounter % dayLength;
         if (time > dayLength / 4 && time < dayLength * 3 / 4) {
             return 0;
@@ -176,7 +177,7 @@
         return 1;
     }
 
-    float canvas::dawnLevel() {
+    float screen::dawnLevel() {
         int time = tickCounter % dayLength;
         if (time > dayLength / 6 && time < dayLength / 3) {
             return (1 - cos(PI * tickCounter / (dayLength / 12.0))) / 2.0;
@@ -192,39 +193,92 @@
         return (Color){c.r * x, c.g * x, c.b * x, c.a * x};
     }
 
-    void canvas::calculateLighting() {
+    void screen::calculateLighting() {
         light = addColor(addColor(addColor(scaleColor(dayLight, dayLevel()), scaleColor(nightLight, nightLevel())), scaleColor(sunsetLight, sunsetLevel())), scaleColor(dawnLight, dawnLevel()));
         background = addColor(addColor(addColor(scaleColor(dayBackground, dayLevel()), scaleColor(nightBackground, nightLevel())), scaleColor(sunsetBackground, sunsetLevel())), scaleColor(dawnBackground, dawnLevel()));
     }
 
-    Color canvas::lighting(Color c) {
+    Color screen::lighting(Color c) {
         return (Color){c.r * light.r / 255.0, c.g * light.g / 255.0, c.b * light.b / 255.0, c.a * light.a / 255.0};
+    }
+
+    void screen::checkerboardTransition(int amountBlack) {
+        int horizontal = 0x2581 + amountBlack;
+        int vertical = 0x258f - amountBlack;
+        int horizontalCheckInt[9], verticalCheckInt[9];
+        for (int i = 0; i < 8; i++) {
+            horizontalCheckInt[i] = horizontal;
+            verticalCheckInt[i] = vertical;
+        }
+        horizontalCheckInt[8] = '\n';
+        verticalCheckInt[8] = '\n';
+        char* verticalCheck = TextToUtf8(verticalCheckInt, 9);
+        char* horizontalCheck = TextToUtf8(horizontalCheckInt, 9);
+        for (int i = 0; i < getHudRows() / 8 + 1; i++) {
+            for (int j = 0; j < getHudCols() / 8 + 1; j++) {
+                for (int k = 0; k < 8; k++) {
+                    if ((j + i) % 2) {
+                        drawHud(j * 8, i * 8 + k, BLACK, verticalCheck);
+                    }
+                    else {
+                        drawHud(j * 8, i * 8 + k, BLACK, horizontalCheck);
+                    }
+                }
+            }
+        }
     }
 
     //BUTTON
 
-    bool canvas::button(float x, float y, string text) {
+    bool screen::button(int pos, string text, bool mouseMode, int selected) {
         Vector2 mouse = GetMousePosition();
-        if (mouse.x > x * hudFontSize && mouse.x < (x + text.size()) * hudFontSize && mouse.y > y * hudFontSize && mouse.y < (y + 1) * hudFontSize) {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-                drawHudBarRight(x, y, DARKBACKGROUND, text.length());
-                drawHud(x, y, DARKFOREGROUND, text);
+        int triangleInt[2] = {0x25ba, ' '};
+        char* triangle = TextToUtf8(triangleInt, 2);
+        text = triangle + text;
+        free(triangle);
+        int y = 2 * (pos + 1);
+//        int x = (getHudCols() - text.size()) / 2;
+        int x = 1;
+        if (mouseMode) {
+            if (mouse.x > x * hudFontSize && mouse.x < (x + text.size()) * hudFontSize && mouse.y > y * hudFontSize && mouse.y < (y + 1) * hudFontSize) {
+                if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                    drawHudBarRight(x, y, DARKBACKGROUND, text.length());
+                    drawHud(x, y, DARKFOREGROUND, text);
+                }
+                else {
+                    drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
+                    drawHud(x, y, LIGHTFOREGROUND, text);
+                }
+                if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+                    return true;
+                }
             }
             else {
-                drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
-                drawHud(x, y, LIGHTFOREGROUND, text);
-            }
-            if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-                return true;
+                drawHud(x, y, UIFOREGROUND, text);
             }
         }
         else {
-            drawHud(x, y, UIFOREGROUND, text);
+            if (selected == pos) {
+                if (IsKeyDown(KEY_ENTER) || IsKeyDown(keys.lastCode)) {
+                    drawHudBarRight(x, y, DARKBACKGROUND, text.length());
+                    drawHud(x, y, DARKFOREGROUND, text);
+                }
+                else {
+                    drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
+                    drawHud(x, y, LIGHTFOREGROUND, text);
+                }
+                if (IsKeyReleased(KEY_ENTER) || IsKeyReleased(keys.lastCode)) {
+                    return true;
+                }
+            }
+            else {
+                drawHud(x, y, UIFOREGROUND, text);
+            }
         }
         return false;
     }
 
-    void canvas::start(float playerX, float playerY, bool tabScreen) {
+    void screen::start(float playerX, float playerY, bool tabScreen) {
 
         //Update camera; round value to nearest pixel
 
@@ -248,7 +302,7 @@
         start(tabScreen);
     }
 
-    void canvas::start(bool tabScreen) {
+    void screen::start(bool tabScreen) {
         if (IsWindowResized()) {
             screenRows = GetScreenHeight() / fontSize;
             screenCols = GetScreenWidth() / fontSize;
@@ -267,14 +321,14 @@
         }
     }
 
-    void canvas::end() {
+    void screen::end() {
         if (DRAWFPS) {
             myDrawText(to_string(GetFPS()).c_str(), (Vector2){0, 0}, 16, 0, WHITE);
         }
         EndDrawing();
     }
 
-    void canvas::draw(float x, float y, Color tint, float sizeFactor, string text, bool doLight) {
+    void screen::draw(float x, float y, Color tint, float sizeFactor, string text, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
@@ -284,18 +338,18 @@
             fontSize * sizeFactor, 0, tint);
     }
 
-    void canvas::drawHud(float x, float y, Color tint, string text) {
-        myDrawText(text.c_str(), (Vector2){x * hudFontSize, y * hudFontSize}, hudFontSize, 1, tint);
+    void screen::drawHud(float x, float y, Color tint, string text) {
+        myDrawText(text.c_str(), (Vector2){x * hudFontSize, y * hudFontSize}, hudFontSize, 0, tint);
     }
 
-    void canvas::drawScaleTest(float x, float y, Color tint, string text) {
+    void screen::drawScaleTest(float x, float y, Color tint, string text) {
         myDrawText(text.c_str(), (Vector2){
-            x * hudFontSize + (text.size() / 2.0) * (hudFontSize - fontSize),
+            x * hudFontSize,
             y * hudFontSize + 0.5 * (hudFontSize - fontSize)},
             fontSize, 1, tint);
     }
 
-    void canvas::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight) {
+    void screen::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
@@ -312,7 +366,7 @@
     //Due to character limitations, for down and left, rounds to four pixels.
     /******************************************************************************/
 
-    void canvas::drawBarLeft(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+    void screen::drawBarLeft(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
@@ -330,7 +384,7 @@
         DrawRectangle(xPixel - width, yPixel, width, height, tint);
     }
 
-    void canvas::drawBarRight(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+    void screen::drawBarRight(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
@@ -346,7 +400,7 @@
     }
 
 
-    void canvas::drawBarDown(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+    void screen::drawBarDown(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
@@ -361,7 +415,7 @@
         DrawRectangle(xPixel, yPixel, width, height, tint);
     }
 
-    void canvas::drawBarUp(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+    void screen::drawBarUp(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
@@ -379,28 +433,28 @@
 //Draws a bar of length n pixels starting at x, y (screen coordinates) in the direction specified.
 /******************************************************************************/
 
-    void canvas::drawHudBarLeft (float x, float y, Color tint, float length) {
+    void screen::drawHudBarLeft (float x, float y, Color tint, float length) {
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
         DrawRectangle((x - length) * hudFontSize, y * hudFontSize, length * hudFontSize, hudFontSize, tint);
     }
 
-    void canvas::drawHudBarRight (float x, float y, Color tint, float length) {
+    void screen::drawHudBarRight (float x, float y, Color tint, float length) {
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
         DrawRectangle(x * hudFontSize, y * hudFontSize, length * hudFontSize, hudFontSize, tint);
     }
 
-    void canvas::drawHudBarDown (float x, float y, Color tint, float length) {
+    void screen::drawHudBarDown (float x, float y, Color tint, float length) {
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
         DrawRectangle(x * hudFontSize, y * hudFontSize, hudFontSize, length * hudFontSize, tint);
     }
 
-    void canvas::drawHudBarUp (float x, float y, Color tint, float length) {
+    void screen::drawHudBarUp (float x, float y, Color tint, float length) {
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
@@ -411,48 +465,48 @@
 //Canvas access functions
 /******************************************************************************/
 
-    Vector2 canvas::getCamera() {
+    Vector2 screen::getCamera() {
         return (Vector2){cameraX, cameraY};
     }
 
-    Vector2 canvas::getMouseRelativeTo(float x, float y, float sizeFactor) {
+    Vector2 screen::getMouseRelativeTo(float x, float y, float sizeFactor) {
         Vector2 mouse = GetMousePosition();
         return (Vector2){(mouse.x / fontSize - screenCols / 2.0) / sizeFactor + cameraX - x,
                          (mouse.y / fontSize - screenRows / 2.0) / sizeFactor + cameraY - y};
     }
 
-    int canvas::getScreenRows() {
+    int screen::getScreenRows() {
         return screenRows;
     }
 
-    int canvas::getScreenCols() {
+    int screen::getScreenCols() {
         return screenCols;
     }
 
-    int canvas::getHudRows() {
+    int screen::getHudRows() {
         return GetScreenHeight() / hudFontSize;
     }
 
-    int canvas::getHudCols() {
+    int screen::getHudCols() {
         return GetScreenWidth() / hudFontSize;
     }
 
-    int canvas::getFontSize() {
+    int screen::getFontSize() {
         return fontSize;
     }
 
-    int canvas::getHudFontSize() {
+    int screen::getHudFontSize() {
         return hudFontSize;
     }
 
-    void canvas::tweakHudScale() {
+    void screen::tweakHudScale() {
         hudFontSize += 4;
         if (hudFontSize > 24) {
             hudFontSize = 8;
         }
     }
 
-    void canvas::tweakGameScale() {
+    void screen::tweakGameScale() {
         fontSize += 4;
         if (fontSize > 24) {
             fontSize = 8;
@@ -469,7 +523,7 @@
 //editableCanvas
 /******************************************************************************/
 
-    editableCanvas::editableCanvas() : canvas() {}
+    editableCanvas::editableCanvas() : screen() {}
 
     void editableCanvas::changeLighting() {
         lightingSelection++;
@@ -532,8 +586,8 @@
 
         if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {        //While dragging
             Vector2 mouse = GetMousePosition();
-            cameraX = oldCameraX - (mouse.x - oldMouseX) / theCanvas -> getFontSize();
-            cameraY = oldCameraY - (mouse.y - oldMouseY) / theCanvas -> getFontSize();
+            cameraX = oldCameraX - (mouse.x - oldMouseX) / theScreen -> getFontSize();
+            cameraY = oldCameraY - (mouse.y - oldMouseY) / theScreen -> getFontSize();
         }
 
         //Zoom
@@ -559,7 +613,7 @@
 //I don't know how the compiler is actually doing this, but
 //this seems like the fastest implementation, ugly as it is.
 
-    int canvas::myGetGlyphIndex(int codepoint) {
+    int screen::myGetGlyphIndex(int codepoint) {
         switch(codepoint) {
             case 0: return 0;
             case 1: return 1;

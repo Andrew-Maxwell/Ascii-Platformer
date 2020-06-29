@@ -3,7 +3,7 @@
 
 #include "world.hpp"
 #include "entity.hpp"
-#include "canvas.hpp"
+#include "screen.hpp"
 #include "meta.hpp"
 
 using namespace rapidjson;

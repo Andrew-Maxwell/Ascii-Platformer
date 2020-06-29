@@ -8,15 +8,15 @@
         for (int i = 0; i < guns.size(); i++) {
             if (guns[i].unlocked) {
                 if (tickCounter < guns[i].lastFired + guns[i].cooldown || guns[i].ammo < 1) {
-                    theCanvas -> drawHud(1, ++rowCount + 3, guns[i].tintFaded, guns[i].display);
+                    theScreen -> drawHud(1, ++rowCount + 3, guns[i].tintFaded, guns[i].display);
                     if (guns[i].ammo >= 0) {
-                        theCanvas -> drawHud(2, rowCount + 3, guns[i].tintFaded, to_string(guns[i].ammo));
+                        theScreen -> drawHud(2, rowCount + 3, guns[i].tintFaded, to_string(guns[i].ammo));
                     }
                 }
                 else {
-                    theCanvas -> drawHud(1, ++rowCount + 3, guns[i].tint, guns[i].display);
+                    theScreen -> drawHud(1, ++rowCount + 3, guns[i].tint, guns[i].display);
                     if (guns[i].ammo >= 0) {
-                        theCanvas -> drawHud(2, rowCount + 3, guns[i].tint, to_string(guns[i].ammo));
+                        theScreen -> drawHud(2, rowCount + 3, guns[i].tint, to_string(guns[i].ammo));
                     }
                 }
             }
@@ -24,21 +24,21 @@
 
         //Health background bar
 
-        theCanvas -> drawHudBarRight(1, 1, UIBACKGROUND, maxHealth / 8.0f);
+        theScreen -> drawHudBarRight(1, 1, BLACK, maxHealth / 8.0f);
 
         //Health bar
 
         if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //If hurt, flash
-            theCanvas -> drawHudBarRight(1, 1, HURTCOLOR, health / 8.0f);
+            theScreen -> drawHudBarRight(1, 1, HURTCOLOR, health / 8.0f);
         }
         else {
-            theCanvas -> drawHudBarRight(1, 1, HEALTHCOLOR, health / 8.0f);
+            theScreen -> drawHudBarRight(1, 1, HEALTHCOLOR, health / 8.0f);
         }
 
         //Air bar
 
         if (air < maxAir) {
-            theCanvas -> drawHudBarRight(1, 2, AIRCOLOR, air / 64.0);
+            theScreen -> drawHudBarRight(1, 2, AIRCOLOR, air / 64.0);
         }
     }
 
@@ -104,14 +104,14 @@
 
         for (int i = 0; i < 10; i++) {
             listNum[0] = '0' + i;
-            theCanvas -> drawHud(1, 10 + 2 * i, UIFOREGROUND, listNum);
-            theCanvas -> drawHud(4, 10 + 2 * i, channelColors[i], channels[i].to_string());
+            theScreen -> drawHud(1, 10 + 2 * i, UIFOREGROUND, listNum);
+            theScreen -> drawHud(4, 10 + 2 * i, channelColors[i], channels[i].to_string());
             for (int j = 0; j < ops.size(); j++) {;
                 if (ops[j].unlocked) {
-                    theCanvas -> drawHud(j * 3 + 15, 10 + 2 * i, UIFOREGROUND, ops[j].display);
+                    theScreen -> drawHud(j * 3 + 15, 10 + 2 * i, UIFOREGROUND, ops[j].display);
                 }
                 else {
-                    theCanvas -> drawHud(j * 3 + 15, 10 + 2 * i, UIFOREGROUND, "?");
+                    theScreen -> drawHud(j * 3 + 15, 10 + 2 * i, UIFOREGROUND, "?");
                 }
             }
         }
@@ -120,9 +120,9 @@
 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             Vector2 mouse = GetMousePosition();
-            int lineSelect = (mouse.y / theCanvas -> getFontSize() - 10) / 2;
+            int lineSelect = (mouse.y / theScreen -> getFontSize() - 10) / 2;
             if (0 <= lineSelect && lineSelect <= 9) {
-                int opSelect = (mouse.x / theCanvas -> getFontSize() - 15) / 3;
+                int opSelect = (mouse.x / theScreen -> getFontSize() - 15) / 3;
                 if (0 <= opSelect && opSelect < ops.size() && ops[opSelect].unlocked) {
                     for (int i = 0; i < ops[opSelect].operations.size(); i++) {
                         apply(&channels[lineSelect], ops[opSelect].operations[i], ops[opSelect].operands[i]);

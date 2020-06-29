@@ -45,7 +45,9 @@ void damageIndicator(int damage, float x, float y, Color tint, float newSizeFact
     float leftEnd = x - 1 - floor(log10(abs(damage))) / 2;
     string digits = to_string(damage);
     for (int i = 0; i < digits.length(); i++) {
-        world -> addEntity(new particle (leftEnd + i, y, tint, newSizeFactor, 0, -0.1, digits[i], 32));
+        particle* p = new particle (leftEnd + i, y, tint, newSizeFactor, 0, -0.1, digits[i], 60);
+        p -> setDoLighting(false);
+        world -> addEntity(p);
     }
 }
 

@@ -60,7 +60,7 @@ class editableLayer : public layer {
 
     Value& getJson();
 
-    //Propogate changes from intCanvas to the ordinary canvas (which is only used for display.)
+    //Propogate changes from intCanvas to the ordinary screen (which is only used for display.)
 
     void update();
 

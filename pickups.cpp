@@ -20,7 +20,7 @@
     }
 
     bool pickup::doesCollide(float otherX, float otherY, int otherType) {
-        if (!collected && (IsKeyPressed(KEY_S) || touch) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE) {
+        if (!collected && (IsKeyPressed(keys.down) || touch) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE) {
             collected = true;
             return true;
         }
@@ -52,7 +52,7 @@
 
     void pickup::print() {
         if (!collected) {
-            theCanvas -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
+            theScreen -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
         }
     }
 

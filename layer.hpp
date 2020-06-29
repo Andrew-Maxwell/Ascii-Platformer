@@ -3,7 +3,7 @@
 
 #include "entity.hpp"
 #include "meta.hpp"
-#include "canvas.hpp"
+#include "screen.hpp"
 
 using namespace rapidjson;
 
@@ -21,7 +21,7 @@ class layer : virtual public entity {
 
     protected:
 
-    vector<string> canvas;
+    vector<string> screen;
     string fileName;
     RenderTexture2D tex;
 
