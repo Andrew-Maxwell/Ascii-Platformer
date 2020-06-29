@@ -49,3 +49,5 @@ rapidjson/encodedstream.h
 rapidjson/document.h
 rapidjson/cursorstreamwrapper.h
 rapidjson/allocators.h
+Ascii-Platformer.vcxproj
+Ascii-Platformer.vcxproj.filters

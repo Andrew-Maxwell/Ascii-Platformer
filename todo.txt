@@ -1,5 +1,6 @@
 Loose ends:
 - Make the max scale determined by screen size
+- Update inventory screen to have new button system
 
 Features:
 1 Puzzle elements:
@@ -26,7 +27,6 @@ Features:
 2 Gun pickups
 2 Gun selection indicator
 2 Map system: Use render test code on the collider texture
-2 Menus + config
 2 Wind/current object
 2 leaf physicalParticles that fly eratically
 2 Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into

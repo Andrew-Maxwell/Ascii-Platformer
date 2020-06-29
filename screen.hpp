@@ -68,10 +68,6 @@ class screen {
 
     void checkerboardTransition(int amountBlack);
 
-    //Button
-
-    bool button(int position, string text, bool mouseMode, int selected);
-
     //Drawing functions
 
     void start(float playerX, float playerY, bool tabScreen);

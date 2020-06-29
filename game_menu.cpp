@@ -2,44 +2,95 @@
 #include "screen.hpp"
 #include "meta.hpp"
 
-    struct menuInput {
 
-        Vector2 oldMouse = GetMousePosition();
-        int select = 0;
-        bool mouseMode = false;
-        int itemCount;
+    string keyName(int key);
 
-        menuInput(int newItemCount) {
-            itemCount = newItemCount;
+    void gameMenu::handleInput() {
+        if (myGetKeyPressed()) {
+            mouseMode = false;
         }
-
-        void handle() {
-            if (myGetKeyPressed()) {
-                mouseMode = false;
+        else {
+            Vector2 mouse = GetMousePosition();
+            if (oldMouse.x != mouse.x || oldMouse.y != mouse.y || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                mouseMode = true;
+            }
+            oldMouse = mouse;
+        }
+        if (!mouseMode) {
+            if (IsKeyPressed(KEY_UP) || IsKeyPressed(keys.up) || (upDown > 18 && upDown % 6 == 0)) {
+                select = (itemCount + select - 1) % itemCount;
+            }
+            if (IsKeyDown(KEY_UP) || IsKeyDown(keys.up)) {
+                upDown++;
             }
             else {
-                Vector2 mouse = GetMousePosition();
-                if (oldMouse.x != mouse.x || oldMouse.y != mouse.y || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    mouseMode = true;
-                }
-                oldMouse = mouse;
+                upDown = 0;
             }
-            if (!mouseMode) {
-                if (IsKeyPressed(KEY_UP) || IsKeyPressed(keys.up)) {
-                    select = (itemCount + select - 1) % itemCount;
-                }
-                if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(keys.down)) {
-                    select = (select + 1) % itemCount;
-                }
+            if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(keys.down) || (downDown > 18 && downDown % 6 == 0)) {
+                select = (select + 1) % itemCount;
+            }
+            if (IsKeyDown(KEY_DOWN) || IsKeyDown(keys.down)) {
+                downDown++;
+            }
+            else {
+                downDown = 0;
             }
         }
+    }
 
-    };
+    bool gameMenu::button(int position, string text) {
+        int hudFontSize = theScreen -> getHudFontSize();
+        Vector2 mouse = GetMousePosition();
+        int triangleInt[2] = {0x25ba, ' '};
+        char* triangle = TextToUtf8(triangleInt, 2);
+        text = triangle + text;
+        free(triangle);
+        int y = 2 * (position + 1);
+//        int x = (getHudCols() - text.size()) / 2;
+        int x = 1;
+        if (mouseMode) {
+            if (mouse.x > x * hudFontSize && mouse.x < (x + text.size()) * hudFontSize && mouse.y > y * hudFontSize && mouse.y < (y + 1) * hudFontSize) {
+                if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                    theScreen -> drawHudBarRight(x, y, DARKBACKGROUND, text.length());
+                    theScreen -> drawHud(x, y, DARKFOREGROUND, text);
+                }
+                else {
+                    theScreen -> drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
+                    theScreen -> drawHud(x, y, LIGHTFOREGROUND, text);
+                }
+                if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+                    return true;
+                }
+            }
+            else {
+                theScreen -> drawHud(x, y, UIFOREGROUND, text);
+            }
+        }
+        else {
+            if (select == position) {
+                if (IsKeyDown(KEY_ENTER) || IsKeyDown(keys.lastCode)) {
+                    theScreen -> drawHudBarRight(x, y, DARKBACKGROUND, text.length());
+                    theScreen -> drawHud(x, y, DARKFOREGROUND, text);
+                }
+                else {
+                    theScreen -> drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
+                    theScreen -> drawHud(x, y, LIGHTFOREGROUND, text);
+                }
+                if (IsKeyReleased(KEY_ENTER) || IsKeyReleased(keys.lastCode)) {
+                    return true;
+                }
+            }
+            else {
+                theScreen -> drawHud(x, y, UIFOREGROUND, text);
+            }
+        }
+        return false;
+    }
 
-    void pauseMenu(int& status) {
-        menuInput in(4);
-        while (status == pause) {
-            in.handle();
+    void gameMenu::pause(int& status) {
+        itemCount = 4;
+        while (status == pauseStatus) {
+            handleInput();
             theScreen -> start(true);
             string pausedLabel = "Game Paused";
             string optionsLabel = "Game Options";
@@ -48,26 +99,26 @@
             string resumeLabel = "Resume";
             theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
             theScreen -> drawHud((theScreen -> getHudCols() - pausedLabel.size()) / 2, 0, LIGHTFOREGROUND, pausedLabel);
-            if (theScreen -> button(0, optionsLabel, in.mouseMode, in.select)) {
-                status = options;
+            if (button(0, optionsLabel)) {
+                status = optionsStatus;
             }
-            else if (theScreen -> button(1, menuLabel, in.mouseMode, in.select)) {
-                status = breakMenu;
+            else if (button(1, menuLabel)) {
+                status = menuStatus;
             }
-            else if (theScreen -> button(2, quitLabel, in.mouseMode, in.select)) {
-                status = breakQuit;
+            else if (button(2, quitLabel)) {
+                status = quitStatus;
             }
-            else if (theScreen -> button(3, resumeLabel, in.mouseMode, in.select)) {
-                status = run;
+            else if (button(3, resumeLabel)) {
+                status = runStatus;
             }
             theScreen -> end();
         }
     }
 
-    void mainMenu(int& status) {
-        menuInput in(3);
-        while (status == breakMenu) {
-            in.handle();
+    void gameMenu::main(int& status) {
+        itemCount = 3;
+        while (status == menuStatus) {
+            handleInput();
             theScreen -> start(true);
             string title = "ASCII Platformer";
             string startLabel = "Load Game";
@@ -75,30 +126,30 @@
             string quitLabel = "Quit";
             theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
             theScreen -> drawHud((theScreen -> getHudCols() - title.size()) / 2, 0, LIGHTFOREGROUND, title);
-            if (theScreen -> button(0, startLabel, in.mouseMode, in.select)) {
-                status = breakDead;
+            if (button(0, startLabel)) {
+                status = deadStatus;
             }
-            else if (theScreen -> button(1, optionsLabel, in.mouseMode, in.select)) {
-                status = options;
+            else if (button(1, optionsLabel)) {
+                status = optionsStatus;
             }
-            else if (theScreen -> button(2, quitLabel, in.mouseMode, in.select)) {
-                status = breakQuit;
+            else if (button(2, quitLabel)) {
+                status = quitStatus;
             }
             theScreen -> end();
         }
     }
 
-    void optionsMenu(int& status, configData& config) {
-        menuInput in(6);
-        while (status == options) {
-            in.handle();
+    void gameMenu::options(int& status, configData& config) {
+        itemCount = 6;
+        while (status == optionsStatus) {
+            handleInput();
             theScreen -> start(true);
             string title = "Options";
             theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
             theScreen -> drawHud((theScreen -> getHudCols() - title.size()) / 2, 0, LIGHTFOREGROUND, title);
             //Display settings
             string fullscreenLabel = "Toggle Fullscreen";
-            if (theScreen -> button(0, fullscreenLabel, in.mouseMode, in.select)) {
+            if (button(0, fullscreenLabel)) {
                 if (IsWindowFullscreen()) {
                     ToggleFullscreen();
                     SetWindowSize(1024, 768);
@@ -115,78 +166,79 @@
                 config.save();
             }
             string hudScaleLabel = "Tweak Interface Scale";
-            if (theScreen -> button(1, hudScaleLabel, in.mouseMode, in.select)) {
+            if (button(1, hudScaleLabel)) {
                 theScreen -> tweakHudScale();
                 config.setHudFontSize(theScreen -> getHudFontSize());
                 config.save();
             }
             string gameScaleLabel = "Tweak Game Scale";
-            if (theScreen -> button(2, gameScaleLabel, in.mouseMode, in.select)) {
+            if (button(2, gameScaleLabel)) {
                 theScreen -> tweakGameScale();
                 config.setGameFontSize(theScreen -> getFontSize());
                 config.save();
             }
             string gameScaleTest = "Game Scale Text";
-            theScreen -> drawScaleTest(3, 8, RED, gameScaleTest);
+            theScreen -> drawScaleTest(4 + gameScaleLabel.size(), 6, RED, gameScaleTest);
             //Keybind settings
             string keyLabel = "Key Bindings";
-            if (theScreen -> button(4, keyLabel, in.mouseMode, in.select)) {
-                status = keyOptions;
+            if (button(3, keyLabel)) {
+                status = keybindStatus;
                 theScreen -> end();
-                keyOptionsMenu(status, config);
+                keyOptions(status, config);
             }
             string backLabel = "Back to Menu";
-            if (theScreen -> button(5, backLabel, in.mouseMode, in.select)) {
+            if (button(4, backLabel)) {
                 status = -1;    //Previous status will be restored in calling function
             }
             theScreen -> end();
         }
     }
 
-    string keyName(int key);
-
-    void keyOptionsMenu(int& status, configData& config) {
-        int selected = -1;
-        menuInput in(keys.count() + 2);
-        while (status == keyOptions) {
-            in.handle();
+    void gameMenu::keyOptions(int& status, configData& config) {
+        itemCount = keys.count() + 2;
+        int keyToChange = -1;
+        while (status == keybindStatus) {
+            if (keyToChange == -1) {
+                handleInput();
+            }
             theScreen -> start(true);
             string title = "Keyboard Bindings";
             theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
             theScreen -> drawHud((theScreen -> getHudCols() - title.size()) / 2, 0, LIGHTFOREGROUND, title);
             bool clickedNoButton = true;
             for (int i = 0; i < keys.count(); i++) {
-                if (selected == i) {
+                if (keyToChange == i) {
                     string pressKey = "PRESS KEY";
                     theScreen -> drawHud((theScreen -> getHudCols() - pressKey.size()) / 2, 2 * (i + 1), RED, pressKey);
                     int lastKey = myGetKeyPressed();
                     if (lastKey) {
                         if (lastKey != KEY_ESCAPE) {
-                            keys[selected] = lastKey;
+                            keys[keyToChange] = lastKey;
                             config.setKeys(keys);
                             config.save();
                         }
-                        selected = -1;
+                        keyToChange = -1;
                     }
                 }
                 else {
-                    if (theScreen -> button(i, keys.name(i) + ": " + keyName(keys[i]), in.mouseMode, in.select)) {
-                        selected = i;
+                    if (button(i, keys.name(i) + ": " + keyName(keys[i]))) {
+                        keyToChange = i;
                         clickedNoButton = false;
                     }
                 }
                 if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && clickedNoButton) {
-                    selected = -1;
+                    keyToChange = -1;
                 }
             }
             string resetLabel = "Reset to Default";
-            if (theScreen -> button(keys.count(), resetLabel, in.mouseMode, in.select)) {
+            if (button(keys.count(), resetLabel)) {
                 keys = keyMapping();
                 config.setKeys(keys);
+                config.save();
             }
             string backLabel = "Back to Options";
-            if (theScreen -> button(keys.count() + 1, backLabel, in.mouseMode, in.select)) {
-                status = options;
+            if (button(keys.count() + 1, backLabel)) {
+                status = optionsStatus;
             }
             theScreen -> end();
         }

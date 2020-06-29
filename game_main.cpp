@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     long total = 0, totalSecond = 0;
     int maxLoad = 0;
 
-    int status = breakMenu;
+    int status = menuStatus;
     player thePlayer(0, 0, (Color){255, 255, 255, 255}, 1.0);
     gameLevelData level;
     saveData save;
@@ -39,26 +39,27 @@ int main(int argc, char** argv) {
     theScreen = new screen();
     theScreen -> setParams(0, 0, config.getGameFontSize(), config.getHudFontSize(), 1.0, 0);
     keys = config.getKeys();
+    gameMenu menu;
 
-    while (!(status == breakQuit || WindowShouldClose())) {      //While the game is running
+    while (!(status == quitStatus || WindowShouldClose())) {      //While the game is running
 
         int transition = 7, transitionDirection = -1;
 
         //Menu logic
 
-        if (status == breakMenu) {
-            mainMenu(status);
+        if (status == menuStatus) {
+            menu.main(status);
         }
-        else if (status == options) {
-            optionsMenu(status, config);
-            status = breakMenu; //Return to main menu after options complete.
+        else if (status == optionsStatus) {
+            menu.options(status, config);
+            status = menuStatus; //Return to main menu after options complete.
         }
 
         //If we broke because we died (or first time), reload from save
         //or reload default position if save doesn't exist
 
-        else if (status == breakDead) {
-            status = run;
+        else if (status == deadStatus) {
+            status = runStatus;
             thePlayer.breakDead = false;
             loadedSave = save.load("save.json");
 
@@ -108,8 +109,8 @@ int main(int argc, char** argv) {
         //If we're moving to a different level, perform a subset
         //of the actions for death
 
-        else if (status == breakDoor) {
-            status = run;
+        else if (status == doorStatus) {
+            status = runStatus;
             thePlayer.breakDoor = false;
             thePlayer.goToDoor();
             save.writeOutfit(thePlayer.getCurrentOutfit());
@@ -142,8 +143,8 @@ int main(int argc, char** argv) {
             }
         }
 
-        else if (status == breakSave) {
-            status = run;
+        else if (status == saveStatus) {
+            status = runStatus;
             argRoom = false;
             thePlayer.breakSave = false;
             save.writeOutfit(thePlayer.getCurrentOutfit());
@@ -151,40 +152,40 @@ int main(int argc, char** argv) {
         }
 
         else {
-            while ((status == run || status == pause || status == options || status == showInventory) && !WindowShouldClose()) {
+            while ((status == runStatus || status == pauseStatus || status == optionsStatus || status == inventoryStatus) && !WindowShouldClose()) {
 
                 //Buttons modifying status
 
                 if (IsKeyPressed(keys.inventory)) {
-                    if (status == showInventory) {
-                        status = run;
+                    if (status == inventoryStatus) {
+                        status = runStatus;
                     }
-                    else if (status == run) {
-                        status = showInventory;
+                    else if (status == runStatus) {
+                        status = inventoryStatus;
                     }
                 }
                 if (IsKeyPressed(KEY_ESCAPE)) {
-                    if (status == pause || status == showInventory) {
-                        status = run;
+                    if (status == pauseStatus || status == inventoryStatus) {
+                        status = runStatus;
                     }
-                    if (status == run) {
-                        status = pause;
+                    if (status == runStatus) {
+                        status = pauseStatus;
                     }
                 }
                 if (IsWindowMinimized() || IsWindowHidden()) {
-                    status = pause;
+                    status = pauseStatus;
                 }
 
                 //take appropriate action for status
 
-                if (status == pause) {
-                    pauseMenu(status);
+                if (status == pauseStatus) {
+                    menu.pause(status);
                 }
-                else if (status == options) {
-                    optionsMenu(status, config);
-                    status = pause; //Return to pause menu after user is done w/ options.
+                else if (status == optionsStatus) {
+                    menu.options(status, config);
+                    status = pauseStatus; //Return to pause menu after user is done w/ options.
                 }
-                else if (status == showInventory) {
+                else if (status == inventoryStatus) {
                     theScreen -> start(true);
                     thePlayer.drawTabScreen();
                     theScreen -> end();
@@ -239,18 +240,18 @@ int main(int argc, char** argv) {
                         //theScreen -> dialog ("You are dead...");
                         int keyPressed = myGetKeyPressed();
                         if (keyPressed == KEY_ESCAPE) {
-                            status = pause;
+                            status = pauseStatus;
                         }
                         else if (keyPressed != 0 && transition == -1) {
                             transition = 0;
                             transitionDirection = 1;
                         }
                         if (transition == 8) {
-                            status = breakDead;
+                            status = deadStatus;
                         }
                     }
                     else if (thePlayer.breakSave) {
-                        status = breakSave;
+                        status = saveStatus;
                     }
                     else if (thePlayer.breakDoor) {
                         if (transition == -1) {
@@ -258,7 +259,7 @@ int main(int argc, char** argv) {
                             transitionDirection = 1;
                         }
                         if (transition == 8) {
-                            status = breakDoor;
+                            status = doorStatus;
                         }
                     }
                 }

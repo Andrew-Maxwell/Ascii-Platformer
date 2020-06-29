@@ -228,56 +228,6 @@
         }
     }
 
-    //BUTTON
-
-    bool screen::button(int pos, string text, bool mouseMode, int selected) {
-        Vector2 mouse = GetMousePosition();
-        int triangleInt[2] = {0x25ba, ' '};
-        char* triangle = TextToUtf8(triangleInt, 2);
-        text = triangle + text;
-        free(triangle);
-        int y = 2 * (pos + 1);
-//        int x = (getHudCols() - text.size()) / 2;
-        int x = 1;
-        if (mouseMode) {
-            if (mouse.x > x * hudFontSize && mouse.x < (x + text.size()) * hudFontSize && mouse.y > y * hudFontSize && mouse.y < (y + 1) * hudFontSize) {
-                if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-                    drawHudBarRight(x, y, DARKBACKGROUND, text.length());
-                    drawHud(x, y, DARKFOREGROUND, text);
-                }
-                else {
-                    drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
-                    drawHud(x, y, LIGHTFOREGROUND, text);
-                }
-                if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-                    return true;
-                }
-            }
-            else {
-                drawHud(x, y, UIFOREGROUND, text);
-            }
-        }
-        else {
-            if (selected == pos) {
-                if (IsKeyDown(KEY_ENTER) || IsKeyDown(keys.lastCode)) {
-                    drawHudBarRight(x, y, DARKBACKGROUND, text.length());
-                    drawHud(x, y, DARKFOREGROUND, text);
-                }
-                else {
-                    drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
-                    drawHud(x, y, LIGHTFOREGROUND, text);
-                }
-                if (IsKeyReleased(KEY_ENTER) || IsKeyReleased(keys.lastCode)) {
-                    return true;
-                }
-            }
-            else {
-                drawHud(x, y, UIFOREGROUND, text);
-            }
-        }
-        return false;
-    }
-
     void screen::start(float playerX, float playerY, bool tabScreen) {
 
         //Update camera; round value to nearest pixel

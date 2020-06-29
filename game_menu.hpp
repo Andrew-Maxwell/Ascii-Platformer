@@ -2,14 +2,31 @@
 #define GAME_MENU_HPP
 #include "configdata.hpp"
 
-enum status{run, pause, showInventory, options, keyOptions, breakDead, breakDoor, breakSave, breakMenu,  breakQuit};
+enum status{runStatus, pauseStatus, inventoryStatus, optionsStatus, keybindStatus, deadStatus, doorStatus, saveStatus, menuStatus, quitStatus};
 
-void pauseMenu(int& status);
+class gameMenu {
 
-void mainMenu(int& status);
+    Vector2 oldMouse = GetMousePosition();
+    int select = 0;
+    bool mouseMode = false;
+    int itemCount;
+    //Measure amount of time a key was pressed for scrolling
+    int upDown = 0, downDown = 0;
 
-void optionsMenu(int& status, configData& config);
+    void handleInput();
 
-void keyOptionsMenu(int& status, configData& config);
+    bool button(int position, string text);
+
+public:
+
+    void pause(int& status);
+
+    void main(int& status);
+
+    void options(int& status, configData& config);
+
+    void keyOptions(int& status, configData& config);
+
+};
 
 #endif //GAME_MENU_HPP
