@@ -4,6 +4,10 @@
         return PLAYERTYPE;
     }
 
+    void player::setInputMap(inputMap newMap) {
+        in = newMap;
+    }
+
 //Outfit handling functions
 
     outfit player::getCurrentOutfit() {
@@ -32,6 +36,7 @@
         toReturn.ops = ops;
         for (int i = 0; i < 10; i++) {
             toReturn.channels[i] = channels[i];
+            toReturn.channelColors[i] = channelColors[i];
         }
         toReturn.collectedPickups = collectedPickups;
         return toReturn;
@@ -79,6 +84,7 @@
             channelColors[i].g = 255 - ((channels[i] & bitset<8>(56)).to_ulong() << 2);
             channelColors[i].b = 255 - ((channels[i] & bitset<8>(7)).to_ulong() << 5);
         }
+        collectedPickups.clear();
         collectedPickups = newOutfit.collectedPickups;
     }
 

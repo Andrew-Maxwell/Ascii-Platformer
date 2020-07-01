@@ -1,0 +1,34 @@
+Currently: 
+
+Create player
+Player's inputMap is default
+create gameleveldata, savedata, screen, gamemenu
+
+while (running)
+    ...
+    if status is deadstatus
+        load save
+        decide on next room
+        Load level file / generate layer cache
+        Initialize empty collider
+        set player location from level/save
+        set outfit from level/save
+        Load non-player entities
+        Set screen parameters
+    if status is doorstatus
+        Set player location from door
+        Save current player outfit
+        Load level file / Generate layer cache
+        Initialize empty collider
+        Set outfit from level/save
+        load non-player entities
+        Set screen parameters
+    Run game
+
+3 Modes: Single player, 2-player co-op, n-player arena
+(ignore for now) Will need to modify camera to accomodate multiple players: 2 player = split screen, arena = 1 screen without scrolling.
+(ignore for now) Need to be able to load different players in different locations for arena mode
+Need to be able to determine mode based on level, allow an appropriate number of players to join
+Need to be able to modify inputMaps, assign input devices to players in the menus
+Doors: Will wait for all players to interact with door before going to next room.
+Saves: All players will share save data.

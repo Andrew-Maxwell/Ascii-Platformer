@@ -21,7 +21,7 @@ class pickup : public collideable, public entityParent {
     bool collected = false;
     bool exploded = false;
     bool touch;
-    int lifetime, ID;
+    int lifetime, pickupID;
     
     char* toPrint;
 

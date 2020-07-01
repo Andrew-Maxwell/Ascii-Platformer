@@ -43,6 +43,7 @@
         "name": "test_outfit",
         "guns": [
             {
+                "display": 65,
                 "unlocked": true,
                 "gunID": 2,
                 "gunType": 1,

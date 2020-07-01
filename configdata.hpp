@@ -2,6 +2,7 @@
 #define CONFIGDATA_HPP
 #include "meta.hpp"
 #include "data.hpp"
+#include "input.hpp"
 
 class configData : public data {
 
@@ -21,10 +22,15 @@ class configData : public data {
 
     void setHudFontSize(int size);
 
-    keyMapping getKeys();
+    int inputMapCount();
 
-    void setKeys(keyMapping newKeys);
+    inputMap getInputMap(int mapNo);
 
+    void setInputMap(int mapNo, inputMap newMap);
+
+    void addInputMap(inputMap newMap);
+
+    void deleteInputMap(int mapNo);
 };
 
 #endif //CONFIGDATA_HPP

@@ -8,6 +8,7 @@
 #include "meta.hpp"
 #include "particles.hpp"
 #include "physicalentities.hpp"
+#include "input.hpp"
 #include <set>
 
 using namespace rapidjson;
@@ -70,6 +71,7 @@ struct outfit {
 
     vector<puzzleOp> ops;
     bitset<8> channels[10];
+    Color channelColors[10];
 
     set<int> collectedPickups;
 
@@ -93,6 +95,8 @@ struct outfit {
 /******************************************************************************/
 
 class player : virtual public collideable, public entityParent, public hudEntity {
+
+    inputMap in;
 
     //Formerly part of the physicalEntity inheritance
     bool hit = false;
@@ -138,7 +142,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
     public:
 
     string nextRoom;
-    bool breakDoor = false, breakSave = false, breakDead = false;
+    bool breakDoor = false, breakSave = false, breakDead = false, breakInventory = false;
 
     int won = 0;
 
@@ -149,6 +153,8 @@ class player : virtual public collideable, public entityParent, public hudEntity
     unsigned int type ();
 
     //In accessor file: Outfit handling + save/load functions
+
+        void setInputMap(inputMap newMap);
 
         outfit getCurrentOutfit();
 

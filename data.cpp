@@ -191,7 +191,7 @@ using namespace rapidjson;
                     if (op == "rotate") {
                         newOp.operations.push_back(1);
                         if (!displayChar) {
-                            if (operands[i].GetInt() > 0) {
+                            if (operands[j].GetInt() <= 0) {
                                 displayChar = 0xab;
                             }
                             else {
@@ -202,7 +202,7 @@ using namespace rapidjson;
                     else if (op == "shift") {
                         newOp.operations.push_back(2);
                         if (!displayChar) {
-                            if (operands[i].GetInt() > 0) {
+                            if (operands[j].GetInt() > 0) {
                                 displayChar = '<';
                             }
                             else {
@@ -240,7 +240,7 @@ using namespace rapidjson;
                             displayChar = '?';
                         }
                     }
-                    newOp.operands.push_back(operands[i].GetInt());
+                    newOp.operands.push_back(operands[j].GetInt());
                 }
                 newOp.display = string(TextToUtf8(&displayChar, 1));
                 toReturn.ops.push_back(newOp);
@@ -254,6 +254,7 @@ using namespace rapidjson;
             }
         }
         else {
+            cout << "No channels found in outfit " << name << endl;
             for (int i = 0; i < 10; i++) {
                 toReturn.channels[i] = bitset<8>(0);
             }

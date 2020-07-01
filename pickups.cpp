@@ -10,7 +10,7 @@
         entity(newX, newY, newTint, newSizeFactor),
         displayChar(newDisplayChar),
         lifetime(newLifetime),
-        ID(newID),
+        pickupID(newID),
         touch(newTouch) {
             toPrint = TextToUtf8(&displayChar, 1);
         }
@@ -20,7 +20,7 @@
     }
 
     bool pickup::doesCollide(float otherX, float otherY, int otherType) {
-        if (!collected && (IsKeyPressed(keys.down) || touch) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE) {
+        if (!collected && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE) {
             collected = true;
             return true;
         }
@@ -74,7 +74,7 @@
     }
 
     collision outfitPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(OUTFITPICKUPTYPE, add ? 1 : 0, 0.0, 0.0, key, value);
+        return collision(OUTFITPICKUPTYPE, add ? 1 : 0, 0.0, pickupID, key, value);
     }
 
 /*****************************************************************************/
@@ -92,7 +92,7 @@
     }
 
     collision gunPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(GUNPICKUPTYPE, gunID, 0.0, ID);
+        return collision(GUNPICKUPTYPE, gunID, 0.0, pickupID);
     }
 
 /*****************************************************************************/
@@ -111,7 +111,7 @@
     }
 
     collision ammoPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(AMMOPICKUPTYPE, gunID, ammoCount, ID);      //ammoCount in xVal
+        return collision(AMMOPICKUPTYPE, gunID, ammoCount, pickupID);      //ammoCount in xVal
     }
 
 /*****************************************************************************/
@@ -129,7 +129,7 @@
     }
 
     collision healthPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(HEALTHPICKUPTYPE, healthCount, 0.0, ID);
+        return collision(HEALTHPICKUPTYPE, healthCount, 0.0, pickupID);
     }
 
 /*****************************************************************************/
@@ -147,7 +147,7 @@
     }
 
     collision maxHealthPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(MAXHEALTHPICKUPTYPE, healthCount, 0.0, ID);
+        return collision(MAXHEALTHPICKUPTYPE, healthCount, 0.0, pickupID);
     }
 
 /*****************************************************************************/
@@ -165,7 +165,7 @@
     }
 
     collision airPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(AIRPICKUPTYPE, airCount, 0.0, ID);
+        return collision(AIRPICKUPTYPE, airCount, 0.0, pickupID);
     }
 
 /*****************************************************************************/
@@ -183,7 +183,7 @@
     }
 
     collision maxAirPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(MAXAIRPICKUPTYPE, airCount, 0.0, ID);
+        return collision(MAXAIRPICKUPTYPE, airCount, 0.0, pickupID);
     }
 
 
@@ -202,5 +202,5 @@
     }
 
     collision opPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(OPPICKUPTYPE, opID, 0.0, ID);
+        return collision(OPPICKUPTYPE, opID, 0.0, pickupID);
     }

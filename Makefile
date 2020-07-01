@@ -25,7 +25,6 @@ GAMESRCS := \
 	player.cpp \
     playeraccessors.cpp \
     playercollisions.cpp \
-    playerhud.cpp \
 	rain.cpp \
 	savepoint.cpp \
 	water.cpp \
@@ -35,7 +34,8 @@ GAMESRCS := \
     savedata.cpp \
     newtestentity.cpp \
     game_menu.cpp \
-    configdata.cpp
+    configdata.cpp \
+    input.cpp
 
 EDTRSRCS := \
 	meta.cpp \

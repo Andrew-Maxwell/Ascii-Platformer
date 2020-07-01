@@ -32,18 +32,18 @@ int main(int argc, char** argv) {
 
     int status = menuStatus;
     player thePlayer(0, 0, (Color){255, 255, 255, 255}, 1.0);
+    inputMap in(false);
+    thePlayer.setInputMap(in);
     gameLevelData level;
     saveData save;
     bool loadedSave;
     bool argRoom = argc > 1;    //If room is defined by argument
     theScreen = new screen();
     theScreen -> setParams(0, 0, config.getGameFontSize(), config.getHudFontSize(), 1.0, 0);
-    keys = config.getKeys();
     gameMenu menu;
+    int transition = 7, transitionDirection = -1;
 
     while (!(status == quitStatus || WindowShouldClose())) {      //While the game is running
-
-        int transition = 7, transitionDirection = -1;
 
         //Menu logic
 
@@ -59,6 +59,7 @@ int main(int argc, char** argv) {
         //or reload default position if save doesn't exist
 
         else if (status == deadStatus) {
+            transition = 7, transitionDirection = -1;
             status = runStatus;
             thePlayer.breakDead = false;
             loadedSave = save.load("save.json");
@@ -84,10 +85,6 @@ int main(int argc, char** argv) {
             }
             //Initialize global handlers
             world = new collider(0.0, 0.0, level.getWorldFileName());
-            //Read in entities
-            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, true);
-            theScreen -> setParams(world -> getRows(), world -> getCols(), config.getGameFontSize(), config.getHudFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
-            level.initializeColors(theScreen);
 
             //Set the player position from save or level as appropriate
             if (loadedSave && !argRoom) {
@@ -104,12 +101,18 @@ int main(int argc, char** argv) {
             else {
                 thePlayer.setOutfit(defaultOutfit);
             }
+
+            //Read in entities
+            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, true);
+            theScreen -> setParams(world -> getRows(), world -> getCols(), config.getGameFontSize(), config.getHudFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
+            level.initializeColors(theScreen);
         }
 
         //If we're moving to a different level, perform a subset
         //of the actions for death
 
         else if (status == doorStatus) {
+            transition = 7, transitionDirection = -1;
             status = runStatus;
             thePlayer.breakDoor = false;
             thePlayer.goToDoor();
@@ -125,11 +128,6 @@ int main(int argc, char** argv) {
             }
             //Initialize global handlers
             world = new collider(0.0, 0.0, level.getWorldFileName());
-            //Read in entities
-            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, false);
-            theScreen -> setParams(world -> getRows(), world -> getCols(),
-               config.getGameFontSize(), config.getHudFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
-            level.initializeColors(theScreen);
 
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");
@@ -141,6 +139,13 @@ int main(int argc, char** argv) {
             else {
                 thePlayer.setOutfit(defaultOutfit);
             }
+
+            //Read in entities
+            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, false);
+            theScreen -> setParams(world -> getRows(), world -> getCols(),
+               config.getGameFontSize(), config.getHudFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
+            level.initializeColors(theScreen);
+
         }
 
         else if (status == saveStatus) {
@@ -156,21 +161,12 @@ int main(int argc, char** argv) {
 
                 //Buttons modifying status
 
-                if (IsKeyPressed(keys.inventory)) {
-                    if (status == inventoryStatus) {
-                        status = runStatus;
-                    }
-                    else if (status == runStatus) {
-                        status = inventoryStatus;
-                    }
+                if (thePlayer.breakInventory && status == runStatus) {
+                    status = inventoryStatus;
+                    thePlayer.breakInventory = false;
                 }
-                if (IsKeyPressed(KEY_ESCAPE)) {
-                    if (status == pauseStatus || status == inventoryStatus) {
-                        status = runStatus;
-                    }
-                    if (status == runStatus) {
-                        status = pauseStatus;
-                    }
+                if (menu.goBack() && status == runStatus) {
+                    status = pauseStatus;
                 }
                 if (IsWindowMinimized() || IsWindowHidden()) {
                     status = pauseStatus;
@@ -186,9 +182,9 @@ int main(int argc, char** argv) {
                     status = pauseStatus; //Return to pause menu after user is done w/ options.
                 }
                 else if (status == inventoryStatus) {
-                    theScreen -> start(true);
-                    thePlayer.drawTabScreen();
-                    theScreen -> end();
+                    outfit o = thePlayer.getCurrentOutfit();
+                    menu.inventory(status, o, in);
+                    thePlayer.setOutfit(o);
                 }
                 else {  //status is run
 
@@ -238,11 +234,10 @@ int main(int argc, char** argv) {
 
                     if (thePlayer.breakDead) {
                         //theScreen -> dialog ("You are dead...");
-                        int keyPressed = myGetKeyPressed();
-                        if (keyPressed == KEY_ESCAPE) {
+                        if (menu.goBack()) {
                             status = pauseStatus;
                         }
-                        else if (keyPressed != 0 && transition == -1) {
+                        else if ((myGetKeyPressed() || getAnyGamepadInput()) && transition == -1) {
                             transition = 0;
                             transitionDirection = 1;
                         }

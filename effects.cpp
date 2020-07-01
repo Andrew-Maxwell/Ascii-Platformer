@@ -30,7 +30,7 @@
             tint.a *= 0.5;
         }
         for (float angle = 0; angle < 2 * PI; angle += (2 * PI / (distance + 20))) {
-            particle* p = new particle(x + cos(angle) * 2, y + sin(angle) * 2, tint, sizeFactor, cos(angle) / 3.0, sin(angle) / 3.0, '~', distance * 3, true);
+            particle* p = new particle(x + cos(angle) * 2, y + sin(angle) * 2, tint, sizeFactor, cos(angle) / 3.0, sin(angle) / 3.0, '~', distance * 3, false);
             p -> setDoLighting(false);
             world -> addEntity(p);
         }

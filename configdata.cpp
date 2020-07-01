@@ -6,22 +6,11 @@
             json.AddMember("fullscreen", Value(false), a);
             json.AddMember("hudFontSize", Value(16), a);
             json.AddMember("gameFontSize", Value(16), a);
-            Value keys(kObjectType);
-            keys.AddMember("up", Value(KEY_W), a);
-            keys.AddMember("down", Value(KEY_S), a);
-            keys.AddMember("left", Value(KEY_A), a);
-            keys.AddMember("right", Value(KEY_D), a);
-            keys.AddMember("inventory", Value(KEY_TAB), a);
-            keys.AddMember("nextWeapon", Value(KEY_E), a);
-            keys.AddMember("previousWeapon", Value(KEY_Q), a);
-            keys.AddMember("explode", Value(KEY_R), a);
-            keys.AddMember("lastCode", Value(KEY_LEFT_SHIFT), a);
-            Value codes(kArrayType);
-            for (int i = 0; i < 10; i++) {
-                codes.PushBack(Value(KEY_ZERO + i), a);
-            }
-            keys.AddMember("code", codes, a);
-            json.AddMember("keys", keys, a);
+            json.AddMember("inputMaps", Value(kArrayType), a);
+            inputMap defaultKeyboard(true);
+            addInputMap(defaultKeyboard);
+            inputMap defaultGamepad(false);
+            addInputMap(defaultGamepad);
         }
     }
 
@@ -55,35 +44,57 @@
         json["hudFontSize"].SetInt(size);
     }
 
-    keyMapping configData::getKeys() {
-        keyMapping toReturn;
-        Value& keys = json["keys"];
-        toReturn.up = keys["up"].GetInt();
-        toReturn.down = keys["down"].GetInt();
-        toReturn.left = keys["left"].GetInt();
-        toReturn.right = keys["right"].GetInt();
-        toReturn.inventory = keys["inventory"].GetInt();
-        toReturn.nextWeapon = keys["nextWeapon"].GetInt();
-        toReturn.previousWeapon = keys["previousWeapon"].GetInt();
-        toReturn.explode = keys["explode"].GetInt();
-        toReturn.lastCode = keys["lastCode"].GetInt();
-        for (int i = 0; i < 10; i++) {
-            toReturn.code[i] = keys["code"][i].GetInt();
+    int configData::inputMapCount() {
+        return json["inputMaps"].Size();
+    }
+
+    inputMap configData::getInputMap(int mapNo) {
+        Value& map = json["inputMaps"][mapNo];
+        inputMap toReturn(map["keyboard"].GetBool());
+        toReturn.useMouseAim = map["useMouseAim"].GetBool();
+        Value& list = map["inputList"];
+        for (SizeType i = 0; i < map.Size(); i++) {
+            bool isAxis = list[i]["isAxis"].GetBool();
+            bool positive = list[i]["positive"].GetBool();
+            int id = list[i]["id"].GetInt();
+            toReturn[i] = input(isAxis, positive, id);
         }
         return toReturn;
     }
 
-    void configData::setKeys(keyMapping newKeys) {
-        json["keys"]["up"].SetInt(newKeys.up);
-        json["keys"]["down"].SetInt(newKeys.down);
-        json["keys"]["left"].SetInt(newKeys.left);
-        json["keys"]["right"].SetInt(newKeys.right);
-        json["keys"]["inventory"].SetInt(newKeys.inventory);
-        json["keys"]["nextWeapon"].SetInt(newKeys.nextWeapon);
-        json["keys"]["previousWeapon"].SetInt(newKeys.previousWeapon);
-        json["keys"]["explode"].SetInt(newKeys.explode);
-        json["keys"]["lastCode"].SetInt(newKeys.lastCode);
-        for (int i = 0; i < 10; i++) {
-            json["keys"]["code"][i].SetInt(newKeys.code[i]);
+    void configData::setInputMap(int mapNo, inputMap toWrite) {
+        Value& map = json["inputMaps"][mapNo];
+        map["keyboard"].SetBool(toWrite.keyboard);
+        map["useMouseAim"].SetBool(toWrite.useMouseAim);
+        Value& list = map["inputList"];
+        for (SizeType i = 0; i < list.Size(); i++) {
+            list[i]["isAxis"].SetBool(toWrite[i].isAxis);
+            list[i]["positive"].SetBool(toWrite[i].positive);
+            list[i]["id"].SetInt(toWrite[i].id);
         }
     }
+
+    void configData::addInputMap(inputMap newMap) {
+        Document::AllocatorType& a = json.GetAllocator();
+        Value mapJson(kObjectType);
+        mapJson.AddMember("keyboard", Value(newMap.keyboard).Move(), a);
+        mapJson.AddMember("useMouseAim", Value(newMap.useMouseAim).Move(), a);
+        mapJson.AddMember("inputList", Value(kArrayType).Move(), a);
+        for (int i = 0; i < newMap.count(); i++) {
+            Value newInput(kObjectType);
+            newInput.AddMember("isAxis", Value(newMap[i].isAxis).Move(), a);
+            newInput.AddMember("positive", Value(newMap[i].positive).Move(), a);
+            newInput.AddMember("id", Value(newMap[i].id).Move(), a);
+            mapJson["inputList"].PushBack(newInput.Move(), a);
+        }
+        json["inputMaps"].PushBack(mapJson.Move(), a);
+    }
+
+    void configData::deleteInputMap(int mapNo) {
+        auto iterator = json["inputMaps"].Begin();
+        for (int i = 0; i < mapNo; i++) {
+            iterator++;
+        }
+        json["inputMaps"].Erase(iterator); //Might work, might not
+    }
+

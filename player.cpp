@@ -47,9 +47,15 @@
         if (gun.unlocked) {
             if (gun.ammo != 0) {
                 if (gun.lastFired + gun.cooldown < tickCounter) {
-                    if (gun.automatic || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        Vector2 aim = theScreen -> getMouseRelativeTo(x, y, sizeFactor);
-                        aim = Vector2Normalize(aim);
+                    if (gun.automatic || IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || in.fire.isPressed()) {
+                        Vector2 aim;
+                        if (in.useMouseAim) {
+                            aim = theScreen -> getMouseRelativeTo(x, y, sizeFactor);
+                            aim = Vector2Normalize(aim);
+                        }
+                        else {
+                            aim = in.getAim();
+                        }
                         bullet* b = new bullet(
                             //x, y, zPosition, color, sizeFactor
                             x + 1.5 * aim.x, y + 1.5 * aim.y, tint, sizeFactor,
@@ -80,6 +86,10 @@
 //Tick functions
 
     void player::tickSet() {
+        in.update();    //Update input data
+        if (in.inventory.isPressed()) {
+            breakInventory = true;
+        }
 
         if (!breakDoor && !breakDead) {
 
@@ -97,7 +107,7 @@
                 yInertia = min(yInertia + gravity, 0.3f);
                 yMovement = 0;
                 //Jumping
-                if (IsKeyPressed(keys.up) || (IsKeyDown(keys.up) && autoRejump)) {  //If the jump key is pressed
+                if (in.jump.isPressed() || (in.jump.isDown() && autoRejump)) {  //If the jump key is pressed
                     if (onGround) {                                         //If we're on a surface we can jump from
                         yInertia  = -1 * jumpSpeed;                                 //then jump, and also reset jump counter
                         jumpsUsed = jumpCount;
@@ -111,25 +121,25 @@
                     else if (jumpsUsed != 0) {                                //Else, if jumps remaining,
                         jumpsUsed--;
                         yInertia = -1 * jumpSpeed;                                 //jump and decrement jump counter
-                        if (IsKeyPressed(keys.up)) {
+                        if (in.up.isPressed()) {
                             justJumped = true;
                         }
                     }
                 }
-                if (IsKeyReleased(keys.up) && yInertia < 0 && justJumped) {
+                if (in.jump.isReleased() && yInertia < 0 && justJumped) {
                     yInertia *= 0.3;
                     justJumped = false;
                 }
 
                 //Lateral movement
-                if (IsKeyDown(keys.right)) {
-                    xMovement = speed;
+                if (in.right.isDown()) {
+                    xMovement = speed * in.right.value;
                     if (xInertia < 0) {
                         xInertia *= 0.9;
                     }
                 }
-                else if (IsKeyDown(keys.left)) {
-                    xMovement = -1 * speed;
+                else if (in.left.isDown()) {
+                    xMovement = -1 * speed * in.left.value;
                     if (xInertia > 0) {
                         xInertia *= 0.9;
                     }
@@ -146,14 +156,14 @@
                 jumpsUsed = jumpCount;
 
                 //Moving underwater
-                if (IsKeyDown(keys.up)) {
-                    yMovement = -1 * speed;
+                if (in.up.isDown()) {
+                    yMovement = -1 * speed * in.up.value;
                     if (yInertia > 0) {
                         yInertia *= 0.9;
                     }
                 }
-                else if (IsKeyDown(keys.down)) {
-                    yMovement = speed;
+                else if (in.down.isDown()) {
+                    yMovement = speed * in.down.value;
                     if (yInertia < 0) {
                         yInertia *= 0.9;
                     }
@@ -163,14 +173,14 @@
                     yInertia *= 0.9;
                 }
 
-                if (IsKeyDown(keys.left)) {
-                    xMovement = -1 * speed;
+                if (in.left.isDown()) {
+                    xMovement = -1 * speed * in.left.value;
                     if (xInertia > 0) {
                         xInertia *= 0.9;
                     }
                 }
-                else if (IsKeyDown(keys.right)) {
-                    xMovement = speed;
+                else if (in.right.isDown()) {
+                    xMovement = speed * in.right.value;
                     if (xInertia < 0) {
                         xInertia *= 0.9;
                     }
@@ -208,23 +218,31 @@
 
             //Channels
             for (int i = 0; i < 10; i++) {
-                if (IsKeyDown(keys.code[i])) {
+                if (in.code[i].isDown()) {
                     world -> setChannel(channels[i].to_ulong());
                     lastChannel = i;
                     if (tickCounter % 8 == 0) {
-                        broadcast(10, x, y, channelColors[i], sizeFactor, channels[i][(tickCounter % 64) / 8]);
+                        broadcast(2, x, y, channelColors[i], sizeFactor, channels[i][(tickCounter % 64) / 8]);
                     }
                 }
             }
-            if (IsKeyDown(keys.lastCode)) {
+            if (in.lastCode.isDown()) {
                 world -> setChannel(channels[lastChannel].to_ulong());
                 if (tickCounter % 8 == 0) {
-                    broadcast(5, x, y, channelColors[lastChannel], sizeFactor, channels[lastChannel][(tickCounter % 64) / 8]);
+                    broadcast(2, x, y, channelColors[lastChannel], sizeFactor, channels[lastChannel][(tickCounter % 64) / 8]);
                 }
             }
 
+            //Switching channels
+            if (in.previousCode.isPressed()) {
+                lastChannel = (lastChannel - 1 + 10) % 10;
+            }
+            else if (in.nextCode.isPressed()) {
+                lastChannel = (lastChannel + 1) % 10;
+            }
+
             //Switching guns
-            if (IsKeyPressed(keys.previousWeapon)) {
+            if (in.previousWeapon.isPressed()) {
                 for (int i = 0; i < guns.size(); i++) {
                     gunSelect = (gunSelect - 1) % guns.size();
                     if (guns[gunSelect].unlocked) {
@@ -232,7 +250,7 @@
                     }
                 }
             }
-            if (IsKeyPressed(keys.nextWeapon)) {
+            if (in.nextWeapon.isPressed()) {
                 for (int i = 0; i < guns.size(); i++) {
                     gunSelect = (gunSelect + 1) % guns.size();
                     if (guns[gunSelect].unlocked) {
@@ -242,12 +260,12 @@
             }
 
             //Shootin'
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && guns.size() > 0) {
+            if (((in.useMouseAim && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) || (!in.useMouseAim && in.fire.isDown())) && guns.size() > 0) {
                 fire(guns[gunSelect]);
             }
 
             //Explosions
-            if (IsKeyPressed(keys.explode)) {
+            if (in.explode.isPressed()) {
                 explode (60, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5, zPosition);
             }
 
@@ -343,6 +361,54 @@
             else {
                 theScreen -> draw(x, y, tint, sizeFactor, displayStr, doLighting);
             }
+        }
+    }
+
+    void player::printHud() {
+
+        //Print selected code
+
+        theScreen -> drawHud(1, 3, channelColors[lastChannel], to_string(lastChannel));
+
+        //Print gun info
+
+        int rowCount = 0;
+        int j = gunSelect;
+        for (int i = 0; i < guns.size(); i++) {
+            if (guns[j].unlocked) {
+                if (tickCounter < guns[j].lastFired + guns[j].cooldown || guns[j].ammo < 1) {
+                    theScreen -> drawHud(1, ++rowCount + 3, guns[j].tintFaded, guns[j].display);
+                    if (guns[j].ammo >= 0) {
+                        theScreen -> drawHud(2, rowCount + 3, guns[j].tintFaded, to_string(guns[j].ammo));
+                    }
+                }
+                else {
+                    theScreen -> drawHud(1, ++rowCount + 3, guns[j].tint, guns[j].display);
+                    if (guns[j].ammo >= 0) {
+                        theScreen -> drawHud(2, rowCount + 3, guns[j].tint, to_string(guns[j].ammo));
+                    }
+                }
+            }
+            j = ((j + 1) % guns.size());
+        }
+
+        //Health background bar
+
+        theScreen -> drawHudBarRight(1, 1, BLACK, maxHealth / 8.0f);
+
+        //Health bar
+
+        if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //If hurt, flash
+            theScreen -> drawHudBarRight(1, 1, HURTCOLOR, health / 8.0f);
+        }
+        else {
+            theScreen -> drawHudBarRight(1, 1, HEALTHCOLOR, health / 8.0f);
+        }
+
+        //Air bar
+
+        if (air < maxAir) {
+            theScreen -> drawHudBarRight(1, 2, AIRCOLOR, air / 64.0);
         }
     }
 

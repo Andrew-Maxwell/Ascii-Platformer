@@ -49,7 +49,8 @@
             "sizeFactor": 1.0,
             "displayChar": 8593,
             "key": "jumpSpeed",
-            "value": 0.5
+            "value": 0.5,
+            "pickupID": 6
         },
         {
             "type": "outfitPickup",
@@ -105,7 +106,8 @@
             "tint": [255, 0, 255, 255],
             "sizeFactor": 1.0,
             "gunID": 2,
-            "ammoCount": 4
+            "ammoCount": 4,
+            "pickupID": 2
         },
         {
             "type": "outfitPickup",
@@ -115,7 +117,8 @@
             "sizeFactor": 1.0,
             "key": "health",
             "value": -50,
-            "add": true
+            "add": true,
+            "pickupID": 3
         },
         {
             "type": "outfitPickup",
@@ -125,16 +128,18 @@
             "sizeFactor": 1.0,
             "key": "maxHealth",
             "value": 100,
-            "add": true
+            "add": true,
+            "pickupID": 4
         },
         {
             "type": "opPickup",
-            "x": 97.0,
-            "y": 16.0,
+            "x": 19.0,
+            "y": 19.0,
             "tint": [0, 255, 255, 255],
             "sizeFactor": 1.0,
             "touch": true,
-            "opID": 100
+            "opID": 100,
+            "pickupID": 5
         },
         {
             "type": "water",
@@ -194,6 +199,16 @@
                 ],
                 "operands": [
                     4,
+                    -1
+                ]
+            },
+            {
+                "unlocked": true,
+                "opID": 101,
+                "operations": [
+                    "rotate"
+                ],
+                "operands": [
                     -1
                 ]
             }

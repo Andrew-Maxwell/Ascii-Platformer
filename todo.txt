@@ -1,6 +1,8 @@
 Loose ends:
 - Make the max scale determined by screen size
-- Update inventory screen to have new button system
+- re-merge playerHud into player.cpp
+- Some stuff with outfit loading wrong? Guns not firing either when gun is not loaded from save, or when using gamepad
+- Broadcast animation + HUD broadcast indicator blends in with background
 
 Features:
 1 Puzzle elements:

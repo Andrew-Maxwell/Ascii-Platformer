@@ -97,17 +97,6 @@
 
 using namespace std;
 
-struct keyMapping {
-    int error = -1, up = KEY_W, down = KEY_S, left = KEY_A, right = KEY_D, inventory = KEY_TAB, nextWeapon = KEY_E, previousWeapon = KEY_Q, explode = KEY_R, lastCode = KEY_LEFT_SHIFT;
-    int code[10] = {KEY_ZERO, KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE, KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE};
-
-    int& operator[](int index);
-    
-    string name(int index);
-
-    int count();
-};
-
 class collider;
 extern collider* world;
 class screen;
@@ -115,7 +104,6 @@ extern screen* theScreen;
 extern int entityCounter;
 extern int tickCounter;
 extern bool debugWatch;
-extern keyMapping keys;
 
 extern "C" {
     extern int FONTCHARS[];
@@ -130,8 +118,6 @@ struct intVector2 {
         y = V.y;
     }
 };
-
-int myGetKeyPressed();
 
 float roundTo8th(float x);
 

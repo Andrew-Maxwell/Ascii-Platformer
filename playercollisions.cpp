@@ -6,7 +6,7 @@
                 won = 1;
                 break;
             case DOORTYPE:
-                if (IsKeyPressed(keys.down)) {
+                if (in.down.isPressed()) {
                     nextX = col.xVal;
                     nextY = col.yVal;
                     nextRoom = col.message;
@@ -53,7 +53,7 @@
                         break;
                     }
                 }
-                if (int(col.yVal)) {
+                if (int(col.yVal) != (1 << 31)) {
                     collectedPickups.insert(int(col.yVal));
                 }
                 break;
@@ -66,54 +66,27 @@
                         break;
                     }
                 }
-                if (int(col.yVal)) {
+                if (int(col.yVal) != (1 << 31)) {
                     collectedPickups.insert(int(col.yVal));
                 }
                 break;
             }
-            case HEALTHPICKUPTYPE:
-                damageIndicator(col.damage, x, y, HEALTHCOLOR, sizeFactor);
-                health = min(maxHealth, health + col.damage);
-                if (int(col.yVal)) {
-                    collectedPickups.insert(int(col.yVal));
-                }
-                break;
-            case MAXHEALTHPICKUPTYPE:
-                health += (col.damage);
-                damageIndicator(col.damage, x, y, HEALTHCOLOR, sizeFactor);
-                maxHealth += (col.damage);
-                if (int(col.yVal)) {
-                    collectedPickups.insert(int(col.yVal));
-                }
-                break;
-            case AIRPICKUPTYPE:
-                air = min(maxAir, air + col.damage);
-                damageIndicator(col.damage, x, y, AIRCOLOR, sizeFactor);
-                if (int(col.yVal)) {
-                    collectedPickups.insert(int(col.yVal));
-                }
-                break;
-            case MAXAIRPICKUPTYPE:
-                air += (col.damage);
-                damageIndicator(col.damage, x, y, AIRCOLOR, sizeFactor);
-                maxAir += (col.damage);
-                if (int(col.yVal)) {
-                    collectedPickups.insert(int(col.yVal));
-                }
-                break;
             case OPPICKUPTYPE: {
                 for (int i = 0; i < ops.size(); i++) {
                     if (ops[i].opID == col.damage) {
                         ops[i].unlocked = true;
                     }
                 }
-                if (int(col.yVal)) {
+                if (int(col.yVal) != (1 << 31)) {
                     collectedPickups.insert(int(col.yVal));
                 }
                 break;
             }
             case OUTFITPICKUPTYPE: {
                 handlePickup(col);
+                if (int(col.yVal) != (1 << 31)) {
+                    collectedPickups.insert(int(col.yVal));
+                }
                 break;
             }
             case FORCEFIELDTYPE: {

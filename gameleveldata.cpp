@@ -163,7 +163,17 @@
             }
             else if (type == "gunPickup" || type == "ammoPickup" ||
                      type == "opPickup" || type == "outfitPickup") {
-                int pickupID = entity.HasMember("pickupID") ? entity["pickupID"].GetInt() : 0;
+                int pickupID;
+                if (entity.HasMember("pickupID")) {
+                    pickupID = entity["pickupID"].GetInt();
+                    if (pickupID == (1 << 31)) {
+                        cout << (1 << 31) << "is a reserved value for pickupID" << endl;
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else {
+                    pickupID = (1 << 31);
+                }
                 if (!(collectedPickups.count(pickupID))) {
                     int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                     bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
@@ -192,6 +202,10 @@
                         bool add = entity.HasMember("add") ? entity["add"].GetBool() : false;
                         int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : '?';
                         newPickup = new outfitPickup(x, y, tint, sizeFactor, displayChar, lifetime, pickupID, touch, key, value, add);
+                    }
+                    else {
+                        cout << "bad pickup type";
+                        newPickup = NULL;
                     }
                     newPickup -> setDoLighting(doLighting);
                     world -> addCollideable(newPickup);

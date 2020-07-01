@@ -13,7 +13,7 @@
     }
 
     bool savePoint::doesCollide(float otherX, float otherY, int otherType) {
-        bool collided = (IsKeyPressed(keys.down) && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE);
+        bool collided = (otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE);
         savedGame |= collided;
         return collided;
     }

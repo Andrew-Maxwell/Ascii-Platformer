@@ -2,11 +2,66 @@
 #include "screen.hpp"
 #include "meta.hpp"
 
+    //Misc helper functions
 
-    string keyName(int key);
+    void drawTitle(string title) {
+        theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
+        theScreen -> drawHud((theScreen -> getHudCols() - title.size()) / 2, 0, LIGHTFOREGROUND, title);
+    }
+
+    bool onAnyGamepad(bool (*gamepadProperty)(int, int), int button) {
+        int padID = 0;
+        while (IsGamepadAvailable(padID)) {
+            if ((*gamepadProperty)(padID, button)) {
+                return true;
+            }
+            padID++;
+        }
+        return false;
+    }
+
+    bool axisOnAnyGamepad(int axis1, int invert1, int axis2 = 0, int invert2 = 0) {
+        int padID = 0;
+        while (IsGamepadAvailable(padID)) {
+            if (GetGamepadAxisMovement(padID, axis1) * invert1 > 0.7) {
+                return true;
+            }
+            if (GetGamepadAxisMovement(padID, axis2) * invert2 > 0.7) {
+                return true;
+            }
+            padID++;
+        }
+        return false;
+    }
+
+    void handleKey (int keyOne, int keyTwo, int button1, int axis1, int axis2, int invertAxes, input in, int& keyDown, int& select, int itemCount, int direction) {
+        if (IsKeyPressed(keyOne) || IsKeyPressed(keyTwo) || onAnyGamepad(IsGamepadButtonPressed, button1) || (axisOnAnyGamepad(axis1, invertAxes, axis2, invertAxes) && keyDown == 0) || in.isPressed() || (keyDown > 18 && keyDown % 6 == 0)) {
+            select = (itemCount + select + direction) % itemCount;
+        }
+        if (IsKeyDown(keyOne) || IsKeyDown(keyTwo) || onAnyGamepad(IsGamepadButtonPressed, button1) || axisOnAnyGamepad(axis1, invertAxes, axis2, invertAxes) || in.isDown()) {
+            keyDown++;
+        }
+        else {
+            keyDown = 0;
+        }
+    }
+
+/*****************************************************************************/
+//gameMenu functions
+/*****************************************************************************/
+
+    void gameMenu::init(int newXCount, int newYCount) {
+        tickNo = 2;
+        xCount = newXCount;
+        yCount = newYCount;
+    }
+
+    bool gameMenu::goBack() {
+        return (tickNo < 0 && (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_DELETE) || onAnyGamepad(IsGamepadButtonPressed, GAMEPAD_BUTTON_MIDDLE_LEFT) || onAnyGamepad(IsGamepadButtonPressed, GAMEPAD_BUTTON_MIDDLE) || onAnyGamepad(IsGamepadButtonPressed, GAMEPAD_BUTTON_MIDDLE_RIGHT)));
+    }
 
     void gameMenu::handleInput() {
-        if (myGetKeyPressed()) {
+        if (myGetKeyPressed() || getAnyGamepadInput()) {
             mouseMode = false;
         }
         else {
@@ -17,37 +72,41 @@
             oldMouse = mouse;
         }
         if (!mouseMode) {
-            if (IsKeyPressed(KEY_UP) || IsKeyPressed(keys.up) || (upDown > 18 && upDown % 6 == 0)) {
-                select = (itemCount + select - 1) % itemCount;
-            }
-            if (IsKeyDown(KEY_UP) || IsKeyDown(keys.up)) {
-                upDown++;
-            }
-            else {
-                upDown = 0;
-            }
-            if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(keys.down) || (downDown > 18 && downDown % 6 == 0)) {
-                select = (select + 1) % itemCount;
-            }
-            if (IsKeyDown(KEY_DOWN) || IsKeyDown(keys.down)) {
-                downDown++;
-            }
-            else {
-                downDown = 0;
-            }
+            handleKey (KEY_UP,    KEY_W, GAMEPAD_BUTTON_LEFT_FACE_UP, GAMEPAD_AXIS_LEFT_Y, GAMEPAD_AXIS_RIGHT_Y, -1, input(), upDown, ySelect, yCount, -1);
+            handleKey (KEY_DOWN,  KEY_S, GAMEPAD_BUTTON_LEFT_FACE_DOWN, GAMEPAD_AXIS_LEFT_Y, GAMEPAD_AXIS_RIGHT_Y, 1, input(), downDown,  ySelect, yCount, 1);
+            handleKey (KEY_LEFT,  KEY_A, GAMEPAD_BUTTON_LEFT_FACE_LEFT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, -1, input(), leftDown,  xSelect, xCount, -1);
+            handleKey (KEY_RIGHT, KEY_D, GAMEPAD_BUTTON_LEFT_FACE_RIGHT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, 1, input(), rightDown, xSelect, xCount, 1);
         }
+        tickNo--;
     }
 
-    bool gameMenu::button(int position, string text) {
+    void gameMenu::handleInput(inputMap& in) {
+        if (myGetKeyPressed() || getAnyGamepadInput()) {
+            mouseMode = false;
+        }
+        else {
+            Vector2 mouse = GetMousePosition();
+            if (oldMouse.x != mouse.x || oldMouse.y != mouse.y || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                mouseMode = true;
+            }
+            oldMouse = mouse;
+        }
+        if (!mouseMode) {
+            handleKey (KEY_UP,    KEY_W, GAMEPAD_BUTTON_LEFT_FACE_UP, GAMEPAD_AXIS_LEFT_Y, GAMEPAD_AXIS_RIGHT_Y, -1, in.up, upDown, ySelect, yCount, -1);
+            handleKey (KEY_DOWN,  KEY_S, GAMEPAD_BUTTON_LEFT_FACE_DOWN, GAMEPAD_AXIS_LEFT_Y, GAMEPAD_AXIS_RIGHT_Y, 1, in.down, downDown,  ySelect, yCount, 1);
+            handleKey (KEY_LEFT,  KEY_A, GAMEPAD_BUTTON_LEFT_FACE_LEFT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, -1, in.left, leftDown,  xSelect, xCount, -1);
+            handleKey (KEY_RIGHT, KEY_D, GAMEPAD_BUTTON_LEFT_FACE_RIGHT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, 1, in.right, rightDown, xSelect, xCount, 1);
+        }
+        tickNo--;
+    }
+
+    bool gameMenu::button(string text, int buttonCol, int buttonRow, int x, int y) {
+        if (y == -1) {
+            y = 2 * (buttonRow + 1);
+        }
         int hudFontSize = theScreen -> getHudFontSize();
         Vector2 mouse = GetMousePosition();
-        int triangleInt[2] = {0x25ba, ' '};
-        char* triangle = TextToUtf8(triangleInt, 2);
-        text = triangle + text;
-        free(triangle);
-        int y = 2 * (position + 1);
-//        int x = (getHudCols() - text.size()) / 2;
-        int x = 1;
+        bool toReturn = false;
         if (mouseMode) {
             if (mouse.x > x * hudFontSize && mouse.x < (x + text.size()) * hudFontSize && mouse.y > y * hudFontSize && mouse.y < (y + 1) * hudFontSize) {
                 if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
@@ -59,7 +118,7 @@
                     theScreen -> drawHud(x, y, LIGHTFOREGROUND, text);
                 }
                 if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-                    return true;
+                    toReturn = true;
                 }
             }
             else {
@@ -67,8 +126,8 @@
             }
         }
         else {
-            if (select == position) {
-                if (IsKeyDown(KEY_ENTER) || IsKeyDown(keys.lastCode)) {
+            if (xSelect == buttonCol && ySelect == buttonRow) {
+                if (IsKeyDown(KEY_ENTER) || IsKeyDown(KEY_SPACE) || onAnyGamepad(IsGamepadButtonDown, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || onAnyGamepad(IsGamepadButtonDown, GAMEPAD_BUTTON_LEFT_TRIGGER_1) || onAnyGamepad(IsGamepadButtonDown, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
                     theScreen -> drawHudBarRight(x, y, DARKBACKGROUND, text.length());
                     theScreen -> drawHud(x, y, DARKFOREGROUND, text);
                 }
@@ -76,39 +135,133 @@
                     theScreen -> drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
                     theScreen -> drawHud(x, y, LIGHTFOREGROUND, text);
                 }
-                if (IsKeyReleased(KEY_ENTER) || IsKeyReleased(keys.lastCode)) {
-                    return true;
+                if (IsKeyReleased(KEY_ENTER) || IsKeyReleased(KEY_SPACE) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_LEFT_TRIGGER_1) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
+                    toReturn = true;
                 }
             }
             else {
                 theScreen -> drawHud(x, y, UIFOREGROUND, text);
             }
         }
-        return false;
+        x += (text.size() + 1);
+        y += 2;
+        return toReturn;
+    }
+
+    void apply(bitset<8>* current, int op, int arg) {
+        switch(op) {
+            case 0: {   //do nothing
+                break;
+            }
+            case 1: {   //Rotate
+                bitset<8> toReturn;
+                for (int i = 0; i < 8; i++) {
+                    toReturn[i] = (*current)[(i + arg)&7];
+                }
+                *current = toReturn;
+                break;
+            }
+            case 2: {   //Shift
+                if (arg > 0) {
+                    *current >>= arg;
+                }
+                else {
+                    *current <<= (-1 * arg);
+                }
+                break;
+            }
+            case 3: {   //Set (OR 1)
+                bitset<8> bs(arg);
+                *current |= bs;
+                break;
+            }
+            case 4: {   //Reset (AND 0)
+                bitset<8> bs(arg);
+                *current &= bs;
+                break;
+            }
+            case 5: {   //Flip (XOR 1);
+                bitset<8> bs(arg);
+                *current ^= bs;
+                break;
+            }
+            case 6: {   //Load
+                bitset<8> toReturn(arg);
+                *current = toReturn;
+                break;
+            }
+            default: {
+                cerr << "Not a valid choice!" << op << endl;
+            }
+        }
+//        cout << op << " " << arg << current -> to_string() << endl;
+    }
+
+    void gameMenu::inventory(int& status, outfit& o, inputMap& in) {
+        init(o.ops.size(), 11);
+        bool firstTick = true;  //Prevents entering and exiting screen in first tick (because tab is pressed)
+        while (status == inventoryStatus) {
+            handleInput(in);
+            if (ySelect == 10) {
+                xSelect = 0;
+            }
+            theScreen -> start(true);
+
+            string title = "Inventory";
+            drawTitle(title);
+
+            //Draw available ops as buttons
+            string listNum = "0: ";
+            for (int i = 0; i < 10; i++) {
+                listNum[0] = '0' + i;
+                theScreen -> drawHud(1, 10 + 2 * i, UIFOREGROUND, listNum);
+                theScreen -> drawHud(4, 10 + 2 * i, o.channelColors[i], o.channels[i].to_string());
+                for (int j = 0; j < o.ops.size(); j++) {;
+                    if (o.ops[j].unlocked) {
+                        if (button(o.ops[j].display, j, i, j * 3 + 15, 10 + 2 * i)) {
+                            for (int k = 0; k < o.ops[j].operations.size(); k++) {
+                                apply(&o.channels[i], o.ops[j].operations[k], o.ops[j].operands[k]);
+                            }
+                            o.channelColors[i].r = 255 - (o.channels[i] & bitset<8>(192)).to_ulong();
+                            o.channelColors[i].g = 255 - ((o.channels[i] & bitset<8>(56)).to_ulong() << 2);
+                            o.channelColors[i].b = 255 - ((o.channels[i] & bitset<8>(7)).to_ulong() << 5);
+                        }
+                    }
+                    else {
+                        button("?", j, i, j * 3 + 15, 10 + 2 * i);
+                    }
+                }
+            }
+            string exitLabel = "Back to Game";
+            if (goBack() || (in.inventory.isPressed() && !firstTick) || button(exitLabel, 0, 10, 1, 32)) {
+                status = runStatus;
+            }
+            firstTick = false;
+            theScreen -> end();
+        }
     }
 
     void gameMenu::pause(int& status) {
-        itemCount = 4;
+        init(1, 4);
         while (status == pauseStatus) {
             handleInput();
             theScreen -> start(true);
             string pausedLabel = "Game Paused";
-            string optionsLabel = "Game Options";
-            string menuLabel = "Main Menu (lose unsaved progress)";
-            string quitLabel = "Quit (lose unsaved progress)";
-            string resumeLabel = "Resume";
-            theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
-            theScreen -> drawHud((theScreen -> getHudCols() - pausedLabel.size()) / 2, 0, LIGHTFOREGROUND, pausedLabel);
-            if (button(0, optionsLabel)) {
+            drawTitle(pausedLabel);
+            string optionsLabel = "\xE2\x96\xBA Game Options";
+            string menuLabel = "\xE2\x96\xBA Main Menu (lose unsaved progress)";
+            string quitLabel = "\xE2\x96\xBA Quit (lose unsaved progress)";
+            string resumeLabel = "\xE2\x96\xBA Resume";
+            if (button(optionsLabel, 0, 0)) {
                 status = optionsStatus;
             }
-            else if (button(1, menuLabel)) {
+            else if (button(menuLabel, 0, 1)) {
                 status = menuStatus;
             }
-            else if (button(2, quitLabel)) {
+            else if (button(quitLabel, 0, 2)) {
                 status = quitStatus;
             }
-            else if (button(3, resumeLabel)) {
+            else if (goBack() || button(resumeLabel, 0, 3)) {
                 status = runStatus;
             }
             theScreen -> end();
@@ -116,23 +269,22 @@
     }
 
     void gameMenu::main(int& status) {
-        itemCount = 3;
+        init(1, 3);
         while (status == menuStatus) {
             handleInput();
             theScreen -> start(true);
             string title = "ASCII Platformer";
-            string startLabel = "Load Game";
-            string optionsLabel = "Options";
-            string quitLabel = "Quit";
-            theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
-            theScreen -> drawHud((theScreen -> getHudCols() - title.size()) / 2, 0, LIGHTFOREGROUND, title);
-            if (button(0, startLabel)) {
+            string startLabel = "\xE2\x96\xBA Load Game";
+            string optionsLabel = "\xE2\x96\xBA Options";
+            string quitLabel = "\xE2\x96\xBA Quit";
+            drawTitle(title);
+            if (button(startLabel, 0, 0)) {
                 status = deadStatus;
             }
-            else if (button(1, optionsLabel)) {
+            else if (button(optionsLabel, 0, 1)) {
                 status = optionsStatus;
             }
-            else if (button(2, quitLabel)) {
+            else if (button(quitLabel, 0, 2)) {
                 status = quitStatus;
             }
             theScreen -> end();
@@ -140,16 +292,15 @@
     }
 
     void gameMenu::options(int& status, configData& config) {
-        itemCount = 6;
+        init(1, 6);
         while (status == optionsStatus) {
             handleInput();
             theScreen -> start(true);
             string title = "Options";
-            theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
-            theScreen -> drawHud((theScreen -> getHudCols() - title.size()) / 2, 0, LIGHTFOREGROUND, title);
+            drawTitle(title);
             //Display settings
             string fullscreenLabel = "Toggle Fullscreen";
-            if (button(0, fullscreenLabel)) {
+            if (button(fullscreenLabel, 0, 0)) {
                 if (IsWindowFullscreen()) {
                     ToggleFullscreen();
                     SetWindowSize(1024, 768);
@@ -166,45 +317,45 @@
                 config.save();
             }
             string hudScaleLabel = "Tweak Interface Scale";
-            if (button(1, hudScaleLabel)) {
+            if (button(hudScaleLabel, 0, 1)) {
                 theScreen -> tweakHudScale();
                 config.setHudFontSize(theScreen -> getHudFontSize());
                 config.save();
             }
             string gameScaleLabel = "Tweak Game Scale";
-            if (button(2, gameScaleLabel)) {
+            if (button(gameScaleLabel, 0, 2)) {
                 theScreen -> tweakGameScale();
                 config.setGameFontSize(theScreen -> getFontSize());
                 config.save();
             }
             string gameScaleTest = "Game Scale Text";
             theScreen -> drawScaleTest(4 + gameScaleLabel.size(), 6, RED, gameScaleTest);
-            //Keybind settings
-            string keyLabel = "Key Bindings";
-            if (button(3, keyLabel)) {
-                status = keybindStatus;
+            //input settings
+            string inputOptionsLabel = "\xE2\x96\xBA Input Settings";
+            if (button(inputOptionsLabel, 0, 3)) {
+                status = inputOptionsStatus;
                 theScreen -> end();
-                keyOptions(status, config);
+                inputOptions(status, config);
             }
-            string backLabel = "Back to Menu";
-            if (button(4, backLabel)) {
+            string backLabel = "\xE2\x96\xBA Back to Menu";
+            if (goBack() || button(backLabel, 0, 4)) {
                 status = -1;    //Previous status will be restored in calling function
             }
             theScreen -> end();
         }
     }
 
-    void gameMenu::keyOptions(int& status, configData& config) {
-        itemCount = keys.count() + 2;
-        int keyToChange = -1;
-        while (status == keybindStatus) {
-            if (keyToChange == -1) {
+    void gameMenu::inputOptions(int& status, configData& config) {
+/*        yCount = inputMap.count() + 2;
+        xCount = 1;
+        int inputToChange = -1;
+        while (status == inputOptionsStatus) {
+            if (inputToChange == -1) {
                 handleInput();
             }
             theScreen -> start(true);
-            string title = "Keyboard Bindings";
-            theScreen -> drawHudBarRight(0, 0, UIFOREGROUND, theScreen -> getHudCols() + 1);
-            theScreen -> drawHud((theScreen -> getHudCols() - title.size()) / 2, 0, LIGHTFOREGROUND, title);
+            string title = "Input Options";
+            drawTitle(title);
             bool clickedNoButton = true;
             for (int i = 0; i < keys.count(); i++) {
                 if (keyToChange == i) {
@@ -221,7 +372,7 @@
                     }
                 }
                 else {
-                    if (button(i, keys.name(i) + ": " + keyName(keys[i]))) {
+                    if (button(keys.name(i) + ": " + keyName(keys[i]), 0, i)) {
                         keyToChange = i;
                         clickedNoButton = false;
                     }
@@ -231,126 +382,16 @@
                 }
             }
             string resetLabel = "Reset to Default";
-            if (button(keys.count(), resetLabel)) {
+            if (button(resetLabel, 0, keys.count())) {
                 keys = keyMapping();
                 config.setKeys(keys);
                 config.save();
             }
-            string backLabel = "Back to Options";
-            if (button(keys.count() + 1, backLabel)) {
+            string backLabel = "\xE2\x96\xBA Back to Options";
+            if (button(backLabel, 0, keys.count() + 1)) {
                 status = optionsStatus;
             }
             theScreen -> end();
-        }
+        }*/
     }
 
-    string keyName(int key) {
-        switch(key) {
-            case 39: return "APOSTROPHE";
-            case 44: return "COMMA";
-            case 45: return "MINUS";
-            case 46: return "PERIOD";
-            case 47: return "SLASH";
-            case 48: return "ZERO";
-            case 49: return "ONE";
-            case 50: return "TWO";
-            case 51: return "THREE";
-            case 52: return "FOUR";
-            case 53: return "FIVE";
-            case 54: return "SIX";
-            case 55: return "SEVEN";
-            case 56: return "EIGHT";
-            case 57: return "NINE";
-            case 59: return "SEMICOLON";
-            case 61: return "EQUAL";
-            case 65: return "A";
-            case 66: return "B";
-            case 67: return "C";
-            case 68: return "D";
-            case 69: return "E";
-            case 70: return "F";
-            case 71: return "G";
-            case 72: return "H";
-            case 73: return "I";
-            case 74: return "J";
-            case 75: return "K";
-            case 76: return "L";
-            case 77: return "M";
-            case 78: return "N";
-            case 79: return "O";
-            case 80: return "P";
-            case 81: return "Q";
-            case 82: return "R";
-            case 83: return "S";
-            case 84: return "T";
-            case 85: return "U";
-            case 86: return "V";
-            case 87: return "W";
-            case 88: return "X";
-            case 89: return "Y";
-            case 90: return "Z";
-            case 32: return "SPACE";
-            case 256: return "ESCAPE";
-            case 257: return "ENTER";
-            case 258: return "TAB";
-            case 259: return "BACKSPACE";
-            case 260: return "INSERT";
-            case 261: return "DELETE";
-            case 262: return "RIGHT";
-            case 263: return "LEFT";
-            case 264: return "DOWN";
-            case 265: return "UP";
-            case 266: return "PAGE UP";
-            case 267: return "PAGE DOWN";
-            case 268: return "HOME";
-            case 269: return "END";
-            case 280: return "CAPS LOCK";
-            case 281: return "SCROLL LOCK";
-            case 282: return "NUM LOCK";
-            case 283: return "PRINT SCREEN";
-            case 284: return "PAUSE";
-            case 290: return "F1";
-            case 291: return "F2";
-            case 292: return "F3";
-            case 293: return "F4";
-            case 294: return "F5";
-            case 295: return "F6";
-            case 296: return "F7";
-            case 297: return "F8";
-            case 298: return "F9";
-            case 299: return "F10";
-            case 300: return "F11";
-            case 301: return "F12";
-            case 340: return "LEFT SHIFT";
-            case 341: return "LEFT CONTROL";
-            case 342: return "LEFT ALT";
-            case 343: return "LEFT SUPER";
-            case 344: return "RIGHT SHIFT";
-            case 345: return "RIGHT CONTROL";
-            case 346: return "RIGHT ALT";
-            case 347: return "RIGHT SUPER";
-            case 348: return "KB MENU";
-            case 91: return "LEFT BRACKET";
-            case 92: return "BACKSLASH";
-            case 93: return "RIGHT BRACKET";
-            case 96: return "GRAVE";
-            case 320: return "KEYPAD 0";
-            case 321: return "KEYPAD 1";
-            case 322: return "KEYPAD 2";
-            case 323: return "KEYPAD 3";
-            case 324: return "KEYPAD 4";
-            case 325: return "KEYPAD 5";
-            case 326: return "KEYPAD 6";
-            case 327: return "KEYPAD 7";
-            case 328: return "KEYPAD 8";
-            case 329: return "KEYPAD 9";
-            case 330: return "KEYPAD DECIMAL";
-            case 331: return "KEYPAD DIVIDE";
-            case 332: return "KEYPAD MULTIPLY";
-            case 333: return "KEYPAD SUBTRACT";
-            case 334: return "KEYPAD ADD";
-            case 335: return "KEYPAD ENTER";
-            case 336: return "KEYPAD EQUAL";
-            default: return "??????";
-        }
-    }
