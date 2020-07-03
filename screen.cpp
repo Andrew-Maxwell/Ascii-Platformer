@@ -260,7 +260,7 @@
             moveCameraY = (worldRows > screenRows / playerSizeFactor);
             cameraLagX = screenCols / playerSizeFactor * 3 / 16;
             cameraLagY = screenRows / playerSizeFactor * 3 / 16;
-        }
+       }
 
         BeginDrawing();
         if (tabScreen) {

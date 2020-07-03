@@ -254,7 +254,6 @@ using namespace rapidjson;
             }
         }
         else {
-            cout << "No channels found in outfit " << name << endl;
             for (int i = 0; i < 10; i++) {
                 toReturn.channels[i] = bitset<8>(0);
             }

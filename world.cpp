@@ -6,9 +6,9 @@
 
     //Constructor
 
-    collider::collider(float newX, float newY, string fileName) :
-        entity(newX, newY, {0, 0, 0, 0}, 1),
-        layer(newX, newY, {0, 0, 0, 0}, 1, fileName)
+    collider::collider(float newX, float newY, string newFileName) :
+        entity(newX, newY, WHITE, 1),
+        layer(newX, newY, WHITE, 1, newFileName)
     {
         if (fileName != "") {
             layer::readLayer();
@@ -20,7 +20,8 @@
     collider::~collider() {
         while (entities.begin() != entities.end()) {
             if ((*entities.begin()) -> type() != PLAYERTYPE &&
-                (*entities.begin()) -> type() != GAMELAYERTYPE) {
+                (*entities.begin()) -> type() != GAMELAYERTYPE &&
+                (*entities.begin()) -> type() != LAYERTYPE) {
                 delete (*entities.begin());
             }
             entities.erase(entities.begin());
@@ -30,7 +31,8 @@
     void collider::clear() {
         while (entities.begin() != entities.end()) {
             if ((*entities.begin()) -> type() != PLAYERTYPE &&
-                (*entities.begin()) -> type() != GAMELAYERTYPE) {
+                (*entities.begin()) -> type() != GAMELAYERTYPE &&
+                (*entities.begin()) -> type() != LAYERTYPE) {
                 delete (*entities.begin());
             }
             entities.erase(entities.begin());
@@ -38,6 +40,7 @@
         entities.clear();
         collideables.clear();
         particles.clear();
+        hudEntities.clear();
     }
 
     //Tick functions

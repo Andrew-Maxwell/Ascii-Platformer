@@ -16,7 +16,7 @@ class saveData : public outfitData {
 
     Vector2 getPosition();
 
-    void writeOutfit(outfit o);
+    void writeOutfit(outfit o, int playerNumber);
 
     void save(Vector2 position, string room);
 };

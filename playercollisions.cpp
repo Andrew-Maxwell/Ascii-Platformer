@@ -6,7 +6,7 @@
                 won = 1;
                 break;
             case DOORTYPE:
-                if (in.down.isPressed()) {
+                if (in.interact.isPressedOnce()) {
                     nextX = col.xVal;
                     nextY = col.yVal;
                     nextRoom = col.message;

@@ -16,6 +16,7 @@ struct input {
     bool positive;  //True if it's the positive half of the axis
     int id = 0;     //Key/button/axis number
     float value = 0, lastValue = 0;
+    bool firstCallPressed, firstCallReleased;
 
     input();
 
@@ -31,21 +32,25 @@ struct input {
 
     bool isPressed();
 
+    bool isPressedOnce();   //Only returns true once per tick
+
     bool isReleased();
+
+    bool isReleasedOnce();  //Only returns true once per tick
 
     bool isUp();
 
 };
 
 struct inputMap {
-    input error, up, down, left, right, jump, inventory, nextWeapon, previousWeapon, explode, lastCode, nextCode, previousCode, aimUp, aimDown, aimLeft, aimRight, fire;
+    input error, up, down, left, right, jump, interact, inventory, nextWeapon, previousWeapon, explode, lastCode, nextCode, previousCode, aimUp, aimDown, aimLeft, aimRight, fire;
     input code[10];
 
     bool keyboard;
     bool useMouseAim;
     int device;
 
-    inputMap(bool keyboard = true);
+    inputMap(int newDevice);
 
     void update();
 

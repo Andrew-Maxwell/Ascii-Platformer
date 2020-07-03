@@ -1,8 +1,12 @@
 Loose ends:
 - Make the max scale determined by screen size
-- re-merge playerHud into player.cpp
-- Some stuff with outfit loading wrong? Guns not firing either when gun is not loaded from save, or when using gamepad
+- Some stuff with outfit loading wrong?
 - Broadcast animation + HUD broadcast indicator blends in with background
+- Player #2 can't walk through door while player #1 is dead
+- Make camera not get stuck after player #1 dies
+- Figure out how to handle dead players respawning; right now, the value health = 0 can get saved, preventing players from respawning.
+- Joystick aim accuracy is VERY limited. Should probably allow spamming/strafing like Cave Story to compensate.
+- Make sure all of the players need to be walking through the same door in order to go through.
 
 Features:
 1 Puzzle elements:

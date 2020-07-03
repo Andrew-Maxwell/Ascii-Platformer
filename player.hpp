@@ -38,6 +38,12 @@ struct weapon {
     bool operator== (const weapon& other) {
         return gunID == other.gunID;
     }
+
+    void merge(weapon& other) {
+        assert(gunID == other.gunID);
+        unlocked |= other.unlocked;
+    }
+
 };
 
 struct puzzleOp {
@@ -49,6 +55,11 @@ struct puzzleOp {
 
     bool operator== (const puzzleOp& other) {
         return opID == other.opID;
+    }
+
+    void merge(puzzleOp& otherOp) {
+        assert(opID == otherOp.opID);
+        unlocked |= otherOp.unlocked;
     }
 };
 
@@ -77,13 +88,21 @@ struct outfit {
 
     void merge(outfit& otherOutfit) {
         for (int i = 0; i < otherOutfit.guns.size(); i++) {
-            if (find(guns.begin(), guns.end(), otherOutfit.guns[i]) == guns.end()) {
+            vector<weapon>::iterator foundGun = find(guns.begin(), guns.end(), otherOutfit.guns[i]);
+            if (foundGun == guns.end()) {
                 guns.push_back(otherOutfit.guns[i]);
+            }
+            else {
+                foundGun -> merge(otherOutfit.guns[i]);
             }
         }
         for (int i = 0; i < otherOutfit.ops.size(); i++) {
-            if (find(ops.begin(), ops.end(), otherOutfit.ops[i]) == ops.end()) {
+            vector<puzzleOp>::iterator foundOp = find(ops.begin(), ops.end(), otherOutfit.ops[i]);
+            if (foundOp == ops.end()) {
                 ops.push_back(otherOutfit.ops[i]);
+            }
+            else {
+                foundOp -> merge(otherOutfit.ops[i]);
             }
         }
     }
@@ -104,19 +123,19 @@ class player : virtual public collideable, public entityParent, public hudEntity
     float elasticity = 0, maxSpeed = 100, gravity, friction;
     float width = 0.8;
 
-    float xMovement, yMovement;
-    float xMoveWater, yMoveWater;
-    float xInertia, yInertia;
+    float xMovement = 0, yMovement = 0;
+    float xMoveWater = 0, yMoveWater = 0;
+    float xInertia = 0, yInertia = 0;
 
-    float nextX, nextY;
+    float nextX = 0, nextY = 0;
 
-    string outfitName;
-    int display;
-    string displayStr;
+    string outfitName = "";
+    int display = '?';
+    string displayStr = "?";
 
-    int health, maxHealth;
+    int health = 1000000, maxHealth = 100000;
     int hurtTimer = -1000;
-    int air, maxAir;
+    int air = 1, maxAir = 1;
 
     float acceleration, speed, playerFriction;
     float waterAcceleration, waterSpeed, waterFriction;

@@ -24,6 +24,14 @@
             "sizeFactor": 1.0
         },
         {
+            "type": "player",
+            "number": 1,
+            "x": 20.0,
+            "y": 19.0,
+            "tint": [0, 0, 255, 255],
+            "sizeFactor": 1.0
+        },
+        {
             "type": "layer",
             "fileName": "test_collider.txt",
             "x": 0.0,

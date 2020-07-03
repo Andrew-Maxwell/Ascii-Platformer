@@ -11,6 +11,14 @@
             "sizeFactor": 1.0
         },
         {
+            "type": "player",
+            "number": 1,
+            "x": 14.0,
+            "y": 7.0,
+            "tint": [0, 0, 255, 255],
+            "sizeFactor": 1.0
+        },
+        {
             "type": "layer",
             "x": 0.0,
             "y": 0.0,

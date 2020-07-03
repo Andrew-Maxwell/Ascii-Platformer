@@ -11,7 +11,10 @@
         fileName(newFileName) {}
 
     layer::~layer() {
-        UnloadRenderTexture(tex);
+        if (rendered) {
+            UnloadRenderTexture(tex);
+        }
+        rendered = false;
     }
 
     unsigned int layer::type() {
@@ -30,12 +33,15 @@
     }
 
     void layer::render() {
-        BeginTextureMode(tex);
-        ClearBackground((Color){0, 0, 0, 0});
-        for (int i = 0; i < screen.size(); i++) {
-            theScreen -> myDrawText(screen[i].c_str(), (Vector2){0, i * 8}, 8, 0, (Color){255, 255, 255, 255});
+        if (!rendered) {
+            BeginTextureMode(tex);
+            ClearBackground((Color){0, 0, 0, 0});
+            for (int i = 0; i < screen.size(); i++) {
+                theScreen -> myDrawText(screen[i].c_str(), (Vector2){0, i * 8}, 8, 0, (Color){255, 255, 255, 255});
+            }
+            EndTextureMode();
+            rendered = true;
         }
-        EndTextureMode();
     }
 
     int layer::getRows() {

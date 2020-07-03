@@ -44,7 +44,7 @@
 
     //Read in entities to global world collider
 
-    void gameLevelData::readEntitiesGame(set<int> collectedPickups, player* thePlayer, bool movePlayerToStart) {
+    void gameLevelData::readEntitiesGame(vector<player*>& players, bool movePlayersToStart) {
 
         auto layerIter = layerCache.begin();
 
@@ -94,15 +94,21 @@
                 S -> setZPosition (world -> getZPosition());
             }
             else if (type == "player") {
-                thePlayer -> setColor((Color)tint);
-                thePlayer -> setDoLighting(doLighting);
-                thePlayer -> setSizeFactor(sizeFactor);
-                if (movePlayerToStart) {
-                    thePlayer -> moveTo ((Vector2){x, y});
+                int playerNumber = entity.HasMember("number") ? entity["number"].GetInt() : 0;
+                if (playerNumber < players.size()) {
+                    players[playerNumber] -> setColor((Color)tint);
+                    players[playerNumber] -> setDoLighting(doLighting);
+                    players[playerNumber] -> setSizeFactor(sizeFactor);
+                    if (movePlayersToStart) {
+                        players[playerNumber] -> moveTo ((Vector2){x, y});
+                    }
+                    world -> addCollideable(players[playerNumber]);
+                    players[playerNumber] -> setZPosition (world -> getZPosition());
+                    world -> addHudEntity(players[playerNumber]);
                 }
-                world -> addCollideable(thePlayer);
-                thePlayer -> setZPosition (world -> getZPosition());
-                world -> addHudEntity(thePlayer);
+                else {
+                    cerr << "No player " << playerNumber << endl;
+                }
             }
             else if (type == "forceField") {
                 int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;
@@ -164,17 +170,21 @@
             else if (type == "gunPickup" || type == "ammoPickup" ||
                      type == "opPickup" || type == "outfitPickup") {
                 int pickupID;
+                bool collected = false;
                 if (entity.HasMember("pickupID")) {
                     pickupID = entity["pickupID"].GetInt();
-                    if (pickupID == (1 << 31)) {
-                        cout << (1 << 31) << "is a reserved value for pickupID" << endl;
-                        exit(EXIT_FAILURE);
+                    if (pickupID != (1 << 31)) {
+                        for (int i = 0; i < players.size(); i++) {
+                            if (players[i] -> getCollectedPickups().count(pickupID)) {
+                                collected = true;
+                            }
+                        }
                     }
                 }
                 else {
                     pickupID = (1 << 31);
                 }
-                if (!(collectedPickups.count(pickupID))) {
+                if (!collected) {
                     int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                     bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
                     pickup* newPickup;

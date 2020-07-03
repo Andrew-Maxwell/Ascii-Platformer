@@ -87,6 +87,8 @@ class collider : public layer {
 
     collider (float newX = 0.0, float newY = 0.0, string fileName = "");
 
+    void readLayer();
+
     //destructor
 
     ~collider();

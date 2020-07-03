@@ -23,7 +23,7 @@
 
 class gameLevelData : public outfitData, public levelData {
 
-    list<layer*> layerCache;
+    list<gameLayer*> layerCache;
 
     public:
 
@@ -37,7 +37,7 @@ class gameLevelData : public outfitData, public levelData {
 
     //Read all of the entities into the global world collider
 
-    void readEntitiesGame(set<int> collectedPickups, player* playerPtr, bool movePlayerToStart);
+    void readEntitiesGame(vector<player*>& players, bool movePlayersToStart);
 
 };
 

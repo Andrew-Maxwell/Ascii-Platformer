@@ -24,6 +24,7 @@ class layer : virtual public entity {
     vector<string> screen;
     string fileName;
     RenderTexture2D tex;
+    bool rendered = false;
 
     public:
 

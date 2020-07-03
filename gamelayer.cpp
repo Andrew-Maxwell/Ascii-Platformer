@@ -14,6 +14,7 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
         }
 
     gameLayer::~gameLayer() {
+        UnloadRenderTexture(tex);
         cout << "gameLayer destroyed\n";
     }
 

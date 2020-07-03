@@ -115,6 +115,7 @@ int getAnyGamepadInput() {
                 value = 0;
             }
         }
+        firstCallPressed = firstCallReleased = true;
     }
 
     bool input::isDown() {
@@ -125,8 +126,24 @@ int getAnyGamepadInput() {
         return (value > 0 && lastValue == 0);
     }
 
+    bool input::isPressedOnce() {
+        if (isPressed() && firstCallPressed) {
+            firstCallPressed = false;
+            return true;
+        }
+        return false;
+    }
+
     bool input::isReleased() {
         return (value == 0 && lastValue > 0);
+    }
+
+    bool input::isReleasedOnce() {
+        if (isReleased() && firstCallReleased) {
+            firstCallReleased = false;
+            return true;
+        }
+        return false;
     }
 
     bool input::isUp() {
@@ -138,8 +155,9 @@ int getAnyGamepadInput() {
 //maps keys/axes/buttons (inputs) to actions (e.g. jump, move, inventory, aim...)
 /******************************************************************************/
 
-    inputMap::inputMap(bool newKeyboard) {
-        keyboard = newKeyboard;
+    inputMap::inputMap(int newDevice) {
+        device = newDevice;
+        keyboard = (device == -1);
         if (keyboard) {   //keyboard
             device = -1;
             useMouseAim = true;
@@ -147,7 +165,8 @@ int getAnyGamepadInput() {
             down = input(false, false, KEY_S);
             left = input(false, false, KEY_A);
             right = input(false, false, KEY_D);
-            up = input(false, false, KEY_W);
+            jump = input(false, false, KEY_W);
+            interact = input(false, false, KEY_S);
             inventory = input(false, false, KEY_TAB);
             nextWeapon = input(false, false, KEY_E);
             previousWeapon = input(false, false, KEY_Q);
@@ -172,6 +191,7 @@ int getAnyGamepadInput() {
             left = input(true, false, GAMEPAD_AXIS_LEFT_X);
             right = input(true, true, GAMEPAD_AXIS_LEFT_X);
             jump = input(false, false, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+            interact = input(false, false, GAMEPAD_BUTTON_LEFT_TRIGGER_2);
             inventory = input(false, false, GAMEPAD_BUTTON_RIGHT_FACE_UP);
             nextWeapon = input(false, false, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
             previousWeapon = input(false, false, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
@@ -197,30 +217,31 @@ int getAnyGamepadInput() {
     }
 
     input& inputMap::operator[](int index) {
-        if (index >= 0 && index < 17) {
+        if (index >= 0 && index < 18) {
             switch(index) {
                 case(0): return up;
                 case(1): return down;
                 case(2): return left;
                 case(3): return right;
                 case(4): return jump;
-                case(5): return inventory;
-                case(6): return nextWeapon;
-                case(7): return previousWeapon;
-                case(8): return explode;
-                case(9): return lastCode;
-                case(10): return nextCode;
-                case(11): return previousCode;
-                case(12): return aimUp;
-                case(13): return aimDown;
-                case(14): return aimLeft;
-                case(15): return aimRight;
-                case(16): return fire;
+                case(5): return interact;
+                case(6): return inventory;
+                case(7): return nextWeapon;
+                case(8): return previousWeapon;
+                case(9): return explode;
+                case(10): return lastCode;
+                case(11): return nextCode;
+                case(12): return previousCode;
+                case(13): return aimUp;
+                case(14): return aimDown;
+                case(15): return aimLeft;
+                case(16): return aimRight;
+                case(17): return fire;
                 default: return error;
             }
         }
-        else if (index < 27) {
-            return code[index - 16];
+        else if (index < 28) {
+            return code[index - 17];
         }
         else {
             return error;
@@ -274,7 +295,7 @@ int getAnyGamepadInput() {
     }
 
     int inputMap::count() {
-        return 27;
+        return 28;
     }
 
     Vector2 inputMap::getAim() {

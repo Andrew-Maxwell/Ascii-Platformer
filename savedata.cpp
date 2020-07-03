@@ -18,15 +18,16 @@
 
     //put outfit in JSON
 
-    void saveData::writeOutfit(outfit o) {
+    void saveData::writeOutfit(outfit o, int playerNumber) {
 
-        json.RemoveMember(o.name.c_str());
+        string name = o.name + to_string(playerNumber);
+        json.RemoveMember(name.c_str());
 
         Document::AllocatorType& a = json.GetAllocator();
         Value newOutfit(kObjectType);
-        Value name;
-        name.SetString(o.name.c_str(), o.name.length(), a);
-        newOutfit.AddMember("name", name, a);
+        Value nameValue;
+        nameValue.SetString(o.name.c_str(), o.name.length(), a);
+        newOutfit.AddMember("name", nameValue, a);
         newOutfit.AddMember("display", Value(o.display), a);
         newOutfit.AddMember("health", Value(o.health).Move(), a);
         newOutfit.AddMember("maxHealth", Value(o.maxHealth).Move(), a);
@@ -125,7 +126,7 @@
         //Store it in the JSON under the outfit name
 
         Value label;
-        label.SetString(o.name.c_str(), o.name.length(), a);
+        label.SetString(name.c_str(), name.length(), a);
         json.AddMember(label, newOutfit, json.GetAllocator());
     }
 

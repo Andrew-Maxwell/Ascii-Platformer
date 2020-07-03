@@ -87,11 +87,12 @@
 
     void player::tickSet() {
         in.update();    //Update input data
-        if (in.inventory.isPressed()) {
-            breakInventory = true;
-        }
 
         if (!breakDoor && !breakDead) {
+
+            if (in.inventory.isPressed()) {
+                breakInventory = true;
+            }
 
             //Detect solid blocks
             bool onGround =
@@ -271,7 +272,7 @@
 
             //Death
             hurtTimer--;
-            if (y > world -> getRows() + 25) {
+            if (IsKeyPressed(KEY_K) || y > world -> getRows() + 25) {
                 health = 0;
             }
             if (health <= 0) {
@@ -279,6 +280,11 @@
                 xInertia = 0;
                 yInertia = 0;
                 collisions.clear();
+            }
+        }
+        else if (breakDoor) {
+            if (in.interact.isPressedOnce()) {
+                breakDoor = false;
             }
         }
     }
@@ -354,7 +360,7 @@
     }
 
     void player::print() {
-        if (!breakDead) {
+        if (!breakDoor && !breakDead) {
             if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
                 theScreen -> draw(x, y, HURTCOLOR, sizeFactor, displayStr, false);
             }

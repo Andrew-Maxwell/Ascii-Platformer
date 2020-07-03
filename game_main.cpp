@@ -31,12 +31,17 @@ int main(int argc, char** argv) {
     int maxLoad = 0;
 
     int status = menuStatus;
-    player thePlayer(0, 0, (Color){255, 255, 255, 255}, 1.0);
-    inputMap in(false);
-    thePlayer.setInputMap(in);
+    vector<player*> players;
+    string roomName;
+/*    players.push_back(new player(0, 0, WHITE, 1.0));
+    players.push_back(new player(0, 0, WHITE, 1.0));
+    inputMap in(true);
+    players[0] -> setInputMap(in);
+    inputMap gamepad(false);
+    players[1] -> setInputMap(gamepad);*/
     gameLevelData level;
     saveData save;
-    bool loadedSave;
+    bool loadedSave = false;
     bool argRoom = argc > 1;    //If room is defined by argument
     theScreen = new screen();
     theScreen -> setParams(0, 0, config.getGameFontSize(), config.getHudFontSize(), 1.0, 0);
@@ -58,53 +63,69 @@ int main(int argc, char** argv) {
         //If we broke because we died (or first time), reload from save
         //or reload default position if save doesn't exist
 
-        else if (status == deadStatus) {
+        /*
+        The ordering of the statements when loading a level has a lot of "gotchas."
+        For example:
+            generateLayerCache after delete world (delete world accesses layers that generateLayerCache() deletes)
+
+        */
+
+        else if (status == deadStatus) {    //All players are dead
             transition = 7, transitionDirection = -1;
             status = runStatus;
-            thePlayer.breakDead = false;
+            for (int i = 0; i < players.size(); i++) {
+                players[i] -> breakDead = false;
+                players[i] -> breakDoor = false;
+            }
             loadedSave = save.load("save.json");
 
             //Determine which room we're going to be in next
             if (argRoom) {
-                thePlayer.nextRoom = argv[1];
+                roomName = argv[1];
             }
             else if (loadedSave) {
-                thePlayer.nextRoom = save.getRoom();
+                roomName = save.getRoom();
             }
             else {
-                thePlayer.nextRoom = "test.json";
+                roomName = "test.json";
+            }
+
+            //Delete world
+            delete world;
+
+            //If necessary, reload from file & recreate layer cache
+            if (roomName != level.getFileName()) {
+                level.load(roomName);
+                level.generateLayerCache();
             }
 
             //Reload world
-
-            delete world;
-            //If necessary, reload from file & recreate layer cache
-            if (thePlayer.nextRoom != level.getFileName()) {
-                level.load(thePlayer.nextRoom);
-                level.generateLayerCache();
-            }
-            //Initialize global handlers
             world = new collider(0.0, 0.0, level.getWorldFileName());
 
             //Set the player position from save or level as appropriate
             if (loadedSave && !argRoom) {
-                thePlayer.moveTo(save.getPosition());
+                for (int i = 0; i < players.size(); i++) {
+                    players[i] -> moveTo(save.getPosition());
+                }
             }
 
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");
-            if (loadedSave && save.hasOutfit(defaultOutfit.name)) {
-                outfit newOutfit = save.getOutfit(defaultOutfit.name);
-                newOutfit.merge(defaultOutfit);
-                thePlayer.setOutfit(newOutfit);
-            }
-            else {
-                thePlayer.setOutfit(defaultOutfit);
+            for (int i = 0; i < players.size(); i++) {
+                string outfitName = defaultOutfit.name + to_string(i);
+                if (loadedSave && save.hasOutfit(outfitName)) {
+                    outfit newOutfit = save.getOutfit(outfitName);
+                    newOutfit.merge(defaultOutfit);
+                    players[i] -> setOutfit(newOutfit);
+                }
+                else {
+                    players[i] -> setOutfit(defaultOutfit);
+                }
             }
 
             //Read in entities
-            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, true);
-            theScreen -> setParams(world -> getRows(), world -> getCols(), config.getGameFontSize(), config.getHudFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
+            level.readEntitiesGame(players, (!loadedSave || argRoom));
+            theScreen -> setParams(world -> getRows(), world -> getCols(), config.getGameFontSize(), config.getHudFontSize(), players[0] -> getSizeFactor(), level.getDayLength());
             level.initializeColors(theScreen);
         }
 
@@ -114,36 +135,45 @@ int main(int argc, char** argv) {
         else if (status == doorStatus) {
             transition = 7, transitionDirection = -1;
             status = runStatus;
-            thePlayer.breakDoor = false;
-            thePlayer.goToDoor();
-            save.writeOutfit(thePlayer.getCurrentOutfit());
+            for (int i = 0; i < players.size(); i++) {
+                players[i] -> breakDoor = false;
+                players[i] -> goToDoor();
+            }
+            roomName = players[0] -> nextRoom;
 
-            //Reload world
+            for (int i = 0; i < players.size(); i++) {
+                save.writeOutfit(players[i] -> getCurrentOutfit(), i);
+            }
 
             delete world;
+
             //If necessary, reload from file & recreate layer cache
-            if (thePlayer.nextRoom != level.getFileName()) {
-                level.load(thePlayer.nextRoom);
+            if (roomName != level.getFileName()) {
+                level.load(roomName);
                 level.generateLayerCache();
             }
-            //Initialize global handlers
+
+            //Reload world
             world = new collider(0.0, 0.0, level.getWorldFileName());
 
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");
-            if (save.hasOutfit(defaultOutfit.name)) {
-                outfit newOutfit = save.getOutfit(defaultOutfit.name);
-                newOutfit.merge(defaultOutfit);
-                thePlayer.setOutfit(newOutfit);
-            }
-            else {
-                thePlayer.setOutfit(defaultOutfit);
+            for (int i = 0; i < players.size(); i++) {
+                string outfitName = defaultOutfit.name + to_string(i);
+                if (save.hasOutfit(outfitName)) {   //NOTE: This is done regardless of if loadedSave is true from earlier
+                    outfit newOutfit = save.getOutfit(outfitName);
+                    newOutfit.merge(defaultOutfit);
+                    players[i] -> setOutfit(newOutfit);
+                }
+                else {
+                    players[i] -> setOutfit(defaultOutfit);
+                }
             }
 
             //Read in entities
-            level.readEntitiesGame(thePlayer.getCollectedPickups(), &thePlayer, false);
+            level.readEntitiesGame(players, false);
             theScreen -> setParams(world -> getRows(), world -> getCols(),
-               config.getGameFontSize(), config.getHudFontSize(), thePlayer.getSizeFactor(), level.getDayLength());
+               config.getGameFontSize(), config.getHudFontSize(), players[0] -> getSizeFactor(), level.getDayLength());
             level.initializeColors(theScreen);
 
         }
@@ -151,9 +181,15 @@ int main(int argc, char** argv) {
         else if (status == saveStatus) {
             status = runStatus;
             argRoom = false;
-            thePlayer.breakSave = false;
-            save.writeOutfit(thePlayer.getCurrentOutfit());
-            save.save(thePlayer.getPosition(), thePlayer.nextRoom);
+            int whoSaved = 0;
+            for (int i = 0; i < players.size(); i++) {
+                if (players[i] -> breakSave) {
+                    whoSaved = i;
+                    players[i] -> breakSave = false;
+                }
+                save.writeOutfit(players[i] -> getCurrentOutfit(), i);
+            }
+            save.save(players[whoSaved] -> getPosition(), players[whoSaved] -> nextRoom);
         }
 
         else {
@@ -161,9 +197,13 @@ int main(int argc, char** argv) {
 
                 //Buttons modifying status
 
-                if (thePlayer.breakInventory && status == runStatus) {
-                    status = inventoryStatus;
-                    thePlayer.breakInventory = false;
+                int whoInventory = 0;
+                for (int i = 0; i < players.size(); i++) {
+                    if (players[i] -> breakInventory && status == runStatus) {
+                        status = inventoryStatus;
+                        whoInventory = i;
+                        players[i] -> breakInventory = false;
+                    }
                 }
                 if (menu.goBack() && status == runStatus) {
                     status = pauseStatus;
@@ -182,9 +222,9 @@ int main(int argc, char** argv) {
                     status = pauseStatus; //Return to pause menu after user is done w/ options.
                 }
                 else if (status == inventoryStatus) {
-                    outfit o = thePlayer.getCurrentOutfit();
+                    outfit o = players[whoInventory] -> getCurrentOutfit();
                     menu.inventory(status, o, in);
-                    thePlayer.setOutfit(o);
+                    players[whoInventory] -> setOutfit(o);
                 }
                 else {  //status is run
 
@@ -201,7 +241,7 @@ int main(int argc, char** argv) {
 
                     //Display the world
 
-                    Vector2 playerPos = thePlayer.getPosition();
+                    Vector2 playerPos = players[0] -> getPosition();
                     theScreen -> calculateLighting();
                     theScreen -> start(playerPos.x, playerPos.y, false);
                     world -> print();
@@ -232,7 +272,21 @@ int main(int argc, char** argv) {
 
                     //Loop break cases
 
-                    if (thePlayer.breakDead) {
+                    bool allDead = true;
+                    bool allDoor = true;
+                    bool anySave = false;
+                    for (int i = 0; i < players.size(); i++) {
+                        if (!players[i] -> breakDead) {
+                            allDead = false;
+                        }
+                        if (!players[i] -> breakDead && !players[i] -> breakDoor) { //only wait for alive players before going thru door
+                            allDoor = false;
+                        }
+                        if (players[i] -> breakSave) {
+                            anySave = true;
+                        }
+                    }
+                    if (allDead) {
                         //theScreen -> dialog ("You are dead...");
                         if (menu.goBack()) {
                             status = pauseStatus;
@@ -245,10 +299,10 @@ int main(int argc, char** argv) {
                             status = deadStatus;
                         }
                     }
-                    else if (thePlayer.breakSave) {
+                    else if (anySave) {
                         status = saveStatus;
                     }
-                    else if (thePlayer.breakDoor) {
+                    else if (allDoor) {
                         if (transition == -1) {
                             transition = 0;
                             transitionDirection = 1;
