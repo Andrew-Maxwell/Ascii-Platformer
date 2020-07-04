@@ -107,14 +107,6 @@
         }
         newOutfit.AddMember("ops", opsArray, a);
 
-        //Copy set of collected pickups
-
-        Value collectedPickups(kArrayType);
-        for (int pickupID : o.collectedPickups) {
-            collectedPickups.PushBack(Value(pickupID).Move(), a);
-        }
-        newOutfit.AddMember("collectedPickups", collectedPickups, a);
-
         //Copy channels
 
         Value channels(kArrayType);
@@ -128,6 +120,28 @@
         Value label;
         label.SetString(name.c_str(), name.length(), a);
         json.AddMember(label, newOutfit, json.GetAllocator());
+    }
+
+    set<int> saveData::getCollectedPickups() {
+        set<int> toReturn;
+        if (json.HasMember("collectedPickups")) {
+            for (SizeType i = 0; i < json["collectedPickups"].Size(); i++) {
+                toReturn.insert(json["collectedPickups"][i].GetInt());
+            }
+        }
+        return toReturn;
+    }
+
+    void saveData::setCollectedPickups(set<int> newSet) {
+        Document::AllocatorType& a = json.GetAllocator();
+        if (json.HasMember("collectedPickups")) {
+            json.RemoveMember("collectedPickups");
+        }
+        Value collectedPickups(kArrayType);
+        for (int pickupID : newSet) {
+            collectedPickups.PushBack(Value(pickupID).Move(), a);
+        }
+        json.AddMember("collectedPickups", collectedPickups, a);
     }
 
     void saveData::save(Vector2 position, string room) {

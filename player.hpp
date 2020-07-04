@@ -84,8 +84,6 @@ struct outfit {
     bitset<8> channels[10];
     Color channelColors[10];
 
-    set<int> collectedPickups;
-
     void merge(outfit& otherOutfit) {
         for (int i = 0; i < otherOutfit.guns.size(); i++) {
             vector<weapon>::iterator foundGun = find(guns.begin(), guns.end(), otherOutfit.guns[i]);
@@ -156,8 +154,6 @@ class player : virtual public collideable, public entityParent, public hudEntity
     Color channelColors[10];
     int lastChannel = 0;
 
-    set<int> collectedPickups;
-
     public:
 
     string nextRoom;
@@ -183,8 +179,6 @@ class player : virtual public collideable, public entityParent, public hudEntity
 
         Vector2 getPosition();
 
-        set<int> getCollectedPickups();
-
         void setColor(Color newTint);
 
         void setSizeFactor(float newSizeFactor);
@@ -192,6 +186,8 @@ class player : virtual public collideable, public entityParent, public hudEntity
         float getSizeFactor();
 
         void goToDoor();
+
+        string getDoorDestination();
 
     //Collision functions
 

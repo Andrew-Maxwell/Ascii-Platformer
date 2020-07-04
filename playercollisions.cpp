@@ -53,9 +53,6 @@
                         break;
                     }
                 }
-                if (int(col.yVal) != (1 << 31)) {
-                    collectedPickups.insert(int(col.yVal));
-                }
                 break;
             }
             case AMMOPICKUPTYPE: {
@@ -66,9 +63,6 @@
                         break;
                     }
                 }
-                if (int(col.yVal) != (1 << 31)) {
-                    collectedPickups.insert(int(col.yVal));
-                }
                 break;
             }
             case OPPICKUPTYPE: {
@@ -77,16 +71,10 @@
                         ops[i].unlocked = true;
                     }
                 }
-                if (int(col.yVal) != (1 << 31)) {
-                    collectedPickups.insert(int(col.yVal));
-                }
                 break;
             }
             case OUTFITPICKUPTYPE: {
                 handlePickup(col);
-                if (int(col.yVal) != (1 << 31)) {
-                    collectedPickups.insert(int(col.yVal));
-                }
                 break;
             }
             case FORCEFIELDTYPE: {

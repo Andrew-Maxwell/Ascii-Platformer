@@ -159,7 +159,6 @@ int getAnyGamepadInput() {
         device = newDevice;
         keyboard = (device == -1);
         if (keyboard) {   //keyboard
-            device = -1;
             useMouseAim = true;
             up = input(false, false, KEY_W);
             down = input(false, false, KEY_S);
@@ -184,7 +183,6 @@ int getAnyGamepadInput() {
             }
         }
         else {
-            device = 0;
             useMouseAim = false;
             up = input(true, false, GAMEPAD_AXIS_LEFT_Y);
             down = input(true, true, GAMEPAD_AXIS_LEFT_Y);

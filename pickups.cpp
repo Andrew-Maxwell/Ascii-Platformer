@@ -6,8 +6,9 @@
 /*****************************************************************************/
 
     pickup::pickup(  float newX, float newY, Color newTint,
-                    float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch) :
+                    float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch) :
         entity(newX, newY, newTint, newSizeFactor),
+        collectedPickups(newCollectedPickups),
         displayChar(newDisplayChar),
         lifetime(newLifetime),
         pickupID(newID),
@@ -22,6 +23,7 @@
     bool pickup::doesCollide(float otherX, float otherY, int otherType) {
         if (!collected && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE) {
             collected = true;
+            collectedPickups -> insert(pickupID);
             return true;
         }
         return false;
@@ -37,6 +39,9 @@
 
     void pickup::tickSet() {
 	    lifetime--;
+        if (!collected && collectedPickups -> count(pickupID)) {    //If another pickup with same ID has been collected
+            collected = exploded = true;
+        }
     }
 
     void pickup::tickGet() {
@@ -62,9 +67,9 @@
 //Modifies any value according to the name used in the save JSON
 /*****************************************************************************/
 
-    outfitPickup::outfitPickup(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool newAdd) :
+    outfitPickup::outfitPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool newAdd) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifetime, newID, newTouch),
+                        pickup(newX, newY, newTint, newSizeFactor, newCollectedPickups, newDisplayChar, newLifetime, newID, newTouch),
                         key(newKey),
                         value(newValue),
                         add (newAdd) {}
@@ -82,9 +87,9 @@
 //Unlocks a new gun
 /*****************************************************************************/
 
-    gunPickup::gunPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
+    gunPickup::gunPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickup(newX, newY, newTint, newSizeFactor, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID) {}
 
     unsigned int gunPickup::type() {
@@ -100,9 +105,9 @@
 //Adds ammo to a given gun
 /*****************************************************************************/
 
-    ammoPickup::ammoPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
+    ammoPickup::ammoPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickup(newX, newY, newTint, newSizeFactor, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID),
                         ammoCount(newAmmoCount) {}
 
@@ -115,86 +120,13 @@
     }
 
 /*****************************************************************************/
-//healthPickup
-//Adds health back
-/*****************************************************************************/
-
-    healthPickup::healthPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
-                        healthCount(newHealthCount) {}
-
-    unsigned int healthPickup::type() {
-        return HEALTHPICKUPTYPE;
-    }
-
-    collision healthPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(HEALTHPICKUPTYPE, healthCount, 0.0, pickupID);
-    }
-
-/*****************************************************************************/
-//maxHealthPickup
-//Adds to max health
-/*****************************************************************************/
-
-    maxHealthPickup::maxHealthPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newHealthCount) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
-                        healthCount(newHealthCount) {}
-
-    unsigned int maxHealthPickup::type() {
-        return MAXHEALTHPICKUPTYPE;
-    }
-
-    collision maxHealthPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(MAXHEALTHPICKUPTYPE, healthCount, 0.0, pickupID);
-    }
-
-/*****************************************************************************/
-//airPickup
-//Adds air back
-/*****************************************************************************/
-
-    airPickup::airPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newAirCount) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
-                        airCount(newAirCount) {}
-
-    unsigned int airPickup::type() {
-        return AIRPICKUPTYPE;
-    }
-
-    collision airPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(AIRPICKUPTYPE, airCount, 0.0, pickupID);
-    }
-
-/*****************************************************************************/
-//maxairPickup
-//Adds to max air
-/*****************************************************************************/
-
-    maxAirPickup::maxAirPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newAirCount) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
-                        airCount(newAirCount) {}
-
-    unsigned int maxAirPickup::type() {
-        return MAXAIRPICKUPTYPE;
-    }
-
-    collision maxAirPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(MAXAIRPICKUPTYPE, airCount, 0.0, pickupID);
-    }
-
-
-/*****************************************************************************/
 //Op pickup
 //Gives the player another bitwise op to play with
 /*****************************************************************************/
 
-    opPickup::opPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newOpID) :
+    opPickup::opPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newOpID) :
                         entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newDisplayChar, newLifeTime, newID, newTouch),
+                        pickup(newX, newY, newTint, newSizeFactor, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
                         opID(newOpID) {}
 
     unsigned int opPickup::type() {

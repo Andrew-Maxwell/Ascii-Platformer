@@ -50,7 +50,7 @@ struct inputMap {
     bool useMouseAim;
     int device;
 
-    inputMap(int newDevice);
+    inputMap(int newDevice = -1);
 
     void update();
 

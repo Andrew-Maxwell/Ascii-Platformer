@@ -33,26 +33,29 @@ int main(int argc, char** argv) {
     int status = menuStatus;
     vector<player*> players;
     string roomName;
+    inputMap in(-1);
 /*    players.push_back(new player(0, 0, WHITE, 1.0));
     players.push_back(new player(0, 0, WHITE, 1.0));
-    inputMap in(true);
     players[0] -> setInputMap(in);
     inputMap gamepad(false);
     players[1] -> setInputMap(gamepad);*/
     gameLevelData level;
     saveData save;
+    set<int> collectedPickups;
     bool loadedSave = false;
     bool argRoom = argc > 1;    //If room is defined by argument
     theScreen = new screen();
     theScreen -> setParams(0, 0, config.getGameFontSize(), config.getHudFontSize(), 1.0, 0);
     gameMenu menu;
     int transition = 7, transitionDirection = -1;
+    Vector2 playerPos;
 
     while (!(status == quitStatus || WindowShouldClose())) {      //While the game is running
 
         //Menu logic
 
         if (status == menuStatus) {
+            players.clear();
             menu.main(status);
         }
         else if (status == optionsStatus) {
@@ -73,11 +76,10 @@ int main(int argc, char** argv) {
         else if (status == deadStatus) {    //All players are dead
             transition = 7, transitionDirection = -1;
             status = runStatus;
-            for (int i = 0; i < players.size(); i++) {
-                players[i] -> breakDead = false;
-                players[i] -> breakDoor = false;
-            }
+            assert(players.size() == 0);
+            cout << "Loading save\n";
             loadedSave = save.load("save.json");
+            cout << "Save loaded\n";
 
             //Determine which room we're going to be in next
             if (argRoom) {
@@ -95,14 +97,23 @@ int main(int argc, char** argv) {
 
             //If necessary, reload from file & recreate layer cache
             if (roomName != level.getFileName()) {
+                cout << "Loading level\n";
                 level.load(roomName);
+                cout << "Level loaded\n";
                 level.generateLayerCache();
             }
 
             //Reload world
             world = new collider(0.0, 0.0, level.getWorldFileName());
 
-            //Set the player position from save or level as appropriate
+            //Read in entities
+            collectedPickups.clear();
+            if (loadedSave) {
+                collectedPickups = save.getCollectedPickups();
+            }
+            level.readEntitiesGame(players, true, &collectedPickups);
+
+            //Set the player position from save if appropriate
             if (loadedSave && !argRoom) {
                 for (int i = 0; i < players.size(); i++) {
                     players[i] -> moveTo(save.getPosition());
@@ -123,8 +134,7 @@ int main(int argc, char** argv) {
                 }
             }
 
-            //Read in entities
-            level.readEntitiesGame(players, (!loadedSave || argRoom));
+            //Set display parameters
             theScreen -> setParams(world -> getRows(), world -> getCols(), config.getGameFontSize(), config.getHudFontSize(), players[0] -> getSizeFactor(), level.getDayLength());
             level.initializeColors(theScreen);
         }
@@ -156,6 +166,9 @@ int main(int argc, char** argv) {
             //Reload world
             world = new collider(0.0, 0.0, level.getWorldFileName());
 
+            //Read in entities
+            level.readEntitiesGame(players, false, &collectedPickups);
+
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");
             for (int i = 0; i < players.size(); i++) {
@@ -170,8 +183,7 @@ int main(int argc, char** argv) {
                 }
             }
 
-            //Read in entities
-            level.readEntitiesGame(players, false);
+            //Set display parameters
             theScreen -> setParams(world -> getRows(), world -> getCols(),
                config.getGameFontSize(), config.getHudFontSize(), players[0] -> getSizeFactor(), level.getDayLength());
             level.initializeColors(theScreen);
@@ -189,26 +201,24 @@ int main(int argc, char** argv) {
                 }
                 save.writeOutfit(players[i] -> getCurrentOutfit(), i);
             }
-            save.save(players[whoSaved] -> getPosition(), players[whoSaved] -> nextRoom);
+            save.setCollectedPickups(collectedPickups);
+            save.save(players[whoSaved] -> getPosition(), roomName);
         }
 
         else {
             while ((status == runStatus || status == pauseStatus || status == optionsStatus || status == inventoryStatus) && !WindowShouldClose()) {
 
-                //Buttons modifying status
+                //modifying status
 
                 int whoInventory = 0;
                 for (int i = 0; i < players.size(); i++) {
                     if (players[i] -> breakInventory && status == runStatus) {
+                        players[i] -> breakInventory = false;
                         status = inventoryStatus;
                         whoInventory = i;
-                        players[i] -> breakInventory = false;
                     }
                 }
-                if (menu.goBack() && status == runStatus) {
-                    status = pauseStatus;
-                }
-                if (IsWindowMinimized() || IsWindowHidden()) {
+                if ((IsWindowMinimized() || IsWindowHidden() || menu.goBack()) && status == runStatus) {
                     status = pauseStatus;
                 }
 
@@ -219,14 +229,14 @@ int main(int argc, char** argv) {
                 }
                 else if (status == optionsStatus) {
                     menu.options(status, config);
-                    status = pauseStatus; //Return to pause menu after user is done w/ options.
+                    status = pauseStatus; //Return to pause menu after options menu
                 }
                 else if (status == inventoryStatus) {
                     outfit o = players[whoInventory] -> getCurrentOutfit();
                     menu.inventory(status, o, in);
                     players[whoInventory] -> setOutfit(o);
                 }
-                else {  //status is run
+                else if (status == runStatus) { 
 
                     //start tick timer
 
@@ -237,11 +247,22 @@ int main(int argc, char** argv) {
 
                     world -> tickSet();
                     world -> tickGet();
+                    vector<player*>::iterator playerIter = players.begin();
+                    while (playerIter != players.end()) {
+                        if ((*playerIter) -> finalize()) {
+                            playerIter = players.erase(playerIter);
+                        }
+                        else {
+                            playerIter++;
+                        }
+                    }
                     world -> finalize();
 
                     //Display the world
 
-                    Vector2 playerPos = players[0] -> getPosition();
+                    if (players.size() > 0) {
+                        playerPos = players[0] -> getPosition();
+                    }
                     theScreen -> calculateLighting();
                     theScreen -> start(playerPos.x, playerPos.y, false);
                     world -> print();
@@ -272,21 +293,17 @@ int main(int argc, char** argv) {
 
                     //Loop break cases
 
-                    bool allDead = true;
                     bool allDoor = true;
                     bool anySave = false;
                     for (int i = 0; i < players.size(); i++) {
-                        if (!players[i] -> breakDead) {
-                            allDead = false;
-                        }
-                        if (!players[i] -> breakDead && !players[i] -> breakDoor) { //only wait for alive players before going thru door
+                        if (!players[i] -> breakDoor || !(players[i] -> getDoorDestination() == players[0] -> getDoorDestination())) {
                             allDoor = false;
                         }
                         if (players[i] -> breakSave) {
                             anySave = true;
                         }
                     }
-                    if (allDead) {
+                    if (players.size() == 0) {
                         //theScreen -> dialog ("You are dead...");
                         if (menu.goBack()) {
                             status = pauseStatus;

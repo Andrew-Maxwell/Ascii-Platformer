@@ -33,8 +33,8 @@
 //Convert to be read from a config file
 
 #define DRAWFPS true
-#define SCREENHEIGHT 900
-#define SCREENWIDTH 1600
+#define MINWINDOWROWS 48
+#define MINWINDOWCOLS 64
 
 #define AIRRECOVERYRATE 15
 #define PLAYERSPEED 0.015

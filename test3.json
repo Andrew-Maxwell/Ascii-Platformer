@@ -37,6 +37,13 @@
             "destinationY": 9.0
         },
         {
+            "type": "savePoint",
+            "x": 7.0,
+            "y": 4.0,
+            "tint": [255, 255, 0, 255],
+            "sizeFactor": 1.0
+        },
+        {
             "type": "door",
             "x": 9.0,
             "y": 58.0,

@@ -13,8 +13,8 @@
         height(newheight),
         wavelength(newWavelength),
         amplitude(newAmplitude) {
-            surface.resize(width, 0.0);
-            lastSurface.resize(width, 0.0);
+            surface.resize(width + 1, 0.0);
+            lastSurface.resize(width + 1, 0.0);
             k = 2 * PI / wavelength;
             omega = sqrt(GRAVITY * k * tanh(k * height));
             pulseSpeed = omega / k;
@@ -52,7 +52,7 @@
 
 
     bool water::doesCollide(float otherX, float otherY, int otherType) {
-        return (otherX >= x && otherX <= x + width && otherY >= y - surface[otherX - x] - 0.5 && otherY <= y + height);
+        return (otherX >= x && otherX < x + width && otherY >= y - surface[otherX - x] - 0.5 && otherY <= y + height);
     }
 
     collision water::getCollision(float otherX, float otherY, int otherType) {

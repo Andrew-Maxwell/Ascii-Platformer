@@ -16,6 +16,10 @@ class saveData : public outfitData {
 
     Vector2 getPosition();
 
+    set<int> getCollectedPickups();
+
+    void setCollectedPickups(set<int> newCollectedPickups);
+
     void writeOutfit(outfit o, int playerNumber);
 
     void save(Vector2 position, string room);

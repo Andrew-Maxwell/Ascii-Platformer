@@ -303,8 +303,8 @@
             if (button(fullscreenLabel, 0, 0)) {
                 if (IsWindowFullscreen()) {
                     ToggleFullscreen();
-                    SetWindowSize(1024, 768);
-                    SetWindowMinSize(1024, 768);
+                    SetWindowSize(MINWINDOWCOLS * theScreen -> getHudFontSize(), MINWINDOWROWS * theScreen -> getHudFontSize());
+                    SetWindowMinSize(MINWINDOWCOLS * theScreen -> getHudFontSize(), MINWINDOWROWS * theScreen -> getHudFontSize());
                     config.setFullScreen(false);
                 }
                 else {

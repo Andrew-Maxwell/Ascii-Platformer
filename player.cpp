@@ -38,7 +38,7 @@
     }
 
     bool player::stopColliding() {
-        return false;
+        return breakDead;
     }
 
 //Fire a gun
@@ -356,7 +356,7 @@
     }
 
     bool player::finalize() {
-        return false;
+        return breakDead;
     }
 
     void player::print() {

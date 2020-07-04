@@ -19,7 +19,7 @@ class particle : virtual public entity {
 
     float xSpeed, ySpeed;
     int lifetime, startLifetime;
-    char* toPrint;
+    char toPrint[2] = "?";
     bool fade;
     uint8_t startA;
 
@@ -28,8 +28,6 @@ class particle : virtual public entity {
     public:
 
     particle(float newX, float newY, Color newTint, float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime, bool newFade = false);
-
-    ~particle();
 
     unsigned int type();
 

@@ -17,11 +17,12 @@
                         startA(tint.a),
                         fade(newFade) {
         if (c == 0) {
-            toPrint = new char[2];
             setDirection();
         }
         else {
-            toPrint = TextToUtf8(&c, 1);
+            char* newToPrint = TextToUtf8(&c, 1);
+            toPrint[0] = newToPrint[0];
+            free(newToPrint);
         }
     }
 
@@ -29,14 +30,14 @@
         return PARTICLETYPE;
     }
 
-    particle::~particle() {
-        delete toPrint;
-    }
-
     void particle::setDirection() {
-        toPrint[1] = '\0';
         if (xSpeed == 0) {
-            toPrint[0] = '|';
+            if (ySpeed == 0) {
+                toPrint[0] = '.';
+            }
+            else {
+                toPrint[0] = '|';
+            }
         }
         else {
             if (ySpeed / xSpeed < -1.09) {

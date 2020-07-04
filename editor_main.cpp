@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 
     //Initialize raylib
 
-    InitWindow(SCREENWIDTH, SCREENHEIGHT, "ASCII Platformer - level editor");
+    InitWindow(1920, 1080, "ASCII Platformer - level editor");
     SetConfigFlags(FLAG_FULLSCREEN_MODE);
     SetTargetFPS(60);
     SetExitKey(KEY_RIGHT_CONTROL);

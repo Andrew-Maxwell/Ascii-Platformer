@@ -259,12 +259,5 @@ using namespace rapidjson;
             }
         }
 
-        if (outfitValue.HasMember("collectedPickups")) {
-            const Value& collectedPickups = outfitValue["collectedPickups"];
-            for (SizeType i = 0; i < collectedPickups.Size(); i++) {
-                toReturn.collectedPickups.insert(collectedPickups[i].GetInt());
-            }
-        }
-
         return toReturn;
     }

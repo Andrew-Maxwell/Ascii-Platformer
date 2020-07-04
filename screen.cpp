@@ -451,14 +451,15 @@
 
     void screen::tweakHudScale() {
         hudFontSize += 4;
-        if (hudFontSize > 24) {
+        if (hudFontSize * MINWINDOWCOLS > GetMonitorWidth(0) || hudFontSize * MINWINDOWROWS > GetMonitorHeight(0)) {
             hudFontSize = 8;
         }
+        SetWindowMinSize(hudFontSize * MINWINDOWCOLS, hudFontSize * MINWINDOWROWS);
     }
 
     void screen::tweakGameScale() {
         fontSize += 4;
-        if (fontSize > 24) {
+        if (fontSize * MINWINDOWCOLS > GetMonitorWidth(0) || fontSize * MINWINDOWROWS > GetMonitorHeight(0)) {
             fontSize = 8;
         }
         screenRows = GetScreenHeight() / fontSize;

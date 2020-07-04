@@ -149,6 +149,17 @@
             }
         }
 
+        //Clear hudEntities
+        list<hudEntity*>::iterator h = hudEntities.begin();
+        while (h != hudEntities.end()) {
+            if ((*h) -> finalize()) {
+                h = hudEntities.erase(h);
+            }
+            else {
+                h++;
+            }
+        }
+
         //Clear the channel bus
 
         for (int i = 0; i < 512; i++) {

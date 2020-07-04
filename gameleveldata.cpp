@@ -44,9 +44,10 @@
 
     //Read in entities to global world collider
 
-    void gameLevelData::readEntitiesGame(vector<player*>& players, bool movePlayersToStart) {
+    void gameLevelData::readEntitiesGame(vector<player*>& players, bool reloadPlayers, set<int>* collectedPickups) {
 
         auto layerIter = layerCache.begin();
+        int playerIter = 0;
 
         //Get the list of entities
 
@@ -94,21 +95,34 @@
                 S -> setZPosition (world -> getZPosition());
             }
             else if (type == "player") {
-                int playerNumber = entity.HasMember("number") ? entity["number"].GetInt() : 0;
-                if (playerNumber < players.size()) {
-                    players[playerNumber] -> setColor((Color)tint);
-                    players[playerNumber] -> setDoLighting(doLighting);
-                    players[playerNumber] -> setSizeFactor(sizeFactor);
-                    if (movePlayersToStart) {
-                        players[playerNumber] -> moveTo ((Vector2){x, y});
-                    }
-                    world -> addCollideable(players[playerNumber]);
-                    players[playerNumber] -> setZPosition (world -> getZPosition());
-                    world -> addHudEntity(players[playerNumber]);
+                //if reloadplayers then create new players in level-defined positions (dead)
+                //otherwise, we load all of the players that already exist from the previous room (door)
+                player* playerToAdd;
+                bool skip = false;
+                if (reloadPlayers) {
+                    cout << "\t...and creating one\n";
+                    playerToAdd = new player (x, y, tint, sizeFactor);
+                    playerToAdd -> setInputMap(inputMap(playerIter - 1));
+                    players.push_back(playerToAdd);
+                    playerToAdd -> setColor((Color)tint);
+                }
+                else if (playerIter < players.size()) {
+                    cout << "\t...and inserting existing one\n";
+                    playerToAdd = players[playerIter];
                 }
                 else {
-                    cerr << "No player " << playerNumber << endl;
+                    cout << "\t...but not loading one\n";
+                    skip = true;
                 }
+
+                if (!skip) {
+                    playerToAdd -> setDoLighting(doLighting);
+                    playerToAdd -> setSizeFactor(sizeFactor);
+                    world -> addCollideable(playerToAdd);
+                    playerToAdd -> setZPosition (world -> getZPosition());
+                    world -> addHudEntity(playerToAdd);
+                }
+                playerIter++;
             }
             else if (type == "forceField") {
                 int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;
@@ -170,39 +184,31 @@
             else if (type == "gunPickup" || type == "ammoPickup" ||
                      type == "opPickup" || type == "outfitPickup") {
                 int pickupID;
-                bool collected = false;
                 if (entity.HasMember("pickupID")) {
                     pickupID = entity["pickupID"].GetInt();
-                    if (pickupID != (1 << 31)) {
-                        for (int i = 0; i < players.size(); i++) {
-                            if (players[i] -> getCollectedPickups().count(pickupID)) {
-                                collected = true;
-                            }
-                        }
-                    }
                 }
                 else {
                     pickupID = (1 << 31);
                 }
-                if (!collected) {
+                if (pickupID == (1 << 31) || collectedPickups -> count(pickupID) == 0) {
                     int lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 0x7FFFFFFF;
                     bool touch = entity.HasMember("touch") ? entity["touch"].GetBool() : false;
                     pickup* newPickup;
                     if (type == "gunPickup") {
                         int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
                         int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
-                        newPickup = new gunPickup(x, y, tint, sizeFactor, displayChar, lifetime, pickupID, touch, gunID);
+                        newPickup = new gunPickup(x, y, tint, sizeFactor, collectedPickups, displayChar, lifetime, pickupID, touch, gunID);
                     }
                     else if (type == "ammoPickup") {
                         int gunID = entity.HasMember("gunID") ? entity["gunID"].GetInt() : 0;
                         int ammoCount = entity.HasMember("ammoCount") ? entity["ammoCount"].GetInt() : 1;
                         int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x2511;
-                        newPickup = new ammoPickup(x, y, tint, sizeFactor, displayChar, lifetime, pickupID, touch, gunID, ammoCount);
+                        newPickup = new ammoPickup(x, y, tint, sizeFactor, collectedPickups, displayChar, lifetime, pickupID, touch, gunID, ammoCount);
                     }
                     else if (type == "opPickup") {
                         int opID = entity.HasMember("opID") ? entity["opID"].GetInt() : -1;
                         int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : 0x00b1;
-                        newPickup = new opPickup(x, y, tint, sizeFactor, displayChar, lifetime, pickupID, touch, opID);
+                        newPickup = new opPickup(x, y, tint, sizeFactor, collectedPickups, displayChar, lifetime, pickupID, touch, opID);
                     }
                     else if (type == "outfitPickup") {
                         assert(entity.HasMember("key"));
@@ -211,7 +217,7 @@
                         double value = entity["value"].GetDouble();
                         bool add = entity.HasMember("add") ? entity["add"].GetBool() : false;
                         int displayChar = entity.HasMember("displayChar") ? entity["displayChar"].GetInt() : '?';
-                        newPickup = new outfitPickup(x, y, tint, sizeFactor, displayChar, lifetime, pickupID, touch, key, value, add);
+                        newPickup = new outfitPickup(x, y, tint, sizeFactor, collectedPickups, displayChar, lifetime, pickupID, touch, key, value, add);
                     }
                     else {
                         cout << "bad pickup type";

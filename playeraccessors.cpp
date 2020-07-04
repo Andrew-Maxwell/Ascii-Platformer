@@ -38,7 +38,6 @@
             toReturn.channels[i] = channels[i];
             toReturn.channelColors[i] = channelColors[i];
         }
-        toReturn.collectedPickups = collectedPickups;
         return toReturn;
     }
 
@@ -84,8 +83,6 @@
             channelColors[i].g = 255 - ((channels[i] & bitset<8>(56)).to_ulong() << 2);
             channelColors[i].b = 255 - ((channels[i] & bitset<8>(7)).to_ulong() << 5);
         }
-        collectedPickups.clear();
-        collectedPickups = newOutfit.collectedPickups;
     }
 
     void player::moveTo(Vector2 position) {
@@ -95,10 +92,6 @@
 
     Vector2 player::getPosition() {
         return (Vector2){x, y};
-    }
-
-    set<int> player::getCollectedPickups() {
-        return collectedPickups;
     }
 
 //Accessors
@@ -118,4 +111,13 @@
     void player::goToDoor() {
         x = nextX;
         y = nextY;
+    }
+
+    string player::getDoorDestination() {
+        if (breakDoor) {
+            return nextRoom + to_string(nextX) + to_string(nextY);
+        }
+        else {
+            return "";
+        }
     }

@@ -71,7 +71,7 @@ class entityParent {
 
 };
 
-class hudEntity {
+class hudEntity : virtual public entity {
 
     public:
 

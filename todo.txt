@@ -7,6 +7,13 @@ Loose ends:
 - Figure out how to handle dead players respawning; right now, the value health = 0 can get saved, preventing players from respawning.
 - Joystick aim accuracy is VERY limited. Should probably allow spamming/strafing like Cave Story to compensate.
 - Make sure all of the players need to be walking through the same door in order to go through.
+- water.cpp:67 can 
+
+- Save and (some) pickups only trigger on interactions
+- Make player colors customizeable or create a set of predefined player colors like Rain World
+- Figure out how to handle fewer players than the level supports
+- HUDs overlap
+- Split screen gameplay for large levels? Should be handled internal to Canvas.
 
 Features:
 1 Puzzle elements:
@@ -107,10 +114,7 @@ Housekeeping items (may never get to all of these):
 - Split largest files (editables.cpp, player.cpp, editor_main.cpp) into smaller files, or at least improve structure
 
 Bugs:
-- player disappears when standing on tile right below top of level
 - touch pickups sometimes collected (?) randomly
-- Markers appearing in wrong place in level editor
-- "Not a valid choice!" error appears when using op screen
 - particles becoming zero-G
 - Some of the files in "dark" getting loaded as wrong width
 - Water appears weird when player is moving very slowly in the vertical direction
@@ -210,6 +214,9 @@ contact, and as a result they are more thoroughly imprisoned. However, (D) does 
 embedded communication tech, and so decides to forcefully put (F) in cold sleep instead. Since the colony does not have any 
 cold sleep facilities itself, they put (F) into cold sleep on your ship! After you are able to figure out how to shut off 
 power to the security systems, you are able to escape in your ship.
+
+Also, lots of the remaining population want to escape too, but they don't have a ship and are prevented from talking about it by the
+security bots. That's why (D) had you imprisoned; because he didn't want you flying off with his subjects.
 
 
 Maybe the story doesn't need to be so complicated. Maybe it's something like:

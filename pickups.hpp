@@ -6,6 +6,7 @@
 #include "entity.hpp"
 #include "meta.hpp"
 #include "particles.hpp"
+#include <set>
 
 using namespace rapidjson;
 
@@ -22,7 +23,7 @@ class pickup : public collideable, public entityParent {
     bool exploded = false;
     bool touch;
     int lifetime, pickupID;
-    
+    set<int>* collectedPickups;
     char* toPrint;
 
     public:
@@ -30,7 +31,7 @@ class pickup : public collideable, public entityParent {
     int displayChar;
 
     explicit pickup(float newX, float newY, Color newTint,
-                    float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch);
+                    float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch);
 
     ~pickup();
 
@@ -62,7 +63,7 @@ class outfitPickup : public pickup {
 
     public:
 
-    explicit outfitPickup(float newX, float newY, Color newTint, float newSizeFactor, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool add);
+    explicit outfitPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool add);
 
     unsigned int type();
 
@@ -81,7 +82,7 @@ class gunPickup : public pickup {
 
     public:
 
-    explicit gunPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+    explicit gunPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     unsigned int type();
 
@@ -101,93 +102,13 @@ class ammoPickup : public pickup {
 
     public:
 
-    explicit ammoPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
+    explicit ammoPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
 
     unsigned int type();
 
     collision getCollision(float otherX, float otherY, int otherType);
 
 };
-
-
-/*****************************************************************************/
-//healthPickup
-//Adds health back
-/*****************************************************************************/
-
-class healthPickup : public pickup {
-
-    int healthCount;
-
-    public:
-
-    explicit healthPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
-
-    unsigned int type();
-
-    collision getCollision(float otherX, float otherY, int otherType);
-
-};
-
-
-/*****************************************************************************/
-//max health pickup
-//Increases max health
-/*****************************************************************************/
-
-class maxHealthPickup : public pickup {
-
-    int healthCount;
-
-    public:
-
-    explicit maxHealthPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
-
-    unsigned int type();
-
-    collision getCollision(float otherX, float otherY, int otherType);
-
-};
-
-/*****************************************************************************/
-//airPickup
-//Adds air back
-/*****************************************************************************/
-
-class airPickup : public pickup {
-
-    int airCount;
-
-    public:
-
-    explicit airPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
-
-    unsigned int type();
-
-    collision getCollision(float otherX, float otherY, int otherType);
-
-};
-
-
-/*****************************************************************************/
-//max air pickup
-//Increases max air
-/*****************************************************************************/
-
-class maxAirPickup : public pickup {
-
-    int airCount;
-
-    public:
-
-    explicit maxAirPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
-
-    unsigned int type();
-
-    collision getCollision(float otherX, float otherY, int otherType);
-
-};
-
 
 /*****************************************************************************/
 //Op pickup
@@ -200,7 +121,7 @@ class opPickup : public pickup {
 
     public:
 
-    explicit opPickup(float newX, float newY, Color newTint, float newSizeFactor,  int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newOpID);
+    explicit opPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newOpID);
 
     unsigned int type();
 

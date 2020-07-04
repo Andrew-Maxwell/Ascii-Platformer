@@ -37,7 +37,7 @@ class gameLevelData : public outfitData, public levelData {
 
     //Read all of the entities into the global world collider
 
-    void readEntitiesGame(vector<player*>& players, bool movePlayersToStart);
+    void readEntitiesGame(vector<player*>& players, bool reloadPlayers, set<int>* collectedPickups);
 
 };
 
