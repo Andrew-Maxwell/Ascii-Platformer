@@ -48,6 +48,35 @@ int getAnyGamepadInput() {
     return toReturn;
 }
 
+int selectGamepad() {
+    int toReturn = -2;
+    int padID = 0;
+    while (IsGamepadAvailable(padID)) {
+        for (int i = 1; i < 17; i++) {
+            if (IsGamepadButtonReleased(padID, i)) {
+                if (toReturn == 0) {
+                    toReturn = padID;
+                }
+                else {
+                    return -2;
+                }
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            if (GetGamepadAxisMovement(padID, i) != 0) {
+                if (toReturn == 0) {
+                    toReturn = padID;
+                }
+                else {
+                    return -2;
+                }
+            }
+        }
+        padID++;
+    }
+    return toReturn;
+}
+
 
 /******************************************************************************/
 //input: Represents one channel of input (one key, gamepad button or axis)
@@ -203,7 +232,7 @@ int getAnyGamepadInput() {
             aimRight = input(true, true, GAMEPAD_AXIS_RIGHT_X);
             fire = input(false, false, GAMEPAD_BUTTON_RIGHT_TRIGGER_1);
             for (int i = 0; i < 10; i++) {
-                code[i] = input(false, false, 0);
+                code[i] = input();
             }
         }
     }
@@ -239,7 +268,7 @@ int getAnyGamepadInput() {
             }
         }
         else if (index < 28) {
-            return code[index - 17];
+            return code[index - 18];
         }
         else {
             return error;
@@ -247,16 +276,44 @@ int getAnyGamepadInput() {
     }
 
     string inputMap::name(int index) {
-        return operator[](index).name(device);
+        if (index >= 0 && index < 18) {
+            switch(index) {
+                case(0): return "up";
+                case(1): return "down";
+                case(2): return "left";
+                case(3): return "right";
+                case(4): return "jump";
+                case(5): return "interact";
+                case(6): return "inventory";
+                case(7): return "next weapon";
+                case(8): return "previous weapon";
+                case(9): return "explode";
+                case(10): return "broadcast most recent code";
+                case(11): return "select next code";
+                case(12): return "select previous code";
+                case(13): return "aim up";
+                case(14): return "aim down";
+                case(15): return "aim left";
+                case(16): return "aim right";
+                case(17): return "fire";
+                default: return "error";
+            }
+        }
+        else if (index < 28) {
+            return "broadcast code " + to_string(index - 18);
+        }
+        else {
+            return "Bad index in inputMap::name()";
+        }
     }
 
-    void inputMap::change(int index) {
+    bool inputMap::change(int index) {
         input newInput;
         if (device == -1) {
             for (int i = 32; i < 349; i++) {
                 if (IsKeyPressed(i)) {
                     if (newInput.isDefined()) { //Multiple keys pressed
-                        return;
+                        return false;
                     }
                     else {
                         newInput = input(false, false, i);
@@ -268,7 +325,7 @@ int getAnyGamepadInput() {
             for (int i = 1; i <= 17; i++) {
                 if (IsGamepadButtonPressed(device, i)) {
                     if (newInput.isDefined()) { //Multiple buttons pressed
-                        return;
+                        return false;
                     }
                     else {
                         newInput = input(false, false, i);
@@ -279,7 +336,7 @@ int getAnyGamepadInput() {
                 float value = GetGamepadAxisMovement(device, i);
                 if (value != 0) {
                     if (newInput.isDefined()) { //Multiple inputs
-                        return;
+                        return false;
                     }
                     else {
                         newInput = input(true, (value > 0), i);
@@ -289,7 +346,9 @@ int getAnyGamepadInput() {
         }
         if (newInput.isDefined()) {
             operator[](index) = newInput;
+            return true;
         }
+        return false;
     }
 
     int inputMap::count() {

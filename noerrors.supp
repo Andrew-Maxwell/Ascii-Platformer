@@ -1,0 +1,28 @@
+{
+    dri1
+    Memcheck:Addr1
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+    ...
+}
+{
+    dri2
+    Memcheck:Addr2
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+    ...
+}
+{
+    dri4
+    Memcheck:Addr4
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+    ...
+}
+{
+    dri8
+    Memcheck:Addr8
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+    ...
+}

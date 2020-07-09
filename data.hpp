@@ -26,6 +26,20 @@ class data {
     string getFileName();
 
     Color getColor(const Value& tintJson);
+
+    void setColor(Value& tintJson, Color newTint);
+};
+
+class listData : virtual public data {
+
+    public:
+
+    listData(string newFileName);
+
+    vector<string> getList();
+
+    void setList(vector<string> newList);
+
 };
 
 class levelData : virtual public data {

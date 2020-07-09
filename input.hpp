@@ -11,6 +11,8 @@ int myGetKeyPressed();
 
 int getAnyGamepadInput();
 
+int selectGamepad();
+
 struct input {
     bool isAxis;  //True if it's a stick/trigger; false if it's a button
     bool positive;  //True if it's the positive half of the axis
@@ -58,7 +60,7 @@ struct inputMap {
 
     string name(int index);
 
-    void change(int index);
+    bool change(int index);
 
     int count();
 

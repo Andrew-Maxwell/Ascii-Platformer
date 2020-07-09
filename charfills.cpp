@@ -49,12 +49,12 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     int pipeCharFill::get(int x, int y) {
-        uint8_t up, down, left, right;
+/*        uint8_t up, down, left, right;
         up = (int)(sin((float)x * (y % 4)) * 1000) % 3;
         left = (int)(cos((float)y * (x % 5)) * 100) % 3;
         down = (int)(sin((float)x * ((y + 1) % 4)) * 1000) % 3;
         right = (int)(cos((float)y * ((x + 1) % 5)) * 100) % 3;
-
+*/
         return 0;
     }
 

@@ -1,16 +1,33 @@
 #include "configdata.hpp"
 
-    configData::configData(string fileName) {
-        if (!load(fileName)) {
+    configData::configData(string fileName, bool reset) {
+        if (reset || !load(fileName)) {
             Document::AllocatorType& a = json.GetAllocator();
             json.AddMember("fullscreen", Value(false), a);
             json.AddMember("hudFontSize", Value(16), a);
             json.AddMember("gameFontSize", Value(16), a);
-            json.AddMember("inputMaps", Value(kArrayType), a);
-            inputMap defaultKeyboard(true);
-            addInputMap(defaultKeyboard);
-            inputMap defaultGamepad(false);
-            addInputMap(defaultGamepad);
+            json.AddMember("configs", Value(kArrayType), a);
+            Color tints[8] = {GOLD, SKYBLUE, MAROON, BEIGE, DARKBLUE, DARKBROWN, VIOLET, PINK};
+            for (int i = 0; i < 8; i++) {
+                inputMap newMap(i - 1);
+                Value newConfig(kObjectType);
+                Value mapJson(kObjectType);
+                mapJson.AddMember("device", Value(i - 1).Move(), a);
+                mapJson.AddMember("useMouseAim", Value(i - 1 == -1).Move(), a);
+                mapJson.AddMember("inputList", Value(kArrayType).Move(), a);
+                for (int i = 0; i < newMap.count(); i++) {
+                    Value newInput(kObjectType);
+                    newInput.AddMember("isAxis", Value(newMap[i].isAxis).Move(), a);
+                    newInput.AddMember("positive", Value(newMap[i].positive).Move(), a);
+                    newInput.AddMember("id", Value(newMap[i].id).Move(), a);
+                    mapJson["inputList"].PushBack(newInput.Move(), a);
+                }
+                newConfig.AddMember("inputMap", mapJson.Move(), a);
+                Value tintJson(kArrayType);
+                setColor(tintJson, tints[i]);
+                newConfig.AddMember("tint", tintJson.Move(), a);
+                json["configs"].PushBack(newConfig.Move(), a);
+            }
         }
     }
 
@@ -44,57 +61,87 @@
         json["hudFontSize"].SetInt(size);
     }
 
-    int configData::inputMapCount() {
-        return json["inputMaps"].Size();
-    }
-
-    inputMap configData::getInputMap(int mapNo) {
-        Value& map = json["inputMaps"][mapNo];
-        inputMap toReturn(map["keyboard"].GetBool());
-        toReturn.useMouseAim = map["useMouseAim"].GetBool();
-        Value& list = map["inputList"];
-        for (SizeType i = 0; i < map.Size(); i++) {
+    playerConfig configData::getConfig(int index) {
+        assert(0 <= index && index < 8);
+        playerConfig toReturn;
+        Value& configJson = json["configs"][index];
+        toReturn.in = inputMap(configJson["inputMap"]["device"].GetInt());
+        toReturn.in.useMouseAim = configJson["inputMap"]["useMouseAim"].GetBool();
+        Value& list = configJson["inputMap"]["inputList"];
+        for (SizeType i = 0; i < list.Size(); i++) {
             bool isAxis = list[i]["isAxis"].GetBool();
             bool positive = list[i]["positive"].GetBool();
             int id = list[i]["id"].GetInt();
-            toReturn[i] = input(isAxis, positive, id);
+            toReturn.in[i] = input(isAxis, positive, id);
         }
+        toReturn.tint = getColor(configJson["tint"]);
         return toReturn;
     }
 
-    void configData::setInputMap(int mapNo, inputMap toWrite) {
-        Value& map = json["inputMaps"][mapNo];
-        map["keyboard"].SetBool(toWrite.keyboard);
-        map["useMouseAim"].SetBool(toWrite.useMouseAim);
-        Value& list = map["inputList"];
-        for (SizeType i = 0; i < list.Size(); i++) {
-            list[i]["isAxis"].SetBool(toWrite[i].isAxis);
-            list[i]["positive"].SetBool(toWrite[i].positive);
-            list[i]["id"].SetInt(toWrite[i].id);
-        }
+    Color configData::getConfigColor(int index) {
+        assert(0 <= index && index < 8);
+        return getColor(json["configs"][index]["tint"]);
     }
 
-    void configData::addInputMap(inputMap newMap) {
-        Document::AllocatorType& a = json.GetAllocator();
-        Value mapJson(kObjectType);
-        mapJson.AddMember("keyboard", Value(newMap.keyboard).Move(), a);
-        mapJson.AddMember("useMouseAim", Value(newMap.useMouseAim).Move(), a);
-        mapJson.AddMember("inputList", Value(kArrayType).Move(), a);
-        for (int i = 0; i < newMap.count(); i++) {
-            Value newInput(kObjectType);
-            newInput.AddMember("isAxis", Value(newMap[i].isAxis).Move(), a);
-            newInput.AddMember("positive", Value(newMap[i].positive).Move(), a);
-            newInput.AddMember("id", Value(newMap[i].id).Move(), a);
-            mapJson["inputList"].PushBack(newInput.Move(), a);
+    void configData::setConfig(int index, playerConfig toWrite) {
+        assert(0 <= index && index < 8);
+        Value& configJson = json["configs"][index];
+        Value& mapJson = configJson["inputMap"];
+        mapJson["device"].SetInt(toWrite.in.device);
+        mapJson["useMouseAim"].SetBool(toWrite.in.useMouseAim);
+        Value& listJson = mapJson["inputList"];
+        for (SizeType i = 0; i < listJson.Size(); i++) {
+            listJson[i]["isAxis"].SetBool(toWrite.in[i].isAxis);
+            listJson[i]["positive"].SetBool(toWrite.in[i].positive);
+            listJson[i]["id"].SetInt(toWrite.in[i].id);
         }
-        json["inputMaps"].PushBack(mapJson.Move(), a);
+        setColor(configJson["tint"], toWrite.tint);
     }
 
-    void configData::deleteInputMap(int mapNo) {
-        auto iterator = json["inputMaps"].Begin();
-        for (int i = 0; i < mapNo; i++) {
-            iterator++;
+    vector<conflict> configData::getConflicts() {
+        vector<conflict> toReturn;
+        set<int> warnedKeys;
+        for (int index1 = 0; index1 < 8; index1++) {
+            for (int index2 = index1 + 1; index2 < 8; index2++) {
+                int device1 = json["configs"][index1]["inputMap"]["device"].GetInt();
+                int device2 = json["configs"][index2]["inputMap"]["device"].GetInt();
+                if (device1 == device2) {
+                    if (device1 == -1) {
+                        set<int> keysUsed;
+                        inputMap map1 = getConfig(index1).in;
+                        inputMap map2 = getConfig(index2).in;
+                        if (map1.useMouseAim && map2.useMouseAim) {
+                            conflict c;
+                            c.player1 = index1;
+                            c.player2 = index2;
+                            c.error = " both use mouse aim\n";
+                            toReturn.push_back(c);
+                        }
+                        for (int i = 0; i < map1.count(); i++) {
+                            if (map1[i].isDefined()) {
+                                keysUsed.insert(map1[i].id);
+                            }
+                        }
+                        for (int i = 0; i < map2.count(); i++) {
+                            if (keysUsed.count(map2[i].id) && map2[i].isDefined() && !warnedKeys.count(map2[i].id)) {
+                                conflict c;
+                                c.player1 = index1;
+                                c.player2 = index2;
+                                c.error = " both use " + map2[i].name(device1) + "\n";
+                                toReturn.push_back(c);
+                                warnedKeys.insert(map2[i].id);
+                            }
+                        }
+                    }
+                    else {
+                        conflict c;
+                        c.player1 = index1;
+                        c.player2 = index2;
+                        c.error = " both use gamepad " + to_string(device1) + "\n";
+                        toReturn.push_back(c);
+                    }
+                }
+            }
         }
-        json["inputMaps"].Erase(iterator); //Might work, might not
+        return toReturn;
     }
-

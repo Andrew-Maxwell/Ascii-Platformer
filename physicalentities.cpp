@@ -131,7 +131,13 @@
     }
 
     void physicalParticle::tickSet() {
-        if (world -> isSolid(x, y) || lifetime-- < 0 || (!isUnderWater && xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01) || y > world -> getRows() + 100) {
+        if (world -> isSolid(x, y)) {
+            shouldDelete = true;
+        }
+        else if (lifetime-- < 0 || (!isUnderWater && xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01) || y > world -> getRows() + 100) {
+            shouldDelete = true;
+        }
+        if (IsKeyPressed(KEY_J)) {
             shouldDelete = true;
         }
     }
@@ -140,7 +146,9 @@
         physicalEntity::tickGet();
     }
 
-    bool physicalParticle::finalize() {return shouldDelete;}
+    bool physicalParticle::finalize() {
+        return shouldDelete;
+    }
 
     void physicalParticle::print() {
         if (dynamicChar) {
@@ -153,6 +161,6 @@
                 toPrint[0] = '.';
             }
         }
-        theScreen -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
+        theScreen -> draw(x + 0.125, y, tint, sizeFactor, toPrint, doLighting);
     }
 

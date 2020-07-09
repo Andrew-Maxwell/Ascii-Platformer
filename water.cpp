@@ -52,7 +52,7 @@
 
 
     bool water::doesCollide(float otherX, float otherY, int otherType) {
-        return (otherX >= x && otherX < x + width && otherY >= y - surface[otherX - x] - 0.5 && otherY <= y + height);
+        return (otherX >= x && otherX <= x + width && otherY >= y - surface[otherX - x] - 0.5 && otherY <= y + height);
     }
 
     collision water::getCollision(float otherX, float otherY, int otherType) {

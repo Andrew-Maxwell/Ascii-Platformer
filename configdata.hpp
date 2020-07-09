@@ -4,11 +4,26 @@
 #include "data.hpp"
 #include "input.hpp"
 
+struct playerConfig {
+    Color tint;
+    inputMap in;
+    int playerNumber = -1;
+};
+
+struct conflict {
+    int player1, player2;
+    string error;
+};
+
 class configData : public data {
 
     public:
 
-    configData(string fileName);
+    //Constructor
+
+    configData(string fileName, bool reset = false);
+
+    //Display parameters
 
     bool getFullscreen();
 
@@ -22,15 +37,16 @@ class configData : public data {
 
     void setHudFontSize(int size);
 
-    int inputMapCount();
+    //Player parameters
 
-    inputMap getInputMap(int mapNo);
+    playerConfig getConfig(int index);
 
-    void setInputMap(int mapNo, inputMap newMap);
+    Color getConfigColor(int index);
 
-    void addInputMap(inputMap newMap);
+    void setConfig(int index, playerConfig newConfig);
 
-    void deleteInputMap(int mapNo);
+    vector<conflict> getConflicts();
+
 };
 
 #endif //CONFIGDATA_HPP

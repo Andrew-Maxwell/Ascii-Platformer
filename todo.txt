@@ -1,14 +1,67 @@
+Core gameplay elements:
+    - Bit puzzles
+    - Element puzzles like Portal has (but probably not as sophisticated)
+    - Movement/platforming challenges involving different bodies, moving platforms, forcefields
+        Body ideas:
+            - Bouncing ball (autorejump + high elasticity)
+            - Helicopter (autorejump + high inertia + low jump power + infinite multijump)
+            - Wall climber (possibly ONLY wall-climbing, no jumping) (autorejump + low jump power + infinite walljumps)
+            - Extreme multijumping?
+            - Rocket jumps/swinging
+    - Combat (with a puzzle-solving bent)
+        - Bullet Hell style? Similar to Cave Story/Noita
+
+Main menu:
+    Singleplayer
+    Co-op
+    Arena
+    Options
+    Quit
+
+Options:
+    [display options]
+    For each of eight players, can:
+        Change color
+        Change input device
+        Edit input map
+
+Singleplayer / Co-op:
+    New Game (input name)
+    Load x.json
+    Load y.json
+    ...
+    Cancel
+
+Arena:
+    Select level(s)
+
+Ready room (co-op/arena)
+    Must load all outfits from save
+    Display HUD for each loaded outfit
+    Have players select outfits (1 per outfit)
+    associates 
+
+Singleplayer load game: [Continue to level]
+
+edit inputmaps:
+    List of keyboard inputmaps with edit/delete buttons
+    Add keyboard inputMap
+    List of gamepad inputMaps with edit/delete buttons
+    add gamepad inputMap
+
+Next up:
+- Allow changing device in inputMap editing screen
+- color editor!
+
 Loose ends:
-- Make the max scale determined by screen size
+- Make saves only trigger on interaction
+- Saves should automatically do everything which can be acheived by commiting suicide (respawn all players, set all players to full health.)
 - Some stuff with outfit loading wrong?
 - Broadcast animation + HUD broadcast indicator blends in with background
-- Player #2 can't walk through door while player #1 is dead
-- Make camera not get stuck after player #1 dies
 - Figure out how to handle dead players respawning; right now, the value health = 0 can get saved, preventing players from respawning.
 - Joystick aim accuracy is VERY limited. Should probably allow spamming/strafing like Cave Story to compensate.
 - Make sure all of the players need to be walking through the same door in order to go through.
 - water.cpp:67 can 
-
 - Save and (some) pickups only trigger on interactions
 - Make player colors customizeable or create a set of predefined player colors like Rain World
 - Figure out how to handle fewer players than the level supports
@@ -37,8 +90,8 @@ Features:
 1 Sound effects
 1 Music: see http://dig.ccmixter.org for free music, or contact noise, or try to make your own!
 1 Controller support
-2 Gun pickups
-2 Gun selection indicator
+2 Variable refresh rate
+2 Generic Gun pickups
 2 Map system: Use render test code on the collider texture
 2 Wind/current object
 2 leaf physicalParticles that fly eratically
@@ -114,13 +167,11 @@ Housekeeping items (may never get to all of these):
 - Split largest files (editables.cpp, player.cpp, editor_main.cpp) into smaller files, or at least improve structure
 
 Bugs:
-- touch pickups sometimes collected (?) randomly
-- particles becoming zero-G
+- When standing next to a solid block of height 1, explosion particles sometimes fly over it and sometimes don't.
 - Some of the files in "dark" getting loaded as wrong width
 - Water appears weird when player is moving very slowly in the vertical direction
 - If there are two water objects with one above the other, they tend to interfere.
 - Particles don't appear right next to walls
-- Layers still getting deleted multiple times under some circumstances?
 - Player vibrates when standing on a surface
 
 Idea: Setting is a floating colony in the atmosphere of a gas giant. Modeled after a truly massive blimp?

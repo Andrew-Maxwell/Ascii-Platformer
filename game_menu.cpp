@@ -54,6 +54,8 @@
         tickNo = 2;
         xCount = newXCount;
         yCount = newYCount;
+        ySelect = 0;
+        scroll = 0;
     }
 
     bool gameMenu::goBack() {
@@ -66,18 +68,21 @@
         }
         else {
             Vector2 mouse = GetMousePosition();
-            if (oldMouse.x != mouse.x || oldMouse.y != mouse.y || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (oldMouse.x != mouse.x || oldMouse.y != mouse.y || IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || GetMouseWheelMove()) {
                 mouseMode = true;
             }
             oldMouse = mouse;
         }
         if (!mouseMode) {
-            handleKey (KEY_UP,    KEY_W, GAMEPAD_BUTTON_LEFT_FACE_UP, GAMEPAD_AXIS_LEFT_Y, GAMEPAD_AXIS_RIGHT_Y, -1, input(), upDown, ySelect, yCount, -1);
-            handleKey (KEY_DOWN,  KEY_S, GAMEPAD_BUTTON_LEFT_FACE_DOWN, GAMEPAD_AXIS_LEFT_Y, GAMEPAD_AXIS_RIGHT_Y, 1, input(), downDown,  ySelect, yCount, 1);
-            handleKey (KEY_LEFT,  KEY_A, GAMEPAD_BUTTON_LEFT_FACE_LEFT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, -1, input(), leftDown,  xSelect, xCount, -1);
-            handleKey (KEY_RIGHT, KEY_D, GAMEPAD_BUTTON_LEFT_FACE_RIGHT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, 1, input(), rightDown, xSelect, xCount, 1);
+            input dummy;
+            handleKey (KEY_UP,    KEY_W, GAMEPAD_BUTTON_LEFT_FACE_UP, GAMEPAD_AXIS_LEFT_Y, GAMEPAD_AXIS_RIGHT_Y, -1, dummy, upDown, ySelect, yCount, -1);
+            handleKey (KEY_DOWN,  KEY_S, GAMEPAD_BUTTON_LEFT_FACE_DOWN, GAMEPAD_AXIS_LEFT_Y, GAMEPAD_AXIS_RIGHT_Y, 1, dummy, downDown,  ySelect, yCount, 1);
+            handleKey (KEY_LEFT,  KEY_A, GAMEPAD_BUTTON_LEFT_FACE_LEFT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, -1, dummy, leftDown,  xSelect, xCount, -1);
+            handleKey (KEY_RIGHT, KEY_D, GAMEPAD_BUTTON_LEFT_FACE_RIGHT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, 1, dummy, rightDown, xSelect, xCount, 1);
         }
         tickNo--;
+        scrollBar();
+        firstCallToReleased = true;
     }
 
     void gameMenu::handleInput(inputMap& in) {
@@ -86,7 +91,7 @@
         }
         else {
             Vector2 mouse = GetMousePosition();
-            if (oldMouse.x != mouse.x || oldMouse.y != mouse.y || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (oldMouse.x != mouse.x || oldMouse.y != mouse.y || IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || GetMouseWheelMove()) {
                 mouseMode = true;
             }
             oldMouse = mouse;
@@ -98,54 +103,157 @@
             handleKey (KEY_RIGHT, KEY_D, GAMEPAD_BUTTON_LEFT_FACE_RIGHT, GAMEPAD_AXIS_LEFT_X, GAMEPAD_AXIS_RIGHT_X, 1, in.right, rightDown, xSelect, xCount, 1);
         }
         tickNo--;
+        scrollBar();
+        firstCallToReleased = true;
     }
 
-    bool gameMenu::button(string text, int buttonCol, int buttonRow, int x, int y) {
+    bool gameMenu::button(string text, int buttonCol, int buttonRow, string inBrackets, int x, int y) {
         if (y == -1) {
-            y = 2 * (buttonRow + 1);
+            y = 2 * (buttonRow + 1) - scroll;
+        }
+        if (y <= 0) {
+            return false;
         }
         int hudFontSize = theScreen -> getHudFontSize();
         Vector2 mouse = GetMousePosition();
         bool toReturn = false;
         if (mouseMode) {
-            if (mouse.x > x * hudFontSize && mouse.x < (x + text.size()) * hudFontSize && mouse.y > y * hudFontSize && mouse.y < (y + 1) * hudFontSize) {
+            if (mouse.x > x * hudFontSize && mouse.x < (x + text.size() + (inBrackets == "" ? 0 : 3 + inBrackets.size())) * hudFontSize && mouse.y > y * hudFontSize && mouse.y < (y + 1) * hudFontSize) {
                 if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-                    theScreen -> drawHudBarRight(x, y, DARKBACKGROUND, text.length());
-                    theScreen -> drawHud(x, y, DARKFOREGROUND, text);
+                    theScreen -> drawHudWithBackground(x, y, DARKFOREGROUND, DARKBACKGROUND, text);
                 }
                 else {
-                    theScreen -> drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
-                    theScreen -> drawHud(x, y, LIGHTFOREGROUND, text);
+                    theScreen -> drawHudWithBackground(x, y, LIGHTFOREGROUND, LIGHTBACKGROUND, text);
                 }
-                if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+                if (inBrackets != "") {
+                    theScreen -> drawHudWithBrackets(x + text.size() + 1, y, inBrackets, true);
+                }
+                if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && firstCallToReleased) {
+                    firstCallToReleased = false;
                     toReturn = true;
                 }
             }
             else {
                 theScreen -> drawHud(x, y, UIFOREGROUND, text);
+                if (inBrackets != "") {
+                    theScreen -> drawHudWithBrackets(x + text.size() + 1, y, inBrackets, false);
+                }
             }
         }
         else {
             if (xSelect == buttonCol && ySelect == buttonRow) {
                 if (IsKeyDown(KEY_ENTER) || IsKeyDown(KEY_SPACE) || onAnyGamepad(IsGamepadButtonDown, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || onAnyGamepad(IsGamepadButtonDown, GAMEPAD_BUTTON_LEFT_TRIGGER_1) || onAnyGamepad(IsGamepadButtonDown, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
-                    theScreen -> drawHudBarRight(x, y, DARKBACKGROUND, text.length());
-                    theScreen -> drawHud(x, y, DARKFOREGROUND, text);
+                    theScreen -> drawHudWithBackground(x, y, DARKFOREGROUND, DARKBACKGROUND, text);
                 }
                 else {
-                    theScreen -> drawHudBarRight(x, y, LIGHTBACKGROUND, text.length());
-                    theScreen -> drawHud(x, y, LIGHTFOREGROUND, text);
+                    theScreen -> drawHudWithBackground(x, y, LIGHTFOREGROUND, LIGHTBACKGROUND, text);
                 }
-                if (IsKeyReleased(KEY_ENTER) || IsKeyReleased(KEY_SPACE) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_LEFT_TRIGGER_1) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) {
+                if (inBrackets != "") {
+                    theScreen -> drawHudWithBrackets(x + text.size() + 1, y, inBrackets, true);
+                }
+                if (tickNo < 0 && (IsKeyReleased(KEY_ENTER) || IsKeyReleased(KEY_SPACE) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_LEFT_TRIGGER_1) || onAnyGamepad(IsGamepadButtonReleased, GAMEPAD_BUTTON_RIGHT_TRIGGER_1))) {
                     toReturn = true;
                 }
             }
             else {
                 theScreen -> drawHud(x, y, UIFOREGROUND, text);
+                if (inBrackets != "") {
+                    theScreen -> drawHudWithBrackets(x + text.size() + 1, y, inBrackets, false);
+                }
             }
         }
-        x += (text.size() + 1);
-        y += 2;
+        if (tickNo > 0) {
+            return false;
+        }
         return toReturn;
+    }
+
+    void gameMenu::scrollBar() {
+        int fontSize = theScreen -> getHudFontSize();
+        int pageRows = 2 * yCount + 1;
+        int screenRows = theScreen -> getHudRows() - 1;
+        if (screenRows < pageRows) {
+            //Determine scroll value
+            float handleLength = (screenRows - 2) * (screenRows / float(pageRows));
+            float handlePosition = 2 + scroll / float(pageRows) * (screenRows - 2);
+            Vector2 newMouse = GetMousePosition();
+            bool mouseOnBar = newMouse.x > fontSize * (theScreen -> getHudCols() - 1);
+            bool mouseOnHandle = mouseOnBar && newMouse.y > handlePosition * fontSize && newMouse.y < (handlePosition + handleLength) * fontSize;
+            if (mouseMode) {
+                scroll -= 2 * GetMouseWheelMove();
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if (mouseOnHandle) {
+                        scrollClicked = true;
+                        scrollMouse = GetMousePosition();
+                        oldScroll = scroll;     //Save where the handle was when we started
+                    }
+                    else if (mouseOnBar) {  //Jump to position clicked on bar
+                        scroll = (((newMouse.y / float(fontSize)) - 2) / float(theScreen -> getHudRows() - 3)) * pageRows;
+                        scrollMouse = GetMousePosition();
+                        oldScroll = scroll;
+                    }
+                }
+                //Move to new scroll relative to old scroll
+                else if (scrollClicked && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                    scroll = oldScroll + (newMouse.y - scrollMouse.y) / float(fontSize * theScreen -> getHudRows()) * pageRows;
+                }
+                else {
+                    scrollClicked = false;
+                }
+                //While scrolling mouse mode, move keyboard mode selection to stay on-screen
+                if (2 * ySelect + 1 - scroll > screenRows) {
+                    ySelect = (scroll - 1 + screenRows) / 2;
+                }
+                if (2 * ySelect + 3 - scroll < 0) {
+                    ySelect = (scroll + 1) / 2;
+                }
+            }
+            //While in keyboard mode, scroll to keep up with keyboard mode selection.
+            else {
+                if (2 * ySelect + 3 - scroll > screenRows) {
+                    scroll = 2 * ySelect + 3 - screenRows;
+                }
+                if (2 * ySelect + 1 - scroll < 0) {
+                    scroll = 2 * ySelect + 1;
+                }
+            }
+            scroll = min(scroll, pageRows - screenRows);
+            scroll = max(0, scroll);
+            if (scroll % 2 == 1) {
+                scroll--;
+            }
+
+            //Draw bar background
+            theScreen -> drawHud(theScreen -> getHudCols() - 1, 1, UIFOREGROUND, "\xE2\x95\xA5");
+            for (int i = 2; i < theScreen -> getHudRows() - 1; i++) {
+                theScreen -> drawHud(theScreen -> getHudCols() - 1, i, UIFOREGROUND,  "\xE2\x95\x91");
+            }
+            theScreen -> drawHud(theScreen -> getHudCols() - 1, theScreen -> getHudRows() - 1, UIFOREGROUND, "\xE2\x95\xA8");
+            //Draw bar handle
+            if (mouseMode && (scrollClicked || mouseOnHandle)) {
+                if (scrollClicked) {
+                    theScreen -> drawHudBarDown(theScreen -> getHudCols() - 1, handlePosition, DARKFOREGROUND, handleLength);
+                }
+                else if (mouseOnHandle) {
+                    theScreen -> drawHudBarDown(theScreen -> getHudCols() - 1, handlePosition, LIGHTFOREGROUND, handleLength);
+                }
+            }
+            else {
+                theScreen -> drawHudBarDown(theScreen -> getHudCols() - 1, handlePosition, UIFOREGROUND, handleLength);
+            }
+        }
+    }
+
+    void gameMenu::inputBox(string title, string& input) {
+        const int width = 48, height = 7, x = (theScreen -> getHudCols() - width) / 2, y = (theScreen -> getHudRows() - height) / 2;
+        char nextChar = GetKeyPressed();
+        while (nextChar && input.size() < width - 4) {
+            input += nextChar;
+            nextChar = GetKeyPressed();
+        }
+        drawHudBox(x, y, width, height, UIFOREGROUND);
+        theScreen -> drawHud((theScreen -> getHudCols() - title.size()) / 2, y + 1, UIBACKGROUND, title);
+        theScreen -> drawHudWithBrackets((
     }
 
     void apply(bitset<8>* current, int op, int arg) {
@@ -197,6 +305,10 @@
 //        cout << op << " " << arg << current -> to_string() << endl;
     }
 
+    Color gameMenu::editColor(Color oldColor) {
+        return oldColor;
+    }
+
     void gameMenu::inventory(int& status, outfit& o, inputMap& in) {
         init(o.ops.size(), 11);
         bool firstTick = true;  //Prevents entering and exiting screen in first tick (because tab is pressed)
@@ -206,10 +318,6 @@
                 xSelect = 0;
             }
             theScreen -> start(true);
-
-            string title = "Inventory";
-            drawTitle(title);
-
             //Draw available ops as buttons
             string listNum = "0: ";
             for (int i = 0; i < 10; i++) {
@@ -218,7 +326,7 @@
                 theScreen -> drawHud(4, 10 + 2 * i, o.channelColors[i], o.channels[i].to_string());
                 for (int j = 0; j < o.ops.size(); j++) {;
                     if (o.ops[j].unlocked) {
-                        if (button(o.ops[j].display, j, i, j * 3 + 15, 10 + 2 * i)) {
+                        if (button(o.ops[j].display, j, i, "", j * 3 + 15, 10 + 2 * i)) {
                             for (int k = 0; k < o.ops[j].operations.size(); k++) {
                                 apply(&o.channels[i], o.ops[j].operations[k], o.ops[j].operands[k]);
                             }
@@ -228,15 +336,14 @@
                         }
                     }
                     else {
-                        button("?", j, i, j * 3 + 15, 10 + 2 * i);
+                        button("?", j, i, "", j * 3 + 15, 10 + 2 * i);
                     }
                 }
             }
-            string exitLabel = "Back to Game";
-            if (goBack() || (in.inventory.isPressed() && !firstTick) || button(exitLabel, 0, 10, 1, 32)) {
-                status = runStatus;
+            if (goBack() || (in.inventory.isPressed() && !firstTick) || button("Back to Game", 0, 10, "", 1, 32)) { status = runStatus;
             }
             firstTick = false;
+            drawTitle("Inventory");
             theScreen -> end();
         }
     }
@@ -246,22 +353,17 @@
         while (status == pauseStatus) {
             handleInput();
             theScreen -> start(true);
-            string pausedLabel = "Game Paused";
-            drawTitle(pausedLabel);
-            string optionsLabel = "\xE2\x96\xBA Game Options";
-            string menuLabel = "\xE2\x96\xBA Main Menu (lose unsaved progress)";
-            string quitLabel = "\xE2\x96\xBA Quit (lose unsaved progress)";
-            string resumeLabel = "\xE2\x96\xBA Resume";
-            if (button(optionsLabel, 0, 0)) {
+            drawTitle("Game Paused");
+            if (button("\xE2\x96\xBA Game Options", 0, 0)) {
                 status = optionsStatus;
             }
-            else if (button(menuLabel, 0, 1)) {
+            else if (button("\xE2\x96\xBA Main Menu (lose unsaved progress)", 0, 1)) {
                 status = menuStatus;
             }
-            else if (button(quitLabel, 0, 2)) {
+            else if (button("\xE2\x96\xBA Quit (lose unsaved progress)", 0, 2)) {
                 status = quitStatus;
             }
-            else if (goBack() || button(resumeLabel, 0, 3)) {
+            else if (goBack() || button("\xE2\x96\xBA Resume", 0, 3)) {
                 status = runStatus;
             }
             theScreen -> end();
@@ -269,129 +371,249 @@
     }
 
     void gameMenu::main(int& status) {
-        init(1, 3);
+        const int rows = 3, cols = 1;
+        init(cols, rows);
         while (status == menuStatus) {
             handleInput();
             theScreen -> start(true);
-            string title = "ASCII Platformer";
-            string startLabel = "\xE2\x96\xBA Load Game";
-            string optionsLabel = "\xE2\x96\xBA Options";
-            string quitLabel = "\xE2\x96\xBA Quit";
-            drawTitle(title);
-            if (button(startLabel, 0, 0)) {
+            if (button("\xE2\x96\xBA Load Game", 0, 0)) {
                 status = deadStatus;
             }
-            else if (button(optionsLabel, 0, 1)) {
+            else if (button("\xE2\x96\xBA Options", 0, 1)) {
                 status = optionsStatus;
+                init(cols, rows);
             }
-            else if (button(quitLabel, 0, 2)) {
+            else if (button( "\xE2\x96\xBA Quit", 0, 2)) {
                 status = quitStatus;
             }
+            drawTitle("ASCII Platformer");
             theScreen -> end();
         }
     }
 
-    void gameMenu::options(int& status, configData& config) {
-        init(1, 6);
-        while (status == optionsStatus) {
+    string gameMenu::chooseSave(listData saves) {
+        vector<string> options = saves.getList();
+        init(1, options.size() + 2);
+        string toReturn = "";
+        bool enterName = false;
+        while (status == loadStatus) {
             handleInput();
             theScreen -> start(true);
-            string title = "Options";
-            drawTitle(title);
+            for (int i = 0; i < options.size(); i++) {
+                if (button("\xE2\x96\xBA Load " + options[i], 0, i)) {
+                    status = deadStatus;
+                    toReturn = options[i];
+                }
+            }
+            if (button("\xE2\x96\xBA New game", 0, options.size())) {
+                enterName = true;
+            }
+            if (enterName && (goBack() || IsKeyPressed(KEY_ENTER) || onAnyGamepad(IsGamepadButtonPressed, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || onAnyGamepad(IsGamepadButtonPressed, GAMEPAD_BUTTON_LEFT_TRIGGER_1) || onAnyGamepad(IsGamepadButtonPressed, GAMEPAD_BUTTON_RIGHT_TRIGGER_1))) {
+                enterName = false;
+            }
+            if (button("\xE2\x96\xBA Back to Menu", 0, options.size() + 1)) {
+                status = menuStatus;
+            }
+            if (enterName) {
+                                                            
+            }
+            drawTitle ("Load Game");
+        }
+        return toReturn;
+    }
+
+
+    void gameMenu::options(int& status, configData& configFile) {
+        const int rows = 12, cols = 2;
+        vector<conflict> conflicts = configFile.getConflicts();
+        init(cols, rows + conflicts.size());
+        while (status == optionsStatus) {
+            handleInput();
+            if (ySelect % yCount < 3 || ySelect % yCount >= 11 + conflicts.size()) {
+                xSelect = 0;
+            }
+            theScreen -> start(true);
             //Display settings
-            string fullscreenLabel = "Toggle Fullscreen";
-            if (button(fullscreenLabel, 0, 0)) {
+            if (button("Toggle fullscreen", 0, 0)) {
                 if (IsWindowFullscreen()) {
                     ToggleFullscreen();
                     SetWindowSize(MINWINDOWCOLS * theScreen -> getHudFontSize(), MINWINDOWROWS * theScreen -> getHudFontSize());
                     SetWindowMinSize(MINWINDOWCOLS * theScreen -> getHudFontSize(), MINWINDOWROWS * theScreen -> getHudFontSize());
-                    config.setFullScreen(false);
+                    configFile.setFullScreen(false);
                 }
                 else {
                     int width = GetMonitorWidth(0);
                     int height = GetMonitorHeight(0);
                     ToggleFullscreen();
                     SetWindowSize(width, height);
-                    config.setFullScreen(true);
+                    configFile.setFullScreen(true);
                 }
-                config.save();
+                configFile.save();
             }
-            string hudScaleLabel = "Tweak Interface Scale";
-            if (button(hudScaleLabel, 0, 1)) {
+            if (button("Tweak interface scale", 0, 1)) {
                 theScreen -> tweakHudScale();
-                config.setHudFontSize(theScreen -> getHudFontSize());
-                config.save();
+                configFile.setHudFontSize(theScreen -> getHudFontSize());
+                configFile.save();
             }
-            string gameScaleLabel = "Tweak Game Scale";
+            string gameScaleLabel = "Tweak game scale";
             if (button(gameScaleLabel, 0, 2)) {
                 theScreen -> tweakGameScale();
-                config.setGameFontSize(theScreen -> getFontSize());
-                config.save();
+                configFile.setGameFontSize(theScreen -> getFontSize());
+                configFile.save();
             }
             string gameScaleTest = "Game Scale Text";
-            theScreen -> drawScaleTest(4 + gameScaleLabel.size(), 6, RED, gameScaleTest);
-            //input settings
-            string inputOptionsLabel = "\xE2\x96\xBA Input Settings";
-            if (button(inputOptionsLabel, 0, 3)) {
-                status = inputOptionsStatus;
-                theScreen -> end();
-                inputOptions(status, config);
+            theScreen -> drawScaleTest(4 + gameScaleLabel.size(), 6 - scroll, RED, gameScaleTest);
+            //Player config settings
+            for (int i = 0; i < 8; i++) {
+                theScreen -> drawHud(1, 2 * (4 + i) - scroll, configFile.getConfigColor(i), "Player " + to_string(i));
+                if (button("\xE2\x96\xBA Edit Input", 0, 3 + i, "", 10)) {
+                    playerConfig c = configFile.getConfig(i);
+                    status = inputOptionsStatus;
+                    editInputMap(status, c.in);
+                    configFile.setConfig(i, c);
+                    configFile.save();
+                    conflicts = configFile.getConflicts();
+                    init(cols, rows + conflicts.size());
+                }
+                if (button("\xE2\x96\xBA Edit Color", 1, 3 + i, "", 24)) {
+                    playerConfig c = configFile.getConfig(i);
+                    c.tint = editColor(c.tint);
+                    configFile.setConfig(i, c);
+                    configFile.save();
+                    conflicts = configFile.getConflicts();
+                    init(cols, rows + conflicts.size());
+                }
             }
-            string backLabel = "\xE2\x96\xBA Back to Menu";
-            if (goBack() || button(backLabel, 0, 4)) {
+            for (int i = 0; i < conflicts.size(); i++) {
+                theScreen -> drawHud(1, 2 * (12 + i) - scroll, RED, "Conflict:            and           " + conflicts[i].error);
+                if (button("\xE2\x96\xBA Player " + to_string(conflicts[i].player1), 0, 11 + i, "", 11)) {
+                    playerConfig c = configFile.getConfig(conflicts[i].player1);
+                    status = inputOptionsStatus;
+                    editInputMap(status, c.in);
+                    configFile.setConfig(conflicts[i].player1, c);
+                    configFile.save();
+                    conflicts = configFile.getConflicts();
+                    init(cols, rows + conflicts.size());
+                }
+                else if (button("\xE2\x96\xBA Player " + to_string(conflicts[i].player2), 1, 11 + i, "", 26)) {
+                    playerConfig c = configFile.getConfig(conflicts[i].player2);
+                    status = inputOptionsStatus;
+                    editInputMap(status, c.in);
+                    configFile.setConfig(conflicts[i].player2, c);
+                    configFile.save();
+                    conflicts = configFile.getConflicts();
+                    init(cols, rows + conflicts.size());
+                }
+            }
+            if (button("Reset all defaults", 0, 11 + conflicts.size())) {
+                string fileName = configFile.getFileName();
+                configFile = configData(fileName, true);
+                conflicts.clear();
+                configFile.save();
+            }
+            if (goBack() || button("\xE2\x96\xBA Back to Menu", 0, 12 + conflicts.size())) {
                 status = -1;    //Previous status will be restored in calling function
             }
+            drawTitle("Options");
             theScreen -> end();
         }
     }
 
-    void gameMenu::inputOptions(int& status, configData& config) {
-/*        yCount = inputMap.count() + 2;
-        xCount = 1;
-        int inputToChange = -1;
+    void gameMenu::editInputMap(int& status, inputMap& toReplace) {
+        init(1, toReplace.count() + 4);
+        int selectionToChange = -1;
+        //Keep track of separate values for gamepad and keyboard
+        inputMap keyboardMap(-1);
+        inputMap gamepadMap(0);
+        inputMap* toEdit;
+        if (toReplace.keyboard) {
+            keyboardMap = toReplace;
+            toEdit = &keyboardMap;
+        }
+        else {
+            gamepadMap = toReplace;
+            toEdit = &gamepadMap;
+        }
         while (status == inputOptionsStatus) {
-            if (inputToChange == -1) {
+            if (selectionToChange == -1) {
                 handleInput();
             }
             theScreen -> start(true);
-            string title = "Input Options";
-            drawTitle(title);
             bool clickedNoButton = true;
-            for (int i = 0; i < keys.count(); i++) {
-                if (keyToChange == i) {
-                    string pressKey = "PRESS KEY";
-                    theScreen -> drawHud((theScreen -> getHudCols() - pressKey.size()) / 2, 2 * (i + 1), RED, pressKey);
-                    int lastKey = myGetKeyPressed();
-                    if (lastKey) {
-                        if (lastKey != KEY_ESCAPE) {
-                            keys[keyToChange] = lastKey;
-                            config.setKeys(keys);
-                            config.save();
+            for (int i = 0; i < toEdit -> count(); i++) {
+                if (selectionToChange == i) {
+                    string prompt;
+                    if (toEdit -> keyboard) {
+                        prompt = "PRESS KEY";
+                    }
+                    else {
+                        prompt = "PRESS BUTTON OR MOVE JOYSTICK";
+                    }
+                    theScreen -> drawHud(1, 2 * (i + 1), RED, prompt);
+                    if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_BACKSPACE)) {
+                        (*toEdit)[i] = input(); //unbound input
+                        selectionToChange = -1;
+                    }
+                    else if (goBack()) {
+                        selectionToChange = -1;
+                    }
+                    else {
+                        if (toEdit -> change(i)) {
+                            selectionToChange = -1;
                         }
-                        keyToChange = -1;
                     }
                 }
                 else {
-                    if (button(keys.name(i) + ": " + keyName(keys[i]), 0, i)) {
-                        keyToChange = i;
+                    if (button(toEdit -> name(i), 0, i, (*toEdit)[i].name(toEdit -> device))) {
+                        selectionToChange = i;
                         clickedNoButton = false;
                     }
                 }
-                if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && clickedNoButton) {
-                    keyToChange = -1;
+                if (selectionToChange > -1 && IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && firstCallToReleased && clickedNoButton) {
+                    selectionToChange = -1;
+                    firstCallToReleased = false;
                 }
             }
-            string resetLabel = "Reset to Default";
-            if (button(resetLabel, 0, keys.count())) {
-                keys = keyMapping();
-                config.setKeys(keys);
-                config.save();
+            if (toEdit -> keyboard) {
+                if (button("Device type", 0, toEdit -> count(), "keyboard")) {
+                    toEdit = &gamepadMap;
+                }
+                else if (button("Use mouse aim", 0, toEdit -> count() + 1, (toEdit -> useMouseAim ? "true" : "false"))) {
+                    toEdit -> useMouseAim = !toEdit -> useMouseAim;
+                }
             }
-            string backLabel = "\xE2\x96\xBA Back to Options";
-            if (button(backLabel, 0, keys.count() + 1)) {
+            else {
+                if (button("Device type", 0, toEdit -> count(), "gamepad")) {
+                    toEdit = &keyboardMap;
+                }
+                else {
+                    if (selectionToChange == toEdit -> count()) {
+                        theScreen -> drawHud(1, 2 * (toEdit -> count() + 2 - scroll), RED, "PRESS GAMEPAD BUTTON OR MOVE JOYSTICK");
+                        int newDevice = selectGamepad();
+                        if (newDevice >= 0) {
+                            toEdit -> device = newDevice;
+                            selectionToChange = -1;
+                            firstCallToReleased = false;
+                        }
+                        if (goBack()) {
+                            selectionToChange = -1;
+                        }
+                    }
+                    else if (button("Gamepad number", 0, toEdit -> count() + 1, to_string(toEdit -> device))) {
+                        selectionToChange = toEdit -> count();
+                    }
+                }
+            }
+            if (button("Reset to default", 0, toEdit -> count() + 2)) {
+                int device = toEdit -> device;
+                *toEdit = inputMap(device);
+            }
+            if (button("\xE2\x96\xBA Back to Options", 0, toEdit -> count() + 3)) {
+                toReplace = *toEdit;
                 status = optionsStatus;
             }
+            drawTitle("Edit Input Map");
             theScreen -> end();
-        }*/
+        }
     }
 

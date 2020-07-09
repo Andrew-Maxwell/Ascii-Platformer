@@ -21,16 +21,20 @@ using namespace rapidjson;
         fseek (jsonFile, 0, SEEK_SET);
         FileReadStream entityReadStream(jsonFile, buffer, sizeof(buffer));
         if (json.ParseStream(entityReadStream).HasParseError()) {
-            cerr << "Error parsing json.\n" << endl;
+            cerr << "Error parsing json.\n";
             exit(EXIT_FAILURE);
         }
         fclose(jsonFile);
-        free(buffer);
+        delete[] buffer;
         return true;
     }
 
     void data::save() {
         FILE* out = fopen(fileName.c_str(), "wb");
+        if (!out) {
+            cerr << "Couldn't open file for saving JSON: " << strerror(errno) << endl;
+            exit(EXIT_FAILURE);
+        }
         char buffer[65536];
         FileWriteStream ws(out, buffer, 65536);
         PrettyWriter<FileWriteStream> writer(ws);
@@ -50,6 +54,47 @@ using namespace rapidjson;
         toReturn.b = tintJson[2].GetInt();
         toReturn.a = tintJson[3].GetInt();
         return toReturn;
+    }
+
+    void data::setColor(Value& tintJson, Color newTint) {
+        assert(tintJson.IsArray());
+        Document::AllocatorType& a = json.GetAllocator();
+        tintJson.Clear();
+        tintJson.PushBack(Value(int(newTint.r)).Move(), a);
+        tintJson.PushBack(Value(int(newTint.g)).Move(), a);
+        tintJson.PushBack(Value(int(newTint.b)).Move(), a);
+        tintJson.PushBack(Value(int(newTint.a)).Move(), a);
+    }
+
+/******************************************************************************/
+//listData
+//Used only to store a list of strings
+/******************************************************************************/
+
+    listData::listData(string newFileName) {
+        fileName = newFileName;
+        if (!load(fileName)) {
+            json.SetArray();
+        }
+    }
+
+    vector<string> listData::getList() {
+        assert(json.IsArray());
+        vector<string> toReturn;
+        for (SizeType i = 0; i < json.Size(); i++) {
+            toReturn.push_back(json[i].GetString());
+        }
+        return toReturn;
+    }
+
+    void listData::setList(vector<string> newList) {
+        Document::AllocatorType& a = json.GetAllocator();
+        json.Clear();
+        for (int i = 0; i < newList.size(); i++) {
+            Value stringValue;
+            stringValue.SetString(newList[i].c_str(), newList[i].length(), a);
+            json.PushBack(stringValue, a);
+        }
     }
 
 /******************************************************************************/

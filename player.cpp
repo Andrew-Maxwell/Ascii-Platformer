@@ -267,7 +267,7 @@
 
             //Explosions
             if (in.explode.isPressed()) {
-                explode (60, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5, zPosition);
+                explode (16, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5, zPosition);
             }
 
             //Death

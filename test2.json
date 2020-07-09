@@ -1,13 +1,23 @@
 {
     "collider": "test2_collider.lyr",
-    "dayBackground": [0, 0, 0, 0],
+    "dayBackground": [
+        0,
+        0,
+        0,
+        0
+    ],
     "fontSize": 16,
     "entities": [
         {
             "type": "player",
             "x": 14.0,
             "y": 7.0,
-            "tint": [255, 0, 0, 255],
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
             "sizeFactor": 1.0
         },
         {
@@ -15,14 +25,24 @@
             "number": 1,
             "x": 14.0,
             "y": 7.0,
-            "tint": [0, 0, 255, 255],
+            "tint": [
+                0,
+                0,
+                255,
+                255
+            ],
             "sizeFactor": 1.0
         },
         {
             "type": "layer",
             "x": 0.0,
             "y": 0.0,
-            "tint": [50, 255, 50, 255],
+            "tint": [
+                50,
+                255,
+                50,
+                255
+            ],
             "sizeFactor": 1.0,
             "fileName": "test2_collider.lyr"
         },
@@ -30,7 +50,12 @@
             "type": "door",
             "x": 14.5,
             "y": 9.0,
-            "tint": [0, 0, 255, 255],
+            "tint": [
+                0,
+                0,
+                255,
+                255
+            ],
             "sizeFactor": 2.0,
             "nextRoom": "test.json",
             "destinationX": 15.0,
@@ -38,9 +63,14 @@
         },
         {
             "type": "door",
-            "x": 17,
+            "x": 17.0,
             "y": 9.0,
-            "tint": [0, 0, 255, 255],
+            "tint": [
+                0,
+                0,
+                255,
+                255
+            ],
             "sizeFactor": 1.0,
             "nextRoom": "test3.json",
             "destinationX": 6.0,

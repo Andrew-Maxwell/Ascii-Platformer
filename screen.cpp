@@ -144,7 +144,6 @@
         }*/
     }
 
-
     //Handle world lighting (e.g. for time of day...)
 
     float screen::dayLevel() {
@@ -292,6 +291,30 @@
         myDrawText(text.c_str(), (Vector2){x * hudFontSize, y * hudFontSize}, hudFontSize, 0, tint);
     }
 
+    void screen::drawWithBackground(float x, float y, Color tint, Color background, float sizeFactor, string text, bool doLight) {
+        drawBarRight(x, y, background, sizeFactor, MeasureTextEx(displayFont, text.c_str(), fontSize * sizeFactor, 0).x / float(fontSize * sizeFactor), doLight);
+        draw(x, y, tint, sizeFactor, text, doLight);
+    }
+
+    void screen::drawHudWithBackground(float x, float y, Color tint, Color background, string text) {
+        int textWidth = MeasureTextEx(displayFont, text.c_str(), hudFontSize, 0).x / hudFontSize;
+        drawHudBarRight(x, y, background, textWidth);
+        drawHud(x, y, tint, text);
+    }
+
+    void screen::drawHudWithBrackets(float x, float y, string text, bool selected) {
+        int textWidth = MeasureTextEx(displayFont, text.c_str(), hudFontSize, 0).x / hudFontSize;
+        drawHud(x, y, BRACKETSFOREGROUND, "[");
+        if (selected) {
+            DrawRectangle((x + 1) * hudFontSize, (y - 0.25) * hudFontSize, textWidth * hudFontSize, 1.5 * hudFontSize, BRACKETSFOREGROUND);
+            drawHud(x + 1, y, BRACKETSBACKGROUND, text);
+        }
+        else {
+            drawHudWithBackground(x + 1, y, BRACKETSFOREGROUND, BRACKETSBACKGROUND, text);
+        }
+        drawHud(x + 1 + textWidth, y, BRACKETSFOREGROUND, "]");
+    }
+
     void screen::drawScaleTest(float x, float y, Color tint, string text) {
         myDrawText(text.c_str(), (Vector2){
             x * hudFontSize,
@@ -310,11 +333,11 @@
         myDrawTexture(t, sourceRec, destRec, (Vector2){0.0f, 0.0f}, 0.0f, tint);
     }
 
-    /******************************************************************************/
-    //drawBar...()
-    //Draws a bar of length n pixels starting at x, y (level coordinates) in the direction specified.
-    //Due to character limitations, for down and left, rounds to four pixels.
-    /******************************************************************************/
+/******************************************************************************/
+//drawBar...()
+//Draws a bar of length n pixels starting at x, y (level coordinates) in the direction specified.
+//Due to character limitations, for down and left, rounds to four pixels.
+/******************************************************************************/
 
     void screen::drawBarLeft(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
         if (doLight) {
@@ -378,6 +401,18 @@
         DrawRectangle(xPixel, yPixel - height, width, height, tint);
     }
 
+    void screen::drawBox(float x, float y, float width, float height, Color tint, float sizeFactor, bool doLight = true) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
+        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
+        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
+        double pixelWidth = width * fontSize * sizeFactor + xPixel - floor(xPixel);
+        double pixelHeight = height * fontSize * sizeFactor + yPixel - floor(yPixel);
+        //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
+        DrawRectangle(xPixel, yPixel, pixelWidth, pixelHeight, tint);
+    }
+
 /******************************************************************************/
 //drawHudBar...()
 //Draws a bar of length n pixels starting at x, y (screen coordinates) in the direction specified.
@@ -409,6 +444,14 @@
         y = roundTo8th(y);
         length = roundTo8th(length);
         DrawRectangle(x * hudFontSize, (y - length) * hudFontSize, hudFontSize, length * hudFontSize, tint);
+    }
+
+    void screen::drawHudBox(float x, float y, float width, float height, Color tint) {
+        x = roundTo8th(x);
+        y = roundTo8th(y);
+        width = roundTo8th(width);
+        height = roundTo8th(height);
+        DrawRectangle(x * hudFontSize, y * hudFontSize, width * hudFontSize, height * hudFontSize, tint);
     }
 
 /******************************************************************************/

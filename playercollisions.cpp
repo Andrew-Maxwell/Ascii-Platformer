@@ -88,6 +88,7 @@
                 isUnderWater = true;
                 xMoveWater += col.xVal;
                 yMoveWater += col.yVal;
+                break;
             }
         }
 

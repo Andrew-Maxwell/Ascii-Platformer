@@ -78,6 +78,12 @@ class screen {
 
     void drawHud(float x, float y, Color tint, string text);
 
+    void drawWithBackground(float x, float y, Color tint, Color background, float sizeFactor, string text, bool doLight = true);
+
+    void drawHudWithBackground(float x, float y, Color tint, Color background, string text);
+    //Used by button in the menus
+    void drawHudWithBrackets(float x, float y, string text, bool selected);
+
     void drawScaleTest(float x, float y, Color tint, string text);
 
     void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight = true);
@@ -94,6 +100,8 @@ class screen {
 
     void drawBarUp(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
 
+    void drawBox(float x, float y, float width, float height, Color tint, float sizeFactor, bool doLight = true);
+
     //Bars (HUD)
 
     void drawHudBarLeft(float x, float y, Color tint, float length);
@@ -103,6 +111,8 @@ class screen {
     void drawHudBarUp(float x, float y, Color tint, float length);
 
     void drawHudBarDown(float x, float y, Color tint, float length);
+
+    void drawHudBox(float x, float y, float width, float height, Color tint);
 
     void end();
 

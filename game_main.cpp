@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 
 //Initialize raylib
 
-    configData config("config.json");
+    configData config("config.json", false);
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
     InitWindow(1024, 768, "ASCII Platformer");    //TODO: allow selecting monitor
     SetWindowMinSize(1024, 768);
@@ -34,12 +34,9 @@ int main(int argc, char** argv) {
     vector<player*> players;
     string roomName;
     inputMap in(-1);
-/*    players.push_back(new player(0, 0, WHITE, 1.0));
-    players.push_back(new player(0, 0, WHITE, 1.0));
-    players[0] -> setInputMap(in);
-    inputMap gamepad(false);
-    players[1] -> setInputMap(gamepad);*/
     gameLevelData level;
+    listData singlePlayerSaves("singleplayersaves.json");
+    listData multiPlayerSaves("multiplayersaves.json");
     saveData save;
     set<int> collectedPickups;
     bool loadedSave = false;
