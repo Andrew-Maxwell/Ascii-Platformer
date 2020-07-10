@@ -143,6 +143,7 @@
             "x": 0.0,
             "y": 0.0,
             "tint": [255, 200, 150, 255],
+            "doLighting": false,
             "sizeFactor": 1.0,
             "fileName": "snow_layer2.txt"
         },

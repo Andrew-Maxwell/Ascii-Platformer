@@ -16,7 +16,7 @@ GAMESRCS := \
 	entity.cpp \
 	forcefield.cpp \
 	gamelayer.cpp \
-	game_main.cpp \
+	gamemain.cpp \
 	layer.cpp \
 	meta.cpp \
 	particles.cpp \
@@ -33,7 +33,8 @@ GAMESRCS := \
     gameleveldata.cpp \
     savedata.cpp \
     newtestentity.cpp \
-    game_menu.cpp \
+    menu.cpp \
+    gamemenu.cpp \
     configdata.cpp \
     input.cpp
 
@@ -45,7 +46,7 @@ EDTRSRCS := \
 	dummyentity.cpp \
 	editables.cpp \
 	charfills.cpp \
-	editor_main.cpp \
+	editormain.cpp \
     screen.cpp \
     data.cpp \
     editorleveldata.cpp

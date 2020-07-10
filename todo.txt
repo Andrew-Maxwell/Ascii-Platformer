@@ -18,13 +18,6 @@ Main menu:
     Options
     Quit
 
-Options:
-    [display options]
-    For each of eight players, can:
-        Change color
-        Change input device
-        Edit input map
-
 Singleplayer / Co-op:
     New Game (input name)
     Load x.json
@@ -41,7 +34,12 @@ Ready room (co-op/arena)
     Have players select outfits (1 per outfit)
     associates 
 
-Singleplayer load game: [Continue to level]
+Options:
+    [display options]
+    For each of eight players, can:
+        Change color
+        Change input device
+        Edit input map
 
 edit inputmaps:
     List of keyboard inputmaps with edit/delete buttons
@@ -50,8 +48,7 @@ edit inputmaps:
     add gamepad inputMap
 
 Next up:
-- Allow changing device in inputMap editing screen
-- color editor!
+- Ability to delete saves
 
 Loose ends:
 - Make saves only trigger on interaction

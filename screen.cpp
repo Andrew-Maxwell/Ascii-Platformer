@@ -333,6 +333,13 @@
         myDrawTexture(t, sourceRec, destRec, (Vector2){0.0f, 0.0f}, 0.0f, tint);
     }
 
+    void screen::drawHudLayer(float x, float y, Color tint, Texture2D& t) {
+        Rectangle sourceRec = {0.0f, 0.0f, (float)t.width, -1 * (float)t.height};
+        Vector2 origin = {x * hudFontSize, y * hudFontSize};
+        Rectangle destRec = {origin.x, origin.y, t.width * hudFontSize / 8.0f, t.height * hudFontSize / 8.0f};
+        myDrawTexture(t, sourceRec, destRec, (Vector2){0.0f, 0.0f}, 0.0f, tint);
+    }
+
 /******************************************************************************/
 //drawBar...()
 //Draws a bar of length n pixels starting at x, y (level coordinates) in the direction specified.
@@ -401,7 +408,7 @@
         DrawRectangle(xPixel, yPixel - height, width, height, tint);
     }
 
-    void screen::drawBox(float x, float y, float width, float height, Color tint, float sizeFactor, bool doLight = true) {
+    void screen::drawBox(float x, float y, float width, float height, Color tint, float sizeFactor, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }

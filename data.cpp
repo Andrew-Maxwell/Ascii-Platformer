@@ -32,7 +32,7 @@ using namespace rapidjson;
     void data::save() {
         FILE* out = fopen(fileName.c_str(), "wb");
         if (!out) {
-            cerr << "Couldn't open file for saving JSON: " << strerror(errno) << endl;
+            cerr << "Couldn't open " << fileName << " for saving JSON: " << strerror(errno) << endl;
             exit(EXIT_FAILURE);
         }
         char buffer[65536];

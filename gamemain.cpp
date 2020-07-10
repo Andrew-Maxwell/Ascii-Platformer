@@ -1,6 +1,6 @@
 #include "gameleveldata.hpp"
 #include "savedata.hpp"
-#include "game_menu.hpp"
+#include "gamemenu.hpp"
 #include "configdata.hpp"
 #include "meta.hpp"
 
@@ -35,8 +35,9 @@ int main(int argc, char** argv) {
     string roomName;
     inputMap in(-1);
     gameLevelData level;
-    listData singlePlayerSaves("singleplayersaves.json");
-    listData multiPlayerSaves("multiplayersaves.json");
+    listData singleSaves("singleplayersaves.json");
+    listData coopSaves("multiplayersaves.json");
+    string saveName;
     saveData save;
     set<int> collectedPickups;
     bool loadedSave = false;
@@ -59,6 +60,12 @@ int main(int argc, char** argv) {
             menu.options(status, config);
             status = menuStatus; //Return to main menu after options complete.
         }
+        else if (status == singleLoadStatus) {
+            saveName = menu.chooseSave(status, singleSaves);
+        }
+        else if (status == coopLoadStatus) {
+            saveName = menu.chooseSave(status, coopSaves);
+        }
 
         //If we broke because we died (or first time), reload from save
         //or reload default position if save doesn't exist
@@ -74,9 +81,13 @@ int main(int argc, char** argv) {
             transition = 7, transitionDirection = -1;
             status = runStatus;
             assert(players.size() == 0);
-            cout << "Loading save\n";
-            loadedSave = save.load("save.json");
-            cout << "Save loaded\n";
+            if (!argRoom) {
+                cout << "Loading save\n";
+                loadedSave = save.load(saveName);
+                if (loadedSave) {
+                    cout << "Save loaded\n";
+                }
+            }
 
             //Determine which room we're going to be in next
             if (argRoom) {

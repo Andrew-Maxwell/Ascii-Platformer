@@ -1,6 +1,7 @@
 #include "configdata.hpp"
 
-    configData::configData(string fileName, bool reset) {
+    configData::configData(string newFileName, bool reset) {
+        fileName = newFileName;
         if (reset || !load(fileName)) {
             Document::AllocatorType& a = json.GetAllocator();
             json.AddMember("fullscreen", Value(false), a);

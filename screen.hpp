@@ -88,6 +88,8 @@ class screen {
 
     void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight = true);
 
+    void drawHudLayer(float x, float y, Color tint, Texture2D& t);
+
     virtual void drawLayerEditor(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected, bool doLight = true) {}
 
     //Bars (world)
