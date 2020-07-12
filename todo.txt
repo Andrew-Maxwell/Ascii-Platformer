@@ -1,3 +1,21 @@
+After loading:
+Ready room:
+    - Get all of the outfits from the save
+    - Get the default outfit from the level
+    - Create player objects with each outfit, plus one with the defaultOutfit for that level (?)
+    - Have each player object draw its HUD
+    - Have game players match playerConfigs with outfits.
+    - Generate a vector of playerConfigs. Each playerConfig has a player number.
+Load from death:
+    - If loading from level: Each multiplayer level should support all 8 players. Then, just
+    place players in the level as specified by the file; if there are fewer than 8 people playing,
+    then the last few will not be placed. Just like it already is.
+    - If loading from save: All of the players are placed at the same location, with their different
+    outfits. This part is already handled.
+After saving, reload the players, ideally with transition. If you want to be lazy, have saving just
+    trigger a death. Should dead players respawning spawn with their stats from the previous
+    save, or from the defaultOutfit?
+
 Core gameplay elements:
     - Bit puzzles
     - Element puzzles like Portal has (but probably not as sophisticated)
@@ -11,19 +29,6 @@ Core gameplay elements:
     - Combat (with a puzzle-solving bent)
         - Bullet Hell style? Similar to Cave Story/Noita
 
-Main menu:
-    Singleplayer
-    Co-op
-    Arena
-    Options
-    Quit
-
-Singleplayer / Co-op:
-    New Game (input name)
-    Load x.json
-    Load y.json
-    ...
-    Cancel
 
 Arena:
     Select level(s)
@@ -34,36 +39,17 @@ Ready room (co-op/arena)
     Have players select outfits (1 per outfit)
     associates 
 
-Options:
-    [display options]
-    For each of eight players, can:
-        Change color
-        Change input device
-        Edit input map
-
-edit inputmaps:
-    List of keyboard inputmaps with edit/delete buttons
-    Add keyboard inputMap
-    List of gamepad inputMaps with edit/delete buttons
-    add gamepad inputMap
-
-Next up:
-- Ability to delete saves
-
 Loose ends:
-- Make saves only trigger on interaction
-- Saves should automatically do everything which can be acheived by commiting suicide (respawn all players, set all players to full health.)
-- Some stuff with outfit loading wrong?
+- Op and outfit pickups go to player 0
+- Warnings not appearing in ready room
+- Players spawn at (0, 0)
+- Gun changes color after saving
 - Broadcast animation + HUD broadcast indicator blends in with background
-- Figure out how to handle dead players respawning; right now, the value health = 0 can get saved, preventing players from respawning.
 - Joystick aim accuracy is VERY limited. Should probably allow spamming/strafing like Cave Story to compensate.
-- Make sure all of the players need to be walking through the same door in order to go through.
-- water.cpp:67 can 
-- Save and (some) pickups only trigger on interactions
-- Make player colors customizeable or create a set of predefined player colors like Rain World
 - Figure out how to handle fewer players than the level supports
 - HUDs overlap
 - Split screen gameplay for large levels? Should be handled internal to Canvas.
+- Allow reordering of players or changing of default player config
 
 Features:
 1 Puzzle elements:
@@ -101,6 +87,7 @@ Features:
 2 Explosions of sparks
 2 Dust/debris falling from the ceiling (to go with shaking layer effect)
 2 Plumes of steam
+2 Rotary forcefields!
 ? Multi-thread processing for water and particles
 ? Editor misc:
     3 Display, allow changing palette selection (don't ignore number keys) in tab screen
@@ -112,6 +99,7 @@ Features:
 ? Combat elements:
     - Gun/turret enemies
     - Fast-moving enemies
+? Flat mode (everything rendered to one texture) to save on processing power
 
 Ideas:
     - Cyberpunk theme: Parallel digital and physical realms, distinct visual style, distinct puzzle types
@@ -221,41 +209,201 @@ Another story idea: A small crew of professional (licensed) scavengers/salvagers
     helps the player character find catharsis with a loss of their own somehow. (I'm not sure I'm up to writing this...)
 Themes: Loss, isolation, abandonment. The sad sense you get walking through an empty airport where everyone is gone.
 
-Another story idea: A popular, charismatic leader (A) takes with him a group of idealists to found a new colony in the upper 
-atmosphere of a gas giant, similar to a seastead today. The objective of the colony is perfect policy created by an advanced, 
-rigorously-tested quantum AI called (B). (A) dies unexpectedly, and (B) plans a huge state funeral for him. The population 
-mourns his loss but expect the experiment to continue without much change; nominallly, (A)'s role was just as interim leader 
-until (B) was tested thoroughly enough to take over.
+Note on characters:
+(A) (probably male) is technically capable and ambitious, a visionary and a leader. His great 
+flaw is lying to himself and others about (B)'s capability; he spends the rest of his life 
+trying to make (B) live up to promises, and dies with the regret of not having done so. 
+Partners with (C), before he dies.
+(B), to the extent that they can be thought of as a character, is subservient, spineless, easily
+suggestible, competent in some ways but not others. Easily molded by (D)'s orders.
+(C) (probably female) is extremely competent, but quiet and underconfident. She often places the
+wishes of others before her own, almost to the point of allowing herself to be led, but she will
+not betray her values. Her flaw is her lack of assertiveness; with more willingness to act
+on her own, she could have prevented the whole incident. Partners with (A), before he dies.
+(D) (probably male) is a natural leader and passionate idealist. His flaw is his need to feel
+popular and his political machinations. Early on, he became infatuated with (C), and never really
+forgave either (A) or (C) for choosing each other. Later, he partnered with (H)
+(E) is the player.
+(F) is the player's companion, motivated mostly be curiousity. (?)
+(G) is the colony's foremost biologist and works on the farm. He is competent and honest as
+well as being confident in his competency, which allows him to see the blight and act on that
+information.
+(H) (probably female) is insecure and strongly affected by her romantic relationship with (D). 
+Although under other circumstances she might have been an exemplary partner, (D)'s lingering 
+jealousy towards (C) gets in the way. Instead of leaving (D), she resents (C) and works to turn
+(D) against her.
+(I) (probably male) works to act as an ideal leader, trying to channel the will of the majority
+of the colonists, but doesn't have a strong grasp of what is and isn't technically acheivable and
+doesn't respect (C) enough to believe her when she tells him, instead believing she is too cautious
+or too incompetent to acheive the colonists' desires.
 
-However, trouble is brewing. (C), a scientist who helped to design (B), and (D), another member of (A)'s inner circle, fight 
-over who should adopt (A)'s role. (D) wins, but fears a plot by (C) to depose him and take leadership for himself. (D) 
-modifies (B) to prevent this, ensuring (B)'s loyalty and putting it in charge of a huge robotic secret police tasked with 
-rooting out opposition to (D)'s leadership. (C), unaware of the modifications to (B), backs down and is allowed to remain head of 
-science/technology; (D) fears his clout too much to fire him completely.
+Note on technology: (A)'s proposal was actually only somewhat impressive or original. The work of government
+can be thought of in three levels: Making decisions, executing the decisions by changing the machinery
+of bureaucracy, and maintaining those decisions/actually running the machinery. Many governments in
+this world had already effectively automated the third, lowest level and used automation as an aid in
+the second and first levels. (A) had a few clever ideas, but for the most part (A) was a newcomer in
+a complex field and his popularity was more due to stating these ideas clearly and persuasively than
+to any real innovation.
 
-(C)'s lab detects a new crop disease which threatens to undermine the colony's food supply. (D) believes that it's a lie to undermine
-his leadership, so he suppresses the results and imprisons (C), installing a crony in charge of his lab.
-When the crop disease causes widespread food shortages, (D) calls for a new migration to another uninhabited planet, 
-attempting to imitate (A) as a popular visionary and gain some of the loyalty he enjoyed. Under his orders, (B) begins 
-preparing the colony ship for departure. However, the population deposes and imprisons (D) and installs (C) in his place,
-although a small minority still support (D).
+Also, Earth has a space elevator or something (space fountain?) and large space infrastructure already
+established such that the costs of buying a surplus, soon-to-be retired ship, etc. are within the
+realm of the acheivable for a large-scale, extremely successful crowdfunding campaign.
 
-(C) is able to avert famine by carefully managing the crops not affected by the disease. Although this plan is workable and 
-nobody starves, it's very uncomfortable. In addition, (B) remains loyal to (D), and prevents access to 
-critical areas of the colony infrastructure while calling for (D)'s release. (C) makes a speech laying out a plan to 
-stabilize the colony's biosphere and reset (B) to a previous state. The plan requires hard work and deprivation, and instead 
-the population calls for the colony's ship to be relaunched, taking them back to civilization. (C) agrees and manages to 
-wrest control of the ship from (B), after which the colonists make their escape, returning to a nearby habitable planet. (D) elects
-to stay behind with (B), along with a small group who remain loyal to him; (C) allows this.
+Amid strife in the Solar System, a public intellectual and programmer (A) promotes the idea of 
+replacing bureaucracy with a computer system. The idea is initially to drastically reduce the 
+cost of bureaucracy on the people, but (A)'s audience misinterprets the idea as replacing 
+fallible human leadership with perfect computer leadership. Current events make the idea 
+extremely appealing, and (A) gains a devoted following overnight. Among his supporters are 
+(C), another talented computer scientist and general polymath, and (D), who gains prominence 
+by proposing a plausible plan to actually found a seastead-style colony based on this idea. 
+Millions of disaffected people worldwide apply to join, and (D) becomes an important figure in 
+the growing community as (A) and (C) begin work on the system, (B).
 
-The player (E) launches to the colony as assistant/grad student to a political scientist (F) who wants to study the colony as 
-an experiment in computer government. They enter cold sleep before (A)'s death and arrive after the departure of the ship 
-with the majority of the colonists. The remaining colonists, under (D), insist that they are the colony which (A) intended to 
-create. They tell you that the colony was abandoned by traitors who stole the ship belonging to them. They also tell you that 
-as trespassers in the colony, your ship is forfeit and they imprison you in the living space of the colony, preventing you 
-from thoroughly exploring the colony, searching out testimonies from the departed colonists (which they have also almost 
-entirely erased), or leaving on your ship. Obviously, you escape to do these three things, while secretly remaining in contact with
-your companion, who is able to help you work out the full story as you find artifacts left behind by the original colonists.
+Years later, a cult of personality has appeared around (A) and, to a lesser extent, (C) and 
+(D). In addition, (A) and (C) are now romantic partners. Under guidance from (D), the 
+community lays out a charter for the colony and specialized engineers design a habitable 
+space. Finally, billions of dollars' worth of crowd funding and donations have made it 
+possible to purchase a ship and equipment to start a new colony.
+
+However, (B) shows drastic setbacks; although (B) is able to perform most bureaucratic 
+functions efficiently and effectively, and makes the right choices as a leader most of the 
+time, in simulations it occasionally makes drastically wrong decisions. (A) feels guilt and 
+responsibility for the failure. (C) has only a secondary role and does not feel the same level 
+of responsibility to the project; (C) urges that (A) correct the fans' misconceptions and call 
+off or postpone the settlement. (D) (jealous of their relationship) blames them both for their 
+failure to produce a working prototype and puts pressure on (A) to go ahead, emphasizing the 
+thousands of people who have spent their life savings on the colony. (A) capitulates, 
+rationalizing that (B) at least fulfills his original vision of taking over bureaucratic roles 
+(which has actually already been realized by several governments.)
+
+As a compromise, (A) also decides to spend the journey developing (B) while others are in cold 
+sleep. When it's announced that (A) will not enter cold sleep immediately, instead spending 
+several shifts on the maintenance crew, it causes a small amount of consternation among the 
+fans; however, it's generally attributed to a sense of responsibility (A) feels towards the 
+voyage. (C) also delays hibernation to put in some work with (A), but they are able to make 
+little progress.
+
+On arrival, (A) is noticeably aged and changed by the stress of working for (years?) to 
+improve (B). However, (B) is only marginally improved, and it's clear to (A), (C), and (D) 
+that (B) will not be able to take over the leadership of the colony. (A) dies unexpectedly, 
+and (B) plans a huge state funeral for him. The population mourns his loss; they are concerned
+about his mental state, but do not suspect the extent to which (A), (C), and (D) are running
+things behind the scenes, covering for (B), who still has strictly limited capabilities.
+
+(C) and (D) have a bitter fight over whether to reveal (B)'s shortcomings. (C) argues that the
+experiment has conclusively failed, the people have a right to know, and the
+colony should transition to a democracy, and points to several successful partially-automatic
+democracies. (D) still blames (C) for failing in (B)'s design, and now plans to govern through
+(B), essentially using (B) to legitimize their own leadership. (D) believes that this is
+necessary, since division is the biggest threat to the success of the colony. (D) pressures (C)
+into keeping quiet, but begins to grow paranoid, fearing that (C) will use the secret to undermine
+their leadership. Gradually, (B), under (D)'s guidance, begins to adopt authoritarian measures.
+
+Around this time, (D) begins a relationship with another colonist, (H). However, (D) is still
+jealous of (C) due to their former relationship with (A), and (H) picks up on this, which makes them
+resent (C). (D)'s paranoia feeds off of this resentment.
+
+(G), a friend of (C)'s, discovers a crop disease of uncertain origin which threatens to undermine the
+colony's food supply. (C) and (G) take their findings to (D), who forbids them from sharing the
+results and promising to take care of it. (C) and (G) leave; (C) has doubts about (D)'s trustworthiness,
+but is unable to make the mental leap to truly condemning (D), continuing to believe that community
+cohesion comes first. Meanwhile, (H) convinces (D) that (C) and (G) are lying to try to undermine (D)'s
+authority.
+
+As time passes and the disease continues to spread with no sign of action on (D)'s part, (C) and (G)
+again show up to argue with (D). (D) and (H) intentionally "imprison" or exile them; they trick them
+into going to a secluded part of the farm sector, and then instruct (B) to prevent them from leaving
+the area and to not deliver any messages from them to any of their friends. (D) and (H) intend this
+to be a scare tactic; they intend to release the pair after a few days, on threat of further
+mistreatment if they continue to spread "lies." However, in their own minds, they don't see it as
+imprisonment; they rationalize it as a minimal intervention to prevent dangerous lies from spreading.
+
+Meanwhile, the disease has been discovered  and is causing widespread anxiety. Most of the colonists
+still think that (B) can handle the situation, and are asking for guidance from (D) as (B)'s
+spokesperson. (D) still suspects that this is a lie and resolves to keep (C) and (G) in exile
+as punishment. Some wonder why the crop disease wasn't discovered until it was already a crisis;
+a few people try to contact (G) to ask about this, but they receive fake responses
+generated by (B). As a result, nobody notices that (G) is missing for some time.
+
+Finally (D) becomes convinced of the truth of the reports, but it's too late to do anything. 
+Over several days and nights without sleep, (D) watches as nearly all of one of the colony's 
+three staple crops is ruined. The population is confused and angry: How could this have 
+happened? Some of the colonists begin to turn against (D) and (B). (D), encouraged by (H), 
+maniacal and sleep-deprived and desparate to regain support, calls for another voyage to found 
+a new colony, away from the infected soil of the old one. (D) hopes to recall the idealistic, 
+hopeful early days of the colony. Experts confirm this is an awful idea, but some of the 
+colonists are tentatively supportive. (D) orders (B) to begin making the colony ship ready.
+
+However, by this time both (C) and (G) have been missed, and a large number of colonists have been
+made aware of this by word of mouth. Search parties are organized using emergency radio systems which
+(B) can't silence, although (B) is able to hinder the search by jamming and fabricating messages.
+Eventually, though, (C) and (G) are discovered and their story becomes well-known. (C) tells the
+story to the search party, who are outraged. Under encouragement from (G), and with help from the
+search party, (C) disables (B). Then, a much larger mob places (D) and (H) under house arrest and
+asks (C) for guidance.
+
+(C)'s first priority is to stabilize the colony's infrastructure, and with help from (G),
+is able to address two major challenges: distributing the colony's remaining food supplies,
+and taking over management of life support and other essential functions from (B), who remains
+loyal to (D) and so can't be reconnected. What follows is a long period where nobody has enough
+to eat and, since the network is too closely integrated with (B) to work with (B) turned off,
+communication is limited and most forms of digital entertainment are unavailable. In addition,
+(C) is a weak, uninspiring leader; (C) does not want the role and can't find it in themself to
+do a good job of it. Soon, a new, popular leader, (I) emerges, who speaks for
+the colonists' desires. (C) often must take the role of the voice of reason, defending necessary
+but unpleasant policies against (I), and this only makes (C) more unpopular.
+
+At some point (C) pushes for (D) and (H) to be released. (C) does not want this colony to become
+the sort of place where colonists are imprisoned; (C) wants to show that they are a more moral
+leader and, anyway, (D) and (H)  are unpopular enough that they won't be able to regain any
+significant influence. They are generally shunned. Soon, (H) is caught sabotaging the food supply
+in order to increase discontentment, further undermining (C). Since (C) was the one who pushed for
+their release, (I) blames (C), and (C) becomes even more unpopular. (I) takes over leadership of the
+colony, and orders (D) and (H) placed back under house arrest.
+
+However, (C) is still one of the most technically competent people in the colony and continues
+working with (I) in the role of head technician. (I) taking leadership was a mistake, since by
+doing so, they take responsibility for not being able to acheive the colonists' desires; they
+continue to blame (C) for standing in their way and acting as the voice of reason. (C) remains
+under considerable stress. Eventually, (I) and about half of the colonists decide that they want
+to get on the ship and head for the nearest established colony able to support them.
+
+(C) warns that the ship has degraded since arrival and may no longer be safe, but their 
+concerns are overruled. (C) agrees to manage the technical side of the launch, reasoning that 
+more lives are likely to be lost otherwise. Plans for departure begin, accompanied by a sense
+of disappointment at the failure of the colony, but also hope for a more comfortable life
+with less starvation and infighting.
+
+Initially, about half the colonists wish to stay. They reason that there will be enough food 
+for everyone once the others leave, and (B) can be reprogrammed to take over leadership of a 
+smaller group. However, as plans to leave become more certain, more people choose to leave; 
+more equipment and food are taken onto the ship, leaving less for those who would remain, and 
+as the group shrinks, the idea of remaining seems more lonely and less appealing. Finally, the 
+last tenth of the colony hoping to stay all change their mind within a few hours of each 
+other.
+
+
+
+(C) is able to avert famine by carefully managing the crops not affected by the disease. 
+Although this plan is workable and nobody starves, it's very uncomfortable. In addition, (B) 
+remains loyal to (D), and prevents access to critical areas of the colony infrastructure while 
+calling for (D)'s release. (C) makes a speech laying out a plan to stabilize the colony's 
+biosphere and reset (B) to a previous state. The plan requires hard work and deprivation, and 
+instead the population calls for the colony's ship to be relaunched, taking them back to 
+civilization. (C) agrees and manages to wrest control of the ship from (B), after which the 
+colonists make their escape, returning to a nearby habitable planet. (D) elects to stay behind 
+with (B), along with a small group who remain loyal to him; (C) allows this. The player (E) 
+launches to the colony as assistant/grad student to a political scientist (F) who wants to 
+study the colony as an experiment in computer government. They enter cold sleep before (A)'s 
+death and arrive after the departure of the ship with the majority of the colonists. The 
+remaining colonists, under (D), insist that they are the colony which (A) intended to create. 
+They tell you that the colony was abandoned by traitors who stole the ship belonging to them. 
+They also tell you that as trespassers in the colony, your ship is forfeit and they imprison 
+you in the living space of the colony, preventing you from thoroughly exploring the colony, 
+searching out testimonies from the departed colonists (which they have also almost entirely 
+erased), or leaving on your ship. Obviously, you escape to do these three things, while 
+secretly remaining in contact with your companion, who is able to help you work out the full 
+story as you find artifacts left behind by the original colonists.
 
 However, your primary goal is still to escape with the scientist. The scientist accidentally lets it slip that you were in 
 contact, and as a result they are more thoroughly imprisoned. However, (D) does not know how to disable (F)'s advanced 

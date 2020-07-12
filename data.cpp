@@ -78,7 +78,26 @@ using namespace rapidjson;
         }
     }
 
-    vector<string> listData::getList() {
+    list<string> listData::getList() {
+        assert(json.IsArray());
+        list<string> toReturn;
+        for (SizeType i = 0; i < json.Size(); i++) {
+            toReturn.push_back(json[i].GetString());
+        }
+        return toReturn;
+    }
+
+    void listData::setList(list<string> newList) {
+        Document::AllocatorType& a = json.GetAllocator();
+        json.Clear();
+        for (auto iter = newList.begin(); iter != newList.end(); iter++) {
+            Value stringValue;
+            stringValue.SetString((*iter).c_str(), (*iter).length(), a);
+            json.PushBack(stringValue, a);
+        }
+    }
+
+    vector<string> listData::getVector() {
         assert(json.IsArray());
         vector<string> toReturn;
         for (SizeType i = 0; i < json.Size(); i++) {
@@ -87,12 +106,12 @@ using namespace rapidjson;
         return toReturn;
     }
 
-    void listData::setList(vector<string> newList) {
+    void listData::setVector(vector<string> newVector) {
         Document::AllocatorType& a = json.GetAllocator();
         json.Clear();
-        for (int i = 0; i < newList.size(); i++) {
+        for (auto iter = newVector.begin(); iter != newVector.end(); iter++) {
             Value stringValue;
-            stringValue.SetString(newList[i].c_str(), newList[i].length(), a);
+            stringValue.SetString((*iter).c_str(), (*iter).length(), a);
             json.PushBack(stringValue, a);
         }
     }

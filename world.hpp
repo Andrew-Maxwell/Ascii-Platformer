@@ -18,14 +18,18 @@ struct collision {
     float yVal;
     double magnitude;
     string message;
+    unsigned int id;
+    unsigned int flags;
 
-    collision(int newType = 0, int newDamage = 0, float newXVal = 0, float newYVal = 0, string newMessage = "", double newMagnitude = 0) :
+    collision(int newType = 0, unsigned int newID = 0, int newDamage = 0, float newXVal = 0, float newYVal = 0, string newMessage = "", double newMagnitude = 0, unsigned int newFlags = 0) :
         type(newType),
+        id(newID),
         damage(newDamage),
         xVal(newXVal),
         yVal(newYVal),
         message(newMessage),
-        magnitude(newMagnitude) {}
+        magnitude(newMagnitude),
+        flags(newFlags) {}
 };
 
 /******************************************************************************/
@@ -48,11 +52,11 @@ class collideable : virtual public entity {
 
     //B's doesCollide() is called with A's data to check if A is close enough to collide
 
-    virtual bool doesCollide(float otherX, float otherY, int otherType) {cerr << "collideable::doesCollide() called. This function should be overridden."; return false;}
+    virtual bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {cerr << "collideable::doesCollide() called. This function should be overridden."; return false;}
 
     //B's getCollision is used to get a collision object containing how A should respond to colliding with B
 
-    virtual collision getCollision(float otherX = 0, float otherY = 0, int otherType = 0) {cerr << "collideable::getCollision() called. This function should be overridden."; return collision();}
+    virtual collision getCollision(float otherX = 0, float otherY = 0, int otherType = 0, unsigned int otherID) {cerr << "collideable::getCollision() called. This function should be overridden."; return collision();}
 
     //This function is called to add the collision object from B to A's collision list. Then, A responds during tickGet.
 

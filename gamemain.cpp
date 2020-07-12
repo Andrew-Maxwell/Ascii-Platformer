@@ -29,14 +29,13 @@ int main(int argc, char** argv) {
     chrono::steady_clock::time_point tickStart = chrono::steady_clock::now(), tickEnd;
     long total = 0, totalSecond = 0;
     int maxLoad = 0;
-
     int status = menuStatus;
+    int mode;
+    vector<playerConfig> playerConfigs;
     vector<player*> players;
     string roomName;
     inputMap in(-1);
     gameLevelData level;
-    listData singleSaves("singleplayersaves.json");
-    listData coopSaves("multiplayersaves.json");
     string saveName;
     saveData save;
     set<int> collectedPickups;
@@ -54,17 +53,18 @@ int main(int argc, char** argv) {
 
         if (status == menuStatus) {
             players.clear();
-            menu.main(status);
+            playerConfigs.clear();
+            menu.main(status, mode);
         }
         else if (status == optionsStatus) {
             menu.options(status, config);
             status = menuStatus; //Return to main menu after options complete.
         }
-        else if (status == singleLoadStatus) {
-            saveName = menu.chooseSave(status, singleSaves);
-        }
-        else if (status == coopLoadStatus) {
-            saveName = menu.chooseSave(status, coopSaves);
+        else if (status == loadStatus) {
+            saveName = menu.chooseSave(status, mode);
+            if (mode == singlePlayerMode) {
+                playerConfigs.push_back(config.getPlayerConfig(0));
+            }
         }
 
         //If we broke because we died (or first time), reload from save
@@ -111,6 +111,18 @@ int main(int argc, char** argv) {
                 level.generateLayerCache();
             }
 
+            //Configure players
+            if (playerConfigs.size() == 0) {    //if loading a save (i.e. coming from menu, not just died)
+                playerConfigs = menu.readyRoom(save, loadedSave, level, config);
+            }
+            for (int i = 0; i < playerConfigs.size(); i++) {
+                players.push_back(new player(0, 0, WHITE, 1));
+                players[i] -> outfitNo = playerConfigs[i].playerNumber;
+                players[i] -> playerNo = i;
+                players[i] -> setColor(playerConfigs[i].tint);
+                players[i] -> setInputMap(playerConfigs[i].in);
+            }
+
             //Reload world
             world = new collider(0.0, 0.0, level.getWorldFileName());
 
@@ -119,7 +131,7 @@ int main(int argc, char** argv) {
             if (loadedSave) {
                 collectedPickups = save.getCollectedPickups();
             }
-            level.readEntitiesGame(players, true, &collectedPickups);
+            level.readEntitiesGame(players, false, &collectedPickups);
 
             //Set the player position from save if appropriate
             if (loadedSave && !argRoom) {
@@ -131,7 +143,7 @@ int main(int argc, char** argv) {
             //Initialize the player outfit
             outfit defaultOutfit = level.getOutfit("defaultOutfit");
             for (int i = 0; i < players.size(); i++) {
-                string outfitName = defaultOutfit.name + to_string(i);
+                string outfitName = defaultOutfit.name + to_string(players[i] -> outfitNo);
                 if (loadedSave && save.hasOutfit(outfitName)) {
                     outfit newOutfit = save.getOutfit(outfitName);
                     newOutfit.merge(defaultOutfit);
@@ -199,7 +211,7 @@ int main(int argc, char** argv) {
         }
 
         else if (status == saveStatus) {
-            status = runStatus;
+            status = deadStatus;    //Reset the level
             argRoom = false;
             int whoSaved = 0;
             for (int i = 0; i < players.size(); i++) {
@@ -211,6 +223,7 @@ int main(int argc, char** argv) {
             }
             save.setCollectedPickups(collectedPickups);
             save.save(players[whoSaved] -> getPosition(), roomName);
+            players.clear();
         }
 
         else {
@@ -325,7 +338,13 @@ int main(int argc, char** argv) {
                         }
                     }
                     else if (anySave) {
-                        status = saveStatus;
+                        if (transition == -1) {
+                            transition = 0;
+                            transitionDirection = 1;
+                        }
+                        if (transition == 8) {
+                            status = saveStatus;
+                        }
                     }
                     else if (allDoor) {
                         if (transition == -1) {
@@ -346,4 +365,5 @@ int main(int argc, char** argv) {
     CloseWindow();
     cout << "Average load: " << total * 100 / 1000000 / (tickCounter / 60) << "%\nMax load: " << maxLoad << "%\n";
 }
+
 

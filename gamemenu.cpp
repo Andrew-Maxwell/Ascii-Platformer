@@ -5,17 +5,19 @@
 //Pre-game menus
 /*****************************************************************************/
 
-    void gameMenu::main(int& status) {
+    void gameMenu::main(int& status, int& mode) {
         const int rows = 5, cols = 1;
         init(cols, rows);
         while (status == menuStatus) {
             handleInput();
             theScreen -> start(true);
             if (button("\xE2\x96\xBA Singleplayer", 0, 0)) {
-                status = singleLoadStatus;
+                status = loadStatus;
+                mode = singlePlayerMode;
             }
             else if (button("\xE2\x96\xBA Co-op", 0, 1)) {
-                status = coopLoadStatus;
+                status = loadStatus;
+                mode = coopMode;
             }
             else if (button("\xE2\x96\xBA Arena", 0, 2)) {
                 
@@ -32,23 +34,38 @@
         }
     }
 
-    string gameMenu::chooseSave(int& status, listData& saves) {
-        vector<string> options = saves.getList();
+    string gameMenu::chooseSave(int& status, int mode) {
+        listData saves("singleplayersaves.json");
+        if (mode == coopMode) {
+            saves.load("multiplayersaves.json");
+        }
+        list<string> options = saves.getList();
         init(1, options.size() + 2);
         string toReturn = "";
         string newName = "";
         bool enterName = false;
         inputBox nameBox;
-        while (status == coopLoadStatus || status == singleLoadStatus) {
+        while (status == loadStatus) {
             handleInput();
             theScreen -> start(true);
-            for (int i = 0; i < options.size(); i++) {
-                if (button("\xE2\x96\xBA Load " + options[i], 0, i)) {
+            int buttonPos = 0;
+            auto iter = options.begin();
+            while (iter != options.end()) {
+                if (button("\xE2\x96\xBA Load " + *iter, 0, buttonPos++)) {
                     status = deadStatus;
-                    toReturn = options[i] + ".save";
+                    string atIter = *iter;
+                    toReturn = atIter + (mode == coopMode ? "coop" : "singleplayer") + ".save";
+                    //Move most recently selected save to front of list
+                    iter = options.erase(iter);
+                    options.push_front(atIter);
+                    saves.setList(options);
+                    saves.save();
+                }
+                else {
+                    iter++;
                 }
             }
-            if (button("\xE2\x96\xBA New game", 0, options.size())) {
+            if (button("New game", 0, options.size())) {
                 enterName = true;
                 locked = true;
             }
@@ -70,7 +87,7 @@
                 }
             }
             else if (newName != "") {
-                options.push_back(newName);
+                options.push_front(newName);
                 newName = "";
                 saves.setList(options);
                 saves.save();
@@ -78,7 +95,103 @@
             drawTitle ("Load Game");
             theScreen -> end();
         }
+        firstCallToReleased = false;
         return toReturn;
+    }
+
+    vector<playerConfig> gameMenu::readyRoom(saveData& save, bool loadedSave, gameLevelData& level, configData& config) {
+        int maxPlayers = min(level.getPlayerCount(), 8);
+        vector<player*> tempPlayers;
+        vector<playerConfig> playerConfigs;
+        outfit defaultOutfit = level.getOutfit("defaultOutfit");
+        bool conflict = false;
+        bool tooFew = false;
+        bool exit = false;
+        //Initialize
+        for (int i = 0; i < maxPlayers; i++) {
+            tempPlayers.push_back(new player(0, 0, HEALTHCOLOR, 1));
+            if (loadedSave && save.hasOutfit(defaultOutfit.name + to_string(i))) {
+                outfit newOutfit = save.getOutfit(defaultOutfit.name + to_string(i));
+                newOutfit.merge(defaultOutfit);
+                tempPlayers[i] -> setOutfit(newOutfit);
+            }
+            else {
+                tempPlayers[i] -> setOutfit(defaultOutfit);
+            }
+            tempPlayers[i] -> playerNo = i;
+            playerConfigs.push_back(config.getPlayerConfig(i));
+        }
+        if (theScreen -> getHudCols() >= 8 * (maxPlayers + 1)) {
+            init (1, 2 + maxPlayers);
+        }
+        else {
+            init (1, 2);
+        }
+        while (!exit) {
+            theScreen -> start(true);
+            handleInput();
+            for (int i = 0; i < maxPlayers; i++) {
+                tempPlayers[i] -> printHud();
+            }
+            for (int i = 0; i < maxPlayers; i++) {
+                playerConfigs[i].in.update();
+                if (playerConfigs[i].in.left.isPressed()) {
+                    playerConfigs[i].playerNumber = (playerConfigs[i].playerNumber - 1 + maxPlayers) % maxPlayers;
+                }
+                if (playerConfigs[i].in.right.isPressed()) {
+                    playerConfigs[i].playerNumber = (playerConfigs[i].playerNumber + 1) % maxPlayers;
+                }
+                if (yCount == 10 && button("Reset", 0, i, "", 8 * maxPlayers, 10 + 2 * i)) {
+                    playerConfigs[i].playerNumber = -1;
+                }
+                if (playerConfigs[i].playerNumber == -1) {
+                    string inactive = "[Press left or right to select avatar]";
+                    theScreen -> drawHud((theScreen -> getHudCols() - inactive.size()) / 2, 10 + 2 * i, playerConfigs[i].tint, inactive);
+                }
+                else {
+                    theScreen -> drawHud(playerConfigs[i].playerNumber * 8 + 4, 10 + 2 * i, playerConfigs[i].tint, "\xE2\x98\xBB");
+                }
+            }
+            if (button("Reset all", 0, yCount - 2, "", 1, 10 + maxPlayers * 2)) {
+                for (int i = 0; i < maxPlayers; i++) {
+                    playerConfigs[i].playerNumber = -1;
+                }
+            }
+            if (button("\xE2\x96\xBA Continue", 0, yCount - 1, "", 1, 12 + maxPlayers * 2)) {
+                bool conflict = false;
+                bool tooFew = true;
+                for (int i = 0; i < maxPlayers; i++) {
+                    for (int j = i + 1; j < maxPlayers; j++) {
+                        if (playerConfigs[i].playerNumber != -1) {
+                            tooFew = false;
+                            if (playerConfigs[i].playerNumber == playerConfigs[j].playerNumber) {
+                                conflict = true;
+                            }
+                        }
+                    }
+                }
+                if (!conflict && !tooFew) {
+                    exit = true;
+                }
+            }
+            if (conflict) {
+                theScreen -> drawHud(1, 30, RED, "Error: players must have different avatars");
+            }
+            if (tooFew) {
+                theScreen -> drawHud(1, 32, RED, "Error: too few players");
+            }
+            theScreen -> end();
+        }
+        auto configIter = playerConfigs.begin();
+        while (configIter != playerConfigs.end()) {
+            if (configIter -> playerNumber == -1) {
+                configIter = playerConfigs.erase(configIter);
+            }
+            else {
+                configIter++;
+            }
+        }
+        return playerConfigs;
     }
 
 /*****************************************************************************/
@@ -105,6 +218,7 @@
             }
             theScreen -> end();
         }
+        firstCallToReleased = false;
     }
 
     void apply(bitset<8>* current, int op, int arg) {
@@ -194,6 +308,7 @@
             drawTitle("Inventory");
             theScreen -> end();
         }
+        firstCallToReleased = false;
     }
 
 
@@ -245,7 +360,7 @@
             for (int i = 0; i < 8; i++) {
                 theScreen -> drawHud(1, 2 * (4 + i) - scroll, configFile.getConfigColor(i), "Player " + to_string(i));
                 if (button("\xE2\x96\xBA Edit Input", 0, 3 + i, "", 10)) {
-                    playerConfig c = configFile.getConfig(i);
+                    playerConfig c = configFile.getPlayerConfig(i);
                     status = inputOptionsStatus;
                     editInputMap(status, c.in);
                     configFile.setConfig(i, c);
@@ -254,7 +369,7 @@
                     init(cols, rows + conflicts.size());
                 }
                 if (button("\xE2\x96\xBA Edit Color", 1, 3 + i, "", 24)) {
-                    playerConfig c = configFile.getConfig(i);
+                    playerConfig c = configFile.getPlayerConfig(i);
                     c.tint = editColor(c.tint);
                     configFile.setConfig(i, c);
                     configFile.save();
@@ -265,7 +380,7 @@
             for (int i = 0; i < conflicts.size(); i++) {
                 theScreen -> drawHud(1, 2 * (12 + i) - scroll, RED, "Conflict:            and           " + conflicts[i].error);
                 if (button("\xE2\x96\xBA Player " + to_string(conflicts[i].player1), 0, 11 + i, "", 11)) {
-                    playerConfig c = configFile.getConfig(conflicts[i].player1);
+                    playerConfig c = configFile.getPlayerConfig(conflicts[i].player1);
                     status = inputOptionsStatus;
                     editInputMap(status, c.in);
                     configFile.setConfig(conflicts[i].player1, c);
@@ -274,7 +389,7 @@
                     init(cols, rows + conflicts.size());
                 }
                 else if (button("\xE2\x96\xBA Player " + to_string(conflicts[i].player2), 1, 11 + i, "", 26)) {
-                    playerConfig c = configFile.getConfig(conflicts[i].player2);
+                    playerConfig c = configFile.getPlayerConfig(conflicts[i].player2);
                     status = inputOptionsStatus;
                     editInputMap(status, c.in);
                     configFile.setConfig(conflicts[i].player2, c);
@@ -295,6 +410,7 @@
             drawTitle("Options");
             theScreen -> end();
         }
+        firstCallToReleased = false;
     }
 
     //Helper function
@@ -338,7 +454,7 @@
             if (!mouseMode && ySelect != 40) {
                 Color c1 = getColor(xSelect, ySelect);
                 Color c2 = {255 - c1.r, 255 - c1.g, 255 - c1.b, 255};
-                theScreen -> drawHud(xSelect, ySelect, c2, "\xE2\x98\x90");
+                theScreen -> drawHud(xSelect, ySelect + 1, c2, "\xE2\x98\x90");
             }
             if (ySelect == 40) {
                 xSelect = 0;
@@ -351,6 +467,7 @@
             theScreen -> end();
         }
         UnloadRenderTexture(palette);
+        firstCallToReleased = false;
         return toReturn;
     }
 
@@ -450,5 +567,6 @@
             drawTitle("Edit Input Map");
             theScreen -> end();
         }
+        firstCallToReleased = false;
     }
 

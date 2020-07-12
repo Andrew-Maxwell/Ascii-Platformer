@@ -42,6 +42,16 @@
         return json.HasMember("fontSize") ? json["fontSize"].GetInt() : 16;
     }
 
+    int gameLevelData::getPlayerCount() {
+        int toReturn = 0;
+        for (SizeType i = 0; i < json["entities"].Size(); i++) {
+            if (json["entities"][i]["type"] == "player") {
+                toReturn++;
+            }
+        }
+        return toReturn;
+    }
+
     //Read in entities to global world collider
 
     void gameLevelData::readEntitiesGame(vector<player*>& players, bool reloadPlayers, set<int>* collectedPickups) {

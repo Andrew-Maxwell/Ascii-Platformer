@@ -36,9 +36,13 @@ class listData : virtual public data {
 
     listData(string newFileName);
 
-    vector<string> getList();
+    list<string> getList();
 
-    void setList(vector<string> newList);
+    void setList(list<string> newList);
+
+    vector<string> getVector();
+
+    void setVector(vector<string> newVector);
 
 };
 

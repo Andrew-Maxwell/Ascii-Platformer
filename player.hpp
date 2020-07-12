@@ -13,6 +13,12 @@
 
 using namespace rapidjson;
 
+struct playerConfig {
+    Color tint;
+    inputMap in;
+    int playerNumber = -1;
+};
+
 struct weapon {
     bool unlocked = false;
     bool automatic;
@@ -156,6 +162,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
 
     public:
 
+    int playerNo = 0, outfitNo = 0;
     string nextRoom;
     bool breakDoor = false, breakSave = false, breakDead = false, breakInventory = false;
 

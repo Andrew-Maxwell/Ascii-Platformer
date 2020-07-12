@@ -13,9 +13,7 @@
     }
 
     bool savePoint::doesCollide(float otherX, float otherY, int otherType) {
-        bool collided = (otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE);
-        savedGame |= collided;
-        return collided;
+        return gotCollision && otherType == PLAYERTYPE && (otherX >= x - 1 && otherX <= x + 1 && otherY >= y - 1 && otherY <= y + 1);
     }
 
     collision savePoint::getCollision(float otherX, float otherY, int otherType) {
@@ -29,10 +27,14 @@
     void savePoint::tickSet() {}
 
     void savePoint::tickGet() {
-        if (savedGame) {
-            savedGame = false;
-            explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
+        gotCollision = false;
+        for (auto colIter = collisions.begin(); colIter != collisions.end(); colIter++) {
+            if (colIter -> type == PLAYERTYPE && colIter -> magnitude == 2) {  //Player is interacting
+                gotCollision = true;
+                explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
+            }
         }
+        collisions.clear();
     }
 
     bool savePoint::finalize() {

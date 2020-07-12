@@ -16,6 +16,7 @@ using namespace rapidjson;
 class savePoint : public collideable, public entityParent {
 
     bool savedGame = false;
+    bool gotCollision = false;
 
     public:
 

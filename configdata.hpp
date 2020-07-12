@@ -3,12 +3,7 @@
 #include "meta.hpp"
 #include "data.hpp"
 #include "input.hpp"
-
-struct playerConfig {
-    Color tint;
-    inputMap in;
-    int playerNumber = -1;
-};
+#include "player.hpp"
 
 struct conflict {
     int player1, player2;
@@ -39,7 +34,7 @@ class configData : public data {
 
     //Player parameters
 
-    playerConfig getConfig(int index);
+    playerConfig getPlayerConfig(int index);
 
     Color getConfigColor(int index);
 

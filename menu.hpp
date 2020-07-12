@@ -74,4 +74,5 @@ public:
     bool cancel();
 
 };
+
 #endif //MENU_HPP

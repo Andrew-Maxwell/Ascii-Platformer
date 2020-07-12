@@ -27,14 +27,22 @@
 //Collision functions
 
     bool player::doesCollide(float otherX, float otherY, int otherType) {
-        return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1));
+        return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x - 1 && otherX <= x + 1 && otherY >= y - 1 && otherY <= y + 1));
     }
 
     collision player::getCollision(float otherX, float otherY, int otherType) {
         if (otherType == WATERTYPE) {
             return collision(PHYSICALENTITYTYPE, 0, x, yInertia);
         }
-        return collision(PLAYERTYPE);
+        else if (in.interact.isPressed()) {
+            return collision(PLAYERTYPE, id, 0, 0, "", 2);
+        }
+        else if (in.interact.isDown()) {
+            return collision(PLAYERTYPE, id, 0, 0, "", 1);
+        }
+        else {
+            return collision(PLAYERTYPE, id, 0, 0, "", 0);
+        }
     }
 
     bool player::stopColliding() {
@@ -374,24 +382,24 @@
 
         //Print selected code
 
-        theScreen -> drawHud(1, 3, channelColors[lastChannel], to_string(lastChannel));
+        theScreen -> drawHud(1 + 8 * playerNo, 3, channelColors[lastChannel], to_string(lastChannel));
 
         //Print gun info
 
         int rowCount = 0;
         int j = gunSelect;
-        for (int i = 0; i < guns.size(); i++) {
+        for (int i = 0; i < min(int(guns.size()), 4); i++) {
             if (guns[j].unlocked) {
-                if (tickCounter < guns[j].lastFired + guns[j].cooldown || guns[j].ammo < 1) {
-                    theScreen -> drawHud(1, ++rowCount + 3, guns[j].tintFaded, guns[j].display);
+                if (tickCounter < guns[j].lastFired + guns[j].cooldown || guns[j].ammo == 0) {
+                    theScreen -> drawHud(1 + 8 * playerNo, ++rowCount + 3, guns[j].tintFaded, guns[j].display);
                     if (guns[j].ammo >= 0) {
-                        theScreen -> drawHud(2, rowCount + 3, guns[j].tintFaded, to_string(guns[j].ammo));
+                        theScreen -> drawHud(2 + 8 * playerNo, rowCount + 3, guns[j].tintFaded, to_string(guns[j].ammo));
                     }
                 }
                 else {
-                    theScreen -> drawHud(1, ++rowCount + 3, guns[j].tint, guns[j].display);
+                    theScreen -> drawHud(1 + 8 * playerNo, ++rowCount + 3, guns[j].tint, guns[j].display);
                     if (guns[j].ammo >= 0) {
-                        theScreen -> drawHud(2, rowCount + 3, guns[j].tint, to_string(guns[j].ammo));
+                        theScreen -> drawHud(2 + 8 * playerNo, rowCount + 3, guns[j].tint, to_string(guns[j].ammo));
                     }
                 }
             }
@@ -400,21 +408,21 @@
 
         //Health background bar
 
-        theScreen -> drawHudBarRight(1, 1, BLACK, maxHealth / 8.0f);
+        theScreen -> drawHudBarRight(1 + 8 * playerNo, 1, BLACK, min(maxHealth / 8.0f, 7.0f));
 
         //Health bar
 
         if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //If hurt, flash
-            theScreen -> drawHudBarRight(1, 1, HURTCOLOR, health / 8.0f);
+            theScreen -> drawHudBarRight(1 + 8 * playerNo, 1, HURTCOLOR, min(health / 8.0f, 7.0f));
         }
         else {
-            theScreen -> drawHudBarRight(1, 1, HEALTHCOLOR, health / 8.0f);
+            theScreen -> drawHudBarRight(1 + 8 * playerNo, 1, tint, min(health / 8.0f, 7.0f));
         }
 
         //Air bar
 
         if (air < maxAir) {
-            theScreen -> drawHudBarRight(1, 2, AIRCOLOR, air / 64.0);
+            theScreen -> drawHudBarRight(1 + 8 * playerNo, 2, AIRCOLOR, min(air / 480.0f, 7.0f));
         }
     }
 

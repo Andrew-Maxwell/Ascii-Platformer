@@ -21,7 +21,7 @@
     }
 
     bool pickup::doesCollide(float otherX, float otherY, int otherType) {
-        if (!collected && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1 && otherType == PLAYERTYPE) {
+        if (gotCollision && otherType == PLAYERTYPE && !collected && (otherX <= x + 1 && otherX >= x - 1 && otherY <= y + 1 && otherY >= y - 1)) {
             collected = true;
             collectedPickups -> insert(pickupID);
             return true;
@@ -40,14 +40,18 @@
     void pickup::tickSet() {
 	    lifetime--;
         if (!collected && collectedPickups -> count(pickupID)) {    //If another pickup with same ID has been collected
-            collected = exploded = true;
+            collected = true;
         }
     }
 
     void pickup::tickGet() {
-        if (collected && !exploded) {
-            exploded = true;
-            explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
+        if (!collected) {
+            for (auto colIter = collisions.begin(); colIter != collisions.end(); colIter++) {
+                if (colIter -> type == PLAYERTYPE && (touch || colIter -> magnitude == 2)) {
+                    gotCollision = true;
+                    explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
+                }
+            }
         }
     }
 

@@ -70,7 +70,6 @@
 
 #define ERRORTYPE -1
 #define LAYERTYPE 0
-#define PLAYERTYPE 1
 #define ENDINGGATETYPE 2
 #define DOORTYPE 3
 #define SAVEPOINTTYPE 4

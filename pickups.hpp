@@ -19,6 +19,7 @@ class pickup : public collideable, public entityParent {
 
     protected:
 
+    bool gotCollision = false;
     bool collected = false;
     bool exploded = false;
     bool touch;

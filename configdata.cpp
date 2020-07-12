@@ -62,7 +62,7 @@
         json["hudFontSize"].SetInt(size);
     }
 
-    playerConfig configData::getConfig(int index) {
+    playerConfig configData::getPlayerConfig(int index) {
         assert(0 <= index && index < 8);
         playerConfig toReturn;
         Value& configJson = json["configs"][index];
@@ -109,8 +109,8 @@
                 if (device1 == device2) {
                     if (device1 == -1) {
                         set<int> keysUsed;
-                        inputMap map1 = getConfig(index1).in;
-                        inputMap map2 = getConfig(index2).in;
+                        inputMap map1 = getPlayerConfig(index1).in;
+                        inputMap map2 = getPlayerConfig(index2).in;
                         if (map1.useMouseAim && map2.useMouseAim) {
                             conflict c;
                             c.player1 = index1;

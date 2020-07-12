@@ -61,58 +61,35 @@
 
         //Check for collisions between any two pairs of collideables.
 
-        list<collideable*>::iterator colIter1 = collideables.begin();
-        while (colIter1 != collideables.end()) {
-            list<collideable*>::iterator colIter2 = colIter1;
-            colIter2++;
-            while (colIter2 != collideables.end()) {
-                if ((*colIter1) -> doesCollide((*colIter2) -> x, (*colIter2) -> y, (*colIter2) -> type())) {
-                    (*colIter2) -> addCollision((*colIter1) -> getCollision((*colIter2) -> x, (*colIter2) -> y, (*colIter2) -> type()));
+        list<collideable*>::iterator iter1 = collideables.begin();
+        while (iter1 != collideables.end()) {
+            list<collideable*>::iterator iter2 = iter1;
+            iter2++;
+            while (iter2 != collideables.end()) {
+                if ((*iter1) -> doesCollide((*iter2) -> x, (*iter2) -> y, (*iter2) -> type(), (*iter2) -> id)) {
+                    (*iter2) -> addCollision((*iter1) -> getCollision((*iter2) -> x, (*iter2) -> y, (*iter2) -> type(), (*iter2) -> id));
                 }
-                if ((*colIter2) -> doesCollide((*colIter1) -> x, (*colIter1) -> y, (*colIter1) -> type())) {
-                    (*colIter1) -> addCollision((*colIter2) -> getCollision((*colIter1) -> x, (*colIter1) -> y, (*colIter1) -> type()));
+                if ((*iter2) -> doesCollide((*iter1) -> x, (*iter1) -> y, (*iter1) -> type(), (*iter1) -> id)) {
+                    (*iter1) -> addCollision((*iter2) -> getCollision((*iter1) -> x, (*iter1) -> y, (*iter1) -> type(), (*iter1) -> id));
                 }
-                colIter2++;
+                iter2++;
             }
-            colIter1++;
+            iter1++;
         }
 
         //Check for one-way collisions from collideables to particles
 
-        list<collideable*>::iterator colIter = collideables.begin();
-        while (colIter != collideables.end()) {
+        list<collideable*>::iterator iter = collideables.begin();
+        while (iter != collideables.end()) {
             list<collideable*>::iterator partIter = particles.begin();
             while (partIter != particles.end()) {
-                if ((*colIter) -> doesCollide((*partIter) -> x, (*partIter) -> y, (*partIter) -> type())) {
-                    (*partIter) -> addCollision((*colIter) -> getCollision((*partIter) -> x, (*partIter) -> y, (*partIter) -> type()));
+                if ((*iter) -> doesCollide((*partIter) -> x, (*partIter) -> y, (*partIter) -> type(), (*partIter) -> id)) {
+                    (*partIter) -> addCollision((*iter) -> getCollision((*partIter) -> x, (*partIter) -> y, (*partIter) -> type(), (*partIter) -> id));
                 }
                 partIter++;
             }
-            colIter++;
+            iter++;
         }
-
-/*
-        for (unsigned int i = 0; i < collideables.size(); i++) {
-            for (unsigned int j = i + 1; j < collideables.size(); j++) {
-                if (collideables[i] -> doesCollide(collideables[j] -> x, collideables[j] -> y, collideables[j] -> type)) {
-                    collideables[j] -> addCollision(collideables[i] -> getCollision(collideables[j] -> x, collideables[j] -> y, collideables[j] -> type));
-                }
-                if (collideables[j] -> doesCollide(collideables[i] -> x, collideables[i] -> y, collideables[i] -> type)) {
-                    collideables[i] -> addCollision(collideables[j] -> getCollision(collideables[i] -> x, collideables[i] -> y, collideables[i] -> type));
-                }
-            }
-        }
-
-        //Check for collideables affecting particles
-
-        for (unsigned int i = 0; i < collideables.size(); i++) {
-            for (unsigned int j = 0; j < particles.size(); j++) {
-                if (collideables[i] -> doesCollide(particles[j] -> x, particles[j] -> y, particles[j] -> type)) {
-                    particles[j] -> addCollision(collideables[i] -> getCollision(particles[j] -> x, particles[j] -> y, particles[j] -> type));
-                }
-            }
-        }
-    */
     }
 
 

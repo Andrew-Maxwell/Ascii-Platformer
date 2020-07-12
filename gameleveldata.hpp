@@ -35,6 +35,8 @@ class gameLevelData : public outfitData, public levelData {
 
     int getFontSize();
 
+    int getPlayerCount();
+
     //Read all of the entities into the global world collider
 
     void readEntitiesGame(vector<player*>& players, bool reloadPlayers, set<int>* collectedPickups);
