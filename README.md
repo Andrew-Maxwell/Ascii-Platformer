@@ -40,41 +40,5 @@ be able to control a forcefield which repels an enemy's bullets away from you.
 The project relies on Raylib for handling basic graphical effects, as well as keyboard, mouse, 
 and gamepad input. Also, RapidJSON is used for handling save, level, and configuration files.
 
-### Entities and collisions
-
-The core of the engine is an object called the "collider." (I'm awful at coming up with names.) The
-collider contains a list of entities, which all implement a common "entity" interface. Each tick,
-four functions are called for each entity: tickSet(), tickGet(), finalize(), and print(). In the first
-stage, each entity performs its own calculations as necessary. In the second stage, each entity may respond
-to the effects of others' calculations. For example, in the first stage, the player might broadcast
-a code, and in the second stage, a forcefield might receive that code and store a value which tells
-it to activate next tick. finalize() returns true if the object should be deleted, and print() just
-displays the entity to the screen.
-
-Many entities also implement the collideable interface, which allows them to interact with 
-other entities in the level, by exchanging small structs called "collisions." For example, 
-suppose the player entity steps on a pressure plate. It would send a collision to the pressure 
-plate entity and the pressure plate entity could respond appropriately, probably by 
-broadcasting a code which would trigger another event elsewhere.
-
-Collideables have four additional functions. When called for entity A, doesCollide() returns 
-true when called with information about entity B if A needs to send a collision to B; for 
-example, if A is the player and B is a pressure plate, then A.doesCollide() returns true if A 
-is standing on B. Next A.getCollision() is called, which returns a collision to send to 
-B.addCollision(). The fourth function is stopColliding(), which returns true if the 
-collideable should be removed from the list of collideables.
-
-Obviously, the number of possible collisions, and therefore calls to doesCollide(), increases 
-with the square of the number of collideables. I considered implementing a system where the 
-level is divided into sectors, and entiites may only collide with other nearby entities, in 
-order to reduce the number of possible collisions. However, I decided it wasn't necessary for 
-two reasons. First, in most cases doesCollide() returns false without needing to do very much 
-processing, so although it's O(n^2) the coefficient is fairly small. Second, most of the 
-particles are placed on a separate list where they receive collisions but cannot send them. If 
-there are m particles and n non-particle entities, this brings the number of interactions down 
-from O((n + m)^2) to O(n^2 + nm); this is a drastic improvement, since n is usually in the 
-tens but m can easily be in the hundreds or thousands. In practice it seems that on older machines,
-the GPU is more of a bottleneck than the CPU, so I think this was the right call.
-
-### ...
-More to come, maybe, but this is almost entirely a solo project and detailed documentation isn't a priority.
+Maybe I'll do a detailed writeup here some other time; right now it's a solo project, and I'm
+working on it frequently enough that I'm not forgetting details.
