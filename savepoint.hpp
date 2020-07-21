@@ -24,9 +24,9 @@ class savePoint : public collideable, public entityParent {
 
     unsigned int type();
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 

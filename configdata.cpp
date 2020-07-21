@@ -7,6 +7,7 @@
             json.AddMember("fullscreen", Value(false), a);
             json.AddMember("hudFontSize", Value(16), a);
             json.AddMember("gameFontSize", Value(16), a);
+            json.AddMember("autoCamera", Value(false), a);
             json.AddMember("configs", Value(kArrayType), a);
             Color tints[8] = {GOLD, SKYBLUE, MAROON, BEIGE, DARKBLUE, DARKBROWN, VIOLET, PINK};
             for (int i = 0; i < 8; i++) {
@@ -62,9 +63,20 @@
         json["hudFontSize"].SetInt(size);
     }
 
+    bool configData::getAutoCamera() {
+        assert(json.HasMember("autoCamera"));
+        return json["autoCamera"].GetBool();
+    }
+
+    void configData::setAutoCamera(bool autoCamera) {
+        assert(json.HasMember("autoCamera"));
+        json["autoCamera"].SetBool(autoCamera);
+    }
+
     playerConfig configData::getPlayerConfig(int index) {
         assert(0 <= index && index < 8);
         playerConfig toReturn;
+        toReturn.configNo = index;
         Value& configJson = json["configs"][index];
         toReturn.in = inputMap(configJson["inputMap"]["device"].GetInt());
         toReturn.in.useMouseAim = configJson["inputMap"]["useMouseAim"].GetBool();

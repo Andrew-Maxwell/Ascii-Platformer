@@ -51,11 +51,11 @@
     }
 
 
-    bool water::doesCollide(float otherX, float otherY, int otherType) {
+    bool water::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         return (otherX >= x && otherX <= x + width && otherY >= y - surface[otherX - x] - 0.5 && otherY <= y + height);
     }
 
-    collision water::getCollision(float otherX, float otherY, int otherType) {
+    collision water::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
 
         /*We calculate y force as d/dt (surface) so that objects move up and down
         more or less as fast as the water surface does.
@@ -67,7 +67,7 @@
         float yForce2 = -1 * heightFactor * (surface[otherX - x + 1] - lastSurface[otherX - x + 1]);
         float xForce = 3 * (yForce1 - yForce2);
 
-        return collision(WATERTYPE, 0, xForce, (yForce1 + yForce2) / 2);
+        return collision(WATERTYPE, id, 0, xForce, (yForce1 + yForce2) / 2);
 
     }
 

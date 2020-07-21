@@ -19,6 +19,7 @@ using namespace rapidjson;
 
 class bullet : public physicalEntity, public particle, public entityParent {
 
+    float lastX, lastY;
     int damage, explosionDamage;
     float explosionPower, explosionRange;
     bool hitWall, hitWater, hitEntity, sticky;
@@ -40,9 +41,9 @@ class bullet : public physicalEntity, public particle, public entityParent {
 
     unsigned int type();
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 

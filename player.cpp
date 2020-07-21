@@ -26,22 +26,22 @@
 
 //Collision functions
 
-    bool player::doesCollide(float otherX, float otherY, int otherType) {
+    bool player::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x - 1 && otherX <= x + 1 && otherY >= y - 1 && otherY <= y + 1));
     }
 
-    collision player::getCollision(float otherX, float otherY, int otherType) {
+    collision player::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
         if (otherType == WATERTYPE) {
-            return collision(PHYSICALENTITYTYPE, 0, x, yInertia);
+            return collision(PHYSICALENTITYTYPE, id, 0, x, yInertia);
         }
         else if (in.interact.isPressed()) {
-            return collision(PLAYERTYPE, id, 0, 0, "", 2);
+            return collision(PLAYERTYPE, id, 2);
         }
         else if (in.interact.isDown()) {
-            return collision(PLAYERTYPE, id, 0, 0, "", 1);
+            return collision(PLAYERTYPE, id, 1);
         }
         else {
-            return collision(PLAYERTYPE, id, 0, 0, "", 0);
+            return collision(PLAYERTYPE, id, 0);
         }
     }
 
@@ -66,7 +66,7 @@
                         }
                         bullet* b = new bullet(
                             //x, y, zPosition, color, sizeFactor
-                            x + 1.5 * aim.x, y + 1.5 * aim.y, tint, sizeFactor,
+                            x + 1.5 * aim.x, y + 1.5 * aim.y,  tint, sizeFactor,
                             //xInertia, yInertia, character, particleCount, lifetime
                             aim.x * gun.speed, aim.y * gun.speed, gun.bulletDisplay, gun.particleCount, gun.lifetime,
                             //Elasticity, max speed, gravity, friction
@@ -98,7 +98,9 @@
 
         if (!breakDoor && !breakDead) {
 
-            if (in.inventory.isPressed()) {
+            focusCamera = in.focusCamera.isPressed();
+
+            if (in.inventory.isPressedOnce()) {
                 breakInventory = true;
             }
 
@@ -228,7 +230,7 @@
             //Channels
             for (int i = 0; i < 10; i++) {
                 if (in.code[i].isDown()) {
-                    world -> setChannel(channels[i].to_ulong());
+                    world -> setChannel(channels[i].to_ulong(), true);
                     lastChannel = i;
                     if (tickCounter % 8 == 0) {
                         broadcast(2, x, y, channelColors[i], sizeFactor, channels[i][(tickCounter % 64) / 8]);
@@ -236,7 +238,7 @@
                 }
             }
             if (in.lastCode.isDown()) {
-                world -> setChannel(channels[lastChannel].to_ulong());
+                world -> setChannel(channels[lastChannel].to_ulong(), true);
                 if (tickCounter % 8 == 0) {
                     broadcast(2, x, y, channelColors[lastChannel], sizeFactor, channels[lastChannel][(tickCounter % 64) / 8]);
                 }
@@ -280,7 +282,7 @@
 
             //Death
             hurtTimer--;
-            if (IsKeyPressed(KEY_K) || y > world -> getRows() + 25) {
+            if (y > world -> getRows() + 25) {
                 health = 0;
             }
             if (health <= 0) {

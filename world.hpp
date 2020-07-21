@@ -3,6 +3,7 @@
 
 #include "meta.hpp"
 #include "layer.hpp"
+#include <set>
 
 using namespace rapidjson;
 
@@ -56,7 +57,7 @@ class collideable : virtual public entity {
 
     //B's getCollision is used to get a collision object containing how A should respond to colliding with B
 
-    virtual collision getCollision(float otherX = 0, float otherY = 0, int otherType = 0, unsigned int otherID) {cerr << "collideable::getCollision() called. This function should be overridden."; return collision();}
+    virtual collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {cerr << "collideable::getCollision() called. This function should be overridden."; return collision();}
 
     //This function is called to add the collision object from B to A's collision list. Then, A responds during tickGet.
 
@@ -84,6 +85,7 @@ class collider : public layer {
     list<collideable*> collideables;
     list<collideable*> particles;
     bool channel[512] = {false};
+    set<uint8_t> interceptedCodes;
 
     public:
 
@@ -145,10 +147,11 @@ class collider : public layer {
 
     //Broadcast functions
 
-    void setChannel(int freq);
+    void setChannel(int freq, bool newChannel);
 
     bool getChannel(int freq);
 
+    set<uint8_t> getInterceptedChannels();
 };
 
 #endif //WORLD_HPP

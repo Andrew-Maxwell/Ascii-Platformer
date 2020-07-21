@@ -19,12 +19,12 @@
         return ENDINGGATETYPE;
     }
 
-    bool endingGate::doesCollide(float otherX, float otherY, int otherType) {
+    bool endingGate::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         return (otherX > x && otherX < x + width && otherY > y && otherY < y + height && otherType == PLAYERTYPE);
     }
 
-    collision endingGate::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type(), 0, 0, 0, "");
+    collision endingGate::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(type(), id, 0, 0, 0, "");
     }
 
     bool endingGate::stopColliding() {

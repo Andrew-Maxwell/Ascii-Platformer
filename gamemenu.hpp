@@ -21,7 +21,7 @@ public:
 
     string chooseSave(int& status, int mode);
 
-    vector<playerConfig> readyRoom(saveData& save, bool loadedSave, gameLevelData& level, configData& config);
+    vector<playerConfig> readyRoom(int& status, saveData& save, bool loadedSave, gameLevelData& level, configData& config);
 
     //In-game menus
 

@@ -45,7 +45,7 @@ struct input {
 };
 
 struct inputMap {
-    input error, up, down, left, right, jump, interact, inventory, nextWeapon, previousWeapon, explode, lastCode, nextCode, previousCode, aimUp, aimDown, aimLeft, aimRight, fire;
+    input error, up, down, left, right, jump, interact, inventory, nextWeapon, previousWeapon, explode, lastCode, nextCode, previousCode, aimUp, aimDown, aimLeft, aimRight, fire, focusCamera;
     input code[10];
 
     bool keyboard;

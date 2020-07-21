@@ -1,20 +1,3 @@
-After loading:
-Ready room:
-    - Get all of the outfits from the save
-    - Get the default outfit from the level
-    - Create player objects with each outfit, plus one with the defaultOutfit for that level (?)
-    - Have each player object draw its HUD
-    - Have game players match playerConfigs with outfits.
-    - Generate a vector of playerConfigs. Each playerConfig has a player number.
-Load from death:
-    - If loading from level: Each multiplayer level should support all 8 players. Then, just
-    place players in the level as specified by the file; if there are fewer than 8 people playing,
-    then the last few will not be placed. Just like it already is.
-    - If loading from save: All of the players are placed at the same location, with their different
-    outfits. This part is already handled.
-After saving, reload the players, ideally with transition. If you want to be lazy, have saving just
-    trigger a death. Should dead players respawning spawn with their stats from the previous
-    save, or from the defaultOutfit?
 
 Core gameplay elements:
     - Bit puzzles
@@ -33,33 +16,19 @@ Core gameplay elements:
 Arena:
     Select level(s)
 
-Ready room (co-op/arena)
-    Must load all outfits from save
-    Display HUD for each loaded outfit
-    Have players select outfits (1 per outfit)
-    associates 
-
 Loose ends:
-- Op and outfit pickups go to player 0
-- Warnings not appearing in ready room
-- Players spawn at (0, 0)
 - Gun changes color after saving
 - Broadcast animation + HUD broadcast indicator blends in with background
 - Joystick aim accuracy is VERY limited. Should probably allow spamming/strafing like Cave Story to compensate.
-- Figure out how to handle fewer players than the level supports
-- HUDs overlap
 - Split screen gameplay for large levels? Should be handled internal to Canvas.
-- Allow reordering of players or changing of default player config
+- Allow reordering of players or changing default player config
 
 Features:
 1 Puzzle elements:
-    - Intercepted codes
-    - Switches
-    - Triggers
+    - Triggers w/ sensitivity levels: Need player + interacting, need player to enter trigger volume, need anything to enter trigger volume
     - Color changing/other effect layers
     - AND/OR/Timer relays
-    - Doors
-    - Disappearing platforms
+    - Disappearing/reappearing blocks
 1 Story elements:
     1 persistent plot variables.
     2 Separate global- and outfit- scope? (e.g. beating boss = global scope, key = outfit scope)

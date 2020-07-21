@@ -14,7 +14,7 @@ public:
     bool locked = false;    //While true, ignore keyboard input
 
     bool firstCallToReleased;
-    int xCount, yCount;
+    int xCount, yCount, pageRows;
     int scroll, oldScroll;
     int xSelect = 0, ySelect = 0;
     bool mouseMode = false, firstTick;

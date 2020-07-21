@@ -26,6 +26,7 @@ class pickup : public collideable, public entityParent {
     int lifetime, pickupID;
     set<int>* collectedPickups;
     char* toPrint;
+    int playerID = 0;
 
     public:
 
@@ -36,9 +37,9 @@ class pickup : public collideable, public entityParent {
 
     ~pickup();
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
-    virtual collision getCollision(float otherX, float otherY, int otherType);
+    virtual collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 
@@ -68,7 +69,7 @@ class outfitPickup : public pickup {
 
     unsigned int type();
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
 };
 
@@ -87,7 +88,7 @@ class gunPickup : public pickup {
 
     unsigned int type();
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
 };
 
@@ -107,7 +108,7 @@ class ammoPickup : public pickup {
 
     unsigned int type();
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
 };
 
@@ -126,7 +127,7 @@ class opPickup : public pickup {
 
     unsigned int type();
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
 };
 

@@ -1,45 +1,74 @@
 # Ascii-Platformer
-WIP ASCII platformer using Raylib. Trying to make atmospheric levels (inspired by Rain World) out of text.
+WIP platformer using Raylib. All of the graphics are composed of overlapping Unicode characters in
+different colors and sizes, inspired by ASCII art; hence the title.
 
-I'll make more detailed documentation later.
+## Gameplay
+The final vision for gameplay can be thought of as having three primary components: Combat, 
+platforming, and puzzles.
 
-Here's how I (Andrew) explained the technical side of it to Mark.
+Combat is fairly standard: the player can find and carry multiple guns with
+diverse stats (not hard-coded; each gun is specified in the level file) and use them to shoot enemies.
 
-So basically I wrote this almost from scratch
-it's not using an engine
-It's using Raylib, which handles key presses and displaying fonts, and nothing else - hence the name, although it uses Unicode really
-Originally it was going to use ncurses and a console interface but that was dumb
-because the console doesn't handle multiple key presses well
-Let's see
-So it's all written in C++
-The world consists of "entities"
-Each entity implements a common interface, with functions called "tickset", "tickget", "finalize", and "print"
-Entities are held in entityLists which also implement those functions. really simple
-Also entities can have entitylists, for example, you can have a bullet hit a wall and then spawn particles, and the particles are entities in an entitylist inside the bullet
-In each tick tickset() is called on everything, then tickget(), then finalize(), then print()
-In tickset() entities do most of the processing, and they also write data to the communication interface, called the collider
-In tickget() they respond to any data they get from the collider
-finalize() just returns true if the entity should be deleted by the entitylist
-and print() displays the entities to screen
-Not all entities are collideable
-The ones that are, must implement an additional interface, collideable
-which has the functions doesCollide(), getCollisions(), and stopColliding()
-The collider uses doesCollide to determine whether an object collides with another. It will call entity A's doesCollide() with entity B's coordinates, and if it returns true, then it passes a collision object from entity A using getCollision() to entity B using addCollision()
-Then it calls stopColliding() to determine whether the object should be deleted. stopColliding() and finalize() should always return true at the same time.
-And some entities can be collided with but can't collide. For example, particles can be affected by other objects but can't affect other objects
-Oh, and the collider also has data on which tiles in the world are solid
-The world visually consists of layers, which are just entities that are extremely large (visually) and don't really do anything
-Each layer can only be one color
-and the data for each layer is stored in a text file
-Also, all layers and objects can be drawn with a different sizeFactor, which allows you to create semi-3D stuff
-But collisions always happen in 2D
-sizeFactor is essentially just how zoomed in it is
-And then there are various interactive objects
-The main things I've implemented so far are doors, save points, and force fields
-Force fields will attract/repel you, bullets, and whatever else when you're close to them
-when you hold shift
-I think there are some interesting platforming puzzle possibilities using forcefields
-Like using forcefields to fly really high, or using them to bend the path of a bullet to fly around corners
-We can also make things like switches that trigger a forcefield when you shoot them
-I was also thinking of adding in the bitwise puzzle system
-Like, as you moved through a level you would pick up different bitwise operators, and then you could press a key to broadcast the current register status, and if the byte matched a receiver then the receiver would trigger
+Early in the game, platforming is also fairly standard for a sidescroller; anyone familiar 
+with Cave Story will find it mostly familiar, except for the forcefields, which push, pull, 
+and fling the player in various directions, and must sometimes be used in addition to just 
+jumping between platforms to reach new areas. Later in the game, other avatars or "outfits" are unlocked which
+have different abilities or weaknesses, such as outfits that can fly like quadcopters, or which
+bounce like in *Within a Deep Forest* by Nifflas, or which can climb vertical walls like in Celeste.
+Like the guns, the parameters of any number of outfits can be defined in the level files.
+
+The puzzles consist of using a limited set of bitwise operations, such as AND, OR, XOR, or 
+shift, to change a variable's value. Certain special values of the variable can be used like a 
+password; when a key is pressed to broadcast them through the level, they activate certain 
+level elements, such as forcefields or doors. In effect, the player is "hacking" the level (in 
+fact, this mechanic is inspired by how easily certain wireless garage doors can be manipulated 
+in a similar way.) These level elements can also be combined to make their own type of 
+puzzles, similar to *Portal* or *The Talos Principle* in that each element is well-defined and 
+predictable, and the challenge lies in finding out how to combine them.
+
+Obviously, each of these elements can be blended together; for example, solving bit puzzles in order to
+be able to control a forcefield which repels an enemy's bullets away from you.
+
+## Under the hood
+
+The project relies on Raylib for handling basic graphical effects, as well as keyboard, mouse, 
+and gamepad input. Also, RapidJSON is used for handling save, level, and configuration files.
+
+### Entities and collisions
+
+The core of the engine is an object called the "collider." (I'm awful at coming up with names.) The
+collider contains a list of entities, which all implement a common "entity" interface. Each tick,
+four functions are called for each entity: tickSet(), tickGet(), finalize(), and print(). In the first
+stage, each entity performs its own calculations as necessary. In the second stage, each entity may respond
+to the effects of others' calculations. For example, in the first stage, the player might broadcast
+a code, and in the second stage, a forcefield might receive that code and store a value which tells
+it to activate next tick. finalize() returns true if the object should be deleted, and print() just
+displays the entity to the screen.
+
+Many entities also implement the collideable interface, which allows them to interact with 
+other entities in the level, by exchanging small structs called "collisions." For example, 
+suppose the player entity steps on a pressure plate. It would send a collision to the pressure 
+plate entity and the pressure plate entity could respond appropriately, probably by 
+broadcasting a code which would trigger another event elsewhere.
+
+Collideables have four additional functions. When called for entity A, doesCollide() returns 
+true when called with information about entity B if A needs to send a collision to B; for 
+example, if A is the player and B is a pressure plate, then A.doesCollide() returns true if A 
+is standing on B. Next A.getCollision() is called, which returns a collision to send to 
+B.addCollision(). The fourth function is stopColliding(), which returns true if the 
+collideable should be removed from the list of collideables.
+
+Obviously, the number of possible collisions, and therefore calls to doesCollide(), increases 
+with the square of the number of collideables. I considered implementing a system where the 
+level is divided into sectors, and entiites may only collide with other nearby entities, in 
+order to reduce the number of possible collisions. However, I decided it wasn't necessary for 
+two reasons. First, in most cases doesCollide() returns false without needing to do very much 
+processing, so although it's O(n^2) the coefficient is fairly small. Second, most of the 
+particles are placed on a separate list where they receive collisions but cannot send them. If 
+there are m particles and n non-particle entities, this brings the number of interactions down 
+from O((n + m)^2) to O(n^2 + nm); this is a drastic improvement, since n is usually in the 
+tens but m can easily be in the hundreds or thousands. In practice it seems that on older machines,
+the GPU is more of a bottleneck than the CPU, so I think this was the right call.
+
+### ...
+More to come, maybe, but this is almost entirely a solo project and detailed documentation isn't a priority.

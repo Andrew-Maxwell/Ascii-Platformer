@@ -32,6 +32,10 @@ class configData : public data {
 
     void setHudFontSize(int size);
 
+    bool getAutoCamera();
+
+    void setAutoCamera(bool autoCamera);
+
     //Player parameters
 
     playerConfig getPlayerConfig(int index);

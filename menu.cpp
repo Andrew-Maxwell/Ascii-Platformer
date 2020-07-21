@@ -47,6 +47,7 @@
         yCount = newYCount;
         ySelect = 0;
         scroll = 0;
+        pageRows = 2 * yCount + 1;
     }
 
     void menu::handleInput(bool doScroll) {
@@ -158,7 +159,6 @@
 
     void menu::scrollBar() {
         int fontSize = theScreen -> getHudFontSize();
-        int pageRows = 2 * yCount + 1;
         int screenRows = theScreen -> getHudRows() - 1;
         if (screenRows < pageRows) {
             float handleLength = (screenRows - 2) * (screenRows / float(pageRows));

@@ -58,13 +58,13 @@
 
     //Collision functions
 
-    bool enemy::doesCollide(float otherX, float otherY, int otherType)
+    bool enemy::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID)
     {
        return physicalEntity::doesCollide(otherX, otherY, otherType);
     } // Called in collider::tickSet for w/ every other object as param EVERY tick
 
-    collision enemy::getCollision(float otherX, float otherY, int otherType) { // Called collider::tickSet after doesCollide() returns true
-        return collision(type(), PHYSICAL_DAMAGE); // TODO: add knockback
+    collision enemy::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) { // Called collider::tickSet after doesCollide() returns true
+        return collision(type(), id, PHYSICAL_DAMAGE); // TODO: add knockback
     }
     bool enemy::stopColliding() {
         return isDead;

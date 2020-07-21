@@ -261,12 +261,19 @@
 
     //Broadcasts
 
-    void collider::setChannel(int freq) {
+    void collider::setChannel(int freq, bool newChannel) {
+        if (newChannel) {
+            interceptedCodes.insert(freq);
+        }
         channel[freq] = true;
     }
 
     bool collider::getChannel(int freq) {
         return channel[freq];
+    }
+
+    set<uint8_t> collider::getInterceptedChannels() {
+        return interceptedCodes;
     }
 
     //Stairs/ramps currently on hold.

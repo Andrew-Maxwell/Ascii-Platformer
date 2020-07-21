@@ -46,6 +46,7 @@ int main(int argc, char** argv) {
     gameMenu menu;
     int transition = 7, transitionDirection = -1;
     Vector2 playerPos;
+    int whoCamera = 0;
 
     while (!(status == quitStatus || WindowShouldClose())) {      //While the game is running
 
@@ -64,6 +65,7 @@ int main(int argc, char** argv) {
             saveName = menu.chooseSave(status, mode);
             if (mode == singlePlayerMode) {
                 playerConfigs.push_back(config.getPlayerConfig(0));
+                playerConfigs[0].playerNo = 0;
             }
         }
 
@@ -77,9 +79,8 @@ int main(int argc, char** argv) {
 
         */
 
-        else if (status == deadStatus) {    //All players are dead
+        else if (status == deadStatus) {   //Reload the level
             transition = 7, transitionDirection = -1;
-            status = runStatus;
             assert(players.size() == 0);
             if (!argRoom) {
                 cout << "Loading save\n";
@@ -111,52 +112,56 @@ int main(int argc, char** argv) {
                 level.generateLayerCache();
             }
 
-            //Configure players
+            //Assign player configs to loaded outfits
             if (playerConfigs.size() == 0) {    //if loading a save (i.e. coming from menu, not just died)
-                playerConfigs = menu.readyRoom(save, loadedSave, level, config);
+                playerConfigs = menu.readyRoom(status, save, loadedSave, level, config);
             }
-            for (int i = 0; i < playerConfigs.size(); i++) {
-                players.push_back(new player(0, 0, WHITE, 1));
-                players[i] -> outfitNo = playerConfigs[i].playerNumber;
-                players[i] -> playerNo = i;
-                players[i] -> setColor(playerConfigs[i].tint);
-                players[i] -> setInputMap(playerConfigs[i].in);
-            }
+            if (status == deadStatus) {
+                status = runStatus;
+                for (int i = 0; i < playerConfigs.size(); i++) {
+                    players.push_back(new player(0, 0, WHITE, 1));
+                    players[i] -> outfitNo = playerConfigs[i].playerNo;
+                    players[i] -> playerNo = i;
+                    players[i] -> configNo = playerConfigs[i].configNo;
+                    players[i] -> setColor(playerConfigs[i].tint);
+                    players[i] -> setInputMap(playerConfigs[i].in);
+                }
 
-            //Reload world
-            world = new collider(0.0, 0.0, level.getWorldFileName());
+                //Reload world
+                world = new collider(0.0, 0.0, level.getWorldFileName());
 
-            //Read in entities
-            collectedPickups.clear();
-            if (loadedSave) {
-                collectedPickups = save.getCollectedPickups();
-            }
-            level.readEntitiesGame(players, false, &collectedPickups);
+                //Read in entities
+                collectedPickups.clear();
+                if (loadedSave) {
+                    collectedPickups = save.getCollectedPickups();
+                }
+                level.readEntitiesGame(players, true, &collectedPickups);
 
-            //Set the player position from save if appropriate
-            if (loadedSave && !argRoom) {
+                //Set the player position from save if appropriate
+                if (loadedSave && !argRoom) {
+                    for (int i = 0; i < players.size(); i++) {
+                        players[i] -> moveTo(save.getPosition());
+                    }
+                }
+
+                //Initialize the player outfit
+                outfit defaultOutfit = level.getOutfit("defaultOutfit");
                 for (int i = 0; i < players.size(); i++) {
-                    players[i] -> moveTo(save.getPosition());
+                    string outfitName = defaultOutfit.name + to_string(players[i] -> outfitNo);
+                    if (loadedSave && save.hasOutfit(outfitName)) {
+                        outfit newOutfit = save.getOutfit(outfitName);
+                        newOutfit.merge(defaultOutfit);
+                        players[i] -> setOutfit(newOutfit);
+                    }
+                    else {
+                        players[i] -> setOutfit(defaultOutfit);
+                    }
                 }
-            }
 
-            //Initialize the player outfit
-            outfit defaultOutfit = level.getOutfit("defaultOutfit");
-            for (int i = 0; i < players.size(); i++) {
-                string outfitName = defaultOutfit.name + to_string(players[i] -> outfitNo);
-                if (loadedSave && save.hasOutfit(outfitName)) {
-                    outfit newOutfit = save.getOutfit(outfitName);
-                    newOutfit.merge(defaultOutfit);
-                    players[i] -> setOutfit(newOutfit);
-                }
-                else {
-                    players[i] -> setOutfit(defaultOutfit);
-                }
+                //Set display parameters
+                theScreen -> setParams(world -> getRows(), world -> getCols(), config.getGameFontSize(), config.getHudFontSize(), players[0] -> getSizeFactor(), level.getDayLength());
+                level.initializeColors(theScreen);
             }
-
-            //Set display parameters
-            theScreen -> setParams(world -> getRows(), world -> getCols(), config.getGameFontSize(), config.getHudFontSize(), players[0] -> getSizeFactor(), level.getDayLength());
-            level.initializeColors(theScreen);
         }
 
         //If we're moving to a different level, perform a subset
@@ -172,7 +177,7 @@ int main(int argc, char** argv) {
             roomName = players[0] -> nextRoom;
 
             for (int i = 0; i < players.size(); i++) {
-                save.writeOutfit(players[i] -> getCurrentOutfit(), i);
+                save.writeOutfit(players[i] -> getCurrentOutfit(), players[i] -> outfitNo);
             }
 
             delete world;
@@ -219,7 +224,7 @@ int main(int argc, char** argv) {
                     whoSaved = i;
                     players[i] -> breakSave = false;
                 }
-                save.writeOutfit(players[i] -> getCurrentOutfit(), i);
+                save.writeOutfit(players[i] -> getCurrentOutfit(), players[i] -> outfitNo);
             }
             save.setCollectedPickups(collectedPickups);
             save.save(players[whoSaved] -> getPosition(), roomName);
@@ -250,11 +255,21 @@ int main(int argc, char** argv) {
                 }
                 else if (status == optionsStatus) {
                     menu.options(status, config);
+                    //Update player configurations
+                    for (int i = 0; i < MAXPLAYERS; i++) {
+                        playerConfig updatedConfig = config.getPlayerConfig(i);
+                        for (int j = 0; j < players.size(); j++) {
+                            if (players[j] -> configNo == i) {
+                                players[j] -> setColor(updatedConfig.tint);
+                                players[j] -> setInputMap(updatedConfig.in);
+                            }
+                        }
+                    }
                     status = pauseStatus; //Return to pause menu after options menu
                 }
                 else if (status == inventoryStatus) {
                     outfit o = players[whoInventory] -> getCurrentOutfit();
-                    menu.inventory(status, o, in);
+                    menu.inventory(status, o, players[whoInventory] -> getInputMap());
                     players[whoInventory] -> setOutfit(o);
                 }
                 else if (status == runStatus) { 
@@ -282,7 +297,19 @@ int main(int argc, char** argv) {
                     //Display the world
 
                     if (players.size() > 0) {
-                        playerPos = players[0] -> getPosition();
+                        if (config.getAutoCamera() && !(players[whoCamera] -> isMoving())) {
+                            for (int i = 0; i < players.size(); i++) {
+                                if (players[i] -> isMoving()) {
+                                    whoCamera = i;
+                                }
+                            }
+                        }
+                        for (int i = 0; i < players.size(); i++) {
+                            if (players[i] -> focusCamera) {
+                                whoCamera = i;
+                            }
+                        }
+                        playerPos = players[whoCamera] -> getPosition();
                     }
                     theScreen -> calculateLighting();
                     theScreen -> start(playerPos.x, playerPos.y, false);

@@ -18,9 +18,9 @@
 
     //put outfit in JSON
 
-    void saveData::writeOutfit(outfit o, int playerNumber) {
+    void saveData::writeOutfit(outfit o, int playerNo) {
 
-        string name = o.name + to_string(playerNumber);
+        string name = o.name + to_string(playerNo);
         json.RemoveMember(name.c_str());
 
         Document::AllocatorType& a = json.GetAllocator();
@@ -85,6 +85,14 @@
         }
         newOutfit.AddMember("guns", gunsArray, a);
 
+        //copy intercepted codes
+
+        Value interceptedCodes(kArrayType);
+        for (uint8_t code : o.interceptedCodes) {
+            interceptedCodes.PushBack(Value(code).Move(), a);
+        }
+        newOutfit.AddMember("interceptedCodes", interceptedCodes, a);
+
         //copy puzzleOps
 
         Value opsArray(kArrayType);
@@ -95,7 +103,19 @@
 
             Value subOps(kArrayType);
             for (uint8_t subOp : o.ops[i].operations) {
-                subOps.PushBack(Value(subOp).Move(), a);
+                string opName;
+                switch(subOp) {
+                    case(1): opName = "rotate"; break;
+                    case(2): opName = "shift"; break;
+                    case(3): opName = "set"; break;
+                    case(4): opName = "reset"; break;
+                    case(5): opName = "xor"; break;
+                    case(6): opName = "load"; break;
+                    default: opName = "undefined";
+                }
+                Value opNameValue;
+                opNameValue.SetString(opName.c_str(), opName.size(), a);
+                subOps.PushBack(opNameValue, a);
             }
             newOp.AddMember("operations", subOps, a);
 
@@ -104,6 +124,7 @@
                 operands.PushBack(Value(operand).Move(), a);
             }
             newOp.AddMember("operands", operands, a);
+            opsArray.PushBack(newOp.Move(), a);
         }
         newOutfit.AddMember("ops", opsArray, a);
 

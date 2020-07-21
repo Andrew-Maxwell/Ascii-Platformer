@@ -19,16 +19,16 @@
         return PHYSICALENTITYTYPE;
     }
 
-    bool physicalEntity::doesCollide(float otherX, float otherY, int otherType) {
-        return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x && otherX <= x + 1 && otherY >= y && otherY <= y + 1));
+    bool physicalEntity::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return ((otherType == WATERTYPE && lastTickUnderWater != isUnderWater) || (otherX >= x - 1 && otherX <= x + 1 && otherY >= y - 1 && otherY <= y + 1));
     }
 
-    collision physicalEntity::getCollision(float otherX, float otherY, int otherType) {
+    collision physicalEntity::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
         if (otherType == WATERTYPE) {
-            return collision(PHYSICALENTITYTYPE, 0, x, yMomentum);
+            return collision(PHYSICALENTITYTYPE, id, 0, x, yMomentum);
         }
         else {
-            return collision(PHYSICALENTITYTYPE, 0, xMomentum, yMomentum);
+            return collision(PHYSICALENTITYTYPE, id, 0, xMomentum, yMomentum);
         }
     }
 
@@ -122,7 +122,7 @@
         return PHYSICALPARTICLETYPE;
     }
 
-    bool physicalParticle::doesCollide(float otherX, float otherY, int otherType) {
+    bool physicalParticle::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         return false;
     }
 

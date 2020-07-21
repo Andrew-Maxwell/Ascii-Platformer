@@ -38,9 +38,9 @@ class linearField : public collideable {
 
     unsigned int type();
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 
@@ -75,9 +75,9 @@ class forceField : public collideable, public entityParent {
 
     unsigned int type();
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 
@@ -103,7 +103,7 @@ class explosion : public forceField {
 
     explicit explosion(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange);
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 

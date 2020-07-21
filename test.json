@@ -1,9 +1,29 @@
 {
     "collider": "test_collider.txt",
-    "dayLight": [255, 255, 255, 255],
-    "nightLight": [100, 100, 150, 255],
-    "dayBackground": [4, 119, 152, 67],
-    "nightBackground": [0, 0, 0, 255],
+    "dayLight": [
+        255,
+        255,
+        255,
+        255
+    ],
+    "nightLight": [
+        100,
+        100,
+        150,
+        255
+    ],
+    "dayBackground": [
+        4,
+        119,
+        152,
+        67
+    ],
+    "nightBackground": [
+        0,
+        0,
+        0,
+        255
+    ],
     "dayLength": 1440,
     "fontSize": 16,
     "entities": [
@@ -11,7 +31,12 @@
             "type": "rain",
             "x": 0.0,
             "y": 0.0,
-            "tint": [100, 100, 150, 255],
+            "tint": [
+                100,
+                100,
+                150,
+                255
+            ],
             "sizeFactor": 1.0,
             "dropsPerTick": 1.0,
             "xMomentum": 0.05
@@ -20,7 +45,12 @@
             "type": "player",
             "x": 20.0,
             "y": 19.0,
-            "tint": [255, 0, 0, 255],
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
             "sizeFactor": 1.0
         },
         {
@@ -28,7 +58,12 @@
             "number": 1,
             "x": 20.0,
             "y": 19.0,
-            "tint": [0, 0, 255, 255],
+            "tint": [
+                0,
+                0,
+                255,
+                255
+            ],
             "sizeFactor": 1.0
         },
         {
@@ -36,14 +71,24 @@
             "fileName": "test_collider.txt",
             "x": 0.0,
             "y": 0.0,
-            "tint": [189, 226, 255, 255],
+            "tint": [
+                189,
+                226,
+                255,
+                255
+            ],
             "sizeFactor": 1.0
         },
         {
             "type": "door",
             "x": 15.0,
             "y": 19.0,
-            "tint": [200, 200, 255, 255],
+            "tint": [
+                200,
+                200,
+                255,
+                255
+            ],
             "sizeFactor": 1.0,
             "nextRoom": "test2.json",
             "destinationX": 14.0,
@@ -51,9 +96,14 @@
         },
         {
             "type": "outfitPickup",
-            "x": 18,
-            "y": 19,
-            "tint": [255, 0, 0, 255],
+            "x": 18.0,
+            "y": 19.0,
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
             "sizeFactor": 1.0,
             "displayChar": 8593,
             "key": "jumpSpeed",
@@ -64,7 +114,12 @@
             "type": "outfitPickup",
             "x": 20.0,
             "y": 65.0,
-            "tint": [200, 200, 255, 255],
+            "tint": [
+                200,
+                200,
+                255,
+                255
+            ],
             "sizeFactor": 1.0,
             "key": "air",
             "value": 6000,
@@ -74,7 +129,12 @@
             "type": "outfitPickup",
             "x": 17.0,
             "y": 53.0,
-            "tint": [255, 255, 255, 255],
+            "tint": [
+                255,
+                255,
+                255,
+                255
+            ],
             "sizeFactor": 1.0,
             "key": "maxAir",
             "value": 6000,
@@ -85,7 +145,12 @@
             "type": "forceField",
             "x": 59.0,
             "y": 40.0,
-            "tint": [255, 0, 0, 255],
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
             "sizeFactor": 1.0,
             "channel": 0,
             "power": -0.03,
@@ -95,14 +160,24 @@
             "type": "savePoint",
             "x": 34.0,
             "y": 20.0,
-            "tint": [150, 255, 150, 255],
+            "tint": [
+                150,
+                255,
+                150,
+                255
+            ],
             "sizeFactor": 1.0
         },
         {
             "type": "gunPickup",
             "x": 90.0,
             "y": 18.0,
-            "tint": [255, 0, 255, 255],
+            "tint": [
+                255,
+                0,
+                255,
+                255
+            ],
             "sizeFactor": 1.0,
             "gunID": 1,
             "pickupID": 1
@@ -111,7 +186,12 @@
             "type": "ammoPickup",
             "x": 100.0,
             "y": 16.0,
-            "tint": [255, 0, 255, 255],
+            "tint": [
+                255,
+                0,
+                255,
+                255
+            ],
             "sizeFactor": 1.0,
             "gunID": 2,
             "ammoCount": 4,
@@ -121,7 +201,12 @@
             "type": "outfitPickup",
             "x": 98.0,
             "y": 16.0,
-            "tint": [255, 0, 0, 255],
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
             "sizeFactor": 1.0,
             "key": "health",
             "value": -50,
@@ -132,7 +217,12 @@
             "type": "outfitPickup",
             "x": 16.0,
             "y": 53.0,
-            "tint": [255, 0, 0, 255],
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
             "sizeFactor": 1.0,
             "key": "maxHealth",
             "value": 100,
@@ -143,7 +233,12 @@
             "type": "opPickup",
             "x": 19.0,
             "y": 19.0,
-            "tint": [0, 255, 255, 255],
+            "tint": [
+                0,
+                255,
+                255,
+                255
+            ],
             "sizeFactor": 1.0,
             "touch": true,
             "opID": 100,
@@ -153,7 +248,12 @@
             "type": "water",
             "x": 1.0,
             "y": 77.0,
-            "tint": [255, 50, 0, 200],
+            "tint": [
+                255,
+                50,
+                0,
+                200
+            ],
             "sizeFactor": 1.0,
             "width": 197,
             "height": 21,
@@ -164,7 +264,12 @@
             "type": "forceField",
             "x": 48.0,
             "y": 66.0,
-            "tint": [255, 0, 0, 255],
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
             "sizeFactor": 1.0,
             "range": 20,
             "power": 0.05
@@ -173,7 +278,12 @@
             "type": "forceField",
             "x": 105.0,
             "y": 66.0,
-            "tint": [255, 0, 0, 255],
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
             "sizeFactor": 1.0,
             "range": 20,
             "power": -0.05
@@ -238,7 +348,12 @@
                 "explosionPower": 0.6,
                 "lifetime": 90,
                 "bulletDisplay": 1012,
-                "tint": [100, 100, 255, 255]
+                "tint": [
+                    100,
+                    100,
+                    255,
+                    255
+                ]
             }
         ]
     }

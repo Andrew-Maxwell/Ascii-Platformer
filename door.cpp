@@ -16,12 +16,12 @@
         return DOORTYPE;
     }
 
-    bool door::doesCollide(float otherX, float otherY, int otherType) {
+    bool door::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         return (otherType == PLAYERTYPE && otherX > x - 1 && otherX < x + 1 && otherY > y - 1 && otherY < y + 1);
     }
 
-    collision door::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type(), 0, destinationX, destinationY, destinationRoom);
+    collision door::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(type(), id, 0, destinationX, destinationY, destinationRoom);
     }
 
     bool door::stopColliding() {

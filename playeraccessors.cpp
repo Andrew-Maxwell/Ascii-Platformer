@@ -8,6 +8,10 @@
         in = newMap;
     }
 
+    inputMap& player::getInputMap() {
+        return in;
+    }
+
 //Outfit handling functions
 
     outfit player::getCurrentOutfit() {
@@ -33,6 +37,12 @@
         toReturn.autoRejump = autoRejump;
         toReturn.walljump = walljump;
         toReturn.guns = guns;
+
+        set<uint8_t> worldCodes = world -> getInterceptedChannels();
+        toReturn.interceptedCodes = interceptedCodes;
+        for (uint8_t channel : worldCodes) {
+            toReturn.interceptedCodes.insert(channel);
+        }
         toReturn.ops = ops;
         for (int i = 0; i < 10; i++) {
             toReturn.channels[i] = channels[i];
@@ -76,6 +86,8 @@
             }
             gunSelect = (gunSelect + 1) % guns.size();
         }
+
+        interceptedCodes = newOutfit.interceptedCodes;
         ops = newOutfit.ops;
         for (int i = 0; i < 10; i++) {
             channels[i] = newOutfit.channels[i];
@@ -120,5 +132,9 @@
         else {
             return "";
         }
+    }
+
+    bool player::isMoving() {
+        return xMovement != 0 || yMovement != 0;
     }
 

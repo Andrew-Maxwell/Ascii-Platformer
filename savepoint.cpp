@@ -12,12 +12,12 @@
         return SAVEPOINTTYPE;
     }
 
-    bool savePoint::doesCollide(float otherX, float otherY, int otherType) {
+    bool savePoint::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         return gotCollision && otherType == PLAYERTYPE && (otherX >= x - 1 && otherX <= x + 1 && otherY >= y - 1 && otherY <= y + 1);
     }
 
-    collision savePoint::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type());
+    collision savePoint::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(type(), id);
     }
 
     bool savePoint::stopColliding() {
@@ -29,7 +29,7 @@
     void savePoint::tickGet() {
         gotCollision = false;
         for (auto colIter = collisions.begin(); colIter != collisions.end(); colIter++) {
-            if (colIter -> type == PLAYERTYPE && colIter -> magnitude == 2) {  //Player is interacting
+            if (colIter -> type == PLAYERTYPE && colIter -> damage == 2) {  //Player is interacting
                 gotCollision = true;
                 explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
             }

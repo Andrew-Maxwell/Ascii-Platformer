@@ -70,12 +70,12 @@
         return FORCEFIELDTYPE;
     }
 
-    bool linearField::doesCollide(float otherX, float otherY, int otherType) {
+    bool linearField::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         return (isOn && otherX >= x && otherX <= x + width && otherY >= y && otherY <= y + height && otherType != WATERTYPE);
     }
 
-    collision linearField::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type(), 0, xPower, yPower);
+    collision linearField::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(type(), id, 0, xPower, yPower);
     }
 
     bool linearField::stopColliding() {
@@ -114,13 +114,14 @@
         range(newRange),
         onTint(newOnTint) {
             nextCollision.type = FORCEFIELDTYPE;
+            nextCollision.id = id;
         }
 
     unsigned int forceField::type() {
         return FORCEFIELDTYPE;
     }
 
-    bool forceField::doesCollide(float otherX, float otherY, int otherType) {
+    bool forceField::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         if (!isOn) {
             return false;
         }
@@ -133,9 +134,9 @@
         return true;
     }
 
-    collision forceField::getCollision(float otherX, float otherY, int otherType) {
+    collision forceField::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
         if (otherType == WATERTYPE) {
-            return collision(FORCEFIELDTYPE, range, x, y, "", power);
+            return collision(FORCEFIELDTYPE, id, range, x, y, "", power);
         }
         else {
             nextCollision.xVal = copysign(pow(pow(power, 2) / (1 + pow((y - otherY) / (x - otherX), 2)), 0.5), x - otherX) * copysign(1, power);
@@ -196,8 +197,8 @@
             isOn = true;
         }
 
-    bool explosion::doesCollide(float otherX, float otherY, int otherType) {
-        return exploding && forceField::doesCollide(otherX, otherY, otherType);
+    bool explosion::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return exploding && forceField::doesCollide(otherX, otherY, otherType, otherID);
     }
 
     bool explosion::stopColliding() {

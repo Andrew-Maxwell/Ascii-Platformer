@@ -16,7 +16,8 @@ using namespace rapidjson;
 struct playerConfig {
     Color tint;
     inputMap in;
-    int playerNumber = -1;
+    int playerNo = -1;
+    int configNo = -1;
 };
 
 struct weapon {
@@ -86,11 +87,15 @@ struct outfit {
 
     vector<weapon> guns;
 
+    set<uint8_t> interceptedCodes;
     vector<puzzleOp> ops;
     bitset<8> channels[10];
     Color channelColors[10];
 
     void merge(outfit& otherOutfit) {
+        if (name != otherOutfit.name) {
+            cout << "WARNING: Merging outfits with different names\n";
+        }
         for (int i = 0; i < otherOutfit.guns.size(); i++) {
             vector<weapon>::iterator foundGun = find(guns.begin(), guns.end(), otherOutfit.guns[i]);
             if (foundGun == guns.end()) {
@@ -155,6 +160,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
 
     //Used in bit manipulation
 
+    set<uint8_t> interceptedCodes;
     vector<puzzleOp> ops;
     bitset<8> channels[10];
     Color channelColors[10];
@@ -162,9 +168,9 @@ class player : virtual public collideable, public entityParent, public hudEntity
 
     public:
 
-    int playerNo = 0, outfitNo = 0;
+    int playerNo = 0, outfitNo = 0, configNo = 0;
     string nextRoom;
-    bool breakDoor = false, breakSave = false, breakDead = false, breakInventory = false;
+    bool breakDoor = false, breakSave = false, breakDead = false, breakInventory = false, focusCamera;
 
     int won = 0;
 
@@ -177,6 +183,8 @@ class player : virtual public collideable, public entityParent, public hudEntity
     //In accessor file: Outfit handling + save/load functions
 
         void setInputMap(inputMap newMap);
+
+        inputMap& getInputMap();
 
         outfit getCurrentOutfit();
 
@@ -196,11 +204,13 @@ class player : virtual public collideable, public entityParent, public hudEntity
 
         string getDoorDestination();
 
+        bool isMoving();
+
     //Collision functions
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 

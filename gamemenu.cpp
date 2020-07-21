@@ -35,9 +35,12 @@
     }
 
     string gameMenu::chooseSave(int& status, int mode) {
-        listData saves("singleplayersaves.json");
-        if (mode == coopMode) {
-            saves.load("multiplayersaves.json");
+        listData saves("");
+        if (mode == singlePlayerMode) {
+            saves.load("singleplayersaves.json");
+        }
+        else {
+            saves.load("coopsaves.json");
         }
         list<string> options = saves.getList();
         init(1, options.size() + 2);
@@ -54,7 +57,7 @@
                 if (button("\xE2\x96\xBA Load " + *iter, 0, buttonPos++)) {
                     status = deadStatus;
                     string atIter = *iter;
-                    toReturn = atIter + (mode == coopMode ? "coop" : "singleplayer") + ".save";
+                    toReturn = atIter + (mode == coopMode ? "-coopsave.json" : "-singleplayersave.json");
                     //Move most recently selected save to front of list
                     iter = options.erase(iter);
                     options.push_front(atIter);
@@ -99,16 +102,16 @@
         return toReturn;
     }
 
-    vector<playerConfig> gameMenu::readyRoom(saveData& save, bool loadedSave, gameLevelData& level, configData& config) {
-        int maxPlayers = min(level.getPlayerCount(), 8);
+    vector<playerConfig> gameMenu::readyRoom(int& status, saveData& save, bool loadedSave, gameLevelData& level, configData& config) {
+        status = readyRoomStatus;
+        int maxPlayersForLevel = min(level.getPlayerCount(), 8);
         vector<player*> tempPlayers;
         vector<playerConfig> playerConfigs;
         outfit defaultOutfit = level.getOutfit("defaultOutfit");
         bool conflict = false;
         bool tooFew = false;
-        bool exit = false;
         //Initialize
-        for (int i = 0; i < maxPlayers; i++) {
+        for (int i = 0; i < maxPlayersForLevel; i++) {
             tempPlayers.push_back(new player(0, 0, HEALTHCOLOR, 1));
             if (loadedSave && save.hasOutfit(defaultOutfit.name + to_string(i))) {
                 outfit newOutfit = save.getOutfit(defaultOutfit.name + to_string(i));
@@ -119,72 +122,82 @@
                 tempPlayers[i] -> setOutfit(defaultOutfit);
             }
             tempPlayers[i] -> playerNo = i;
+        }
+        for (int i = 0; i < MAXPLAYERS; i++) {
             playerConfigs.push_back(config.getPlayerConfig(i));
         }
-        if (theScreen -> getHudCols() >= 8 * (maxPlayers + 1)) {
-            init (1, 2 + maxPlayers);
+        //If the screen is wide enough, add a "reset" button for each player
+        if (theScreen -> getHudCols() >= 8 * (maxPlayersForLevel + 1)) {
+            init (1, 3 + MAXPLAYERS);
         }
         else {
-            init (1, 2);
+            init (1, 3);
         }
-        while (!exit) {
+        while (status == readyRoomStatus) {
             theScreen -> start(true);
             handleInput();
-            for (int i = 0; i < maxPlayers; i++) {
+            for (int i = 0; i < maxPlayersForLevel; i++) {
                 tempPlayers[i] -> printHud();
             }
-            for (int i = 0; i < maxPlayers; i++) {
+            for (int i = 0; i < MAXPLAYERS; i++) {
                 playerConfigs[i].in.update();
                 if (playerConfigs[i].in.left.isPressed()) {
-                    playerConfigs[i].playerNumber = (playerConfigs[i].playerNumber - 1 + maxPlayers) % maxPlayers;
+                    playerConfigs[i].playerNo = (playerConfigs[i].playerNo - 1 + maxPlayersForLevel) % maxPlayersForLevel;
                 }
                 if (playerConfigs[i].in.right.isPressed()) {
-                    playerConfigs[i].playerNumber = (playerConfigs[i].playerNumber + 1) % maxPlayers;
+                    playerConfigs[i].playerNo = (playerConfigs[i].playerNo + 1) % maxPlayersForLevel;
                 }
-                if (yCount == 10 && button("Reset", 0, i, "", 8 * maxPlayers, 10 + 2 * i)) {
-                    playerConfigs[i].playerNumber = -1;
+                if (yCount > MAXPLAYERS && button("Reset", 0, i, "", 8 * maxPlayersForLevel, 10 + 2 * i)) {
+                    playerConfigs[i].playerNo = -1;
                 }
-                if (playerConfigs[i].playerNumber == -1) {
-                    string inactive = "[Press left or right to select avatar]";
-                    theScreen -> drawHud((theScreen -> getHudCols() - inactive.size()) / 2, 10 + 2 * i, playerConfigs[i].tint, inactive);
+                if (playerConfigs[i].playerNo == -1) {
+                    theScreen -> drawHud(1, 10 + 2 * i, playerConfigs[i].tint, "[Not selected]");
                 }
                 else {
-                    theScreen -> drawHud(playerConfigs[i].playerNumber * 8 + 4, 10 + 2 * i, playerConfigs[i].tint, "\xE2\x98\xBB");
+                    theScreen -> drawHud(playerConfigs[i].playerNo * 8 + 4, 10 + 2 * i, playerConfigs[i].tint, "\xE2\x98\xBB");
                 }
             }
-            if (button("Reset all", 0, yCount - 2, "", 1, 10 + maxPlayers * 2)) {
-                for (int i = 0; i < maxPlayers; i++) {
-                    playerConfigs[i].playerNumber = -1;
+            if (button("Reset all", 0, yCount - 3, "", 1, 10 + MAXPLAYERS * 2)) {
+                for (int i = 0; i < 8; i++) {
+                    playerConfigs[i].playerNo = -1;
                 }
             }
-            if (button("\xE2\x96\xBA Continue", 0, yCount - 1, "", 1, 12 + maxPlayers * 2)) {
-                bool conflict = false;
-                bool tooFew = true;
-                for (int i = 0; i < maxPlayers; i++) {
-                    for (int j = i + 1; j < maxPlayers; j++) {
-                        if (playerConfigs[i].playerNumber != -1) {
-                            tooFew = false;
-                            if (playerConfigs[i].playerNumber == playerConfigs[j].playerNumber) {
+            if (button("\xE2\x96\xBA Continue", 0, yCount - 2, "", 1, 12 + MAXPLAYERS * 2)) {
+                conflict = false;
+                tooFew = true;
+                for (int i = 0; i < MAXPLAYERS; i++) {
+                    if (playerConfigs[i].playerNo != -1) {
+                        tooFew = false;
+                        for (int j = i + 1; j < MAXPLAYERS; j++) {
+                            if (playerConfigs[i].playerNo == playerConfigs[j].playerNo) {
                                 conflict = true;
                             }
                         }
                     }
                 }
                 if (!conflict && !tooFew) {
-                    exit = true;
+                    status = deadStatus;    //Keep loading the level
                 }
             }
+            if (button("\xE2\x96\xBA Exit to main menu", 0, yCount - 1, "", 1, 14 + MAXPLAYERS * 2)) {
+                playerConfigs.clear();
+                status = menuStatus;    //Return to menu
+            }
             if (conflict) {
-                theScreen -> drawHud(1, 30, RED, "Error: players must have different avatars");
+                theScreen -> drawHud(1, 16 + MAXPLAYERS * 2, RED, "Error: players must select different characters");
             }
-            if (tooFew) {
-                theScreen -> drawHud(1, 32, RED, "Error: too few players");
+            else if (tooFew) {
+                theScreen -> drawHud(1, 16 + MAXPLAYERS * 2, RED, "Error: need at least 1 character selected");
             }
+            else {
+                theScreen -> drawHud(1, 16 + MAXPLAYERS * 2, UIFOREGROUND, "Press left or right to select an avatar");
+            }
+            drawTitle("Ready Room");
             theScreen -> end();
         }
         auto configIter = playerConfigs.begin();
         while (configIter != playerConfigs.end()) {
-            if (configIter -> playerNumber == -1) {
+            if (configIter -> playerNo == -1) {
                 configIter = playerConfigs.erase(configIter);
             }
             else {
@@ -272,8 +285,9 @@
 
     void gameMenu::inventory(int& status, outfit& o, inputMap& in) {
         init(o.ops.size(), 11);
-        bool firstTick = true;  //Prevents entering and exiting screen in first tick (because tab is pressed)
+        pageRows = 35 + 2 * (o.interceptedCodes.size() / (theScreen -> getHudCols() / 9));
         while (status == inventoryStatus) {
+            in.update();
             handleInput(in);
             if (ySelect == 10) {
                 xSelect = 0;
@@ -283,11 +297,11 @@
             string listNum = "0: ";
             for (int i = 0; i < 10; i++) {
                 listNum[0] = '0' + i;
-                theScreen -> drawHud(1, 10 + 2 * i, UIFOREGROUND, listNum);
-                theScreen -> drawHud(4, 10 + 2 * i, o.channelColors[i], o.channels[i].to_string());
+                theScreen -> drawHud(1, 10 + 2 * i - scroll, UIFOREGROUND, listNum);
+                theScreen -> drawHud(4, 10 + 2 * i - scroll, o.channelColors[i], o.channels[i].to_string());
                 for (int j = 0; j < o.ops.size(); j++) {;
                     if (o.ops[j].unlocked) {
-                        if (button(o.ops[j].display, j, i, "", j * 3 + 15, 10 + 2 * i)) {
+                        if (button(o.ops[j].display, j, i, "", j * 3 + 15, 10 + 2 * i - scroll)) {
                             for (int k = 0; k < o.ops[j].operations.size(); k++) {
                                 apply(&o.channels[i], o.ops[j].operations[k], o.ops[j].operands[k]);
                             }
@@ -301,8 +315,19 @@
                     }
                 }
             }
-            if (goBack() || (in.inventory.isPressed() && !firstTick) || button("Back to Game", 0, 10, "", 1, 32)) {
+            if (goBack() || (in.inventory.isPressedOnce()) || button("Back to Game", 0, 10, "", 1, 32 - scroll)) {
                 status = runStatus;
+            }
+            theScreen -> drawHud(1, 34 - scroll, UIFOREGROUND, "Intercepted codes: ");
+            int chanIter = 0;
+            for (uint8_t channel : o.interceptedCodes) {
+                Color tint = {255, 255, 255, 255};
+                tint.r = 255 - (channel & 192);
+                tint.g = 255 - ((channel & 56) << 2);
+                tint.b = 255 - ((channel & 7) << 5);
+                tint.a = 255;
+                theScreen -> drawHud(1 + (chanIter % (theScreen -> getHudCols() / 9)) * 9, 36 + chanIter / (theScreen -> getHudCols() / 9) * 2 - scroll, tint, bitset<8>(channel).to_string());
+                chanIter++;
             }
             firstTick = false;
             drawTitle("Inventory");
@@ -317,7 +342,7 @@
 /*****************************************************************************/
 
     void gameMenu::options(int& status, configData& configFile) {
-        const int rows = 12, cols = 2;
+        const int rows = 14, cols = 2;
         vector<conflict> conflicts = configFile.getConflicts();
         init(cols, rows + conflicts.size());
         while (status == optionsStatus) {
@@ -327,7 +352,7 @@
             }
             theScreen -> start(true);
             //Display settings
-            if (button("Toggle fullscreen", 0, 0)) {
+            if (button("Fullscreen", 0, 0, (IsWindowFullscreen() ? "true" : "false"))) {
                 if (IsWindowFullscreen()) {
                     ToggleFullscreen();
                     SetWindowSize(MINWINDOWCOLS * theScreen -> getHudFontSize(), MINWINDOWROWS * theScreen -> getHudFontSize());
@@ -343,23 +368,27 @@
                 }
                 configFile.save();
             }
-            if (button("Tweak interface scale", 0, 1)) {
+            if (button("Interface scale", 0, 1, to_string(theScreen -> getHudFontSize()))) {
                 theScreen -> tweakHudScale();
                 configFile.setHudFontSize(theScreen -> getHudFontSize());
                 configFile.save();
             }
-            string gameScaleLabel = "Tweak game scale";
-            if (button(gameScaleLabel, 0, 2)) {
+            string gameScaleLabel = "Game scale";   //Need size to draw size indicator below
+            if (button(gameScaleLabel, 0, 2, to_string(theScreen -> getFontSize()))) {
                 theScreen -> tweakGameScale();
                 configFile.setGameFontSize(theScreen -> getFontSize());
                 configFile.save();
             }
             string gameScaleTest = "Game Scale Text";
-            theScreen -> drawScaleTest(4 + gameScaleLabel.size(), 6 - scroll, RED, gameScaleTest);
+            theScreen -> drawScaleTest(9 + gameScaleLabel.size(), 6 - scroll, RED, gameScaleTest);
+            if (button("Auto switch camera in multiplayer", 0, 3, (configFile.getAutoCamera() ? "true" : "false"))) {
+                configFile.setAutoCamera(!configFile.getAutoCamera());
+                configFile.save();
+            }
             //Player config settings
-            for (int i = 0; i < 8; i++) {
-                theScreen -> drawHud(1, 2 * (4 + i) - scroll, configFile.getConfigColor(i), "Player " + to_string(i));
-                if (button("\xE2\x96\xBA Edit Input", 0, 3 + i, "", 10)) {
+            for (int i = 0; i < MAXPLAYERS; i++) {
+                theScreen -> drawHud(1, 2 * (5 + i) - scroll, configFile.getConfigColor(i), "Player " + to_string(i));
+                if (button("\xE2\x96\xBA Edit Input", 0, 4 + i, "", 10)) {
                     playerConfig c = configFile.getPlayerConfig(i);
                     status = inputOptionsStatus;
                     editInputMap(status, c.in);
@@ -368,7 +397,7 @@
                     conflicts = configFile.getConflicts();
                     init(cols, rows + conflicts.size());
                 }
-                if (button("\xE2\x96\xBA Edit Color", 1, 3 + i, "", 24)) {
+                if (button("\xE2\x96\xBA Edit Color", 1, 4 + i, "", 24)) {
                     playerConfig c = configFile.getPlayerConfig(i);
                     c.tint = editColor(c.tint);
                     configFile.setConfig(i, c);
@@ -378,8 +407,8 @@
                 }
             }
             for (int i = 0; i < conflicts.size(); i++) {
-                theScreen -> drawHud(1, 2 * (12 + i) - scroll, RED, "Conflict:            and           " + conflicts[i].error);
-                if (button("\xE2\x96\xBA Player " + to_string(conflicts[i].player1), 0, 11 + i, "", 11)) {
+                theScreen -> drawHud(1, 2 * (MAXPLAYERS + 5 + i) - scroll, RED, "Conflict:            and           " + conflicts[i].error);
+                if (button("\xE2\x96\xBA Player " + to_string(conflicts[i].player1), 0, MAXPLAYERS + 4 + i, "", 11)) {
                     playerConfig c = configFile.getPlayerConfig(conflicts[i].player1);
                     status = inputOptionsStatus;
                     editInputMap(status, c.in);
@@ -388,7 +417,7 @@
                     conflicts = configFile.getConflicts();
                     init(cols, rows + conflicts.size());
                 }
-                else if (button("\xE2\x96\xBA Player " + to_string(conflicts[i].player2), 1, 11 + i, "", 26)) {
+                else if (button("\xE2\x96\xBA Player " + to_string(conflicts[i].player2), 1, MAXPLAYERS + 4 + i, "", 26)) {
                     playerConfig c = configFile.getPlayerConfig(conflicts[i].player2);
                     status = inputOptionsStatus;
                     editInputMap(status, c.in);
@@ -398,13 +427,13 @@
                     init(cols, rows + conflicts.size());
                 }
             }
-            if (button("Reset all defaults", 0, 11 + conflicts.size())) {
+            if (button("Reset all defaults", 0, MAXPLAYERS + 4 + conflicts.size())) {
                 string fileName = configFile.getFileName();
                 configFile = configData(fileName, true);
                 conflicts.clear();
                 configFile.save();
             }
-            if (goBack() || button("\xE2\x96\xBA Back to Menu", 0, 12 + conflicts.size())) {
+            if (goBack() || button("\xE2\x96\xBA Back to Menu", 0, MAXPLAYERS + 5 + conflicts.size())) {
                 status = -1;    //Previous status will be restored in calling function
             }
             drawTitle("Options");
@@ -491,6 +520,36 @@
                 handleInput();
             }
             theScreen -> start(true);
+            if (toEdit -> keyboard) {
+                if (button("Device type", 0, 0, "keyboard")) {
+                    toEdit = &gamepadMap;
+                }
+                else if (button("Use mouse aim", 0, 1, (toEdit -> useMouseAim ? "true" : "false"))) {
+                    toEdit -> useMouseAim = !toEdit -> useMouseAim;
+                }
+            }
+            else {
+                if (button("Device type", 0, 0, "gamepad")) {
+                    toEdit = &keyboardMap;
+                }
+                else {
+                    if (selectionToChange == toEdit -> count()) {
+                        theScreen -> drawHud(1, 4 - scroll, RED, "PRESS GAMEPAD BUTTON OR MOVE JOYSTICK");
+                        int newDevice = selectGamepad();
+                        if (newDevice >= 0) {
+                            toEdit -> device = newDevice;
+                            selectionToChange = -1;
+                            firstCallToReleased = false;
+                        }
+                        if (goBack()) {
+                            selectionToChange = -1;
+                        }
+                    }
+                    else if (button("Gamepad number", 0, 1, to_string(toEdit -> device))) {
+                        selectionToChange = toEdit -> count();
+                    }
+                }
+            }
             bool clickedNoButton = true;
             for (int i = 0; i < toEdit -> count(); i++) {
                 if (selectionToChange == i) {
@@ -501,7 +560,7 @@
                     else {
                         prompt = "PRESS BUTTON OR MOVE JOYSTICK";
                     }
-                    theScreen -> drawHud(1, 2 * (i + 1), RED, prompt);
+                    theScreen -> drawHud(1, 2 * (i + 3) - scroll, RED, prompt);
                     if (IsKeyPressed(KEY_DELETE) || IsKeyPressed(KEY_BACKSPACE)) {
                         (*toEdit)[i] = input(); //unbound input
                         selectionToChange = -1;
@@ -516,7 +575,7 @@
                     }
                 }
                 else {
-                    if (button(toEdit -> name(i), 0, i, (*toEdit)[i].name(toEdit -> device))) {
+                    if (button(toEdit -> name(i), 0, i + 2, (*toEdit)[i].name(toEdit -> device))) {
                         selectionToChange = i;
                         clickedNoButton = false;
                     }
@@ -524,36 +583,6 @@
                 if (selectionToChange > -1 && IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && firstCallToReleased && clickedNoButton) {
                     selectionToChange = -1;
                     firstCallToReleased = false;
-                }
-            }
-            if (toEdit -> keyboard) {
-                if (button("Device type", 0, toEdit -> count(), "keyboard")) {
-                    toEdit = &gamepadMap;
-                }
-                else if (button("Use mouse aim", 0, toEdit -> count() + 1, (toEdit -> useMouseAim ? "true" : "false"))) {
-                    toEdit -> useMouseAim = !toEdit -> useMouseAim;
-                }
-            }
-            else {
-                if (button("Device type", 0, toEdit -> count(), "gamepad")) {
-                    toEdit = &keyboardMap;
-                }
-                else {
-                    if (selectionToChange == toEdit -> count()) {
-                        theScreen -> drawHud(1, 2 * (toEdit -> count() + 2 - scroll), RED, "PRESS GAMEPAD BUTTON OR MOVE JOYSTICK");
-                        int newDevice = selectGamepad();
-                        if (newDevice >= 0) {
-                            toEdit -> device = newDevice;
-                            selectionToChange = -1;
-                            firstCallToReleased = false;
-                        }
-                        if (goBack()) {
-                            selectionToChange = -1;
-                        }
-                    }
-                    else if (button("Gamepad number", 0, toEdit -> count() + 1, to_string(toEdit -> device))) {
-                        selectionToChange = toEdit -> count();
-                    }
                 }
             }
             if (button("Reset to default", 0, toEdit -> count() + 2)) {

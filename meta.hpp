@@ -70,6 +70,7 @@
 
 #define ERRORTYPE -1
 #define LAYERTYPE 0
+#define PLAYERTYPE 1
 #define ENDINGGATETYPE 2
 #define DOORTYPE 3
 #define SAVEPOINTTYPE 4
@@ -89,6 +90,8 @@
 #define AMMOPICKUPTYPE 22
 #define OPPICKUPTYPE 27
 #define OUTFITPICKUPTYPE 28
+
+#define MAXPLAYERS 8
 
 //Globally accessible stuff
 

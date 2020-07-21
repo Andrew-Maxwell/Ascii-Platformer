@@ -6,7 +6,7 @@
                 won = 1;
                 break;
             case DOORTYPE:
-                if (in.interact.isPressedOnce()) {
+                if (!(breakDead || breakDoor) && in.interact.isPressedOnce()) {
                     nextX = col.xVal;
                     nextY = col.yVal;
                     nextRoom = col.message;
@@ -14,21 +14,23 @@
                 }
                 break;
             case SAVEPOINTTYPE: {
-                breakSave = true;
+                if (!(breakDead || breakDoor)) {
+                    breakSave = true;
+                }
                 break;
             }
             case BULLETTYPE:
                 if (hurtTimer < 0) {
                     yInertia += col.yVal * 0.3;
                     xInertia += col.xVal * 0.3;
-                    health += (col.damage);
+                    health = max(0, min(maxHealth, health + col.damage));
                     hurtTimer = 60;
                     damageIndicator(col.damage, x, y, HURTCOLOR, sizeFactor);
                 }
                 break;
             case ENEMYTYPE:
                 if (hurtTimer < 0) {
-                    health += (col.damage);
+                    health = max(0, min(maxHealth, health + col.damage));
                     hurtTimer = 60;
                     damageIndicator(col.damage, x, y, HURTCOLOR, sizeFactor);
                     Vector2 newInertia = Vector2Scale(Vector2Negate(Vector2Normalize({xInertia, yInertia})), 0.7);

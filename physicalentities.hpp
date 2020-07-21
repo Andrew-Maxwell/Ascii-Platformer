@@ -30,9 +30,9 @@ class physicalEntity : virtual public collideable {
 
     unsigned int type();
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
-    collision getCollision(float otherX, float otherY, int otherType);
+    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 
@@ -64,7 +64,7 @@ class physicalParticle : public physicalEntity, protected particle {
 
     unsigned int type();
 
-    bool doesCollide(float otherX, float otherY, int otherType);
+    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 
     bool stopColliding();
 

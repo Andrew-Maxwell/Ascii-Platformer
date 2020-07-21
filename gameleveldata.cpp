@@ -54,10 +54,10 @@
 
     //Read in entities to global world collider
 
-    void gameLevelData::readEntitiesGame(vector<player*>& players, bool reloadPlayers, set<int>* collectedPickups) {
+    void gameLevelData::readEntitiesGame(vector<player*>& players, bool movePlayers, set<int>* collectedPickups) {
 
         auto layerIter = layerCache.begin();
-        int playerIter = 0;
+        auto playerIter = players.begin();
 
         //Get the list of entities
 
@@ -105,34 +105,18 @@
                 S -> setZPosition (world -> getZPosition());
             }
             else if (type == "player") {
-                //if reloadplayers then create new players in level-defined positions (dead)
-                //otherwise, we load all of the players that already exist from the previous room (door)
-                player* playerToAdd;
-                bool skip = false;
-                if (reloadPlayers) {
-                    cout << "\t...and creating one\n";
-                    playerToAdd = new player (x, y, tint, sizeFactor);
-                    playerToAdd -> setInputMap(inputMap(playerIter - 1));
-                    players.push_back(playerToAdd);
-                    playerToAdd -> setColor((Color)tint);
+                //if movePlayers then move players to level-defined positions (dead)
+                if (playerIter != players.end()) {
+                    if (movePlayers) {
+                        (*playerIter) -> moveTo((Vector2){x, y});
+                    }
+                    (*playerIter) -> setDoLighting(doLighting);
+                    (*playerIter) -> setSizeFactor(sizeFactor);
+                    world -> addCollideable(*playerIter);
+                    (*playerIter) -> setZPosition (world -> getZPosition());
+                    world -> addHudEntity(*playerIter);
+                    playerIter++;
                 }
-                else if (playerIter < players.size()) {
-                    cout << "\t...and inserting existing one\n";
-                    playerToAdd = players[playerIter];
-                }
-                else {
-                    cout << "\t...but not loading one\n";
-                    skip = true;
-                }
-
-                if (!skip) {
-                    playerToAdd -> setDoLighting(doLighting);
-                    playerToAdd -> setSizeFactor(sizeFactor);
-                    world -> addCollideable(playerToAdd);
-                    playerToAdd -> setZPosition (world -> getZPosition());
-                    world -> addHudEntity(playerToAdd);
-                }
-                playerIter++;
             }
             else if (type == "forceField") {
                 int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0.0;

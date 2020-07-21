@@ -23,21 +23,43 @@
         hitWall(newHitWall),
         hitWater(newHitWater),
         hitEntity(newHitEntity),
-        sticky(newSticky) {}
+        sticky(newSticky),
+        lastX(newX),
+        lastY(newY) {
+            physicalEntity::tickSet();
+            physicalEntity::tickSet();
+        }
 
     unsigned int bullet::type() {
         return BULLETTYPE;
     }
 
-    bool bullet::doesCollide(float otherX, float otherY, int otherType) {
-        return physicalEntity::doesCollide(otherX, otherY, otherType);
+    bool bullet::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
+        //Check for any objects between this position and the last position
+        if (otherX >= min(lastX, x) - 1 && otherX <= max(lastX, x) + 1 && otherY >= min(lastY, y) - 1 && otherY <= max(lastY, y) + 1) {
+            int numSteps = max(abs(int(x - lastX)), abs(int(y - lastY))) + 1;
+            float xStep = (x - lastX) / numSteps;
+            float yStep = (y - lastY) / numSteps;
+            for (int i = 1; i <= numSteps; i++) {
+                if (otherX >= x - xStep * i - 1 && otherX <= x - xStep * i + 1 && otherY >= y - yStep * i - 1 && otherY <= y + yStep * i + 1) {
+                    if (hitEntity && (otherType == PLAYERTYPE || otherType == PHYSICALENTITYTYPE || otherType == ENEMYTYPE)) {
+                        bulletHit = true;
+                    }
+                    if (hitWater && otherType == WATERTYPE) {
+                        bulletHit = true;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    collision bullet::getCollision(float otherX, float otherY, int otherType) {
+    collision bullet::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
         if (otherType == WATERTYPE) {
-            return physicalEntity::getCollision(otherX, otherY, otherType);
+            return physicalEntity::getCollision(otherX, otherY, otherType, otherID);
         }
-        return collision(type(), damage, xMomentum, yMomentum);
+        return collision(type(), id, damage, xMomentum, yMomentum);
     }
 
     bool bullet::stopColliding() {
@@ -59,19 +81,10 @@
     }
 
     void bullet::tickGet() {
-        if (!bulletHit) {
-            for (auto c : collisions) {
-                if (hitWater && c.type == WATERTYPE) {
-                    bulletHit = true;
-                    break;
-                }
-                if (hitEntity && c.type != WATERTYPE) {
-                    bulletHit = true;
-                    break;
-                }
-            }
-        }
+        collisions.clear();
         if (!stuck) {
+            lastX = x;
+            lastY = y;
             physicalEntity::tickGet();
         }
         if (bulletHit && explosionRange > 0) {

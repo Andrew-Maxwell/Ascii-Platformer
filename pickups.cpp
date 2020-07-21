@@ -20,8 +20,8 @@
         free(toPrint);
     }
 
-    bool pickup::doesCollide(float otherX, float otherY, int otherType) {
-        if (gotCollision && otherType == PLAYERTYPE && !collected && (otherX <= x + 1 && otherX >= x - 1 && otherY <= y + 1 && otherY >= y - 1)) {
+    bool pickup::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
+        if (gotCollision && otherType == PLAYERTYPE && !collected && (otherX <= x + 1 && otherX >= x - 1 && otherY <= y + 1 && otherY >= y - 1) && otherID == playerID) {
             collected = true;
             collectedPickups -> insert(pickupID);
             return true;
@@ -29,8 +29,8 @@
         return false;
     }
 
-    collision pickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type());
+    collision pickup::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(type(), id);
     }
 
     bool pickup::stopColliding() {
@@ -47,9 +47,11 @@
     void pickup::tickGet() {
         if (!collected) {
             for (auto colIter = collisions.begin(); colIter != collisions.end(); colIter++) {
-                if (colIter -> type == PLAYERTYPE && (touch || colIter -> magnitude == 2)) {
+                if (colIter -> type == PLAYERTYPE && (touch || colIter -> damage == 2)) {
                     gotCollision = true;
                     explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
+                    playerID = colIter -> id;
+                    break;
                 }
             }
         }
@@ -82,8 +84,8 @@
         return OUTFITPICKUPTYPE;
     }
 
-    collision outfitPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(OUTFITPICKUPTYPE, add ? 1 : 0, 0.0, pickupID, key, value);
+    collision outfitPickup::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(OUTFITPICKUPTYPE, id, add ? 1 : 0, 0.0, pickupID, key, value);
     }
 
 /*****************************************************************************/
@@ -100,8 +102,8 @@
         return GUNPICKUPTYPE;
     }
 
-    collision gunPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(GUNPICKUPTYPE, gunID, 0.0, pickupID);
+    collision gunPickup::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(GUNPICKUPTYPE, id, gunID, 0.0, pickupID);
     }
 
 /*****************************************************************************/
@@ -119,8 +121,8 @@
         return AMMOPICKUPTYPE;
     }
 
-    collision ammoPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(AMMOPICKUPTYPE, gunID, ammoCount, pickupID);      //ammoCount in xVal
+    collision ammoPickup::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(AMMOPICKUPTYPE, id, gunID, ammoCount, pickupID);      //ammoCount in xVal
     }
 
 /*****************************************************************************/
@@ -137,6 +139,6 @@
         return OPPICKUPTYPE;
     }
 
-    collision opPickup::getCollision(float otherX, float otherY, int otherType) {
-        return collision(OPPICKUPTYPE, opID, 0.0, pickupID);
+    collision opPickup::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return collision(OPPICKUPTYPE, id, opID, 0.0, pickupID);
     }

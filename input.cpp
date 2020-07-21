@@ -54,7 +54,7 @@ int selectGamepad() {
     while (IsGamepadAvailable(padID)) {
         for (int i = 1; i < 17; i++) {
             if (IsGamepadButtonReleased(padID, i)) {
-                if (toReturn == 0) {
+                if (toReturn == -2) {
                     toReturn = padID;
                 }
                 else {
@@ -64,7 +64,7 @@ int selectGamepad() {
         }
         for (int i = 0; i < 4; i++) {
             if (GetGamepadAxisMovement(padID, i) != 0) {
-                if (toReturn == 0) {
+                if (toReturn == -2) {
                     toReturn = padID;
                 }
                 else {
@@ -207,6 +207,7 @@ int selectGamepad() {
             aimLeft = input(false, false, KEY_J);
             aimRight = input(false, false, KEY_L);
             fire = input(false, false, KEY_SPACE);
+            focusCamera = input(false, false, KEY_GRAVE);
             for (int i = 0; i < 10; i++) {
                 code[i] = input(false, false, KEY_ZERO + i);
             }
@@ -231,6 +232,7 @@ int selectGamepad() {
             aimLeft = input(true, false, GAMEPAD_AXIS_RIGHT_X);
             aimRight = input(true, true, GAMEPAD_AXIS_RIGHT_X);
             fire = input(false, false, GAMEPAD_BUTTON_RIGHT_TRIGGER_1);
+            focusCamera = input(false, false, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
             for (int i = 0; i < 10; i++) {
                 code[i] = input();
             }
@@ -244,7 +246,7 @@ int selectGamepad() {
     }
 
     input& inputMap::operator[](int index) {
-        if (index >= 0 && index < 18) {
+        if (index >= 0 && index < 19) {
             switch(index) {
                 case(0): return up;
                 case(1): return down;
@@ -264,11 +266,12 @@ int selectGamepad() {
                 case(15): return aimLeft;
                 case(16): return aimRight;
                 case(17): return fire;
+                case(18): return focusCamera;
                 default: return error;
             }
         }
-        else if (index < 28) {
-            return code[index - 18];
+        else if (index < 29) {
+            return code[index - 19];
         }
         else {
             return error;
@@ -276,7 +279,7 @@ int selectGamepad() {
     }
 
     string inputMap::name(int index) {
-        if (index >= 0 && index < 18) {
+        if (index >= 0 && index < 19) {
             switch(index) {
                 case(0): return "up";
                 case(1): return "down";
@@ -296,11 +299,12 @@ int selectGamepad() {
                 case(15): return "aim left";
                 case(16): return "aim right";
                 case(17): return "fire";
+                case(18): return "focus camera";
                 default: return "error";
             }
         }
-        else if (index < 28) {
-            return "broadcast code " + to_string(index - 18);
+        else if (index < 29) {
+            return "broadcast code " + to_string(index - 19);
         }
         else {
             return "Bad index in inputMap::name()";
@@ -352,7 +356,7 @@ int selectGamepad() {
     }
 
     int inputMap::count() {
-        return 28;
+        return 29;
     }
 
     Vector2 inputMap::getAim() {

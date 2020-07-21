@@ -14,16 +14,16 @@
         return ENEMYTYPE;
     }
 
-    bool newTestEntity::doesCollide(float otherX, float otherY, int otherType) {
-        return physicalEntity::doesCollide(otherX, otherY, otherType);
+    bool newTestEntity::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
+        return physicalEntity::doesCollide(otherX, otherY, otherType, otherID);
     }
 
-    collision newTestEntity::getCollision(float otherX, float otherY, int otherType) {
+    collision newTestEntity::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
         if (otherType == WATERTYPE) {
-            return physicalEntity::getCollision(otherX, otherY, otherType);
+            return physicalEntity::getCollision(otherX, otherY, otherType, otherID);
         }
         else {
-            return collision(type(), damage);
+            return collision(type(), id, damage);
         }
     }
 

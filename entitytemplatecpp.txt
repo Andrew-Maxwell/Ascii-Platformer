@@ -12,7 +12,7 @@
     }
 
     collision newTestEntity::getCollision(float otherX, float otherY, int otherType) {
-        return collision(type());
+        return collision(type(), id);
     }
 
     bool newTestEntity::stopColliding() {

@@ -20,7 +20,7 @@ class saveData : public outfitData {
 
     void setCollectedPickups(set<int> newCollectedPickups);
 
-    void writeOutfit(outfit o, int playerNumber);
+    void writeOutfit(outfit o, int playerNo);
 
     void save(Vector2 position, string room);
 };

@@ -73,7 +73,7 @@ using namespace rapidjson;
 
     listData::listData(string newFileName) {
         fileName = newFileName;
-        if (!load(fileName)) {
+        if (newFileName == "" || !load(fileName)) {
             json.SetArray();
         }
     }
@@ -166,6 +166,7 @@ using namespace rapidjson;
         const Value& outfitValue = json[name.c_str()];
         assert(outfitValue.IsObject());
         assert(outfitValue.HasMember("name"));
+        assert(outfitValue["name"].IsString());
         toReturn.name = outfitValue["name"].GetString();
         toReturn.display = outfitValue.HasMember("display") ? outfitValue["display"].GetInt() : '@';
         toReturn.health = outfitValue.HasMember("health") ? outfitValue["health"].GetInt() : 8;
@@ -231,6 +232,15 @@ using namespace rapidjson;
                 newGun.tint = gunData.HasMember("tint") ? getColor(gunData["tint"]) : (Color){255, 0, 0, 255};
                 newGun.tintFaded = (Color){(newGun.tint.r + 122) / 2, (newGun.tint.g + 122) / 2, (newGun.tint.b + 122) / 2, (newGun.tint.a + 122) / 2};
                 toReturn.guns.push_back(newGun);
+            }
+        }
+
+        //Get intercepted codes
+
+        if (outfitValue.HasMember("interceptedCodes")) {
+            for (SizeType i = 0; i < outfitValue["interceptedCodes"].Size(); i++) {
+                toReturn.interceptedCodes.insert(outfitValue["interceptedCodes"][i].GetInt());
+                cout << "Got code from json\n";
             }
         }
 
