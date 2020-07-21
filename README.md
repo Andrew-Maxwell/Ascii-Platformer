@@ -2,6 +2,12 @@
 WIP platformer using Raylib. All of the graphics are composed of overlapping Unicode characters in
 different colors and sizes, inspired by ASCII art; hence the title.
 
+![snow.json level at dawn](images/snowjsondawn.png)
+![dark.json level](images/darkjson.png)
+![matrix-looking level](images/matrix.png)
+![options](images/options.png)
+![enter name](images/entername.png)
+
 ## Gameplay
 The final vision for gameplay can be thought of as having three primary components: Combat, 
 platforming, and puzzles.
