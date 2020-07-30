@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
                 if (IsKeyPressed(KEY_E)) {
                     brushName = "(E)ntity move";
                     brushID = 3;
-                    brushClickCount = 2;
+                    brushClickCount = 1;
                 }
                 if (IsKeyPressed(KEY_Q)) {
                     brushName = "(Q)uadrilateral";
@@ -534,7 +534,7 @@ int main(int argc, char** argv) {
                             if (brushID == 10) {
                                 intVector2 tile = theScreen -> getMouseRelativeTo(0, 0, 1);
                                 Value& newJson = level.getNewEntity(tile.x, tile.y, (*thisLayer) -> getSizeFactor(), placeHoldersAdded);
-                                editableLayer* newEntity = new editableLayer(tile.x, tile.y, {0, 0, 255, 255}, (*thisLayer) -> getSizeFactor(), false, false, "", 'A' + placeHoldersAdded, 1, 1, newJson);
+                                editableLayer* newEntity = new editableLayer(tile.x, tile.y, {0, 0, 255, 255}, (*thisLayer) -> getSizeFactor(), false, false, "", 'A' + placeHoldersAdded, 1, 1, newJson, true);
                                 placeHoldersAdded++;
                                 layers.push_back(newEntity);
                                 thisLayer = layers.end();

@@ -169,7 +169,8 @@
             "y": 0.0,
             "tint": [255, 0, 0, 255],
             "sizeFactor": 1.0,
-            "fileName": "snow_layer5.txt"
+            "fileName": "snow_layer5.txt",
+            "doLighting": false
         },
         {
             "type": "layer",

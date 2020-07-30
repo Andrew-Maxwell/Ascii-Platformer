@@ -296,18 +296,19 @@
             //Draw available ops as buttons
             string listNum = "0: ";
             for (int i = 0; i < 10; i++) {
-                listNum[0] = '0' + i;
+                int reOrder = (i + 1) % 10;   //print in keyboard order 1234567890
+                listNum[0] = '0' + reOrder;
                 theScreen -> drawHud(1, 10 + 2 * i - scroll, UIFOREGROUND, listNum);
-                theScreen -> drawHud(4, 10 + 2 * i - scroll, o.channelColors[i], o.channels[i].to_string());
-                for (int j = 0; j < o.ops.size(); j++) {;
+                theScreen -> drawHud(4, 10 + 2 * i - scroll, o.channelColors[reOrder], o.channels[reOrder].to_string());
+                for (int j = 0; j < o.ops.size(); j++) {
                     if (o.ops[j].unlocked) {
                         if (button(o.ops[j].display, j, i, "", j * 3 + 15, 10 + 2 * i - scroll)) {
                             for (int k = 0; k < o.ops[j].operations.size(); k++) {
-                                apply(&o.channels[i], o.ops[j].operations[k], o.ops[j].operands[k]);
+                                apply(&o.channels[reOrder], o.ops[j].operations[k], o.ops[j].operands[k]);
                             }
-                            o.channelColors[i].r = 255 - (o.channels[i] & bitset<8>(192)).to_ulong();
-                            o.channelColors[i].g = 255 - ((o.channels[i] & bitset<8>(56)).to_ulong() << 2);
-                            o.channelColors[i].b = 255 - ((o.channels[i] & bitset<8>(7)).to_ulong() << 5);
+                            o.channelColors[reOrder].r = 255 - (o.channels[reOrder] & bitset<8>(192)).to_ulong();
+                            o.channelColors[reOrder].g = 255 - ((o.channels[reOrder] & bitset<8>(56)).to_ulong() << 2);
+                            o.channelColors[reOrder].b = 255 - ((o.channels[reOrder] & bitset<8>(7)).to_ulong() << 5);
                         }
                     }
                     else {

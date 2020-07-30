@@ -35,6 +35,9 @@
     }
 
     bool bullet::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
+        if (otherType == TRIGGERTYPE) {
+            return true;
+        }
         //Check for any objects between this position and the last position
         if (otherX >= min(lastX, x) - 1 && otherX <= max(lastX, x) + 1 && otherY >= min(lastY, y) - 1 && otherY <= max(lastY, y) + 1) {
             int numSteps = max(abs(int(x - lastX)), abs(int(y - lastY))) + 1;
@@ -56,6 +59,9 @@
     }
 
     collision bullet::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
+        if (otherType == TRIGGERTYPE) {
+            return collision(type(), 0, x, y);
+        }
         if (otherType == WATERTYPE) {
             return physicalEntity::getCollision(otherX, otherY, otherType, otherID);
         }

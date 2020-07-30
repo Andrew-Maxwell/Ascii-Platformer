@@ -2,8 +2,8 @@
 
 collider* world = NULL;
 screen* theScreen = NULL;
-int entityCounter = 0;
-int tickCounter = 0;
+unsigned int entityCounter = 0;
+unsigned int tickCounter = 0;
 bool debugWatch = false;
 
 extern "C" int FONTCHARS[] = {  //Line break prevents horrifically long warning when building
@@ -11,6 +11,15 @@ extern "C" int FONTCHARS[] = {  //Line break prevents horrifically long warning 
 
 float roundTo8th(float x) {
     return (int)(x * 8) / 8.0;
+}
+
+int cMod(int a, int b) {    //Continuous modulo function; doesn't return negative values
+    if (a < 0) {
+        return ((a % b) + b) % b;
+    }
+    else {
+        return a % b;
+    }
 }
 
 /******************************************************************************/

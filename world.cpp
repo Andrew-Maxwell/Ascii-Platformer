@@ -90,6 +90,7 @@
             }
             iter++;
         }
+
     }
 
 
@@ -141,6 +142,15 @@
 
         for (int i = 0; i < 512; i++) {
             channel[i] = false;
+        }
+
+        //Manage toggling
+        //togglingChannel are incremented when toggleChannel() is still being called
+        //If togglingChannel is > 0, then it's multiple consecutive calls and should be ignored.
+        for (int i = 0; i < 512; i++) {
+            if (togglingChannel[i]) {
+                togglingChannel[i]--;
+            }
         }
     }
 
@@ -222,11 +232,10 @@
         return false;
     }
 
-    bool collider::isLiquid(int checkX, int checkY) {
-        if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {
-            return screen[checkY][checkX] == 'w';
+    void collider::setSolid(int xPoint, int yPoint, char solid) {
+        if (yPoint >= 0 && yPoint < screen.size() && xPoint >= 0 && xPoint < screen[yPoint].size()) {
+            screen[yPoint][xPoint] = solid;
         }
-        return false;
     }
 
     int collider::getPlayerDamage(int checkX, int checkY) {
@@ -262,14 +271,30 @@
     //Broadcasts
 
     void collider::setChannel(int freq, bool newChannel) {
-        if (newChannel) {
+        if (newChannel && freq <= 255) {
             interceptedCodes.insert(freq);
         }
         channel[freq] = true;
     }
 
+    void collider::toggleChannel(int freq, bool newChannel) {
+        if (newChannel && freq <= 255) {
+            interceptedCodes.insert(freq);
+        }
+        if (!togglingChannel[freq]) {
+            togglingChannel[freq] = 2;
+            persistentChannel[freq] = !persistentChannel[freq];
+        }
+        else {  //Multiple consecutive calls to toggleChannel are ignored.
+            togglingChannel[freq]++;
+        }
+    }
+
     bool collider::getChannel(int freq) {
-        return channel[freq];
+        if (freq >= 0 && freq < 512) {
+            return channel[freq] || persistentChannel[freq];
+        }
+        return false;
     }
 
     set<uint8_t> collider::getInterceptedChannels() {

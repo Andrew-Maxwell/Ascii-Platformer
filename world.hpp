@@ -85,6 +85,8 @@ class collider : public layer {
     list<collideable*> collideables;
     list<collideable*> particles;
     bool channel[512] = {false};
+    bool persistentChannel[512] = {false};
+    uint8_t togglingChannel[512] = {0};
     set<uint8_t> interceptedCodes;
 
     public:
@@ -135,7 +137,7 @@ class collider : public layer {
 
     bool isSolid(int checkX, int checkY);
 
-    bool isLiquid(int checkX, int checkY);
+    void setSolid(int x, int y, char solid);
     
     int getPlayerDamage(int checkX, int checkY);
     
@@ -148,6 +150,8 @@ class collider : public layer {
     //Broadcast functions
 
     void setChannel(int freq, bool newChannel);
+
+    void toggleChannel(int freq, bool newChannel);
 
     bool getChannel(int freq);
 

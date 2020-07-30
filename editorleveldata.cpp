@@ -18,6 +18,7 @@
         editableCollider* col = new editableCollider(0.0, 0.0, WHITE, 1, true, colFileName, '!', dummyValue);
         theScreen -> setParams(col -> getRows(), col -> getCols(), fontSize, 16, 1.0f, getDayLength());
         initializeColors(theScreen);
+        theScreen -> changeLighting();
 
         Value& entities = json["entities"];
         assert(entities.IsArray());
@@ -36,10 +37,11 @@
             float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
             float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
             Color tint = entity.HasMember("tint") ? getColor(entity["tint"]) : WHITE;
+            bool doLighting = entity.HasMember("doLighting") ? entity["doLighting"].GetBool() : true;
             float sizeFactor = entity.HasMember("sizeFactor") ? entity["sizeFactor"].GetFloat() : 1.0;
             int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
             int height = entity.HasMember("height") ? entity["height"].GetInt() : 1;
-            editableLayer * L = new editableLayer(x, y, tint, sizeFactor, (type == "layer"), loadedLayers.find(fileName) == loadedLayers.end(), fileName, toupper(type[0]), width, height, entity);
+            editableLayer * L = new editableLayer(x, y, tint, sizeFactor, (type == "layer"), loadedLayers.find(fileName) == loadedLayers.end(), fileName, toupper(type[0]), width, height, entity, doLighting);
             if (type == "layer") {
                 loadedLayers.insert(fileName);
             }
@@ -87,7 +89,7 @@
         while (saveIter != layers.end()) {
             (*saveIter) -> save();
             Value entity((*saveIter) -> getJson(), a);
-            if (entity.HasMember("x")) {        //if not the collider (The collider has an empty JSON)
+            if (entity.HasMember("type")) {        //if not the collider (The collider has an empty JSON)
                 entities.PushBack(entity, a);
             }
             saveIter++;

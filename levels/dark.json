@@ -1,6 +1,6 @@
 {
     "collider": "dark_collider.lyr",
-    "tint": [35, 20, 10, 0],
+    "dayBackground": [35, 20, 10, 255],
     "fontSize": 24,
     "entities": [
         {
@@ -39,17 +39,17 @@
             "type": "layer",
             "x": 0.0,
             "y": 0.0,
-            "tint": [254, 137, 40, 255],
-            "sizeFactor": 0.99,
-            "fileName": "dark_layer4.lyr"
+            "tint": [0, 0, 0, 255],
+            "sizeFactor": 0.9999999403953552,
+            "fileName": "dark_layer2.lyr"
         },
         {
             "type": "layer",
             "x": 0.0,
             "y": 0.0,
-            "tint": [0, 0, 0, 255],
-            "sizeFactor": 0.9999999403953552,
-            "fileName": "dark_layer2.lyr"
+            "tint": [254, 137, 40, 255],
+            "sizeFactor": 0.99,
+            "fileName": "dark_layer4.lyr"
         },
         {
             "type": "player",

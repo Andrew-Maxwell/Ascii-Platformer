@@ -20,6 +20,8 @@
 #include "world.hpp"
 #include "enemy.hpp"
 #include "newtestentity.hpp"
+#include "logic.hpp"
+#include "movingwalls.hpp"
 
 class gameLevelData : public outfitData, public levelData {
 

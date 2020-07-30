@@ -85,6 +85,11 @@
 #define DUMMYENTITYTYPE 13
 #define GAMELAYERTYPE 14
 #define ENEMYTYPE 15
+#define TRIGGERTYPE 16
+#define LOGICTYPE 17
+#define SNAKEWALLTYPE 18
+#define ACTIVEWALLTYPE 19
+#define ELEVATORTYPE 20
 
 #define GUNPICKUPTYPE 21
 #define AMMOPICKUPTYPE 22
@@ -101,8 +106,8 @@ class collider;
 extern collider* world;
 class screen;
 extern screen* theScreen;
-extern int entityCounter;
-extern int tickCounter;
+extern unsigned int entityCounter;
+extern unsigned int tickCounter;
 extern bool debugWatch;
 
 extern "C" {
@@ -113,13 +118,24 @@ struct intVector2 {
     int x;
     int y;
 
+    intVector2(int newX, int newY) {
+        x = newX;
+        y = newY;
+    }
+
     intVector2(Vector2 V) {
         x = V.x;
         y = V.y;
     }
+
+    Vector2 getVector2() {
+        return (Vector2){x, y};
+    }
 };
 
 float roundTo8th(float x);
+
+int cMod(int a, int b);
 
 string findFile(string fileName);
 

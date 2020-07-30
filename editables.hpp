@@ -23,6 +23,7 @@ class editableLayer : public layer {
     Value json;
     int flashCount = -1;
     bool visible = true;
+    bool doLighting;
     bool isLayer, isEditable;
     Color original;
     vector<vector<int*>> frames;
@@ -34,7 +35,7 @@ class editableLayer : public layer {
 
     public:
 
-    editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, bool newIsEditable, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value& newJson);
+    editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, bool newIsEditable, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value& newJson, bool newDoLighting);
 
     editableLayer(editableLayer& other);
 

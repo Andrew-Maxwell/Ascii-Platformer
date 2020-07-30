@@ -218,8 +218,8 @@ using namespace rapidjson;
                 newGun.gunType = gunData["gunType"].GetInt();
                 newGun.ammo = gunData.HasMember("ammo") ? gunData["ammo"].GetInt() : 1;
                 newGun.maxAmmo = gunData.HasMember("maxAmmo") ? gunData["maxAmmo"].GetInt() : -1;
-                newGun.lastFired = -1 * 10000000;
                 newGun.cooldown = gunData.HasMember("cooldown") ? gunData["cooldown"].GetInt() : 0;
+                newGun.lastFired = -1 * newGun.cooldown;
                 if (gunData.HasMember("display")) {
                     if (gunData["display"].IsInt()) {
                         int displayInt = gunData["display"].GetInt();

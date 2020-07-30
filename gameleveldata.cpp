@@ -175,6 +175,90 @@
                     world -> addCollideable(newNTE);
                 }
             }
+            else if (type == "snakeWall") {
+                bool loop = entity.HasMember("loop") ? entity["loop"].GetBool() : true;
+                int forwardChannel = entity.HasMember("forwardChannel") ? entity["forwardChannel"].GetInt() : -1;
+                int reverseChannel = entity.HasMember("reverseChannel") ? entity["reverseChannel"].GetInt() : -1;
+                int snakeLength = entity.HasMember("snakeLength") ? entity["snakeLength"].GetInt() : 1;
+                int snakeHead = entity.HasMember("snakeHead") ? entity["snakeHead"].GetInt() : snakeLength;
+                int ticksPerMove = entity.HasMember("ticksPerMove") ? entity["ticksPerMove"].GetInt() : 1;
+                int displayInt = entity.HasMember("display") ? entity["display"].GetInt() : '#';
+                string display(TextToUtf8(&displayInt, 1));
+                assert(entity.HasMember("points"));
+                assert(entity["points"].IsArray());
+                snakeWall* newSnakeWall = new snakeWall(x, y, tint, sizeFactor, snakeLength, snakeHead, ticksPerMove, loop, forwardChannel, reverseChannel, display);
+                for (SizeType i = 0; i < entity["points"].Size(); i++) {
+                    int pointX = entity["points"][i]["x"].GetFloat();
+                    int pointY = entity["points"][i]["y"].GetFloat();
+                    newSnakeWall -> addPoint(pointX, pointY);
+                }
+                newSnakeWall -> finish();
+                newSnakeWall -> setDoLighting(doLighting);
+                world -> addCollideable(newSnakeWall);
+            }
+            else if (type == "activeWall") {
+                int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
+                int height = entity.HasMember("height") ? entity["height"].GetInt() : 1;
+                int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0;
+                int display = entity.HasMember("display") ? entity["display"].GetInt(): 0;
+                activeWall * newActiveWall = new activeWall(x, y, tint, sizeFactor, width, height, channel, display);
+                newActiveWall -> setDoLighting(doLighting);
+                world -> addEntity(newActiveWall);
+            }
+            else if (type == "trigger" || type == "ANDRelay" || type == "ORRelay" || type == "NOTRelay" || type == "timerRelay" || type == "toggleRelay" || type == "randomSource") {
+                vector<int> outputs;
+                for (SizeType i = 0; i < entity["outputs"].Size(); i++) {
+                    outputs.push_back(entity["outputs"][i].GetInt());
+                }
+                if (type == "trigger") {
+                    int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
+                    int height = entity.HasMember("height") ? entity["height"].GetInt() : 1;
+                    bool mustInteract = entity.HasMember("mustInteract") ? entity["mustInteract"].GetBool() : false;
+                    bool toggle = entity.HasMember("toggle") ? entity["toggle"].GetBool() : false;
+                    set<int> triggeredBy;
+                    if (entity.HasMember("triggeredBy")) {
+                        for (SizeType i = 0; i < entity["triggeredBy"].Size(); i++) {
+                            triggeredBy.insert(entity["triggeredBy"][i].GetInt());
+                        }
+                    }
+                    trigger* newTrigger = new trigger(outputs, x, y, width, height, mustInteract, toggle, triggeredBy);
+                    world -> addCollideable(newTrigger);
+                }
+                else {
+                    logic* newLogic;
+                    if (type == "ANDRelay" || type == "ORRelay") {
+                        vector<int> inputs;
+                        for (SizeType i = 0; i < entity["inputs"].Size(); i++) {
+                            inputs.push_back(entity["inputs"][i].GetInt());
+                        }
+                        if (type == "ANDRelay") {
+                            newLogic = new ANDRelay(outputs, inputs);
+                        }
+                        else if (type == "ORRelay") {
+                            newLogic = new ORRelay(outputs, inputs);
+                        }
+                    }
+                    else if (type == "randomSource") {
+                        float mix = entity.HasMember("mix") ? entity["mix"].GetFloat() : 1;
+                        float probability = entity.HasMember("probability") ? entity["probability"].GetFloat() : 0.5f;
+                        newLogic = new randomSource(outputs, mix, probability);
+                    }
+                    else {
+                        int input = entity["input"].GetInt();
+                        if (type == "NOTRelay") {
+                            newLogic = new NOTRelay(outputs, input);
+                        }
+                        else if (type == "timerRelay") {
+                            int delay = entity["delay"].GetInt();
+                            newLogic = new timerRelay(outputs, input, delay);
+                        }
+                        else if (type == "toggleRelay") {
+                            newLogic = new toggleRelay(outputs, input);
+                        }
+                    }
+                    world -> addEntity(newLogic);
+                }
+            }
             else if (type == "gunPickup" || type == "ammoPickup" ||
                      type == "opPickup" || type == "outfitPickup") {
                 int pickupID;

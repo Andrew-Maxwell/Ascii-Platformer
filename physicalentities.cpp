@@ -40,14 +40,14 @@
 
     void physicalEntity::tickGet() {
         hit = false;
-        float waterMoveX = 0, waterMoveY = 0;
+        float pushedX = 0, pushedY = 0;
         lastTickUnderWater = isUnderWater;
         isUnderWater = false;
         for (auto c : collisions) {
             if (c.type == WATERTYPE) {
                 isUnderWater = true;
-                waterMoveX += c.xVal;
-                waterMoveY += c.yVal;
+                pushedX += c.xVal;
+                pushedY += c.yVal;
             }
             else if (c.type == FORCEFIELDTYPE) {
                 xMomentum += c.xVal * 0.8;
@@ -70,8 +70,8 @@
             yMomentum *= maxSpeed / momentumMagnitude;
         }
 
-        float xStep = (xMomentum + waterMoveX) / (abs(xMomentum + waterMoveX) + 1);
-        for (int i = 0; i < abs(xMomentum + waterMoveX) + 1; i++) {
+        float xStep = (xMomentum + pushedX) / (abs(xMomentum + pushedX) + 1);
+        for (int i = 0; i < abs(xMomentum + pushedX) + 1; i++) {
             if (world -> isSolid((int)(x + xStep) + (xStep > 0), (int)y)) {// || world -> isSolid((int)y + 0.5, (int)(x + xStep) + (xStep > 0))) {
                 x = floor(x + xStep) + (xStep < 0);
                 xMomentum *= (-1 * elasticity);
@@ -83,8 +83,8 @@
             }
         }
 
-        float yStep = (yMomentum + waterMoveY) / (abs(yMomentum + waterMoveY) + 1);
-        for (int i = 0; i < abs(yMomentum + waterMoveY) + 1; i++) {
+        float yStep = (yMomentum + pushedY) / (abs(yMomentum + pushedY) + 1);
+        for (int i = 0; i < abs(yMomentum + pushedY) + 1; i++) {
             if (world -> isSolid((int)(x + 0.5 - width / 2), (int)(y + yStep) + (yStep > 0)) || world -> isSolid((int)(x + 0.5 + width / 2), (int)(y + yStep) + (yStep > 0))) {
                 y = floor(y + yStep) + (yStep < 0);
                 yMomentum *= (-1 * elasticity);

@@ -36,7 +36,9 @@ GAMESRCS := \
     menu.cpp \
     gamemenu.cpp \
     configdata.cpp \
-    input.cpp
+    input.cpp \
+    logic.cpp \
+    movingwalls.hpp
 
 EDTRSRCS := \
 	meta.cpp \

@@ -2,6 +2,7 @@
 Core gameplay elements:
     - Bit puzzles
     - Element puzzles like Portal has (but probably not as sophisticated)
+        - Directing bullets towards triggers
     - Movement/platforming challenges involving different bodies, moving platforms, forcefields
         Body ideas:
             - Bouncing ball (autorejump + high elasticity)
@@ -25,9 +26,7 @@ Loose ends:
 
 Features:
 1 Puzzle elements:
-    - Triggers w/ sensitivity levels: Need player + interacting, need player to enter trigger volume, need anything to enter trigger volume
     - Color changing/other effect layers
-    - AND/OR/Timer relays
     - Disappearing/reappearing blocks
 1 Story elements:
     1 persistent plot variables.
@@ -41,21 +40,22 @@ Features:
     2 Inventory
 1 Sound effects
 1 Music: see http://dig.ccmixter.org for free music, or contact noise, or try to make your own!
-1 Controller support
 2 Variable refresh rate
 2 Generic Gun pickups
-2 Map system: Use render test code on the collider texture
-2 Wind/current object
-2 leaf physicalParticles that fly eratically
-2 Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
-    original.
-2 Lightning bolt, fire (spreads via embers), huge fireballs
-2 Snakes (like in snake game) that move around and you can jump on them (platforming puzzle element)
-2 transition visual effect
-2 Wave and rocket guns
-2 Explosions of sparks
-2 Dust/debris falling from the ceiling (to go with shaking layer effect)
-2 Plumes of steam
+2 Map system: Use render test code on the collider
+2 Visual effects:
+    2 leaf physicalParticles that fly eratically
+    2 Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
+        original.
+    2 Lightning bolt, fire (spreads via embers), huge fireballs
+    2 Snakes (like in snake game) that move around and you can jump on them (platforming puzzle element)
+    2 transition visual effect
+    2 Wave and rocket guns
+    2 Explosions of sparks
+    2 Dust/debris falling from the ceiling (to go with shaking layer effect)
+    2 Plumes of steam/smoke particles
+    2 Algae/foliage particles (can move, but return elastically to original position.)
+        Trees: Generate pseudo-randomly based on location/size/level file name/whatever. elasticity of each particle depends on distance from trunk point
 2 Rotary forcefields!
 ? Multi-thread processing for water and particles
 ? Editor misc:
@@ -99,7 +99,7 @@ inspiration/vague visual ideas:
         - AI doesn't want you poking around, if you go to far into his world he threatens you then starts killing you
             IRL and you have to get out of the level before he kills you entirely. Makes more sense if you don't usually
             have a health bar in the virtual world. Making virtual world one-hit-kill makes sense for small, puzzle-oriented levels.
-    
+    - Trippy level where you have to run up and down flashing neon signs where turned on = solid    
 
 Housekeeping items (may never get to all of these):
 - Rewrite player::apply to be less confusing; maybe stop using bitsets, just use uint8_ts
@@ -121,6 +121,7 @@ Housekeeping items (may never get to all of these):
 - Split largest files (editables.cpp, player.cpp, editor_main.cpp) into smaller files, or at least improve structure
 
 Bugs:
+- invalid free() when quitting in CloseWindow()
 - When standing next to a solid block of height 1, explosion particles sometimes fly over it and sometimes don't.
 - Some of the files in "dark" getting loaded as wrong width
 - Water appears weird when player is moving very slowly in the vertical direction
@@ -132,6 +133,7 @@ Idea: Setting is a floating colony in the atmosphere of a gas giant. Modeled aft
 
 Zone ideas:
     Greenhouses
+    Algae Tanks
     Residencies
     Commerical District
     Park

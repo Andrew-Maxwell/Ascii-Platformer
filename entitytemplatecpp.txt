@@ -7,11 +7,11 @@
         return 1000;
     }
 
-    bool newTestEntity::doesCollide(float otherX, float otherY, int otherType) {
+    bool newTestEntity::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         return false;
     }
 
-    collision newTestEntity::getCollision(float otherX, float otherY, int otherType) {
+    collision newTestEntity::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
         return collision(type(), id);
     }
 

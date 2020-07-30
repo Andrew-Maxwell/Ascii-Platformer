@@ -8,19 +8,20 @@ using namespace rapidjson;
 //Also used to represent other entities (isLayer = false.) Not all of the same editing functions apply.
 /*****************************************************************************/
 
-    editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, bool newIsEditable, string newFileName, char newDisplay, int newDisplayWidth, int newDisplayHeight, Value& newJson) :
+    editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, bool newIsEditable, string newFileName, char newDisplay, int newDisplayWidth, int newDisplayHeight, Value& newJson, bool newDoLighting) :
         entity(newX, newY, newTint, newSizeFactor),
         layer(newX, newY, newTint, newSizeFactor, newFileName),
         displayWidth(newDisplayWidth),
         displayHeight(newDisplayHeight),
         isLayer(newIsLayer),
-        isEditable(newIsEditable)
+        isEditable(newIsEditable),
+        doLighting(newDoLighting)
     {
 
         //Set original color to reset to after flashing
 
         display = newDisplay;
-        original = newTint;
+        tint = original = newTint;
         json = newJson;
 
         //If layer Read in screen information. Canvas stores the layer in UTF-8; intCanvas is in UTF-32 (?)
@@ -149,6 +150,7 @@ using namespace rapidjson;
             free(lineC);
          //  cout << "\t" << intCanvas[i] << endl;
         }
+        rendered = false;
         render();
     }
 
@@ -176,9 +178,8 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     void editableLayer::move(vector<intVector2> mousePos) {
-        cout << "Moving " << mousePos[1].x - mousePos[0].x << endl;
-        x += mousePos[1].x - mousePos[0].x;
-        y += mousePos[1].y - mousePos[0].y;
+        x += mousePos[0].x;
+        y += mousePos[0].y;
     }
 
 
@@ -518,6 +519,7 @@ using namespace rapidjson;
                 }
                 UnloadRenderTexture(tex);
                 tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
+                rendered = false;
                 render();
             }
         }
@@ -732,13 +734,21 @@ using namespace rapidjson;
             }
             layerOut.close();
         }
-        json["tint"][0] = tint.r;
-        json["tint"][1] = tint.g;
-        json["tint"][2] = tint.b;
-        json["tint"][3] = tint.a;
-        json["x"] = x;
-        json["y"] = y;
-        json["sizeFactor"] = sizeFactor;
+        if (json.HasMember("tint")) {
+            json["tint"][0] = tint.r;
+            json["tint"][1] = tint.g;
+            json["tint"][2] = tint.b;
+            json["tint"][3] = tint.a;
+        }
+        if (json.HasMember("x")) {
+            json["x"] = x;
+        }
+        if (json.HasMember("y")) {
+            json["y"] = y;
+        }
+        if (json.HasMember("sizeFactor")) {
+            json["sizeFactor"] = sizeFactor;
+        }
         if (json.HasMember("width")) {
             json["width"] = getCols();
         }
@@ -767,7 +777,7 @@ using namespace rapidjson;
 
     editableCollider::editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value& dummyJson) :
         entity(newX, newY, newTint, newSizeFactor),
-        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, true, newFileName, display, 0, 0, dummyJson) {}
+        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, true, newFileName, display, 0, 0, dummyJson, false) {}
 
 /*****************************************************************************/
 //Dummy functions which don't do anything for the collider
@@ -792,7 +802,7 @@ using namespace rapidjson;
     }
 
     void editableCollider::print() {
-        if (flashCount-- <= 0) {
+        if (flashCount-- == 0) {
             Color background = theScreen -> getColor();
             tint = (Color){255 - background.r, 255 - background.g, 255 - background.b, 255};
         }

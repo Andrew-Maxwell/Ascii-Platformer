@@ -133,7 +133,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
     float width = 0.8;
 
     float xMovement = 0, yMovement = 0;
-    float xMoveWater = 0, yMoveWater = 0;
+    float pushedX = 0, pushedY = 0;
     float xInertia = 0, yInertia = 0;
 
     float nextX = 0, nextY = 0;
