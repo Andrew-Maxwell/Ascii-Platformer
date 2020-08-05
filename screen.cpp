@@ -277,23 +277,23 @@
         EndDrawing();
     }
 
-    void screen::draw(float x, float y, Color tint, float sizeFactor, string text, bool doLight) {
+    void screen::draw(float x, float y, Color tint, float scale, string text, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
         myDrawText(text.c_str(),
-            (Vector2){ (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
-            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor },
-            fontSize * sizeFactor, 0, tint);
+            (Vector2){ (screenCols / scale / 2 - cameraX + x) * fontSize * scale,
+            (screenRows / scale / 2 - cameraY + y) * fontSize * scale },
+            fontSize * scale, 0, tint);
     }
 
     void screen::drawHud(float x, float y, Color tint, string text) {
         myDrawText(text.c_str(), (Vector2){x * hudFontSize, y * hudFontSize}, hudFontSize, 0, tint);
     }
 
-    void screen::drawWithBackground(float x, float y, Color tint, Color background, float sizeFactor, string text, bool doLight) {
-        drawBarRight(x, y, background, sizeFactor, MeasureTextEx(displayFont, text.c_str(), fontSize * sizeFactor, 0).x / float(fontSize * sizeFactor), doLight);
-        draw(x, y, tint, sizeFactor, text, doLight);
+    void screen::drawWithBackground(float x, float y, Color tint, Color background, float scale, string text, bool doLight) {
+        drawBarRight(x, y, background, scale, MeasureTextEx(displayFont, text.c_str(), fontSize * scale, 0).x / float(fontSize * scale), doLight);
+        draw(x, y, tint, scale, text, doLight);
     }
 
     void screen::drawHudWithBackground(float x, float y, Color tint, Color background, string text) {
@@ -322,14 +322,14 @@
             fontSize, 1, tint);
     }
 
-    void screen::drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight) {
+    void screen::drawLayer(float x, float y, Color tint, float scale, Texture2D& t, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
         Rectangle sourceRec = {0.0f, 0.0f, (float)t.width, -1 * (float)t.height};
-        Vector2 origin = { (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
-            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor };
-        Rectangle destRec = {origin.x, origin.y, t.width * fontSize / 8 * sizeFactor, t.height * fontSize / 8 * sizeFactor};
+        Vector2 origin = { (screenCols / scale / 2 - cameraX + x) * fontSize * scale,
+            (screenRows / scale / 2 - cameraY + y) * fontSize * scale };
+        Rectangle destRec = {origin.x, origin.y, t.width * fontSize / 8 * scale, t.height * fontSize / 8 * scale};
         myDrawTexture(t, sourceRec, destRec, (Vector2){0.0f, 0.0f}, 0.0f, tint);
     }
 
@@ -346,7 +346,7 @@
 //Due to character limitations, for down and left, rounds to four pixels.
 /******************************************************************************/
 
-    void screen::drawBarLeft(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+    void screen::drawBarLeft(float x, float y, Color tint, float scale, float length, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
@@ -356,66 +356,66 @@
 
         //Using double fixes some alignment errors (esp. visible in water)
 
-        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
-        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
-        double width = length * fontSize * sizeFactor + xPixel - floor(xPixel);
-        double height = fontSize * sizeFactor + yPixel - floor(yPixel);
+        double xPixel = (screenCols / scale / 2.0 - cameraX + x) * fontSize * scale;
+        double yPixel = (screenRows / scale / 2.0 - cameraY + y) * fontSize * scale;
+        double width = length * fontSize * scale + xPixel - floor(xPixel);
+        double height = fontSize * scale + yPixel - floor(yPixel);
         //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
         DrawRectangle(xPixel - width, yPixel, width, height, tint);
     }
 
-    void screen::drawBarRight(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+    void screen::drawBarRight(float x, float y, Color tint, float scale, float length, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
-        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
-        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
-        double width = length * fontSize * sizeFactor + xPixel - floor(xPixel);
-        double height = fontSize * sizeFactor + yPixel - floor(yPixel);
+        double xPixel = (screenCols / scale / 2.0 - cameraX + x) * fontSize * scale;
+        double yPixel = (screenRows / scale / 2.0 - cameraY + y) * fontSize * scale;
+        double width = length * fontSize * scale + xPixel - floor(xPixel);
+        double height = fontSize * scale + yPixel - floor(yPixel);
         //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
         DrawRectangle(xPixel, yPixel, width, height, tint);
     }
 
 
-    void screen::drawBarDown(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+    void screen::drawBarDown(float x, float y, Color tint, float scale, float length, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
         x = roundTo8th(x);
         y = roundTo8th(y);
         length = roundTo8th(length);
-        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
-        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
-        double width = fontSize * sizeFactor + xPixel - floor(xPixel);
-        double height = length * fontSize * sizeFactor + yPixel - floor(yPixel);
+        double xPixel = (screenCols / scale / 2.0 - cameraX + x) * fontSize * scale;
+        double yPixel = (screenRows / scale / 2.0 - cameraY + y) * fontSize * scale;
+        double width = fontSize * scale + xPixel - floor(xPixel);
+        double height = length * fontSize * scale + yPixel - floor(yPixel);
         //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
         DrawRectangle(xPixel, yPixel, width, height, tint);
     }
 
-    void screen::drawBarUp(float x, float y, Color tint, float sizeFactor, float length, bool doLight) {
+    void screen::drawBarUp(float x, float y, Color tint, float scale, float length, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
         length = roundTo8th(length);
-        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
-        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
-        double width = fontSize * sizeFactor + xPixel - floor(xPixel);
-        double height = length * fontSize * sizeFactor + yPixel - floor(yPixel);
+        double xPixel = (screenCols / scale / 2.0 - cameraX + x) * fontSize * scale;
+        double yPixel = (screenRows / scale / 2.0 - cameraY + y) * fontSize * scale;
+        double width = fontSize * scale + xPixel - floor(xPixel);
+        double height = length * fontSize * scale + yPixel - floor(yPixel);
         //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
         DrawRectangle(xPixel, yPixel - height, width, height, tint);
     }
 
-    void screen::drawBox(float x, float y, float width, float height, Color tint, float sizeFactor, bool doLight) {
+    void screen::drawBox(float x, float y, float width, float height, Color tint, float scale, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
-        double xPixel = (screenCols / sizeFactor / 2.0 - cameraX + x) * fontSize * sizeFactor;
-        double yPixel = (screenRows / sizeFactor / 2.0 - cameraY + y) * fontSize * sizeFactor;
-        double pixelWidth = width * fontSize * sizeFactor + xPixel - floor(xPixel);
-        double pixelHeight = height * fontSize * sizeFactor + yPixel - floor(yPixel);
+        double xPixel = (screenCols / scale / 2.0 - cameraX + x) * fontSize * scale;
+        double yPixel = (screenRows / scale / 2.0 - cameraY + y) * fontSize * scale;
+        double pixelWidth = width * fontSize * scale + xPixel - floor(xPixel);
+        double pixelHeight = height * fontSize * scale + yPixel - floor(yPixel);
         //cout << xPixel << " + " << width << " = " << xPixel + width << endl;
         DrawRectangle(xPixel, yPixel, pixelWidth, pixelHeight, tint);
     }
@@ -469,10 +469,10 @@
         return (Vector2){cameraX, cameraY};
     }
 
-    Vector2 screen::getMouseRelativeTo(float x, float y, float sizeFactor) {
+    Vector2 screen::getMouseRelativeTo(float x, float y, float scale) {
         Vector2 mouse = GetMousePosition();
-        return (Vector2){(mouse.x / fontSize - screenCols / 2.0) / sizeFactor + cameraX - x,
-                         (mouse.y / fontSize - screenRows / 2.0) / sizeFactor + cameraY - y};
+        return (Vector2){(mouse.x / fontSize - screenCols / 2.0) / scale + cameraX - x,
+                         (mouse.y / fontSize - screenRows / 2.0) / scale + cameraY - y};
     }
 
     int screen::getScreenRows() {
@@ -597,14 +597,14 @@
 
     }
 
-    void editableCanvas::drawLayerEditor(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected, bool doLight) {
+    void editableCanvas::drawLayerEditor(float x, float y, Color tint, float scale, Texture2D& t, bool selected, bool doLight) {
         if (doLight) {
             tint = lighting(tint);
         }
         Rectangle sourceRec = {0.0f, 0.0f, (float)t.width, -1 * (float)t.height};
-        Vector2 origin = { (screenCols / sizeFactor / 2 - cameraX + x) * fontSize * sizeFactor,
-            (screenRows / sizeFactor / 2 - cameraY + y) * fontSize * sizeFactor };
-        Rectangle destRec = {origin.x, origin.y, t.width * fontSize / 8 * sizeFactor, t.height * fontSize / 8 * sizeFactor};
+        Vector2 origin = { (screenCols / scale / 2 - cameraX + x) * fontSize * scale,
+            (screenRows / scale / 2 - cameraY + y) * fontSize * scale };
+        Rectangle destRec = {origin.x, origin.y, t.width * fontSize / 8 * scale, t.height * fontSize / 8 * scale};
         myDrawTexture(t, sourceRec, destRec, (Vector2){0.0f, 0.0f}, 0.0f, tint);
         if (selected) {
             DrawRectangleLines(destRec.x, destRec.y, destRec.width, destRec.height, RED);

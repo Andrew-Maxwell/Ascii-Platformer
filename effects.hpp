@@ -15,11 +15,11 @@ using namespace rapidjson;
 //Splash() spawns drops specifically
 /******************************************************************************/
 
-void explode(int count, float x, float y, Color tint, float newSizeFactor, float speed, int c, int lifespan,
+void explode(int count, float x, float y, Color tint, float newScale, float speed, int c, int lifespan,
              float elasticity, list<entity*>::iterator zPosition, bool doLighting = false);
 
 
-void splash(int count, float x, float y, Color tint, float newSizeFactor, float speed, int c, int lifespan,
+void splash(int count, float x, float y, Color tint, float newScale, float speed, int c, int lifespan,
             float elasticity, list<entity*>::iterator zPosition);
 
 /******************************************************************************/
@@ -27,13 +27,13 @@ void splash(int count, float x, float y, Color tint, float newSizeFactor, float 
 //Spawns an expanding non-physical bubble of radio waves
 /******************************************************************************/
 
-void broadcast(int count, float x, float y, Color tint, float sizeFactor, bool high = true);
+void broadcast(int count, float x, float y, Color tint, float scale, bool high = true);
 
 /******************************************************************************/
 //DamageIndicator()
 //Spawns a little number that floats up when damage is taken/dealt
 /******************************************************************************/
 
-void damageIndicator(int damage, float x, float y, Color tint, float newSizeFactor);
+void damageIndicator(int damage, float x, float y, Color tint, float newScale);
 
 #endif //EFFECTS_HPP

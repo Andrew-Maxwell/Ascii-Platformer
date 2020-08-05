@@ -5,8 +5,8 @@
 //A wall that moves like the snake in snake (but also diagonally)
 /*****************************************************************************/
 
-    snakeWall::snakeWall(  float newX, float newY, Color newTint, float newSizeFactor, int newSnakeLength, int newSnakeHead, int newTicksPerMove, bool newLoop, int newForwardChannel, int newReverseChannel, string newDisplay) :
-        entity(newX, newY, newTint, newSizeFactor),
+    snakeWall::snakeWall(  float newX, float newY, Color newTint, float newScale, int newSnakeLength, int newSnakeHead, int newTicksPerMove, bool newLoop, int newForwardChannel, int newReverseChannel, string newDisplay) :
+        entity(newX, newY, newTint, newScale),
         loop(newLoop),
         forwardChannel(newForwardChannel),
         reverseChannel(newReverseChannel),
@@ -42,7 +42,7 @@
     }
 
     unsigned int snakeWall::type() {
-        return MOVINGWALLTYPE;
+        return SNAKEWALLTYPE;
     }
 
     bool snakeWall::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
@@ -76,7 +76,7 @@
             push = Vector2Subtract(points[pushPoint].getVector2(), points[directionPoint].getVector2());
         }
         push = Vector2Scale(Vector2Normalize(push), (1 / float(ticksPerMove)));
-        return collision(MOVINGWALLTYPE, id, 0, push.x, push.y);
+        return collision(SNAKEWALLTYPE, id, 0, push.x, push.y);
     }
 
     bool snakeWall::stopColliding() {
@@ -125,7 +125,7 @@
 
     void snakeWall::print() {
         for (int i = snakeHead - snakeLength + 1; i <= snakeHead; i++) {
-            theScreen -> draw(points[cMod(i, points.size())].x, points[cMod(i, points.size())].y, tint, sizeFactor, display, doLighting);
+            theScreen -> draw(points[cMod(i, points.size())].x, points[cMod(i, points.size())].y, tint, scale, display, doLighting);
         }
     }
 
@@ -134,8 +134,8 @@
 //Appears only when triggered
 /*****************************************************************************/
 
-    activeWall::activeWall(  float newX, float newY, Color newTint, float newSizeFactor, int newWidth, int newHeight, int newChannel, int newDisplay) :
-        entity(newX, newY, newTint, newSizeFactor),
+    activeWall::activeWall(  float newX, float newY, Color newTint, float newScale, int newWidth, int newHeight, int newChannel, int newDisplay) :
+        entity(newX, newY, newTint, newScale),
         width(newWidth),
         height(newHeight),
         channel(newChannel) {
@@ -155,7 +155,7 @@
         if (active && !activated) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    world -> setSolid(x + i, y + j, 's');
+                    world -> setSolid(x + j, y + i, 's');
                 }
             }
             activated = true;
@@ -163,7 +163,7 @@
         if (!active && activated) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    world -> setSolid(x + i, y + j, '.');
+                    world -> setSolid(x + j, y + i, '.');
                 }
             }
             activated = false;
@@ -181,7 +181,7 @@
     void activeWall::print() {
         if (activated && display != "") {
             for (int i = 0; i < height; i++) {
-                theScreen -> draw(x, y + i, tint, sizeFactor, display, doLighting);
+                theScreen -> draw(x, y + i, tint, scale, display, doLighting);
             }
         }
     }
@@ -191,27 +191,58 @@
 //A block with fixed size and shape which can move in multiple directions
 //Takes any entities on top of it with it.
 /*****************************************************************************/
-/*
-    elevator::elevator(  float newX, float newY, Color newTint, float newSizeFactor) :
-                        entity(newX, newY, newTint, newSizeFactor) {}
+
+    elevator::elevator(  float newX, float newY, Color newTint, float newScale, int newWidth, int newHeight, float newSpeed) :
+        entity(newX, newY, newTint, newScale),
+        width(newWidth),
+        height(newHeight),
+        speed(newSpeed) {}
+
+    void elevator::addPoint(Vector2 newPoint) {
+        points.push_back(newPoint);
+    }
+
+    void elevator::finish(int startingPoint) {
+        nextPoint = cMod(startingPoint, points.size());
+        x = points[nextPoint].x;
+        y = points[nextPoint].y;
+    }
 
     unsigned int elevator::type() {
         return ELEVATORTYPE;
     }
 
     bool elevator::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
-        return false;
+        return (otherX > x - 1 && otherX < x + width && otherY >= y - 1 && otherY < y + height);
     }
 
     collision elevator::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
-        return collision(type(), id);
+        return collision(type(), id, 0, move.x, move.y);
     }
 
     bool elevator::stopColliding() {
-        return true;
+        return false;
     }
 
-    void elevator::tickSet() {}
+    //NOTE: elevator does not always move by "move" distance. This may cause problems with
+    //entities riding along coming out of sync with the elevator.
+
+    //TODO: make reversable (for now, no channels at all)
+    //TODO: Add starting point
+    //TODO: Add configurable pauses
+
+    void elevator::tickSet() {
+        if (x == points[nextPoint].x && y == points[nextPoint].y) {
+            nextPoint = cMod(nextPoint + direction, points.size());
+            move = Vector2Scale(Vector2Normalize((Vector2){points[nextPoint].x - x, points[nextPoint].y - y}), speed);
+        }
+        else if (abs(move.x) > abs(x - points[nextPoint].x) || abs(move.y) > abs(y - points[nextPoint].y)) {
+            move = Vector2Subtract(points[nextPoint], (Vector2){x, y});
+        }
+        world -> addRectangle(x, y, width, height, move.x, move.y);
+        x += move.x;
+        y += move.y;
+    }
 
     void elevator::tickGet() {}
 
@@ -219,7 +250,12 @@
         return false;
     }
 
+    //TODO: allow for a layer to be specified to be displayed/moved along with the elevator
     void elevator::print() {
-        theScreen -> draw(x, y, tint, sizeFactor, "test");
+/*        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                theScreen -> draw(x + j, y + i, tint, scale, "E");
+            }
+        }*/
     }
-*/
+

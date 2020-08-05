@@ -127,6 +127,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
     inputMap in;
 
     //Formerly part of the physicalEntity inheritance
+    bool onGround, onWall;
     bool hit = false;
     bool isUnderWater = false, lastTickUnderWater = false;
     float elasticity = 0, maxSpeed = 100, gravity, friction;
@@ -176,7 +177,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
 
     //Constructor
 
-    explicit player (float newX, float newY, Color newTint, float newSizeFactor);
+    explicit player (float newX, float newY, Color newTint, float newScale);
 
     unsigned int type ();
 
@@ -196,7 +197,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
 
         void setColor(Color newTint);
 
-        void setSizeFactor(float newSizeFactor);
+        void setSizeFactor(float newScale);
 
         float getSizeFactor();
 

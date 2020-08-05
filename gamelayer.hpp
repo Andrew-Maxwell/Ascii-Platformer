@@ -16,7 +16,7 @@ class gameLayer : public layer {
     
     public:
     
-    gameLayer(float newx, float newy, Color newTint, float newSizeFactor, string newFileName);
+    gameLayer(float newx, float newy, Color newTint, float newScale, string newFileName);
 
     ~gameLayer();
 

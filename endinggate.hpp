@@ -22,7 +22,7 @@ class endingGate : public collideable, public entityParent {
     public:
 
     explicit endingGate(float newX, float newY, Color newTint,
-                        float newSizeFactor,  int newWidth, int newHeight);
+                        float newScale,  int newWidth, int newHeight);
 
     unsigned int type();
 

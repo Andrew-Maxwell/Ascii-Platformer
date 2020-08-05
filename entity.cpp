@@ -4,11 +4,11 @@
 //Virtual entity parent class.
 /******************************************************************************/
 
-entity::entity(float newx, float newy, Color newTint, float newSizeFactor) {
+entity::entity(float newx, float newy, Color newTint, float newScale) {
     x = newx;
     y = newy;
     tint = newTint;
-    sizeFactor = newSizeFactor;
+    scale = newScale;
     id = ++entityCounter;
 }
 

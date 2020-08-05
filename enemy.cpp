@@ -5,10 +5,10 @@
 
     //Constructor
 
-    enemy::enemy(  float newX, float newY, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+    enemy::enemy(  float newX, float newY, Color newTint, float newScale, int displayChar, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int maxHealth, int newDamage) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        physicalEntity(newX, newY, newTint, newSizeFactor, elasticity, newXMomentum,
+                        entity(newX, newY, newTint, newScale),
+                        physicalEntity(newX, newY, newTint, newScale, elasticity, newXMomentum,
                                 newYMomentum, newMaxSpeed, newGravity, newFriction)
     {
         health = maxHealth;
@@ -72,5 +72,5 @@
 
     void enemy::print(float cameraX, float cameraY, Font displayFont)
     {
-       theScreen -> draw(x, y, tint, sizeFactor, "@");
+       theScreen -> draw(x, y, tint, scale, "@");
     }

@@ -28,20 +28,6 @@
     "fontSize": 16,
     "entities": [
         {
-            "type": "rain",
-            "x": 0.0,
-            "y": 0.0,
-            "tint": [
-                120,
-                100,
-                150,
-                255
-            ],
-            "sizeFactor": 1.0,
-            "dropsPerTick": 1.0,
-            "xMomentum": 0.05
-        },
-        {
             "type": "player",
             "x": 20.0,
             "y": 19.0,
@@ -51,7 +37,7 @@
                 0,
                 255
             ],
-            "sizeFactor": 1.0
+            "scale": 1.0
         },
         {
             "type": "player",
@@ -63,7 +49,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0
+            "scale": 1.0
         },
         {
             "type": "trigger",
@@ -106,7 +92,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0
+            "scale": 1.0
         },
         {
             "type": "door",
@@ -118,7 +104,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "nextRoom": "test2.json",
             "destinationX": 14.0,
             "destinationY": 9.0
@@ -133,7 +119,7 @@
                 0,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "displayChar": 8593,
             "key": "jumpSpeed",
             "value": 0.5,
@@ -149,7 +135,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "key": "air",
             "value": 6000,
             "add": true
@@ -164,7 +150,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "key": "maxAir",
             "value": 6000,
             "add": true,
@@ -180,7 +166,7 @@
                 0,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "channel": 0,
             "power": -0.03,
             "range": 20
@@ -195,7 +181,7 @@
                 150,
                 255
             ],
-            "sizeFactor": 1.0
+            "scale": 1.0
         },
         {
             "type": "gunPickup",
@@ -207,7 +193,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "gunID": 1,
             "pickupID": 1
         },
@@ -221,7 +207,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "gunID": 2,
             "ammoCount": 4,
             "pickupID": 2
@@ -236,7 +222,7 @@
                 0,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "key": "health",
             "value": -50,
             "add": true,
@@ -252,7 +238,7 @@
                 0,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "key": "maxHealth",
             "value": 100,
             "add": true,
@@ -268,7 +254,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "touch": true,
             "opID": 100,
             "pickupID": 5
@@ -283,7 +269,7 @@
                 0,
                 200
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "width": 197,
             "height": 21,
             "amplitude": 0,
@@ -299,7 +285,7 @@
                 0,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "range": 20,
             "power": 0.05
         },
@@ -313,7 +299,7 @@
                 0,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "range": 20,
             "power": -0.05
         },
@@ -325,7 +311,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "snakeLength": 1,
             "forwardChannel": 1,
             "reverseChannel": 2,
@@ -362,7 +348,7 @@
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "snakeLength": 1,
             "forwardChannel": 4,
             "reverseChannel": 8,
@@ -382,16 +368,23 @@
         {
             "type": "snakeWall",
             "snakeLength": 10,
-            "points": [{
-            "x": 49.0,
-            "y": 62.0},{"x": 111.0, "y": 62.0}],
+            "points": [
+                {
+                    "x": 49.0,
+                    "y": 62.0
+                },
+                {
+                    "x": 111.0,
+                    "y": 62.0
+                }
+            ],
             "tint": [
                 0,
                 0,
                 255,
                 255
             ],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "ticksPerMove": 4,
             "forwardChannel": 310,
             "reverseChannel": 311,
@@ -400,13 +393,70 @@
         {
             "type": "timerRelay",
             "input": 311,
-            "outputs": [310],
+            "outputs": [
+                310
+            ],
             "delay": 300
         },
         {
             "type": "NOTRelay",
             "input": 310,
-            "outputs": [311]
+            "outputs": [
+                311
+            ]
+        },
+        {
+            "type": "NOTRelay",
+            "input": 1,
+            "outputs": [
+                300
+            ]
+        },
+        {
+            "type": "activeWall",
+            "x": 16.0,
+            "y": 38.0,
+            "tint": [
+                0,
+                0,
+                255,
+                255
+            ],
+            "width": 1,
+            "height": 4,
+            "scale": 1.0,
+            "channel": 300,
+            "display": 63
+        },
+        {
+            "type": "activeWall",
+            "x": 0.0,
+            "y": 24.0,
+            "tint": [
+                0,
+                0,
+                255,
+                255
+            ],
+            "width": 12,
+            "height": 1,
+            "scale": 1.0,
+            "channel": 300,
+            "display": 64
+        },
+        {
+            "type": "elevator",
+            "points": [{"x": 44, "y": 20},{"x": 44, "y": 0}, {"x": 88, "y": 20}],
+            "tint": [
+                0,
+                0,
+                255,
+                255
+            ],
+            "width": 3,
+            "height": 1,
+            "scale": 1.0,
+            "speed": 0.05
         }
     ],
     "defaultOutfit": {
@@ -422,7 +472,7 @@
         "waterFriction": 0.95,
         "waterAcceleration": 0.05,
         "autoRejump": false,
-        "jumpCount": 4,
+        "jumpCount": 0,
         "walljump": true,
         "health": 16,
         "maxHealth": 24,

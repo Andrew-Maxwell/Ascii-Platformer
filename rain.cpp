@@ -5,10 +5,10 @@
 //Physical particle that disappears on contact with water.
 /******************************************************************************/
 
-    drop::drop( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+    drop::drop( float newx, float newy, Color newTint, float newScale, int displayChar, float elasticity, float newXMomentum,
               float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int newLifetime) :
-                entity(newx, newy, newTint, newSizeFactor),
-                physicalParticle(newx, newy, newTint, newSizeFactor, displayChar, elasticity, newXMomentum,
+                entity(newx, newy, newTint, newScale),
+                physicalParticle(newx, newy, newTint, newScale, displayChar, elasticity, newXMomentum,
                 newYMomentum, newMaxSpeed, newGravity, newFriction, newLifetime) {}
 
     unsigned int drop::type() {
@@ -28,8 +28,8 @@
 //Constantly spawns particles above the top of the screen
 /******************************************************************************/
 
-    rain::rain(float newX, float newY, Color newTint, float newSizeFactor,  float newDropsPerTick, float newXMomentum, bool newIsSnow) :
-        entity(newX, newY, newTint, newSizeFactor),
+    rain::rain(float newX, float newY, Color newTint, float newScale,  float newDropsPerTick, float newXMomentum, bool newIsSnow) :
+        entity(newX, newY, newTint, newScale),
         dropsPerTick(newDropsPerTick),
         xMomentum(newXMomentum),
         isSnow(newIsSnow) {}
@@ -66,10 +66,10 @@
                         snowflake = 0x263c;
                         break;
                 }
-                raindrop = new drop(GetRandomValue(0, world -> getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, snowflake, 0, xMomentum, 0.2, 0.2, GRAVITY, 0.5, 1000);
+                raindrop = new drop(GetRandomValue(0, world -> getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, scale, snowflake, 0, xMomentum, 0.2, 0.2, GRAVITY, 0.5, 1000);
             }
             else {
-                raindrop = new drop(GetRandomValue(0, world -> getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, sizeFactor, 0, 0, xMomentum, 0.7, 0.7, GRAVITY, 0.5, 200);
+                raindrop = new drop(GetRandomValue(0, world -> getCols() * 10) / 10, GetRandomValue(0, 10) / 10, tint, scale, 0, 0, xMomentum, 0.7, 0.7, GRAVITY, 0.5, 200);
             }
             world -> addParticle(raindrop, zPosition);
         }

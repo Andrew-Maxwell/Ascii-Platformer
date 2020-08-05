@@ -5,8 +5,8 @@
 //Saves the game when interacted with.
 /*****************************************************************************/
 
-    savePoint::savePoint(float newX, float newY, Color newTint, float newSizeFactor) :
-        entity(newX, newY, newTint, newSizeFactor) {}
+    savePoint::savePoint(float newX, float newY, Color newTint, float newScale) :
+        entity(newX, newY, newTint, newScale) {}
 
     unsigned int savePoint::type() {
         return SAVEPOINTTYPE;
@@ -31,7 +31,7 @@
         for (auto colIter = collisions.begin(); colIter != collisions.end(); colIter++) {
             if (colIter -> type == PLAYERTYPE && colIter -> damage == 2) {  //Player is interacting
                 gotCollision = true;
-                explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
+                explode(16, x, y, tint, scale, 0.3, '*', 100, 0.5, zPosition);
             }
         }
         collisions.clear();
@@ -42,5 +42,5 @@
     }
 
     void savePoint::print() {
-        theScreen -> draw(x, y, tint, sizeFactor, "S", doLighting);
+        theScreen -> draw(x, y, tint, scale, "S", doLighting);
     }

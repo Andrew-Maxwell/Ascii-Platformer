@@ -25,7 +25,7 @@ class water : public collideable, public entityParent {
 
     public:
 
-    explicit water (float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newheight, float newWavelength, float newAmplitude);
+    explicit water (float newX, float newY, Color newTint, float newScale,  int newWidth, float newheight, float newWavelength, float newAmplitude);
 
     unsigned int type ();
 

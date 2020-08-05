@@ -112,12 +112,12 @@
         tint = newTint;
     }
 
-    void player::setSizeFactor(float newSizeFactor) {
-        sizeFactor = newSizeFactor;
+    void player::setSizeFactor(float newScale) {
+        scale = newScale;
     }
 
     float player::getSizeFactor() {
-        return sizeFactor;
+        return scale;
     }
 
     void player::goToDoor() {

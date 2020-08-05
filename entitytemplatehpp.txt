@@ -16,7 +16,7 @@ class newTestEntity : virtual public collideable {
 
     public:
 
-    explicit newTestEntity(  float newX, float newY, Color newTint, float newSizeFactor);
+    explicit newTestEntity(  float newX, float newY, Color newTint, float newScale);
 
     unsigned int type();
 

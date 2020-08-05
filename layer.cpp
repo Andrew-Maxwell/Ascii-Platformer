@@ -6,8 +6,8 @@
 //Designed to be the visual part of the level.
 /******************************************************************************/
 
-    layer::layer( float newx, float newy, Color newTint, float newSizeFactor, string newFileName) :
-        entity(newx, newy, newTint, newSizeFactor),
+    layer::layer( float newx, float newy, Color newTint, float newScale, string newFileName) :
+        entity(newx, newy, newTint, newScale),
         fileName(newFileName) {}
 
     layer::~layer() {
@@ -61,15 +61,15 @@
     }
 
     void layer::print() {
-        theScreen -> drawLayer(x, y, tint, sizeFactor, tex.texture, doLighting);
+        theScreen -> drawLayer(x, y, tint, scale, tex.texture, doLighting);
 //        for (int i = 0; i < screen.size(); i++) {
-//            theScreen -> draw(x, y + i, tint, sizeFactor, screen[i]);
+//            theScreen -> draw(x, y + i, tint, scale, screen[i]);
 //        }
 //        Vector2 camera = theScreen -> getCamera();
-//        int iMin = max(int(camera.y - y - theScreen -> getScreenRows() / sizeFactor / 2), 0);
-//        for (int i = iMin; i < min((int)(camera.y - y + theScreen -> getScreenRows() / 2.0 / sizeFactor) + 1, (int)screen.size()); i++) {
-//            theScreen -> draw(x, y + i, tint, sizeFactor, screen[i]);
+//        int iMin = max(int(camera.y - y - theScreen -> getScreenRows() / scale / 2), 0);
+//        for (int i = iMin; i < min((int)(camera.y - y + theScreen -> getScreenRows() / 2.0 / scale) + 1, (int)screen.size()); i++) {
+//            theScreen -> draw(x, y + i, tint, scale, screen[i]);
 //        }
-//        theScreen -> drawLayer(x, y, tint, sizeFactor, textTexture);
+//        theScreen -> drawLayer(x, y, tint, scale, textTexture);
     }
 

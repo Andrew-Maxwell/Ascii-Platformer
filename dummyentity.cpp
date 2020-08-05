@@ -8,8 +8,8 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     dummyEntity::dummyEntity(  float newX, float newY,  Color newTint,
-                    float newSizeFactor, char newC, int newLifetime) :
-        entity(newX, newY, newTint, newSizeFactor),
+                    float newScale, char newC, int newLifetime) :
+        entity(newX, newY, newTint, newScale),
         lifetime(newLifetime) {
             toPrint[0] = newC;
         }
@@ -25,5 +25,5 @@ using namespace rapidjson;
     bool dummyEntity::finalize() {return --lifetime < 0;}
 
     void dummyEntity::print()  {
-        theScreen -> draw(x, y, tint, sizeFactor, toPrint, false);
+        theScreen -> draw(x, y, tint, scale, toPrint, false);
     }

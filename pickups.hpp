@@ -33,7 +33,7 @@ class pickup : public collideable, public entityParent {
     int displayChar;
 
     explicit pickup(float newX, float newY, Color newTint,
-                    float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch);
+                    float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch);
 
     ~pickup();
 
@@ -65,7 +65,7 @@ class outfitPickup : public pickup {
 
     public:
 
-    explicit outfitPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool add);
+    explicit outfitPickup(float newX, float newY, Color newTint, float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool add);
 
     unsigned int type();
 
@@ -84,7 +84,7 @@ class gunPickup : public pickup {
 
     public:
 
-    explicit gunPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
+    explicit gunPickup(float newX, float newY, Color newTint, float newScale, set<int>* newCollectedPickups,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID);
 
     unsigned int type();
 
@@ -104,7 +104,7 @@ class ammoPickup : public pickup {
 
     public:
 
-    explicit ammoPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
+    explicit ammoPickup(float newX, float newY, Color newTint, float newScale, set<int>* newCollectedPickups,  int newDisplayChar, int newLifetime, int newID, bool newTouch, int newGunID, int newAmmoCount);
 
     unsigned int type();
 
@@ -123,7 +123,7 @@ class opPickup : public pickup {
 
     public:
 
-    explicit opPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newOpID);
+    explicit opPickup(float newX, float newY, Color newTint, float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newOpID);
 
     unsigned int type();
 

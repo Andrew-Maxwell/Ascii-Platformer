@@ -6,8 +6,8 @@
 /*****************************************************************************/
 
     pickup::pickup(  float newX, float newY, Color newTint,
-                    float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch) :
-        entity(newX, newY, newTint, newSizeFactor),
+                    float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch) :
+        entity(newX, newY, newTint, newScale),
         collectedPickups(newCollectedPickups),
         displayChar(newDisplayChar),
         lifetime(newLifetime),
@@ -49,7 +49,7 @@
             for (auto colIter = collisions.begin(); colIter != collisions.end(); colIter++) {
                 if (colIter -> type == PLAYERTYPE && (touch || colIter -> damage == 2)) {
                     gotCollision = true;
-                    explode(16, x, y, tint, sizeFactor, 0.3, '*', 100, 0.5, zPosition);
+                    explode(16, x, y, tint, scale, 0.3, '*', 100, 0.5, zPosition);
                     playerID = colIter -> id;
                     break;
                 }
@@ -63,7 +63,7 @@
 
     void pickup::print() {
         if (!collected) {
-            theScreen -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
+            theScreen -> draw(x, y, tint, scale, toPrint, doLighting);
         }
     }
 
@@ -73,9 +73,9 @@
 //Modifies any value according to the name used in the save JSON
 /*****************************************************************************/
 
-    outfitPickup::outfitPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool newAdd) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newCollectedPickups, newDisplayChar, newLifetime, newID, newTouch),
+    outfitPickup::outfitPickup(float newX, float newY, Color newTint, float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch, string newKey, double newValue, bool newAdd) :
+                        entity(newX, newY, newTint, newScale),
+                        pickup(newX, newY, newTint, newScale, newCollectedPickups, newDisplayChar, newLifetime, newID, newTouch),
                         key(newKey),
                         value(newValue),
                         add (newAdd) {}
@@ -93,9 +93,9 @@
 //Unlocks a new gun
 /*****************************************************************************/
 
-    gunPickup::gunPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
+    gunPickup::gunPickup(float newX, float newY, Color newTint, float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID) :
+                        entity(newX, newY, newTint, newScale),
+                        pickup(newX, newY, newTint, newScale, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID) {}
 
     unsigned int gunPickup::type() {
@@ -111,9 +111,9 @@
 //Adds ammo to a given gun
 /*****************************************************************************/
 
-    ammoPickup::ammoPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
+    ammoPickup::ammoPickup(float newX, float newY, Color newTint, float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newGunID, int newAmmoCount) :
+                        entity(newX, newY, newTint, newScale),
+                        pickup(newX, newY, newTint, newScale, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
                         gunID(newGunID),
                         ammoCount(newAmmoCount) {}
 
@@ -130,9 +130,9 @@
 //Gives the player another bitwise op to play with
 /*****************************************************************************/
 
-    opPickup::opPickup(float newX, float newY, Color newTint, float newSizeFactor, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newOpID) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        pickup(newX, newY, newTint, newSizeFactor, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
+    opPickup::opPickup(float newX, float newY, Color newTint, float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifeTime, int newID, bool newTouch, int newOpID) :
+                        entity(newX, newY, newTint, newScale),
+                        pickup(newX, newY, newTint, newScale, newCollectedPickups, newDisplayChar, newLifeTime, newID, newTouch),
                         opID(newOpID) {}
 
     unsigned int opPickup::type() {

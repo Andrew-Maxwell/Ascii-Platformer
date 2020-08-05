@@ -1,4 +1,5 @@
 #include "world.hpp"
+#include <iomanip>
 
 /******************************************************************************/
 /*Collidor*/
@@ -50,6 +51,8 @@
         if (STATS && tickCounter % 60 == 0) {
             cout << "Entities: " << entities.size() << " ";
         }
+
+        rectangles.clear();
 
         //(Formerly entitylist functionality)
 
@@ -169,6 +172,9 @@
     }
 
     void collider::print() {
+        for (movingRectangle rect : rectangles) {
+            theScreen -> drawBox(rect.x1 + rect.dX, rect.y1 + rect.dY, rect.x2 - rect.x1, rect.y2 - rect.y1, RED, 1, false);
+        }
         list<entity*>::iterator e = entities.begin();
         while (e != entities.end()) {
             (*e) -> print();
@@ -215,6 +221,17 @@
         entities.insert(zPosition, newParticle);
     }
 
+    void collider::addRectangle(float x1, float y1, float width, float height, float dX, float dY) {
+        movingRectangle newRect;
+        newRect.x1 = x1;
+        newRect.y1 = y1;
+        newRect.x2 = x1 + width;
+        newRect.y2 = y1 + height;
+        newRect.dX = dX;
+        newRect.dY = dY;
+        rectangles.push_back(newRect);
+    }
+
     //Used to tell entities where they are in the list at creation time
 
     list<entity*>::iterator collider::getZPosition() {
@@ -224,6 +241,149 @@
     }
 
     //Physical tilemap functions
+
+    Vector2 collider::go(Vector2 start, Vector2 d) {
+        //Determine whether there are any solid tiles in the way
+        Vector2 pos = start;
+        float numSteps = int(max(abs(d.x), abs(d.y))) + 1;
+        float xStep = d.x / numSteps;
+        float yStep = d.y / numSteps;
+        float buf = 0.1;
+        for (int i = 0; i < numSteps; i++) {
+            if (xStep != 0 && (isSolid(int(pos.x + xStep + buf + 0.9 * (xStep > 0)), int(pos.y + buf))
+            || isSolid(int(pos.x + xStep + buf + 0.9 * (xStep > 0)), int(pos.y + 1 - buf)))) {
+                pos.x = floor(pos.x + xStep) + (xStep < 0);
+                xStep = 0;
+            }
+            else {
+                pos.x += xStep;
+            }
+            if (yStep != 0 && (isSolid(int(pos.x + buf), int(pos.y + yStep + buf + 0.9 * (yStep > 0)))
+            || isSolid(int(pos.x + 1 - buf), int(pos.y + yStep + buf + 0.9 * (yStep > 0))))) {
+                pos.y = floor(pos.y + yStep) + (yStep < 0);
+                yStep = 0;
+            }
+            else {
+                pos.y += yStep;
+            }
+        }
+
+        float width = 1, height = 1;
+
+
+
+        for (movingRectangle rect : rectangles) {
+            float oldX1 = rect.x1 - width;
+            float oldY1 = rect.y1 - height;
+            float oldX2 = rect.x2;
+            float oldY2 = rect.y2;
+            float newX1 = oldX1 + rect.dX;
+            float newY1 = oldY1 + rect.dY;
+            float newX2 = oldX2 + rect.dX;
+            float newY2 = oldY2 + rect.dY;
+            if ((start.x <= oldX1) != (pos.x <= newX1)) {
+                float yIntersect = start.y + (newX1 - start.x) * d.y / d.x;
+                if (newY1 < yIntersect && yIntersect < newY2) {
+                    pos.x = newX1;
+                }
+            }
+            if ((start.x >= oldX2) != (pos.x >= oldX2)) {
+                float yIntersect = start.y + (newX2 - start.x) * d.y / d.x;
+                if (newY1 < yIntersect && yIntersect < newY2) {
+                    pos.x = newX2;
+                }
+            }
+            cout << endl << "d.y " << d.y << "rect.y1 " << rect.y1 << " ";
+            if (start.y == oldY1) {
+                cout << setprecision(10) << start.y << " == " << oldY1 << endl;
+            }
+            else {
+                cout << setprecision(10) << start.y << " != " << oldY1 << endl;
+            }
+            if (oldY1 < 4) {
+                cout << "*******************************************************\n";
+            }
+            cout << start.y << " <= " << oldY1 << " != " << pos.y << " <= " << newY1 << " " << (start.y <= oldY1) << " " << (pos.y <= newY1);
+            if ((start.y <= oldY1) != (pos.y <= newY1)) {
+                cout << "all good";
+                float xIntersect = start.x + (newY1 - start.y) * d.x / d.y;
+                if (newX1 < xIntersect && xIntersect < newX2) {
+                    pos.y = newY1;
+                    cout << "New pos.y (up) " << pos.y;
+                }
+            }
+            else {
+                cout << "Fell through!";
+            }
+            if ((start.y >= oldY2) != (pos.y >= newY2)) {
+                float xIntersect = start.x + (newY2 - start.y) * d.x / d.y;
+                if (newX1 - width < xIntersect && xIntersect < newX2) {
+                    pos.y = newY2;
+                }
+            }
+            cout << endl;
+        }
+
+
+/*
+        //For each side of rectangle:
+        //First check if the side is passing by the object (should push object)
+        //If not, check if object would cross side (should stop object)
+        for (movingRectangle rect : rectangles) {
+            float oldX1 = rect.x1 - width;
+            float oldY1 = rect.y1 - height;
+            float oldX2 = rect.x2;
+            float oldY2 = rect.y2;
+            float newX1 = oldX1 + rect.dX;
+            float newY1 = oldY1 + rect.dY;
+            float newX2 = oldX2 + rect.dX;
+            float newY2 = oldY2 + rect.dY;
+
+            //left side
+            if (((pos.x <= oldX1) != (pos.x <= newX1)) && oldY1 < pos.y && pos.y < oldY2) {
+                pos.x = newX1;
+            }
+            else if ((start.x <= newX1) != (pos.x <= newX1)) {
+                float yIntersect = start.y + (newX1 - start.x) * d.y / d.x;
+                if (newY1 < yIntersect && yIntersect < newY2) {
+                    pos.x = newX1;
+                }
+            }
+            //right side
+            if (((pos.x >= oldX2) != (pos.x >= newX2)) && oldY1 < pos.y && pos.y < oldY2) {
+                pos.x = newX2;
+            }
+            else if ((start.x >= newX2) != (pos.x >= newX2)) {
+                float yIntersect = start.y + (newX2 - start.x) * d.y / d.x;
+                if (newY1 < yIntersect && yIntersect < newY2) {
+                    pos.x = newX2;
+                }
+            }
+            //top side
+            if (((pos.y <= oldY1) != (pos.y <= newY1)) && oldX1 < pos.x && pos.x < oldX2) {
+                pos.y = newY1;
+            }
+            else if ((start.y <= newY1) != (pos.y <= newY1)) {
+                float xIntersect = start.x + (newY1 - start.y) * d.x / d.y;
+                if (newX1 < xIntersect && xIntersect < newX2) {
+                    pos.y = newY1;
+                }
+            }
+            //bottom side
+            if (((pos.y >= oldY2) != (pos.y >= newY2)) && oldX1 < pos.x && pos.x < oldX2) {
+                pos.y = newY2;
+            }
+            else if ((start.y >= newY2) != (pos.y >= newY2)) {
+                float xIntersect = start.x + (newY2 - start.y) * d.x / d.y;
+                if (newX1 < xIntersect && xIntersect < newX2) {
+                    pos.y = newY2;
+                }
+            }
+        }*/
+        return pos;
+    }
+
+
 
     bool collider::isSolid(int checkX, int checkY) {
         if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {

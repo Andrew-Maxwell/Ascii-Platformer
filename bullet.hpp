@@ -33,7 +33,7 @@ class bullet : public physicalEntity, public particle, public entityParent {
 
     public:
 
-    bullet(float newX, float newY, Color newTint, float newSizeFactor, 
+    bullet(float newX, float newY, Color newTint, float newScale, 
            float newXMomentum, float newYMomentum, int c, int particleCount, int newLifeTime,
            float newElasticity, float newMaxSpeed, float newGravity, float newFriction,
            int newDamage, float newExplosionPower, float newExplosionRange,

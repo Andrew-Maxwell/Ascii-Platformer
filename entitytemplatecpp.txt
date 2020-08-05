@@ -1,7 +1,7 @@
 #include "newtestentity.hpp"
 
-    newTestEntity::newTestEntity(  float newX, float newY, Color newTint, float newSizeFactor) :
-                        entity(newX, newY, newTint, newSizeFactor) {}
+    newTestEntity::newTestEntity(  float newX, float newY, Color newTint, float newScale) :
+                        entity(newX, newY, newTint, newScale) {}
 
     unsigned int newTestEntity::type() {
         return 1000;
@@ -28,5 +28,5 @@
     }
 
     void newTestEntity::print() {
-        theScreen -> draw(x, y, tint, sizeFactor, "test");
+        theScreen -> draw(x, y, tint, scale, "test");
     }

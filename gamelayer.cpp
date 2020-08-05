@@ -5,9 +5,9 @@
 Implements layer functionality (e.g. animations) which the editor doesn't use.*/
 /******************************************************************************/
 
-    gameLayer::gameLayer( float newx, float newy, Color newTint, float newSizeFactor, string newFileName) :
-        entity(newx, newy, newTint, newSizeFactor),
-        layer(newx, newy, newTint, newSizeFactor, newFileName) {
+    gameLayer::gameLayer( float newx, float newy, Color newTint, float newScale, string newFileName) :
+        entity(newx, newy, newTint, newScale),
+        layer(newx, newy, newTint, newScale, newFileName) {
             layer::readLayer();
             tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
             layer::render();

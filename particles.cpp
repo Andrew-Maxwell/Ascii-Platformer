@@ -8,8 +8,8 @@
 /******************************************************************************/
 
     particle::particle(  float newX, float newY, Color newTint,
-                        float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime, bool newFade) :
-                        entity(newX, newY, newTint, newSizeFactor),
+                        float newScale, float newXSpeed, float newYSpeed, int c, int newLifetime, bool newFade) :
+                        entity(newX, newY, newTint, newScale),
                         xSpeed(newXSpeed),
                         ySpeed(newYSpeed),
                         lifetime(newLifetime),
@@ -74,5 +74,5 @@
     }
 
     void particle::print() {
-        theScreen -> draw(x, y, tint, sizeFactor, toPrint, doLighting);
+        theScreen -> draw(x, y, tint, scale, toPrint, doLighting);
     }

@@ -5,15 +5,15 @@
 //a physicalParticle that deals damage
 /*****************************************************************************/
 
-    bullet::bullet( float newX, float newY, Color newTint, float newSizeFactor, 
+    bullet::bullet( float newX, float newY, Color newTint, float newScale, 
                     float newXMomentum, float newYMomentum, int c, int newParticleCount, int newLifetime,
                     float newElasticity, float newMaxSpeed, float newGravity, float newFriction,
                     int newDamage, float newExplosionPower, float newExplosionRange,
                     bool newHitWall, bool newHitWater, bool newHitEntity, bool newSticky) :
-        entity(newX, newY, newTint, newSizeFactor),
-        physicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXMomentum, newYMomentum, 
+        entity(newX, newY, newTint, newScale),
+        physicalEntity(newX, newY, newTint, newScale, newElasticity, newXMomentum, newYMomentum, 
             newMaxSpeed, newGravity, newFriction),
-        particle(newX, newY, newTint, newSizeFactor, 0, 0, c, newLifetime),
+        particle(newX, newY, newTint, newScale, 0, 0, c, newLifetime),
         damage(newDamage),
         dynamicChar(c == 0),
         particleCount(newParticleCount),
@@ -94,8 +94,8 @@
             physicalEntity::tickGet();
         }
         if (bulletHit && explosionRange > 0) {
-            explode (particleCount, x, y, tint, sizeFactor, 0.02, 0, 600, 0.5, zPosition);
-            explosion* e = new explosion(x, y, tint, sizeFactor, 0, explosionPower, explosionRange);
+            explode (particleCount, x, y, tint, scale, 0.02, 0, 600, 0.5, zPosition);
+            explosion* e = new explosion(x, y, tint, scale, 0, explosionPower, explosionRange);
             world -> addCollideable(e);
         }
     }

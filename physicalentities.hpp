@@ -18,14 +18,14 @@ class physicalEntity : virtual public collideable {
 
     protected:
 
-    bool hit = false;
+    bool hit = false, onGround = false;
     bool isUnderWater = false, lastTickUnderWater = false;
     float elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction;
     float width = 0.8;
 
     public:
 
-    explicit physicalEntity(float newx, float newy, Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
+    explicit physicalEntity(float newx, float newy, Color newTint, float newScale, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     unsigned int type();
@@ -59,7 +59,7 @@ class physicalParticle : public physicalEntity, protected particle {
 
     public:
 
-    explicit physicalParticle( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+    explicit physicalParticle( float newx, float newy, Color newTint, float newScale, int displayChar, float elasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION, int newLifetime = 2147483647);
 
     unsigned int type();

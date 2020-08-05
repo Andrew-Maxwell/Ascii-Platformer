@@ -20,7 +20,7 @@ class dummyEntity : public entity {
     public:
 
     dummyEntity(  float newX, float newY, Color newTint,
-                    float newSizeFactor, char newC, int newLifetime = 10000000);
+                    float newScale, char newC, int newLifetime = 10000000);
 
     unsigned int type();
 

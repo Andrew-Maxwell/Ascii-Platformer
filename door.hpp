@@ -21,7 +21,7 @@ class door : public collideable {
     public:
 
     explicit door(  float newX, float newY, Color newTint,
-                    float newSizeFactor, string newDestinationRoom, float newDestX, float newDestY);
+                    float newScale, string newDestinationRoom, float newDestX, float newDestY);
 
     unsigned int type();
 

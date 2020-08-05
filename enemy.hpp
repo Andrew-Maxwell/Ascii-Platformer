@@ -24,7 +24,7 @@ class enemy : protected physicalEntity, virtual public collideable {  // exists 
 
 public:
 
-    explicit enemy(  float newX, float newY, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+    explicit enemy(  float newX, float newY, Color newTint, float newScale, int displayChar, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int maxHealth, int newDamage);
 
     unsigned int type();

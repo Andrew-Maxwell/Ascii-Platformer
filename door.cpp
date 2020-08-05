@@ -6,8 +6,8 @@
 /*****************************************************************************/
 
     door::door(  float newX, float newY, Color newTint,
-                    float newSizeFactor, string newDestinationRoom, float newDestX, float newDestY) :
-        entity(newX, newY, newTint, newSizeFactor),
+                    float newScale, string newDestinationRoom, float newDestX, float newDestY) :
+        entity(newX, newY, newTint, newScale),
         destinationX(newDestX),
         destinationY(newDestY),
         destinationRoom(newDestinationRoom) {}
@@ -35,6 +35,6 @@
     bool door::finalize() {return false;}
 
     void door::print() {
-        theScreen -> draw(x, y, tint, sizeFactor, "D", doLighting);
+        theScreen -> draw(x, y, tint, scale, "D", doLighting);
     }
 

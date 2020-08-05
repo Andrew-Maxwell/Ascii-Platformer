@@ -26,8 +26,10 @@ Loose ends:
 
 Features:
 1 Puzzle elements:
-    - Color changing/other effect layers
-    - Disappearing/reappearing blocks
+    1 Color changing/other effect layers
+    1 Elevators/other moving platforms
+    1 Transmitter effect
+    2 Variable size channels (4, 8, 16 bit)
 1 Story elements:
     1 persistent plot variables.
     2 Separate global- and outfit- scope? (e.g. beating boss = global scope, key = outfit scope)
@@ -48,14 +50,13 @@ Features:
     2 Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
         original.
     2 Lightning bolt, fire (spreads via embers), huge fireballs
-    2 Snakes (like in snake game) that move around and you can jump on them (platforming puzzle element)
-    2 transition visual effect
     2 Wave and rocket guns
     2 Explosions of sparks
     2 Dust/debris falling from the ceiling (to go with shaking layer effect)
     2 Plumes of steam/smoke particles
     2 Algae/foliage particles (can move, but return elastically to original position.)
         Trees: Generate pseudo-randomly based on location/size/level file name/whatever. elasticity of each particle depends on distance from trunk point
+    2 Glass panes that explode into tons and tons of tiny shards
 2 Rotary forcefields!
 ? Multi-thread processing for water and particles
 ? Editor misc:
@@ -108,7 +109,7 @@ Housekeeping items (may never get to all of these):
 - Create configure() functions rather than having 10-argument constructors/standardize constructor argument order
 - Cap line lengths
 - change everything from camelCase to PascalCase - use Perl to identify variable names using declarations? what about scoping?
-- rename sizeFactor to Scale
+- rename scale to Scale
 - make layer use char[][] for mild performance benefits
 - Convert rain to a generic random particle spawner that can spawn particles within a given box area
 - Come up with better names for everything
@@ -121,6 +122,8 @@ Housekeeping items (may never get to all of these):
 - Split largest files (editables.cpp, player.cpp, editor_main.cpp) into smaller files, or at least improve structure
 
 Bugs:
+- Snakewalls sometimes crush player in front of them
+- Guns change color after saving
 - invalid free() when quitting in CloseWindow()
 - When standing next to a solid block of height 1, explosion particles sometimes fly over it and sometimes don't.
 - Some of the files in "dark" getting loaded as wrong width
@@ -163,6 +166,29 @@ AND EITHER:
 OR:
     - Want it to have fighting robots!
 
+Perhaps the machine is not flawed. Perhaps the machine is perfect, and designed to give each settler exactly what they want; but is not able to give them what they need. The machine is designed to fulfil 
+each settler's every whim, to the extent that it does not conflict with other settlers. Hoewver, these settlers are the wealthy, the successful, from Earth; therefore highly competitive. With every 
+imaginable material good available to them, they soon grow bored and essentially turn into a high school, with cliques and petty intrigues. Heavy-handed metaphor for capitalism/modernity? Different 
+artist-guru-influencer types, with different movements.
+
+The first culture, shared by most of the settlers on arrival, is an exploratory movement, with a frontier ethic, seeking the sublime, the thrill, crazy sports in the atmospheres and oceans of a virgin world, 
+chateaus off in the woods, racing to claim the best spots. A frenzy of excitement and expansion of their arrival. However, for many the excitement soon fades. 
+
+In response, a serenity movement, grasping at the trappings of spirituality, jumping from one religion to the next, ostensibly searching for meaning, with a never-ending sequence of gurus jockeying for 
+status by ostentatiously claiming to have found, and displaying, their enlightenment in a never-ending array of spiritual traditions. Fetishizing religions, especially Eastern ones, but only at a very 
+superficial level. Many find it unfulfilling.
+
+Finally, in reaction against both, an absurdist nihilistic movement, mocking the three others. Focusing on realism, aesthetic emphasis on the ugliest parts of the machinery holding up their society.
+
+Each movement represents something good, only perverted. The first represents the satisfaction of work, stolen away by the machine which does all work for them. The second represents spirituality, of course.
+The third represents the search for truth, but the truth, in this case, is ugly.
+
+Within each movement, a few find meaning and happiness. Among the wilderness explorers, some find happiness in contemplation of the new world, or in creating beautiful structures that complement it. Among
+the spiritual, some manage to reach the content of the philosophies rather than merely imitating the form. Among the nihilists, some find happiness in advocating for a cultural shift away from meaninglessness,
+although they have trouble articulating this.
+
+Difficult to portray all of this clearly. Should avoid: oversimplifying/creating extremely stupid movements. People aren't THAT stupid or ignorant. Also should avoid the need for symmetry between the three
+movements.
 
 Another story idea: A small crew of professional (licensed) scavengers/salvagers, exploring an abandoned planetary colony.
 - Planetary colony was abandoned due to large-scale disaster (solar flare? earthquake? Ecosystem/life support destabilization?) which

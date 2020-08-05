@@ -35,7 +35,7 @@ class editableLayer : public layer {
 
     public:
 
-    editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, bool newIsEditable, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value& newJson, bool newDoLighting);
+    editableLayer( float newX, float newY, Color newTint, float newScale, bool newIsLayer, bool newIsEditable, string newFileName, char display, int newDisplayWidth, int newDisplayHeight, Value& newJson, bool newDoLighting);
 
     editableLayer(editableLayer& other);
 
@@ -49,7 +49,7 @@ class editableLayer : public layer {
 
     float getSizeFactor();
     
-    virtual void setSizeFactor(float newSizeFactor);
+    virtual void setSizeFactor(float newScale);
 
     Color getColor();
 
@@ -124,11 +124,11 @@ class editableCollider : virtual public editableLayer {
 
     public:
 
-    editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value& dummyJson);
+    editableCollider (float newX, float newY, Color newTint, float newScale, bool newIsLayer, string newFileName, char display, Value& dummyJson);
 
     //Dummy functions which don't do anything
 
-    void setSizeFactor (float newSizeFactor);
+    void setSizeFactor (float newScale);
 
     void move (vector<intVector2> mousePos);
 

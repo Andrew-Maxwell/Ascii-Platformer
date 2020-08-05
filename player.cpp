@@ -8,8 +8,8 @@
 
 //Constructor
 
-    player::player(float newX, float newY, Color newTint, float newSizeFactor) :
-                       entity(newX, newY, newTint, newSizeFactor) {
+    player::player(float newX, float newY, Color newTint, float newScale) :
+                       entity(newX, newY, newTint, newScale) {
         yInertia = 0;
         elasticity = 0;
         friction = 1.0f;
@@ -58,15 +58,15 @@
                     if (gun.automatic || IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || in.fire.isPressed()) {
                         Vector2 aim;
                         if (in.useMouseAim) {
-                            aim = theScreen -> getMouseRelativeTo(x, y, sizeFactor);
+                            aim = theScreen -> getMouseRelativeTo(x, y, scale);
                             aim = Vector2Normalize(aim);
                         }
                         else {
                             aim = in.getAim();
                         }
                         bullet* b = new bullet(
-                            //x, y, zPosition, color, sizeFactor
-                            x + 1.5 * aim.x, y + 1.5 * aim.y,  tint, sizeFactor,
+                            //x, y, zPosition, color, scale
+                            x + 1.5 * aim.x, y + 1.5 * aim.y,  tint, scale,
                             //xInertia, yInertia, character, particleCount, lifetime
                             aim.x * gun.speed, aim.y * gun.speed, gun.bulletDisplay, gun.particleCount, gun.lifetime,
                             //Elasticity, max speed, gravity, friction
@@ -110,14 +110,14 @@
                     world -> setChannel(channels[i].to_ulong(), false);
                     lastChannel = i;
                     if (tickCounter % 8 == 0) {
-                        broadcast(2, x, y, channelColors[i], sizeFactor, channels[i][(tickCounter % 64) / 8]);
+                        broadcast(2, x, y, channelColors[i], scale, channels[i][(tickCounter % 64) / 8]);
                     }
                 }
             }
             if (in.lastCode.isDown()) {
                 world -> setChannel(channels[lastChannel].to_ulong(), false);
                 if (tickCounter % 8 == 0) {
-                    broadcast(2, x, y, channelColors[lastChannel], sizeFactor, channels[lastChannel][(tickCounter % 64) / 8]);
+                    broadcast(2, x, y, channelColors[lastChannel], scale, channels[lastChannel][(tickCounter % 64) / 8]);
                 }
             }
 
@@ -154,7 +154,7 @@
 
             //Explosions
             if (in.explode.isPressed()) {
-                explode (16, x, y, tint, sizeFactor, 0.4, 0, 600, 0.5, zPosition);
+                explode (60, x, y, tint, scale, 0.4, 0, 600, 0.5, zPosition);
             }
 
             //Death
@@ -180,7 +180,6 @@
 
         if (!breakDoor && !breakDead) {
 
-            hit = false;
             lastTickUnderWater = isUnderWater;
             isUnderWater = false;
             pushedX = 0;
@@ -200,14 +199,6 @@
                 yInertia = yMovement + pushedY;
                 yMovement = 0;
             }
-
-            //Detect solid blocks
-            bool onGround =
-                world -> isSolid(x + (1 - width) / 2, y + 1) ||
-                world -> isSolid(x + (1 + width) / 2, y + 1);
-            bool onWall =
-                world -> isSolid(x + (1 - width) / 2 - 0.1, y) ||
-                world -> isSolid(x + (1 + width) / 2 + 0.1, y);
 
             //Keyboard movement handling
             if (!isUnderWater) {
@@ -315,41 +306,34 @@
                 Vector2 newInertia = Vector2Scale(Vector2Negate(Vector2Normalize({xInertia, yInertia})), 0.7);
                 xInertia = newInertia.x;
                 yInertia = newInertia.y / 3;
-                damageIndicator(spikeDamage, x, y, HURTCOLOR, sizeFactor);
+                damageIndicator(spikeDamage, x, y, HURTCOLOR, scale);
             }
 
+            hit = onGround = onWall = false;
+
             //Update X and Y position based on 3 movement variables
-            float numSteps = max(int(abs(xInertia + pushedX + xMovement)) + 1, int(abs(yInertia + pushedY + yMovement)) + 1);
-            float xStep = (xInertia + pushedX + xMovement) / numSteps;
-            float yStep = (yInertia + pushedY + yMovement) / numSteps;
-            for (int i = 0; i < numSteps; i++) {
-                if (world -> isSolid(int(x + xStep + 0.05 + 0.9 * (xStep > 0)), int(y + 0.05))
-                || world -> isSolid(int(x + xStep + 0.05 + 0.9 * (xStep > 0)), int(y + 0.95))) {
-                    x = floor(x + xStep) + (xStep < 0);
-                    xInertia *= (-1 * elasticity);
-                    hit = true;
-                    xStep = 0;
-                }
-                else {
-                    x += xStep;
-                }
-                if (world -> isSolid(int(x + 0.05), int(y + yStep + 0.05 + 0.9 * (yStep > 0)))
-                || world -> isSolid(int(x + 0.95), int(y + yStep + 0.05 + 0.9 * (yStep > 0)))) {
-                    y = floor(y + yStep) + (yStep < 0);
-                    yInertia *= (-1 * elasticity);
-                    xInertia *= friction;
-                    hit = true;
-                    yStep = 0;
-                }
-                else {
-                    y += yStep;
-                }
+            float dX = xInertia + pushedX + xMovement;
+            float dY = yInertia + pushedY + yMovement;
+            cout << "Player: (" << x << ", " << y << ") " << dX << " " << dY << endl;
+            Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY});
+            if (newPosition.x != x + dX) { //hit horizontally
+                xInertia *= (-1 * elasticity);
+                hit = true;
+                onWall = true;
             }
+            if (newPosition.y != y + dY) {  //hit vertically
+                yInertia *= (-1 * elasticity);
+                xInertia *= friction;
+                hit = true;
+                onGround = true;
+            }
+            x = newPosition.x;
+            y = newPosition.y;
 
             //Allow for being crushed
             if (world -> isSolid(x + 0.5, y + 0.5)) {
                 health -= 500;
-                damageIndicator(-500, x, y, HURTCOLOR, sizeFactor);
+                damageIndicator(-500, x, y, HURTCOLOR, scale);
             }
 
 
@@ -363,10 +347,10 @@
     void player::print() {
         if (!breakDoor && !breakDead) {
             if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
-                theScreen -> draw(x, y, HURTCOLOR, sizeFactor, displayStr, false);
+                theScreen -> draw(x, y, HURTCOLOR, scale, displayStr, false);
             }
             else {
-                theScreen -> draw(x, y, tint, sizeFactor, displayStr, doLighting);
+                theScreen -> draw(x, y, tint, scale, displayStr, doLighting);
             }
         }
     }

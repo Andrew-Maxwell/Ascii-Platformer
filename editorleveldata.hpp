@@ -17,7 +17,7 @@ class editorLevelData : public levelData {
 
     void initializeEditor(list<editableLayer*>& layers, Color& background);
 
-    Value& getNewEntity(float x, float y, float sizeFactor, int count);
+    Value& getNewEntity(float x, float y, float scale, int count);
 
     //Save changes to entities
 

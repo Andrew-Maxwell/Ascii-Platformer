@@ -32,7 +32,7 @@ class linearField : public collideable {
 
     public:
 
-    explicit linearField(float newX, float newY, Color newTint, Color newOnTint, float newSizeFactor,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight);
+    explicit linearField(float newX, float newY, Color newTint, Color newOnTint, float newScale,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight);
 
     ~linearField();
 
@@ -71,7 +71,7 @@ class forceField : public collideable, public entityParent {
 
     public:
 
-    explicit forceField(float newX, float newY, Color newTint, Color newOnTint, float newSizeFactor,  int newChannel, float newPower, float newRange);
+    explicit forceField(float newX, float newY, Color newTint, Color newOnTint, float newScale,  int newChannel, float newPower, float newRange);
 
     unsigned int type();
 
@@ -101,7 +101,7 @@ class explosion : public forceField {
 
     public:
 
-    explicit explosion(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange);
+    explicit explosion(float newX, float newY, Color newTint, float newScale,  int newChannel, float newPower, float newRange);
 
     bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 

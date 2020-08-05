@@ -8,9 +8,9 @@ using namespace rapidjson;
 //Also used to represent other entities (isLayer = false.) Not all of the same editing functions apply.
 /*****************************************************************************/
 
-    editableLayer::editableLayer( float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, bool newIsEditable, string newFileName, char newDisplay, int newDisplayWidth, int newDisplayHeight, Value& newJson, bool newDoLighting) :
-        entity(newX, newY, newTint, newSizeFactor),
-        layer(newX, newY, newTint, newSizeFactor, newFileName),
+    editableLayer::editableLayer( float newX, float newY, Color newTint, float newScale, bool newIsLayer, bool newIsEditable, string newFileName, char newDisplay, int newDisplayWidth, int newDisplayHeight, Value& newJson, bool newDoLighting) :
+        entity(newX, newY, newTint, newScale),
+        layer(newX, newY, newTint, newScale, newFileName),
         displayWidth(newDisplayWidth),
         displayHeight(newDisplayHeight),
         isLayer(newIsLayer),
@@ -70,8 +70,8 @@ using namespace rapidjson;
     }
 
     editableLayer::editableLayer(editableLayer& other) : 
-        entity(other.x, other.y, other.tint, other.sizeFactor),
-        layer(other.x, other.y, other.tint, other.sizeFactor, other.fileName) {
+        entity(other.x, other.y, other.tint, other.scale),
+        layer(other.x, other.y, other.tint, other.scale, other.fileName) {
         display = other.display;
         json.CopyFrom(other.json, doc.GetAllocator());
         visible = true;
@@ -109,11 +109,11 @@ using namespace rapidjson;
     }
 
     float editableLayer::getSizeFactor() {
-        return sizeFactor;
+        return scale;
     }
 
-    void editableLayer::setSizeFactor(float newSizeFactor) {
-        sizeFactor = newSizeFactor;
+    void editableLayer::setSizeFactor(float newScale) {
+        scale = newScale;
     }
 
     Color editableLayer::getColor() {
@@ -188,7 +188,7 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     bool editableLayer::mouseOn() {
-        intVector2 tile = intVector2(theScreen -> getMouseRelativeTo(x, y, sizeFactor));
+        intVector2 tile = intVector2(theScreen -> getMouseRelativeTo(x, y, scale));
         return (visible && tile.x >= 0 && tile.x <= getCols() && tile.y >= 0 && tile.y <= getRows());
     }
 
@@ -197,7 +197,7 @@ using namespace rapidjson;
 /*****************************************************************************/
 
     intVector2 editableLayer::getMouseTile() {
-        return intVector2(theScreen -> getMouseRelativeTo(x, y, sizeFactor));
+        return intVector2(theScreen -> getMouseRelativeTo(x, y, scale));
     }
 
 /*****************************************************************************/
@@ -507,7 +507,7 @@ using namespace rapidjson;
 
     void editableLayer::setArea() {
         if (json.HasMember("height") && json.HasMember("width")) {
-            intVector2 newArea = intVector2(theScreen -> getMouseRelativeTo(x, y, sizeFactor));
+            intVector2 newArea = intVector2(theScreen -> getMouseRelativeTo(x, y, scale));
             newArea.x++;
             newArea.y++;
             if (newArea.x >= 1 && newArea.y >= 1) {
@@ -746,8 +746,8 @@ using namespace rapidjson;
         if (json.HasMember("y")) {
             json["y"] = y;
         }
-        if (json.HasMember("sizeFactor")) {
-            json["sizeFactor"] = sizeFactor;
+        if (json.HasMember("scale")) {
+            json["scale"] = scale;
         }
         if (json.HasMember("width")) {
             json["width"] = getCols();
@@ -766,7 +766,7 @@ using namespace rapidjson;
             tint = original;
         }
         if (visible) {
-            theScreen -> drawLayerEditor(x, y, tint, sizeFactor, tex.texture, selected, (flashCount <= 0 && doLighting));
+            theScreen -> drawLayerEditor(x, y, tint, scale, tex.texture, selected, (flashCount <= 0 && doLighting));
         }
     }
 
@@ -775,15 +775,15 @@ using namespace rapidjson;
 //Constructor
 /*****************************************************************************/
 
-    editableCollider::editableCollider (float newX, float newY, Color newTint, float newSizeFactor, bool newIsLayer, string newFileName, char display, Value& dummyJson) :
-        entity(newX, newY, newTint, newSizeFactor),
-        editableLayer(newX, newY, newTint, newSizeFactor, newIsLayer, true, newFileName, display, 0, 0, dummyJson, false) {}
+    editableCollider::editableCollider (float newX, float newY, Color newTint, float newScale, bool newIsLayer, string newFileName, char display, Value& dummyJson) :
+        entity(newX, newY, newTint, newScale),
+        editableLayer(newX, newY, newTint, newScale, newIsLayer, true, newFileName, display, 0, 0, dummyJson, false) {}
 
 /*****************************************************************************/
 //Dummy functions which don't do anything for the collider
 /*****************************************************************************/
 
-    void editableCollider::setSizeFactor (float newSizeFactor) {}
+    void editableCollider::setSizeFactor (float newScale) {}
 
     void editableCollider::move(vector<intVector2> mousePos) {}
 
@@ -807,7 +807,7 @@ using namespace rapidjson;
             tint = (Color){255 - background.r, 255 - background.g, 255 - background.b, 255};
         }
         if (visible) {
-            theScreen -> drawLayerEditor(x, y, tint, sizeFactor, tex.texture, selected, false);
+            theScreen -> drawLayerEditor(x, y, tint, scale, tex.texture, selected, false);
         }
     }
 

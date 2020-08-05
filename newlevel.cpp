@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     player.AddMember("G", Value(255).Move(), a);
     player.AddMember("B", Value(50).Move(), a);
     player.AddMember("A", Value(255).Move(), a);
-    player.AddMember("sizeFactor", Value(1.0).Move(), a);
+    player.AddMember("scale", Value(1.0).Move(), a);
     entities.PushBack(player, a);
     for (int i = 0; i < layers; i++) {
         Value layer(kObjectType);
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
         layer.AddMember("G", Value(255).Move(), a);
         layer.AddMember("B", Value(50).Move(), a);
         layer.AddMember("A", Value(255).Move(), a);
-        layer.AddMember("sizeFactor", Value(1.0).Move(), a);
+        layer.AddMember("scale", Value(1.0).Move(), a);
         string layerFileName = levelName + "_layer" + to_string(i) + ".lyr";
         layer.AddMember("fileName", Value().SetString(layerFileName.c_str(), layerFileName.length(), a), a);
         entities.PushBack(layer, a);

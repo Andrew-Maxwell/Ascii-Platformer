@@ -27,7 +27,7 @@ class particle : virtual public entity {
 
     public:
 
-    particle(float newX, float newY, Color newTint, float newSizeFactor, float newXSpeed, float newYSpeed, int c, int newLifetime, bool newFade = false);
+    particle(float newX, float newY, Color newTint, float newScale, float newXSpeed, float newYSpeed, int c, int newLifetime, bool newFade = false);
 
     unsigned int type();
 

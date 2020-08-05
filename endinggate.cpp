@@ -8,8 +8,8 @@
 /*****************************************************************************/
 
     endingGate::endingGate(float newX, float newY, Color newTint,
-                        float newSizeFactor,  int newWidth = 0, int newHeight = 0) :
-                        entity(newX, newY, newTint, newSizeFactor) {
+                        float newScale,  int newWidth = 0, int newHeight = 0) :
+                        entity(newX, newY, newTint, newScale) {
         toPrint = {"O----O", "|    |", "|    |", "|    |", "O----O"};
         width = 5;
         height = 5;
@@ -33,7 +33,7 @@
 
     void endingGate::tickSet() {
         if (GetRandomValue(0, 10) == 0) {
-            world -> addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, sizeFactor, 0, -0.01, '*', (height - 1.5) * 100), zPosition);
+            world -> addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, scale, 0, -0.01, '*', (height - 1.5) * 100), zPosition);
         }
     }
 
@@ -46,7 +46,7 @@
 
     void endingGate::print() {
         for (int i = 0; i < height; i++) {
-            theScreen -> draw(x, y + i, tint, sizeFactor, toPrint[i], doLighting);
+            theScreen -> draw(x, y + i, tint, scale, toPrint[i], doLighting);
         }
     }
 

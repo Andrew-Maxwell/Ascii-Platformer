@@ -25,14 +25,14 @@
                     xInertia += col.xVal * 0.3;
                     health = max(0, min(maxHealth, health + col.damage));
                     hurtTimer = 60;
-                    damageIndicator(col.damage, x, y, HURTCOLOR, sizeFactor);
+                    damageIndicator(col.damage, x, y, HURTCOLOR, scale);
                 }
                 break;
             case ENEMYTYPE:
                 if (hurtTimer < 0) {
                     health = max(0, min(maxHealth, health + col.damage));
                     hurtTimer = 60;
-                    damageIndicator(col.damage, x, y, HURTCOLOR, sizeFactor);
+                    damageIndicator(col.damage, x, y, HURTCOLOR, scale);
                     Vector2 newInertia = Vector2Scale(Vector2Negate(Vector2Normalize({xInertia, yInertia})), 0.7);
                     xInertia = newInertia.x;
                     yInertia = newInertia.y / 3;
@@ -95,6 +95,11 @@
                 else {
                     pushedY += copysign(1, col.yVal);
                 }
+                break;
+            }
+            case ELEVATORTYPE: {
+                pushedX += col.xVal;
+                pushedY += col.yVal;
                 break;
             }
             case WATERTYPE: {

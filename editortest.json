@@ -16,7 +16,7 @@
             "x": 7.0,
             "y": 24.0,
             "tint": [255, 0, 0, 255],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "width": 21,
             "height": 12,
             "yPower": -0.033
@@ -26,7 +26,7 @@
             "x": 0.0,
             "y": 0.0,
             "tint": [255, 0, 0, 255],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "width": 10,
             "height": 5,
             "yPower": -0.033
@@ -36,7 +36,7 @@
             "x": 20.0,
             "y": 14.0,
             "tint": [255, 0, 0, 255],
-            "sizeFactor": 1.0,
+            "scale": 1.0,
             "width": 10,
             "height": 5,
             "yPower": -0.033

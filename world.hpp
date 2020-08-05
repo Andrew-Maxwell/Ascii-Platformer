@@ -7,6 +7,11 @@
 
 using namespace rapidjson;
 
+//(x1, y1) is the upper left corner
+struct movingRectangle {
+    float x1, y1, x2, y2, dX, dY;
+};
+
 /******************************************************************************/
 //Collision
 //A sort of message between entities
@@ -14,12 +19,12 @@ using namespace rapidjson;
 
 struct collision {
     int type;
+    unsigned int id;
     int damage;
     float xVal;
     float yVal;
-    double magnitude;
     string message;
-    unsigned int id;
+    double magnitude;
     unsigned int flags;
 
     collision(int newType = 0, unsigned int newID = 0, int newDamage = 0, float newXVal = 0, float newYVal = 0, string newMessage = "", double newMagnitude = 0, unsigned int newFlags = 0) :
@@ -84,10 +89,13 @@ class collider : public layer {
     list<hudEntity*> hudEntities;
     list<collideable*> collideables;
     list<collideable*> particles;
+
     bool channel[512] = {false};
     bool persistentChannel[512] = {false};
     uint8_t togglingChannel[512] = {0};
     set<uint8_t> interceptedCodes;
+
+    list<movingRectangle> rectangles;
 
     public:
 
@@ -129,11 +137,15 @@ class collider : public layer {
 
     void addParticle(collideable* newParticle, list<entity*>::iterator zPosition);
 
+    void addRectangle(float x1, float y1, float width, float height, float dX, float dY);
+
     //Used exclusively when creating entities to be added
 
     list<entity*>::iterator getZPosition();
 
     //physical tilemap functions
+
+    Vector2 go(Vector2 pos, Vector2 d);
 
     bool isSolid(int checkX, int checkY);
 

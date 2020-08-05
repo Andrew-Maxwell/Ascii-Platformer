@@ -74,11 +74,11 @@ class screen {
 
     void start(bool tabScreen);
 
-    void draw(float x, float y, Color tint, float sizeFactor, string text, bool doLight = true);
+    void draw(float x, float y, Color tint, float scale, string text, bool doLight = true);
 
     void drawHud(float x, float y, Color tint, string text);
 
-    void drawWithBackground(float x, float y, Color tint, Color background, float sizeFactor, string text, bool doLight = true);
+    void drawWithBackground(float x, float y, Color tint, Color background, float scale, string text, bool doLight = true);
 
     void drawHudWithBackground(float x, float y, Color tint, Color background, string text);
     //Used by button in the menus
@@ -86,23 +86,23 @@ class screen {
 
     void drawScaleTest(float x, float y, Color tint, string text);
 
-    void drawLayer(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool doLight = true);
+    void drawLayer(float x, float y, Color tint, float scale, Texture2D& t, bool doLight = true);
 
     void drawHudLayer(float x, float y, Color tint, Texture2D& t);
 
-    virtual void drawLayerEditor(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected, bool doLight = true) {}
+    virtual void drawLayerEditor(float x, float y, Color tint, float scale, Texture2D& t, bool selected, bool doLight = true) {}
 
     //Bars (world)
 
-    void drawBarLeft(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
+    void drawBarLeft(float x, float y, Color tint, float scale, float length, bool doLight = true);
 
-    void drawBarRight(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
+    void drawBarRight(float x, float y, Color tint, float scale, float length, bool doLight = true);
 
-    void drawBarDown(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
+    void drawBarDown(float x, float y, Color tint, float scale, float length, bool doLight = true);
 
-    void drawBarUp(float x, float y, Color tint, float sizeFactor, float length, bool doLight = true);
+    void drawBarUp(float x, float y, Color tint, float scale, float length, bool doLight = true);
 
-    void drawBox(float x, float y, float width, float height, Color tint, float sizeFactor, bool doLight = true);
+    void drawBox(float x, float y, float width, float height, Color tint, float scale, bool doLight = true);
 
     //Bars (HUD)
 
@@ -124,7 +124,7 @@ class screen {
 
     Vector2 getCamera();
 
-    Vector2 getMouseRelativeTo(float x, float y, float sizeFactor);
+    Vector2 getMouseRelativeTo(float x, float y, float scale);
 
     int getScreenRows();
 
@@ -158,7 +158,7 @@ class editableCanvas : public screen {
 
     void moveCamera();
 
-    void drawLayerEditor(float x, float y, Color tint, float sizeFactor, Texture2D& t, bool selected, bool doLight = true);
+    void drawLayerEditor(float x, float y, Color tint, float scale, Texture2D& t, bool selected, bool doLight = true);
 
 };
 

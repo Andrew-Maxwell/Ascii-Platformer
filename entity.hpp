@@ -17,7 +17,7 @@ class entity {
 
     Color tint;
     bool doLighting = true;
-    float sizeFactor = 1;
+    float scale = 1;
 
     public:
 
@@ -27,7 +27,7 @@ class entity {
 
     //Constructor and destructor
 
-    entity(float newx, float newy, Color newTint, float newSizeFactor);
+    entity(float newx, float newy, Color newTint, float newScale);
 
     entity() {}
 

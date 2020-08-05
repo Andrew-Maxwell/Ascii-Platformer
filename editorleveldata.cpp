@@ -38,10 +38,10 @@
             float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
             Color tint = entity.HasMember("tint") ? getColor(entity["tint"]) : WHITE;
             bool doLighting = entity.HasMember("doLighting") ? entity["doLighting"].GetBool() : true;
-            float sizeFactor = entity.HasMember("sizeFactor") ? entity["sizeFactor"].GetFloat() : 1.0;
+            float scale = entity.HasMember("scale") ? entity["scale"].GetFloat() : 1.0;
             int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
             int height = entity.HasMember("height") ? entity["height"].GetInt() : 1;
-            editableLayer * L = new editableLayer(x, y, tint, sizeFactor, (type == "layer"), loadedLayers.find(fileName) == loadedLayers.end(), fileName, toupper(type[0]), width, height, entity, doLighting);
+            editableLayer * L = new editableLayer(x, y, tint, scale, (type == "layer"), loadedLayers.find(fileName) == loadedLayers.end(), fileName, toupper(type[0]), width, height, entity, doLighting);
             if (type == "layer") {
                 loadedLayers.insert(fileName);
             }
@@ -54,7 +54,7 @@
 
     }
 
-    Value& editorLevelData::getNewEntity(float x, float y, float sizeFactor, int count) {
+    Value& editorLevelData::getNewEntity(float x, float y, float scale, int count) {
         Document::AllocatorType& a = json.GetAllocator();
         Value newEntity(kObjectType);
         char buffer[15];
@@ -71,7 +71,7 @@
         newEntity["tint"].PushBack(Value(255).Move(), a);
         newEntity.AddMember("width", Value(1).Move(), a);
         newEntity.AddMember("height", Value(1).Move(), a);
-        newEntity.AddMember("sizeFactor", Value(sizeFactor).Move(), a);
+        newEntity.AddMember("scale", Value(scale).Move(), a);
         json["entities"].PushBack(newEntity, a);
         return json["entities"][json["entities"].Size() - 1];
     }

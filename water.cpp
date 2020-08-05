@@ -7,8 +7,8 @@
 //Animates the surface of water
 /*****************************************************************************/
 
-    water:: water(float newX, float newY, Color newTint, float newSizeFactor,  int newWidth, float newheight, float newWavelength, float newAmplitude) :
-        entity(newX, newY, newTint, newSizeFactor),
+    water:: water(float newX, float newY, Color newTint, float newScale,  int newWidth, float newheight, float newWavelength, float newAmplitude) :
+        entity(newX, newY, newTint, newScale),
         width(newWidth),
         height(newheight),
         wavelength(newWavelength),
@@ -103,7 +103,7 @@
                     if (y > otherY && power > 0) {
                         for (int i = 0; i < power * 40; i++) {
                             world -> addParticle(new drop(GetRandomValue(colIter -> xVal - xRange, colIter -> xVal + xRange),
-                                y - surface[otherX - x], tint, sizeFactor, 0, 0, 0,
+                                y - surface[otherX - x], tint, scale, 0, 0, 0,
                                 power * -5, 100, GRAVITY, FRICTION, 100), zPosition);
                         }
                     }
@@ -116,7 +116,7 @@
 
                 //Spawn some particles (this is splash() from effects.cpp)
 
-                splash(40 * abs(colIter -> yVal), colIter -> xVal, y - surface[colIter -> xVal - x], tint, sizeFactor, abs(colIter -> yVal) * 0.5, 0, 100, 0.5, zPosition);
+                splash(40 * abs(colIter -> yVal), colIter -> xVal, y - surface[colIter -> xVal - x], tint, scale, abs(colIter -> yVal) * 0.5, 0, 100, 0.5, zPosition);
             }
             colIter = collisions.erase(colIter);
         }
@@ -142,9 +142,9 @@
 
     void water::print() {
         Vector2 camera = theScreen -> getCamera();
-        for (int i = max(0, (int)(camera.x - x - theScreen -> getScreenCols() / sizeFactor / 2.0f));
-                i < min(width, (int)(camera.x - x + theScreen -> getScreenCols() / sizeFactor / 2.0f + 1));
+        for (int i = max(0, (int)(camera.x - x - theScreen -> getScreenCols() / scale / 2.0f));
+                i < min(width, (int)(camera.x - x + theScreen -> getScreenCols() / scale / 2.0f + 1));
                 i++) {
-            theScreen -> drawBarUp(x + i, y + height, tint, sizeFactor, height + surface[i], doLighting);
+            theScreen -> drawBarUp(x + i, y + height, tint, scale, height + surface[i], doLighting);
         }
     }

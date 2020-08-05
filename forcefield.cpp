@@ -6,8 +6,8 @@
 //propels physical entities in a given direction
 /*****************************************************************************/
 
-    linearField::linearField(float newX, float newY, Color newTint, Color newOnTint, float newSizeFactor,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight) :
-        entity(newX, newY, newTint, newSizeFactor),
+    linearField::linearField(float newX, float newY, Color newTint, Color newOnTint, float newScale,  int newChannel, float newXPower, float newYPower, int newWidth, int newHeight) :
+        entity(newX, newY, newTint, newScale),
         channel(newChannel),
         xPower(newXPower),
         yPower(newYPower),
@@ -94,10 +94,10 @@
 
     void linearField::print() {
         if (isOn) {
-            theScreen -> drawLayer(x, y, onTint, sizeFactor, tex.texture, false);
+            theScreen -> drawLayer(x, y, onTint, scale, tex.texture, false);
         }
         else {
-            theScreen -> drawLayer(x, y, tint, sizeFactor, tex.texture, doLighting);
+            theScreen -> drawLayer(x, y, tint, scale, tex.texture, doLighting);
         }
     }
 
@@ -106,8 +106,8 @@
 //Attracts or repels physical entities within its influence
 /*****************************************************************************/
 
-    forceField::forceField(float newX, float newY, Color newTint, Color newOnTint, float newSizeFactor,  int newChannel, float newPower, float newRange) :
-        entity(newX, newY, newTint, newSizeFactor),
+    forceField::forceField(float newX, float newY, Color newTint, Color newOnTint, float newScale,  int newChannel, float newPower, float newRange) :
+        entity(newX, newY, newTint, newScale),
         channel(newChannel),
         power(newPower),
         isOn(false),
@@ -158,10 +158,10 @@
             float angle = GetRandomValue(0, 2 * PI * 1000) / 1000.0;
             particle* p;
             if (power > 0) { //Attractor force field
-                p = new particle(x + cos(angle) * range, y + sin(angle) * range, onTint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40);
+                p = new particle(x + cos(angle) * range, y + sin(angle) * range, onTint, scale, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / 40);
             }
             else {  //repeller force field
-                p = new particle(x, y, onTint, sizeFactor, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / -40);
+                p = new particle(x, y, onTint, scale, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / -40);
             }
             p -> setDoLighting(false);
             world -> addEntity(p);
@@ -178,10 +178,10 @@
 
     void forceField::print() {
         if (isOn) {
-            theScreen -> draw(x, y, onTint, sizeFactor, "F", false);
+            theScreen -> draw(x, y, onTint, scale, "F", false);
         }
         else {
-            theScreen -> draw(x, y, tint, sizeFactor, "F", doLighting);
+            theScreen -> draw(x, y, tint, scale, "F", doLighting);
         }
     }
 
@@ -190,9 +190,9 @@
 //Attracts or repels physical entities for one tick, then disappears.
 /*****************************************************************************/
 
-    explosion::explosion(float newX, float newY, Color newTint, float newSizeFactor,  int newChannel, float newPower, float newRange) :
-        entity(newX, newY, newTint, newSizeFactor),
-        forceField(newX, newY, newTint, newTint, newSizeFactor, newChannel, newPower, newRange)
+    explosion::explosion(float newX, float newY, Color newTint, float newScale,  int newChannel, float newPower, float newRange) :
+        entity(newX, newY, newTint, newScale),
+        forceField(newX, newY, newTint, newTint, newScale, newChannel, newPower, newRange)
         {
             isOn = true;
         }

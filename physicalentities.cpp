@@ -6,9 +6,9 @@
 //applies, more rigorously.
 /******************************************************************************/
 
-    physicalEntity::physicalEntity(float newX, float newY,  Color newTint, float newSizeFactor, float elasticity, float newXMomentum,
+    physicalEntity::physicalEntity(float newX, float newY,  Color newTint, float newScale, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed, float newGravity, float newFriction) :
-                                entity(newX, newY, newTint, newSizeFactor),
+                                entity(newX, newY, newTint, newScale),
                                 maxSpeed(newMaxSpeed),
                                 gravity(newGravity),
                                 friction(newFriction),
@@ -60,7 +60,7 @@
             yMomentum *= WATERRESISTANCE;
             xMomentum *= WATERRESISTANCE;
         }
-        else {
+        else if (!onGround) {
             yMomentum += gravity;
         }
 
@@ -70,7 +70,26 @@
             yMomentum *= maxSpeed / momentumMagnitude;
         }
 
-        float xStep = (xMomentum + pushedX) / (abs(xMomentum + pushedX) + 1);
+        float dX = xMomentum + pushedX;
+        float dY = yMomentum + pushedY;
+        Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY});
+        if (newPosition.x != x + dX) { //hit horizontally
+            xMomentum *= (-1 * elasticity);
+            hit = true;
+        }
+        if (newPosition.y != y + dY) {  //hit vertically
+            yMomentum *= (-1 * elasticity);
+            xMomentum *= friction;
+            hit = true;
+            onGround = true;
+        }
+        else {
+            onGround = false;
+        }
+        x = newPosition.x;
+        y = newPosition.y;
+
+/*        float xStep = (xMomentum + pushedX) / (abs(xMomentum + pushedX) + 1);
         for (int i = 0; i < abs(xMomentum + pushedX) + 1; i++) {
             if (world -> isSolid((int)(x + xStep) + (xStep > 0), (int)y)) {// || world -> isSolid((int)y + 0.5, (int)(x + xStep) + (xStep > 0))) {
                 x = floor(x + xStep) + (xStep < 0);
@@ -95,7 +114,7 @@
             else {
                 y += yStep;
             }
-        }
+        }*/
     }
 
     bool physicalEntity::finalize() {return false;}
@@ -108,11 +127,11 @@
 //A physicalEntity with some particle characteristics
 /******************************************************************************/
 
-    physicalParticle::physicalParticle( float newX, float newY, Color newTint, float newSizeFactor, int displayChar, float newElasticity, float newXMomentum,
+    physicalParticle::physicalParticle( float newX, float newY, Color newTint, float newScale, int displayChar, float newElasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int newLifetime) :
-                                  entity(newX, newY, newTint, newSizeFactor),
-                                  physicalEntity(newX, newY, newTint, newSizeFactor, newElasticity, newXMomentum, newYMomentum, newMaxSpeed, newGravity, newFriction),
-                                  particle(newX, newY, newTint, newSizeFactor, newXMomentum, newYMomentum, displayChar, newLifetime),
+                                  entity(newX, newY, newTint, newScale),
+                                  physicalEntity(newX, newY, newTint, newScale, newElasticity, newXMomentum, newYMomentum, newMaxSpeed, newGravity, newFriction),
+                                  particle(newX, newY, newTint, newScale, newXMomentum, newYMomentum, displayChar, newLifetime),
                                   dynamicChar(displayChar == 0),
                                   lifetime(newLifetime) {
         elasticity = newElasticity;
@@ -161,6 +180,6 @@
                 toPrint[0] = '.';
             }
         }
-        theScreen -> draw(x + 0.125, y, tint, sizeFactor, toPrint, doLighting);
+        theScreen -> draw(x + 0.125, y, tint, scale, toPrint, doLighting);
     }
 

@@ -23,7 +23,7 @@ class snakeWall : virtual public collideable {
 
     public:
 
-    explicit snakeWall(float newX, float newY, Color newTint, float newSizeFactor, int newSnakeLength, int newSnakeHead, int newTicksPerMove, bool newLoop, int newForwardChannel, int newReverseChannel, string newDisplay);
+    explicit snakeWall(float newX, float newY, Color newTint, float newScale, int newSnakeLength, int newSnakeHead, int newTicksPerMove, bool newLoop, int newForwardChannel, int newReverseChannel, string newDisplay);
 
     void addPoint(int px, int py);
 
@@ -54,7 +54,7 @@ class activeWall : public entity {
 
     public:
 
-    explicit activeWall(  float newX, float newY, Color newTint, float newSizeFactor, int newWidth, int newHeight, int newChannel, int newDisplay);
+    explicit activeWall(  float newX, float newY, Color newTint, float newScale, int newWidth, int newHeight, int newChannel, int newDisplay);
 
     unsigned int type();
 
@@ -66,16 +66,25 @@ class activeWall : public entity {
 
     void print();
 };
-/*
-class newTestEntity : virtual public collideable {
 
-    int health, hurtTimer = 0;
-    int damage;
-    bool isDead = false;
+//TODO: change elevator to inherit from a layer
+
+class elevator : virtual public collideable {
+
+    vector<Vector2> points;
+    int direction = 1;
+    float speed;
+    Vector2 move;
+    int nextPoint = 0;
+    int width, height;
 
     public:
 
-    explicit newTestEntity(  float newX, float newY, Color newTint, float newSizeFactor);
+    explicit elevator(float newX, float newY, Color newTint, float newScale, int newWidth, int newHeight, float newSpeed);
+
+    void addPoint(Vector2 newPoint);
+
+    void finish(int startingPoint);
 
     unsigned int type();
 
@@ -93,7 +102,5 @@ class newTestEntity : virtual public collideable {
 
     void print();
 };
-*/
-
 
 #endif //MOVINGWALLS_HPP

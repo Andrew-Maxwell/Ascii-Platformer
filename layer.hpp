@@ -28,7 +28,7 @@ class layer : virtual public entity {
 
     public:
 
-    explicit layer( float newx, float newy, Color newTint, float newSizeFactor,
+    explicit layer( float newx, float newy, Color newTint, float newScale,
                     string newFileName);
 
     ~layer();

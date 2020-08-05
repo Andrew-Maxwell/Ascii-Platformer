@@ -17,7 +17,7 @@ class drop : public physicalParticle {
 
     public:
 
-     explicit drop( float newx, float newy, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+     explicit drop( float newx, float newy, Color newTint, float newScale, int displayChar, float elasticity, float newXMomentum,
                                   float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION, int newLifetime = 2147483647);
 
     unsigned int type();
@@ -39,7 +39,7 @@ class rain : public entity, public entityParent {
 
     public:
 
-    rain(float newX, float newY, Color newTint, float newSizeFactor,  float newDropsPerTick, float newXMomentum, bool isSnow);
+    rain(float newX, float newY, Color newTint, float newScale,  float newDropsPerTick, float newXMomentum, bool isSnow);
 
     unsigned int type();
 

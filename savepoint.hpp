@@ -20,7 +20,7 @@ class savePoint : public collideable, public entityParent {
 
     public:
 
-    explicit savePoint(float newX, float newY, Color newTint, float newSizeFactor);
+    explicit savePoint(float newX, float newY, Color newTint, float newScale);
 
     unsigned int type();
 

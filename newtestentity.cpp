@@ -1,9 +1,9 @@
 #include "newtestentity.hpp"
 
-    newTestEntity::newTestEntity(  float newX, float newY, Color newTint, float newSizeFactor, int displayChar, float elasticity, float newXMomentum,
+    newTestEntity::newTestEntity(  float newX, float newY, Color newTint, float newScale, int displayChar, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int maxHealth, int newDamage) :
-                        entity(newX, newY, newTint, newSizeFactor),
-                        physicalEntity(newX, newY, newTint, newSizeFactor, elasticity, newXMomentum,
+                        entity(newX, newY, newTint, newScale),
+                        physicalEntity(newX, newY, newTint, newScale, elasticity, newXMomentum,
                                 newYMomentum, newMaxSpeed, newGravity, newFriction)
     {
         health = maxHealth;
@@ -56,7 +56,7 @@
                 case BULLETTYPE: // bullet
                     health += colIter -> damage;
                     colIter = collisions.erase(colIter);
-                    damageIndicator(colIter -> damage, x, y, HURTCOLOR, sizeFactor);
+                    damageIndicator(colIter -> damage, x, y, HURTCOLOR, scale);
                     break;
                 default:
                     colIter++;
@@ -70,5 +70,5 @@
     }
 
     void newTestEntity::print() {
-        theScreen -> draw(x, y, tint, sizeFactor, "test");
+        theScreen -> draw(x, y, tint, scale, "test");
     }
