@@ -9,7 +9,7 @@ using namespace rapidjson;
 
 //(x1, y1) is the upper left corner
 struct movingRectangle {
-    float x1, y1, x2, y2, dX, dY;
+    float oldX1, oldY1, oldX2, oldY2, newX1, newY1, newX2, newY2;
 };
 
 /******************************************************************************/
@@ -137,7 +137,7 @@ class collider : public layer {
 
     void addParticle(collideable* newParticle, list<entity*>::iterator zPosition);
 
-    void addRectangle(float x1, float y1, float width, float height, float dX, float dY);
+    void addRectangle(movingRectangle newRectangle);
 
     //Used exclusively when creating entities to be added
 
@@ -145,9 +145,11 @@ class collider : public layer {
 
     //physical tilemap functions
 
-    Vector2 go(Vector2 pos, Vector2 d);
+    Vector2 go(Vector2 pos, Vector2 d, float width, float height, bool& hitX, bool& hitY);
 
-    bool isSolid(int checkX, int checkY);
+    bool isSolid(float checkX, float checkY);
+
+    bool isTileSolid(int checkX, int checkY);
 
     void setSolid(int x, int y, char solid);
     

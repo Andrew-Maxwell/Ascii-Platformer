@@ -192,11 +192,15 @@
 //Takes any entities on top of it with it.
 /*****************************************************************************/
 
-    elevator::elevator(  float newX, float newY, Color newTint, float newScale, int newWidth, int newHeight, float newSpeed) :
+    elevator::elevator(float newX, float newY, Color newTint, float newScale, float newWidth, float newHeight, float newSpeed, bool newLoop, int newForwardChannel, int newReverseChannel, gameLayer& newLayer) :
         entity(newX, newY, newTint, newScale),
+        gameLayer(newLayer),
         width(newWidth),
         height(newHeight),
-        speed(newSpeed) {}
+        speed(newSpeed),
+        loop(newLoop),
+        forwardChannel(newForwardChannel),
+        reverseChannel(newReverseChannel) {}
 
     void elevator::addPoint(Vector2 newPoint) {
         points.push_back(newPoint);
@@ -224,38 +228,45 @@
         return false;
     }
 
-    //NOTE: elevator does not always move by "move" distance. This may cause problems with
-    //entities riding along coming out of sync with the elevator.
-
-    //TODO: make reversable (for now, no channels at all)
-    //TODO: Add starting point
-    //TODO: Add configurable pauses
-
     void elevator::tickSet() {
         if (x == points[nextPoint].x && y == points[nextPoint].y) {
-            nextPoint = cMod(nextPoint + direction, points.size());
-            move = Vector2Scale(Vector2Normalize((Vector2){points[nextPoint].x - x, points[nextPoint].y - y}), speed);
+            if (world -> getChannel(forwardChannel) && (loop || nextPoint < points.size() - 1)) {
+                nextPoint = cMod(nextPoint + 1, points.size());
+                move = Vector2Scale(Vector2Normalize((Vector2){points[nextPoint].x - x, points[nextPoint].y - y}), speed);
+            }
+            else if (world -> getChannel(reverseChannel) && (loop || nextPoint > 0)) {
+                nextPoint = cMod(nextPoint - 1, points.size());
+                move = Vector2Scale(Vector2Normalize((Vector2){points[nextPoint].x - x, points[nextPoint].y - y}), speed);
+            }
+            else {
+                move = (Vector2){0, 0};
+            }
         }
         else if (abs(move.x) > abs(x - points[nextPoint].x) || abs(move.y) > abs(y - points[nextPoint].y)) {
             move = Vector2Subtract(points[nextPoint], (Vector2){x, y});
         }
-        world -> addRectangle(x, y, width, height, move.x, move.y);
+        movingRectangle newRect;
+        newRect.oldX1 = x;
+        newRect.oldY1 = y;
+        newRect.oldX2 = x + width;
+        newRect.oldY2 = y + height;
+        newRect.newX1 = newRect.oldX1 + move.x;
+        newRect.newY1 = newRect.oldY1 + move.y;
+        newRect.newX2 = newRect.oldX2 + move.x;
+        newRect.newY2 = newRect.oldY2 + move.y;
+        world -> addRectangle(newRect);
+    }
+
+    void elevator::tickGet() {
         x += move.x;
         y += move.y;
     }
-
-    void elevator::tickGet() {}
 
     bool elevator::finalize() {
         return false;
     }
 
-    //TODO: allow for a layer to be specified to be displayed/moved along with the elevator
     void elevator::print() {
-/*        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                theScreen -> draw(x + j, y + i, tint, scale, "E");
-            }
-        }*/
+        gameLayer::print();
     }
 

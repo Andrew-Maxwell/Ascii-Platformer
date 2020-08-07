@@ -499,6 +499,10 @@
         return hudFontSize;
     }
 
+    int screen::textLength(string text) {
+        return MeasureTextEx(displayFont, text.c_str(), 1, 0).x;
+    }
+
     void screen::tweakHudScale() {
         hudFontSize += 4;
         if (hudFontSize * MINWINDOWCOLS > GetMonitorWidth(0) || hudFontSize * MINWINDOWROWS > GetMonitorHeight(0)) {

@@ -4,6 +4,7 @@ collider* world = NULL;
 screen* theScreen = NULL;
 unsigned int entityCounter = 0;
 unsigned int tickCounter = 0;
+unsigned int FPS = 60;
 bool debugWatch = false;
 
 extern "C" int FONTCHARS[] = {  //Line break prevents horrifically long warning when building

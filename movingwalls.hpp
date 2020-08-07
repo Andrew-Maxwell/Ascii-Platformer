@@ -5,6 +5,7 @@
 #include "effects.hpp"
 #include "entity.hpp"
 #include "meta.hpp"
+#include "gamelayer.hpp"
 
 using namespace rapidjson;
 
@@ -67,20 +68,19 @@ class activeWall : public entity {
     void print();
 };
 
-//TODO: change elevator to inherit from a layer
-
-class elevator : virtual public collideable {
+class elevator : virtual public collideable, virtual public gameLayer {
 
     vector<Vector2> points;
-    int direction = 1;
     float speed;
     Vector2 move;
     int nextPoint = 0;
-    int width, height;
+    float width, height;
+    int forwardChannel, reverseChannel;
+    bool loop;
 
     public:
 
-    explicit elevator(float newX, float newY, Color newTint, float newScale, int newWidth, int newHeight, float newSpeed);
+    explicit elevator(float newX, float newY, Color newTint, float newScale, float newWidth, float newHeight, float newSpeed, bool newLoop, int newForwardChannel, int newReverseChannel, gameLayer& newLayer);
 
     void addPoint(Vector2 newPoint);
 
@@ -102,5 +102,13 @@ class elevator : virtual public collideable {
 
     void print();
 };
+/*
+class looseBlock : public physicalEntity, virtual public gameLayer {
 
+    public:
+
+    explicit looseBlock(float newX, float newY, Color newTint, float newScale, float newWidth, float newHeight, 
+
+};
+*/
 #endif //MOVINGWALLS_HPP

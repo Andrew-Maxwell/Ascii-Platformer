@@ -446,17 +446,42 @@
         },
         {
             "type": "elevator",
-            "points": [{"x": 44, "y": 20},{"x": 44, "y": 0}, {"x": 88, "y": 20}],
+            "points": [
+                {
+                    "x": 70,
+                    "y": 50
+                },
+                {
+                    "x": 44,
+                    "y": 50
+                },
+                {
+                    "x": 44,
+                    "y": 10
+                },
+                {
+                    "x": 60,
+                    "y": 20
+                },
+                {
+                    "x": 44,
+                    "y": 0
+                }
+            ],
             "tint": [
                 0,
                 0,
                 255,
                 255
             ],
-            "width": 3,
-            "height": 1,
+            "width": 6,
+            "height": 4,
             "scale": 1.0,
-            "speed": 0.05
+            "speed": 0.35,
+            "forwardChannel": 1,
+            "reverseChannel": 2,
+            "loop": false,
+            "fileName": "testelevator.lyr"
         }
     ],
     "defaultOutfit": {

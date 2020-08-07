@@ -109,6 +109,7 @@ extern screen* theScreen;
 extern unsigned int entityCounter;
 extern unsigned int tickCounter;
 extern bool debugWatch;
+extern unsigned int FPS;
 
 extern "C" {
     extern int FONTCHARS[];

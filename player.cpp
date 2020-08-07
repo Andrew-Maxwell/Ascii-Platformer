@@ -203,7 +203,7 @@
             //Keyboard movement handling
             if (!isUnderWater) {
                 //Gravity
-                yInertia = min(yInertia + gravity, 0.3f);
+                yInertia = min(yInertia + gravity, maxFallSpeed);
                 yMovement = 0;
                 //Jumping
                 if (in.jump.isPressed() || (in.jump.isDown() && autoRejump)) {  //If the jump key is pressed
@@ -314,26 +314,28 @@
             //Update X and Y position based on 3 movement variables
             float dX = xInertia + pushedX + xMovement;
             float dY = yInertia + pushedY + yMovement;
-            cout << "Player: (" << x << ", " << y << ") " << dX << " " << dY << endl;
-            Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY});
-            if (newPosition.x != x + dX) { //hit horizontally
+            bool hitX, hitY;
+            Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY}, width, height, hitX, hitY);
+            if (hitX) {
                 xInertia *= (-1 * elasticity);
                 hit = true;
                 onWall = true;
             }
-            if (newPosition.y != y + dY) {  //hit vertically
+            if (hitY) {
                 yInertia *= (-1 * elasticity);
                 xInertia *= friction;
                 hit = true;
-                onGround = true;
+                if (newPosition.y < y + dY) {
+                    onGround = true;
+                }
             }
             x = newPosition.x;
             y = newPosition.y;
 
             //Allow for being crushed
             if (world -> isSolid(x + 0.5, y + 0.5)) {
-                health -= 500;
-                damageIndicator(-500, x, y, HURTCOLOR, scale);
+                health -= 999;
+                damageIndicator(-999, x, y, HURTCOLOR, scale);
             }
 
 

@@ -99,7 +99,9 @@
             }
             case ELEVATORTYPE: {
                 pushedX += col.xVal;
-                pushedY += col.yVal;
+                if (col.yVal < maxFallSpeed) {
+                    pushedY += col.yVal;
+                }
                 break;
             }
             case WATERTYPE: {

@@ -130,8 +130,8 @@ class player : virtual public collideable, public entityParent, public hudEntity
     bool onGround, onWall;
     bool hit = false;
     bool isUnderWater = false, lastTickUnderWater = false;
-    float elasticity = 0, maxSpeed = 100, gravity, friction;
-    float width = 0.8;
+    float elasticity = 0, maxSpeed = 100, gravity, friction, maxFallSpeed = 0.3f;
+    float width = 1, height = 1;
 
     float xMovement = 0, yMovement = 0;
     float pushedX = 0, pushedY = 0;

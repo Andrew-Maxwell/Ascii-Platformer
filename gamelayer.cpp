@@ -13,6 +13,14 @@ Implements layer functionality (e.g. animations) which the editor doesn't use.*/
             layer::render();
         }
 
+    gameLayer::gameLayer(gameLayer& other) :
+        entity(other.x, other.y, other.tint, other.scale),
+        layer(other.x, other.y, other.tint, other.scale, other.fileName) {
+            layer::readLayer();
+            tex = LoadRenderTexture(getCols() * 8, getRows() * 8);
+            layer::render();
+    }
+
     gameLayer::~gameLayer() {
         UnloadRenderTexture(tex);
         cout << "gameLayer destroyed\n";

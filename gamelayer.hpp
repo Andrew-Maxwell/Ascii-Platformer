@@ -18,6 +18,8 @@ class gameLayer : public layer {
     
     gameLayer(float newx, float newy, Color newTint, float newScale, string newFileName);
 
+    gameLayer(gameLayer& other);
+
     ~gameLayer();
 
     unsigned int type();

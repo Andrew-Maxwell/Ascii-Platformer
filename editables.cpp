@@ -750,10 +750,10 @@ using namespace rapidjson;
             json["scale"] = scale;
         }
         if (json.HasMember("width")) {
-            json["width"] = getCols();
+            json["width"] = displayWidth;
         }
         if (json.HasMember("height")) {
-            json["height"] = getRows();
+            json["height"] = displayHeight;
         }
     }
 

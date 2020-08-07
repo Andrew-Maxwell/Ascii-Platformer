@@ -21,11 +21,11 @@ class physicalEntity : virtual public collideable {
     bool hit = false, onGround = false;
     bool isUnderWater = false, lastTickUnderWater = false;
     float elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction;
-    float width = 0.8;
+    float width, height;
 
     public:
 
-    explicit physicalEntity(float newx, float newy, Color newTint, float newScale, float elasticity, float newXMomentum,
+    explicit physicalEntity(float newx, float newy, Color newTint, float newScale, float newWidth, float newHeight, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed = 100, float newGravity = GRAVITY, float newFriction = FRICTION);
 
     unsigned int type();

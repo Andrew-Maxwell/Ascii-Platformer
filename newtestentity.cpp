@@ -3,7 +3,7 @@
     newTestEntity::newTestEntity(  float newX, float newY, Color newTint, float newScale, int displayChar, float elasticity, float newXMomentum,
                                 float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int maxHealth, int newDamage) :
                         entity(newX, newY, newTint, newScale),
-                        physicalEntity(newX, newY, newTint, newScale, elasticity, newXMomentum,
+                        physicalEntity(newX, newY, newTint, newScale, 1, 1, elasticity, newXMomentum,
                                 newYMomentum, newMaxSpeed, newGravity, newFriction)
     {
         health = maxHealth;

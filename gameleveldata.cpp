@@ -20,7 +20,7 @@
             assert(entity.IsObject());
             string type = entity.HasMember("type") ? entity["type"].GetString() : "unknown entity";
 
-            if (type == "layer") {
+            if (type == "layer" || type == "elevator") {
                 float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
                 float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
                 Color tint = entity.HasMember("tint") ? getColor(entity["tint"]) : (Color){0, 255, 0, 255};
@@ -206,11 +206,14 @@
                 world -> addEntity(newActiveWall);
             }
             else if (type == ("elevator")) {
-                int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
-                int height = entity.HasMember("height") ? entity["height"].GetInt() : 1;
-                int startingPoint = entity.HasMember("startingPoint") ? entity["startingPoint"].GetInt() : 0;
+                float width = entity.HasMember("width") ? entity["width"].GetFloat() : 1;
+                float height = entity.HasMember("height") ? entity["height"].GetFloat() : 1;
                 float speed = entity.HasMember("speed") ? entity["speed"].GetFloat() : 0.05;
-                elevator* newElevator = new elevator(x, y, tint, scale, width, height, speed);
+                bool loop = entity.HasMember("loop") ? entity["loop"].GetBool() : true;
+                int forwardChannel = entity.HasMember("forwardChannel") ? entity["forwardChannel"].GetInt() : -1;
+                int reverseChannel = entity.HasMember("reverseChannel") ? entity["reverseChannel"].GetInt() : -1;
+                elevator* newElevator = new elevator(x, y, tint, scale, width, height, speed, loop, forwardChannel, reverseChannel, **layerIter);
+                layerIter++;
                 assert(entity.HasMember("points"));
                 assert(entity["points"].IsArray());
                 for (SizeType i = 0; i < entity["points"].Size(); i++) {
@@ -218,6 +221,7 @@
                     float pointY = entity["points"][i]["y"].GetFloat();
                     newElevator -> addPoint((Vector2){pointX, pointY});
                 }
+                int startingPoint = entity.HasMember("startingPoint") ? entity["startingPoint"].GetInt() : 0;
                 newElevator -> finish(startingPoint);
                 newElevator -> setDoLighting(doLighting);
                 world -> addCollideable(newElevator);

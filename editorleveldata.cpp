@@ -36,13 +36,18 @@
 
             float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
             float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
+            if (type == "elevator") {
+                int startingPoint = entity.HasMember("startingPoint") ? entity["startingPoint"].GetInt() : 0;
+                x = entity["points"][startingPoint]["x"].GetFloat();
+                y = entity["points"][startingPoint]["y"].GetFloat();
+            }
             Color tint = entity.HasMember("tint") ? getColor(entity["tint"]) : WHITE;
             bool doLighting = entity.HasMember("doLighting") ? entity["doLighting"].GetBool() : true;
             float scale = entity.HasMember("scale") ? entity["scale"].GetFloat() : 1.0;
             int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
             int height = entity.HasMember("height") ? entity["height"].GetInt() : 1;
-            editableLayer * L = new editableLayer(x, y, tint, scale, (type == "layer"), loadedLayers.find(fileName) == loadedLayers.end(), fileName, toupper(type[0]), width, height, entity, doLighting);
-            if (type == "layer") {
+            editableLayer * L = new editableLayer(x, y, tint, scale, (type == "layer" || type == "elevator"), loadedLayers.find(fileName) == loadedLayers.end(), fileName, toupper(type[0]), width, height, entity, doLighting);
+            if (type == "layer" || type == "elevator") {
                 loadedLayers.insert(fileName);
             }
             layers.push_back(L);

@@ -142,6 +142,8 @@ class screen {
 
     void tweakGameScale();
 
+    int textLength(string text);
+
 };
 
 class editableCanvas : public screen {

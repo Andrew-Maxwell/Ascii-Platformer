@@ -11,7 +11,8 @@ Core gameplay elements:
             - Extreme multijumping?
             - Rocket jumps/swinging
     - Combat (with a puzzle-solving bent)
-        - Bullet Hell style? Similar to Cave Story/Noita
+        - Bullet Hell style?
+        - Similar to Cave Story/Noita
 
 
 Arena:
@@ -27,7 +28,6 @@ Loose ends:
 Features:
 1 Puzzle elements:
     1 Color changing/other effect layers
-    1 Elevators/other moving platforms
     1 Transmitter effect
     2 Variable size channels (4, 8, 16 bit)
 1 Story elements:
@@ -43,7 +43,6 @@ Features:
 1 Sound effects
 1 Music: see http://dig.ccmixter.org for free music, or contact noise, or try to make your own!
 2 Variable refresh rate
-2 Generic Gun pickups
 2 Map system: Use render test code on the collider
 2 Visual effects:
     2 leaf physicalParticles that fly eratically
@@ -58,6 +57,7 @@ Features:
         Trees: Generate pseudo-randomly based on location/size/level file name/whatever. elasticity of each particle depends on distance from trunk point
     2 Glass panes that explode into tons and tons of tiny shards
 2 Rotary forcefields!
+3 physical solid blocks?
 ? Multi-thread processing for water and particles
 ? Editor misc:
     3 Display, allow changing palette selection (don't ignore number keys) in tab screen
@@ -65,11 +65,12 @@ Features:
     3 Fix the default palette
     3 Need to be able to correspond entities in the file to entities in the editor more easily.
 
-? Generic physicalEntity parameters (density/volume/mass)
-? Combat elements:
+2 Combat elements:
     - Gun/turret enemies
     - Fast-moving enemies
-? Flat mode (everything rendered to one texture) to save on processing power
+    2 Generic Gun pickups
+2 Generic physicalEntity parameters (density/volume/mass)
+2 Flat mode (everything rendered to one texture) to save on processing power
 
 Ideas:
     - Cyberpunk theme: Parallel digital and physical realms, distinct visual style, distinct puzzle types

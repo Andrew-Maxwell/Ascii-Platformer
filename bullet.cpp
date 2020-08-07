@@ -11,7 +11,7 @@
                     int newDamage, float newExplosionPower, float newExplosionRange,
                     bool newHitWall, bool newHitWater, bool newHitEntity, bool newSticky) :
         entity(newX, newY, newTint, newScale),
-        physicalEntity(newX, newY, newTint, newScale, newElasticity, newXMomentum, newYMomentum, 
+        physicalEntity(newX, newY, newTint, newScale, 0.5, 0.5, newElasticity, newXMomentum, newYMomentum, 
             newMaxSpeed, newGravity, newFriction),
         particle(newX, newY, newTint, newScale, 0, 0, c, newLifetime),
         damage(newDamage),

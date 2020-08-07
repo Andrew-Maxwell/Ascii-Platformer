@@ -9,9 +9,13 @@
     void explode(int count, float x, float y, Color tint, float newScale, float speed, int c, int lifespan, float elasticity, list<entity*>::iterator zPosition, bool doLighting) {
         if (count > 0) {
             for (float angle = 0; angle < 2 * PI; angle += (2 * PI / count)) {
-                physicalParticle* p = new physicalParticle(x + cos(angle) / 1000, y + sin(angle) / 1000, tint, newScale, c, elasticity, cos(angle) * speed, sin(angle) * speed, 3, GRAVITY, FRICTION, lifespan);
-                p -> setDoLighting(doLighting);
-                world -> addParticle(p, zPosition);
+                float dX = cos(angle);
+                float dY = sin(angle);
+                if (!(world -> isSolid(x + dX + 0.5, y + dY + 0.5))) {
+                    physicalParticle* p = new physicalParticle(x + dX / 1000, y + dY / 1000, tint, newScale, c, elasticity, dX * speed, dY * speed, 3, GRAVITY, FRICTION, lifespan);
+                    p -> setDoLighting(doLighting);
+                    world -> addParticle(p, zPosition);
+                }
             }
         }
     }

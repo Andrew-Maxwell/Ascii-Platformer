@@ -6,14 +6,16 @@
 //applies, more rigorously.
 /******************************************************************************/
 
-    physicalEntity::physicalEntity(float newX, float newY,  Color newTint, float newScale, float elasticity, float newXMomentum,
-                                float newYMomentum, float newMaxSpeed, float newGravity, float newFriction) :
-                                entity(newX, newY, newTint, newScale),
-                                maxSpeed(newMaxSpeed),
-                                gravity(newGravity),
-                                friction(newFriction),
-                                xMomentum(newXMomentum),
-                                yMomentum(newYMomentum) {}
+    physicalEntity::physicalEntity(float newX, float newY,  Color newTint, float newScale, float newWidth, float newHeight, float elasticity, float newXMomentum,
+        float newYMomentum, float newMaxSpeed, float newGravity, float newFriction) :
+        entity(newX, newY, newTint, newScale),
+        width(newWidth),
+        height(newHeight),
+        maxSpeed(newMaxSpeed),
+        gravity(newGravity),
+        friction(newFriction),
+        xMomentum(newXMomentum),
+        yMomentum(newYMomentum) {}
 
     unsigned int physicalEntity::type() {
         return PHYSICALENTITYTYPE;
@@ -50,8 +52,14 @@
                 pushedY += c.yVal;
             }
             else if (c.type == FORCEFIELDTYPE) {
-                xMomentum += c.xVal * 0.8;
-                yMomentum += c.yVal * 0.8;
+                xMomentum += c.xVal;
+                yMomentum += c.yVal;
+            }
+            else if (c.type == ELEVATORTYPE) {
+                pushedX += c.xVal;
+                if (c.yVal < gravity * 5) {
+                    pushedY += c.yVal;
+                }
             }
         }
         collisions.clear();
@@ -72,49 +80,25 @@
 
         float dX = xMomentum + pushedX;
         float dY = yMomentum + pushedY;
-        Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY});
-        if (newPosition.x != x + dX) { //hit horizontally
+        bool hitX, hitY;
+        Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY}, width, height, hitX, hitY);
+        if (hitX) { //hit horizontally
             xMomentum *= (-1 * elasticity);
             hit = true;
         }
-        if (newPosition.y != y + dY) {  //hit vertically
+        if (hitY) {  //hit vertically
             yMomentum *= (-1 * elasticity);
             xMomentum *= friction;
             hit = true;
-            onGround = true;
+            if (newPosition.y < y + dY) {
+                onGround = true;
+            }
         }
         else {
             onGround = false;
         }
         x = newPosition.x;
         y = newPosition.y;
-
-/*        float xStep = (xMomentum + pushedX) / (abs(xMomentum + pushedX) + 1);
-        for (int i = 0; i < abs(xMomentum + pushedX) + 1; i++) {
-            if (world -> isSolid((int)(x + xStep) + (xStep > 0), (int)y)) {// || world -> isSolid((int)y + 0.5, (int)(x + xStep) + (xStep > 0))) {
-                x = floor(x + xStep) + (xStep < 0);
-                xMomentum *= (-1 * elasticity);
-                hit = true;
-                break;
-            }
-            else {
-                x += xStep;
-            }
-        }
-
-        float yStep = (yMomentum + pushedY) / (abs(yMomentum + pushedY) + 1);
-        for (int i = 0; i < abs(yMomentum + pushedY) + 1; i++) {
-            if (world -> isSolid((int)(x + 0.5 - width / 2), (int)(y + yStep) + (yStep > 0)) || world -> isSolid((int)(x + 0.5 + width / 2), (int)(y + yStep) + (yStep > 0))) {
-                y = floor(y + yStep) + (yStep < 0);
-                yMomentum *= (-1 * elasticity);
-                xMomentum *= friction;
-                hit = true;
-                break;
-            }
-            else {
-                y += yStep;
-            }
-        }*/
     }
 
     bool physicalEntity::finalize() {return false;}
@@ -128,13 +112,13 @@
 /******************************************************************************/
 
     physicalParticle::physicalParticle( float newX, float newY, Color newTint, float newScale, int displayChar, float newElasticity, float newXMomentum,
-                                  float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int newLifetime) :
-                                  entity(newX, newY, newTint, newScale),
-                                  physicalEntity(newX, newY, newTint, newScale, newElasticity, newXMomentum, newYMomentum, newMaxSpeed, newGravity, newFriction),
-                                  particle(newX, newY, newTint, newScale, newXMomentum, newYMomentum, displayChar, newLifetime),
-                                  dynamicChar(displayChar == 0),
-                                  lifetime(newLifetime) {
-        elasticity = newElasticity;
+        float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int newLifetime) :
+        entity(newX, newY, newTint, newScale),
+        physicalEntity(newX, newY, newTint, newScale, 0.5, 0.5, newElasticity, newXMomentum, newYMomentum, newMaxSpeed, newGravity, newFriction),
+        particle(newX, newY, newTint, newScale, newXMomentum, newYMomentum, displayChar, newLifetime),
+        dynamicChar(displayChar == 0),
+        lifetime(newLifetime) {
+            elasticity = newElasticity;
     }
 
     unsigned int physicalParticle::type() {
@@ -149,19 +133,15 @@
         return shouldDelete;
     }
 
-    void physicalParticle::tickSet() {
-        if (world -> isSolid(x, y)) {
+    void physicalParticle::tickSet() {}
+
+    void physicalParticle::tickGet() {
+        if (world -> isSolid(x + 0.5, y + 0.5)) {
             shouldDelete = true;
         }
         else if (lifetime-- < 0 || (!isUnderWater && xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01) || y > world -> getRows() + 100) {
             shouldDelete = true;
         }
-        if (IsKeyPressed(KEY_J)) {
-            shouldDelete = true;
-        }
-    }
-
-    void physicalParticle::tickGet() {
         physicalEntity::tickGet();
     }
 
