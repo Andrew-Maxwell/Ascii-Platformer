@@ -20,15 +20,16 @@
             assert(entity.IsObject());
             string type = entity.HasMember("type") ? entity["type"].GetString() : "unknown entity";
 
-            if (type == "layer" || type == "elevator") {
+            if (type == "layer" || type == "elevator" || type == "physicalBlock") {
                 float x = entity.HasMember("x") ? entity["x"].GetFloat() : 0.0;
                 float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
                 Color tint = entity.HasMember("tint") ? getColor(entity["tint"]) : (Color){0, 255, 0, 255};
                 bool doLighting = entity.HasMember("doLighting") ? entity["doLighting"].GetBool() : true;
+                bool doHighlight = entity.HasMember("doHighlight") ? entity["doHighlight"].GetBool() : false;
                 float scale = entity.HasMember("scale") ? entity["scale"].GetFloat() : 1.0;
                 string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "Error: No layer filename specified.";
                 gameLayer * L = new gameLayer(x, y, tint, scale, fileName);
-                L -> setDoLighting(doLighting);
+                L -> setLighting(doLighting, doHighlight);
                 layerCache.push_back(L);
             }
         }
@@ -77,6 +78,20 @@
             float y = entity.HasMember("y") ? entity["y"].GetFloat() : 0.0;
             Color tint = entity.HasMember("tint") ? getColor(entity["tint"]) : (Color){0, 255, 0, 255};
             bool doLighting = entity.HasMember("doLighting") ? entity["doLighting"].GetBool() : true;
+            bool doHighlight;
+            if (entity.HasMember("doHighlight")) {
+                doHighlight = entity["doHighlight"].GetBool();
+            }
+            else if (type == "endingGate" || type == "door" || type == "savePoint" || type == "player"
+                    || type == "forceField" || type == "linearField" || type == "snakeWall" || type == "activeWall"
+                    || type == "elevator" || type == "gunPickup" || type == "ammoPickup"
+                    || type == "opPickup" || type == "outfitPickup") {
+                doHighlight = true;
+            }
+            else {
+                doHighlight = false;
+            }
+
             float scale = entity.HasMember("scale") ? entity["scale"].GetFloat() : 1.0;
 
             if (type == "layer") {  //Add layers from the layer cache
@@ -95,12 +110,12 @@
                 float destinationX = entity.HasMember("destinationX") ? entity["destinationX"].GetFloat() : 0.0;
                 float destinationY = entity.HasMember("destinationY") ? entity["destinationY"].GetFloat() : 0.0;
                 door * D = new door(x, y, tint, scale, nextRoom, destinationX, destinationY);
-                D -> setDoLighting(doLighting);
+                D -> setLighting(doLighting, doHighlight);
                 world -> addCollideable(D);
             }
             else if (type == "savePoint") {
                 savePoint * S = new savePoint(x, y, tint, scale);
-                S -> setDoLighting(doLighting);
+                S -> setLighting(doLighting, doHighlight);
                 world -> addCollideable(S);
                 S -> setZPosition (world -> getZPosition());
             }
@@ -110,7 +125,7 @@
                     if (movePlayers) {
                         (*playerIter) -> moveTo((Vector2){x, y});
                     }
-                    (*playerIter) -> setDoLighting(doLighting);
+                    (*playerIter) -> setLighting(doLighting, doHighlight);
                     (*playerIter) -> setSizeFactor(scale);
                     world -> addCollideable(*playerIter);
                     (*playerIter) -> setZPosition (world -> getZPosition());
@@ -124,7 +139,7 @@
                 float range = entity.HasMember("range") ? entity["range"].GetFloat() : 0;
                 Color onTint = entity.HasMember("onTint") ? getColor(entity["onTint"]) : tint;
                 forceField * F = new forceField(x, y, tint, onTint, scale, channel, power, range);
-                F -> setDoLighting(doLighting);
+                F -> setLighting(doLighting, doHighlight);
                 world -> addCollideable(F);
                 F -> setZPosition(world -> getZPosition());
             }
@@ -136,7 +151,7 @@
                 int width = entity.HasMember("width") ? entity["width"].GetInt() : 5;
                 int height = entity.HasMember("height") ? entity["height"].GetInt() : 5;
                 linearField * L = new linearField(x, y, tint, onTint, scale, channel, xPower, yPower, width, height);
-                L -> setDoLighting(doLighting);
+                L -> setLighting(doLighting, doHighlight);
                 world -> addCollideable(L);
             }
             else if (type == "rain") {
@@ -144,7 +159,7 @@
                 float xMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat() : 0.0;
                 bool isSnow = entity.HasMember("snow") ? entity["snow"].GetBool() : 0;
                 rain * newRain = new rain(x, y, tint, scale, dropsPerTick, xMomentum, isSnow);
-                newRain -> setDoLighting(doLighting);
+                newRain -> setLighting(doLighting, doHighlight);
                 world -> addEntity(newRain);
                 newRain -> setZPosition(world -> getZPosition());
             }
@@ -154,7 +169,7 @@
                 float wavelength = entity.HasMember("wavelength") ? entity["wavelength"].GetFloat() : 1.0;
                 float amplitude = entity.HasMember("amplitude") ? entity["amplitude"].GetFloat() : 1.0;
                 water * newWater = new water(x, y, tint, scale, width, height, wavelength, amplitude);
-                newWater -> setDoLighting(doLighting);
+                newWater -> setLighting(doLighting, doHighlight);
                 world -> addCollideable(newWater);
                 newWater -> setZPosition(world -> getZPosition());
             }
@@ -171,7 +186,7 @@
                     int newDamage = entity.HasMember("damage") ? entity["damage"].GetInt(): -5;
                     newTestEntity * newNTE = new newTestEntity(x, y, tint, scale, displayChar, elasticity, newXMomentum,
                         newYMomentum, newMaxSpeed, newGravity, newFriction, maxHealth, newDamage);
-                    newNTE -> setDoLighting(doLighting);
+                    newNTE -> setLighting(doLighting, doHighlight);
                     world -> addCollideable(newNTE);
                 }
             }
@@ -193,8 +208,8 @@
                     newSnakeWall -> addPoint(pointX, pointY);
                 }
                 newSnakeWall -> finish();
-                newSnakeWall -> setDoLighting(doLighting);
-                world -> addCollideable(newSnakeWall);
+                newSnakeWall -> setLighting(doLighting, doHighlight);
+                world -> addEntity(newSnakeWall);
             }
             else if (type == "activeWall") {
                 int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
@@ -202,10 +217,10 @@
                 int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : 0;
                 int display = entity.HasMember("display") ? entity["display"].GetInt(): 0;
                 activeWall * newActiveWall = new activeWall(x, y, tint, scale, width, height, channel, display);
-                newActiveWall -> setDoLighting(doLighting);
+                newActiveWall -> setLighting(doLighting, doHighlight);
                 world -> addEntity(newActiveWall);
             }
-            else if (type == ("elevator")) {
+            else if (type == "elevator") {
                 float width = entity.HasMember("width") ? entity["width"].GetFloat() : 1;
                 float height = entity.HasMember("height") ? entity["height"].GetFloat() : 1;
                 float speed = entity.HasMember("speed") ? entity["speed"].GetFloat() : 0.05;
@@ -223,8 +238,22 @@
                 }
                 int startingPoint = entity.HasMember("startingPoint") ? entity["startingPoint"].GetInt() : 0;
                 newElevator -> finish(startingPoint);
-                newElevator -> setDoLighting(doLighting);
-                world -> addCollideable(newElevator);
+                newElevator -> setLighting(doLighting, doHighlight);
+                world -> addEntity(newElevator);
+            }
+            else if (type == "physicalBlock") {
+                float width = entity.HasMember("width") ? entity["width"].GetFloat() : 1;
+                float height = entity.HasMember("height") ? entity["height"].GetFloat(): 1;
+                float elasticity = entity.HasMember("elasticity") ? entity["elasticity"].GetFloat() : 0;
+                float xMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat() : 0;
+                float yMomentum = entity.HasMember("yMomentum") ? entity["yMomentum"].GetFloat() : 0;
+                float maxSpeed = entity.HasMember("maxSpeed") ? entity["maxSpeed"].GetFloat() : 100;
+                float gravity = entity.HasMember("gravity") ? entity["gravity"].GetFloat() : GRAVITY;
+                float friction = entity.HasMember("friction") ? entity["friction"].GetFloat() : 0.9;
+                physicalBlock* newPB = new physicalBlock(x, y, tint, scale, width, height, elasticity, xMomentum, yMomentum, maxSpeed, gravity, friction, **layerIter);
+                layerIter++;
+                newPB -> setLighting(doLighting, doHighlight);
+                world -> addCollideable(newPB);
             }
             else if (type == "trigger" || type == "ANDRelay" || type == "ORRelay" || type == "NOTRelay" || type == "timerRelay" || type == "toggleRelay" || type == "randomSource") {
                 vector<int> outputs;
@@ -322,7 +351,7 @@
                         cout << "bad pickup type";
                         newPickup = NULL;
                     }
-                    newPickup -> setDoLighting(doLighting);
+                    newPickup -> setLighting(doLighting, doHighlight);
                     world -> addCollideable(newPickup);
                     newPickup -> setZPosition(world -> getZPosition());
                 }

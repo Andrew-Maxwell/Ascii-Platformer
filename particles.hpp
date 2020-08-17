@@ -19,7 +19,7 @@ class particle : virtual public entity {
 
     float xSpeed, ySpeed;
     int lifetime, startLifetime;
-    char toPrint[2] = "?";
+    char display[5] = "?\0\0\0";
     bool fade;
     uint8_t startA;
 

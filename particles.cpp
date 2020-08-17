@@ -20,9 +20,11 @@
             setDirection();
         }
         else {
-            char* newToPrint = TextToUtf8(&c, 1);
-            toPrint[0] = newToPrint[0];
-            free(newToPrint);
+            char* newDisplay = TextToUtf8(&c, 1);
+            for (int i = 0; i < 4; i++) {
+                display[i] = newDisplay[i];
+            }
+            free(newDisplay);
         }
     }
 
@@ -33,27 +35,27 @@
     void particle::setDirection() {
         if (xSpeed == 0) {
             if (ySpeed == 0) {
-                toPrint[0] = '.';
+                display[0] = '.';
             }
             else {
-                toPrint[0] = '|';
+                display[0] = '|';
             }
         }
         else {
             if (ySpeed / xSpeed < -1.09) {
-                toPrint[0] = '|';
+                display[0] = '|';
             }
             else if (ySpeed / xSpeed < -0.383) {
-                toPrint[0] = '/';
+                display[0] = '/';
             }
             else if (ySpeed / xSpeed < 0.383) {
-                toPrint[0] = '-';
+                display[0] = '-';
             }
             else if (ySpeed / xSpeed < 1.09) {
-                toPrint[0] = '\\';
+                display[0] = '\\';
             }
             else {
-                toPrint[0] = '|';
+                display[0] = '|';
             }
         }
     }
@@ -74,5 +76,5 @@
     }
 
     void particle::print() {
-        theScreen -> draw(x, y, tint, scale, toPrint, doLighting);
+        theScreen -> draw(x, y, tint, scale, display, doLighting, doHighlight);
     }

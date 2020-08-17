@@ -9,7 +9,12 @@
 
 using namespace rapidjson;
 
-class snakeWall : virtual public collideable {
+/*****************************************************************************/
+//Snakewall
+//A wall that moves like the snake in snake (but also diagonally)
+/*****************************************************************************/
+
+class snakeWall : virtual public entity {
 
     bool loop;
     int forwardChannel, reverseChannel;
@@ -32,12 +37,6 @@ class snakeWall : virtual public collideable {
 
     unsigned int type();
 
-    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
-
-    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
-
-    bool stopColliding();
-
     void tickSet();
 
     void tickGet();
@@ -46,6 +45,11 @@ class snakeWall : virtual public collideable {
 
     void print();
 };
+
+/*****************************************************************************/
+//activeWall
+//Appears only when triggered
+/*****************************************************************************/
 
 class activeWall : public entity {
 
@@ -68,7 +72,13 @@ class activeWall : public entity {
     void print();
 };
 
-class elevator : virtual public collideable, virtual public gameLayer {
+/*****************************************************************************/
+//elevator
+//A block with fixed size and shape which can move in multiple directions
+//Takes any entities on top of it with it.
+/*****************************************************************************/
+
+class elevator : virtual public gameLayer {
 
     vector<Vector2> points;
     float speed;
@@ -88,12 +98,6 @@ class elevator : virtual public collideable, virtual public gameLayer {
 
     unsigned int type();
 
-    bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
-
-    collision getCollision(float otherX, float otherY, int otherType, unsigned int otherID);
-
-    bool stopColliding();
-
     void tickSet();
 
     void tickGet();
@@ -102,13 +106,32 @@ class elevator : virtual public collideable, virtual public gameLayer {
 
     void print();
 };
-/*
-class looseBlock : public physicalEntity, virtual public gameLayer {
+
+/*****************************************************************************/
+//physicalBlock
+//A solid block which has physical attributes (gravity, momentum)
+/*****************************************************************************/
+
+class physicalBlock : public physicalEntity, virtual public gameLayer {
+
+    float oldX, oldY;
 
     public:
 
-    explicit looseBlock(float newX, float newY, Color newTint, float newScale, float newWidth, float newHeight, 
+    explicit physicalBlock(float newX, float newY, Color newTint, float newScale, float newWidth, float newHeight, float newElasticity, float newXMomentum, float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, gameLayer& newLayer);
+
+    unsigned int type();
+
+    void tickSet();
+
+    void tickGet();
+
+    bool stopColliding();
+
+    bool finalize();
+
+    void print();
 
 };
-*/
+
 #endif //MOVINGWALLS_HPP

@@ -45,44 +45,6 @@
         return SNAKEWALLTYPE;
     }
 
-    bool snakeWall::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
-        if ((tickCounter + 1) % ticksPerMove == 0 && newDirection != 0) {
-            if (newDirection == 1) {
-                pushPoint = cMod(snakeHead + 1, points.size());
-            }
-            else {
-                pushPoint = cMod(snakeHead - snakeLength, points.size());
-            }
-            if (pushPoint - newDirection >= 0 && pushPoint - newDirection < points.size()) {
-                directionPoint = pushPoint - newDirection;
-                swapDirectionPoint = false;
-            }
-            else {
-                directionPoint = pushPoint + newDirection;
-                swapDirectionPoint = true;
-            }
-            Vector2 pushTile = points[pushPoint].getVector2();
-            return (otherX >= pushTile.x - 0.8 && otherX <= pushTile.x + 0.8 && otherY >= pushTile.y - 0.8 && otherY <= pushTile.y + 0.8);
-        }
-        return false;
-    }
-
-    collision snakeWall::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
-        Vector2 push;
-        if (swapDirectionPoint) {
-            push = Vector2Subtract(points[directionPoint].getVector2(), points[pushPoint].getVector2());
-        }
-        else {
-            push = Vector2Subtract(points[pushPoint].getVector2(), points[directionPoint].getVector2());
-        }
-        push = Vector2Scale(Vector2Normalize(push), (1 / float(ticksPerMove)));
-        return collision(SNAKEWALLTYPE, id, 0, push.x, push.y);
-    }
-
-    bool snakeWall::stopColliding() {
-        return false;
-    }
-
     void snakeWall::tickSet() {
         if (oldDirection != 0 && tickCounter % ticksPerMove == 0) {
             int front, back;
@@ -94,14 +56,31 @@
                 front = snakeHead - snakeLength;
                 back = snakeHead;
             }
-            if (!world -> isSolid(points[front].x, points[front].y) && (loop || (min(front, back) >= 0 && max(front, back) < points.size()))) {
+            if (loop || (min(front, back) >= 0 && max(front, back) < points.size())) {
                 front = cMod(front, points.size());
                 back = cMod(back, points.size());
-                world -> setSolid(points[front].x, points[front].y, 's');
-                world -> setSolid(points[back].x, points[back].y, '.');
-                snakeHead = cMod(snakeHead + oldDirection, points.size());
+                if (!world -> isSolid(points[front].x, points[front].y)) {
+                    world -> setSolid(points[front].x, points[front].y, 's');
+                    world -> setSolid(points[back].x, points[back].y, '.');
+                    snakeHead = cMod(snakeHead + oldDirection, points.size());
+                }
             }
         }
+        //If snakeWall should push objects out of the way
+/*        if (newDirection != 0 && (tickCounter + 1) % ticksPerMove == 0) {
+            int front;
+            if (newDirection == 1) {
+                front = cMod(snakeHead + 1, points.size());
+            }
+            else { //if (direction == -1)
+                front = cMod(snakeHead - snakeLength, points.size());
+            }
+            int previous = cMod(front - newDirection, points.size());
+            if (front == previous + 1 || front == previous - 1) {
+                movingRectangle newRect(points[previous].x, points[previous].y + 0.0001, points[previous].x + 1, points[previous].y + 1, points[front].x, points[front].y + 0.0001, points[front].x + 1, points[front].y + 1, id);
+                world -> addRectangle(newRect);
+            }
+        }*/
     }
 
     void snakeWall::tickGet() {
@@ -125,7 +104,7 @@
 
     void snakeWall::print() {
         for (int i = snakeHead - snakeLength + 1; i <= snakeHead; i++) {
-            theScreen -> draw(points[cMod(i, points.size())].x, points[cMod(i, points.size())].y, tint, scale, display, doLighting);
+            theScreen -> draw(points[cMod(i, points.size())].x, points[cMod(i, points.size())].y, tint, scale, display, doLighting, doHighlight);
         }
     }
 
@@ -181,7 +160,7 @@
     void activeWall::print() {
         if (activated && display != "") {
             for (int i = 0; i < height; i++) {
-                theScreen -> draw(x, y + i, tint, scale, display, doLighting);
+                theScreen -> draw(x, y + i, tint, scale, display, doLighting, doHighlight);
             }
         }
     }
@@ -216,18 +195,6 @@
         return ELEVATORTYPE;
     }
 
-    bool elevator::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
-        return (otherX > x - 1 && otherX < x + width && otherY >= y - 1 && otherY < y + height);
-    }
-
-    collision elevator::getCollision(float otherX, float otherY, int otherType, unsigned int otherID) {
-        return collision(type(), id, 0, move.x, move.y);
-    }
-
-    bool elevator::stopColliding() {
-        return false;
-    }
-
     void elevator::tickSet() {
         if (x == points[nextPoint].x && y == points[nextPoint].y) {
             if (world -> getChannel(forwardChannel) && (loop || nextPoint < points.size() - 1)) {
@@ -245,15 +212,7 @@
         else if (abs(move.x) > abs(x - points[nextPoint].x) || abs(move.y) > abs(y - points[nextPoint].y)) {
             move = Vector2Subtract(points[nextPoint], (Vector2){x, y});
         }
-        movingRectangle newRect;
-        newRect.oldX1 = x;
-        newRect.oldY1 = y;
-        newRect.oldX2 = x + width;
-        newRect.oldY2 = y + height;
-        newRect.newX1 = newRect.oldX1 + move.x;
-        newRect.newY1 = newRect.oldY1 + move.y;
-        newRect.newX2 = newRect.oldX2 + move.x;
-        newRect.newY2 = newRect.oldY2 + move.y;
+        movingRectangle newRect(x, y, x + width, y + height, x + move.x, y + move.y, x + width + move.x, y + height + move.y, id);
         world -> addRectangle(newRect);
     }
 
@@ -270,3 +229,39 @@
         gameLayer::print();
     }
 
+/*****************************************************************************/
+//physicalBlock
+//A solid block which has physical attributes (gravity, momentum)
+/*****************************************************************************/
+
+    physicalBlock::physicalBlock(float newX, float newY, Color newTint, float newScale, float newWidth, float newHeight, float newElasticity, float newXMomentum, float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, gameLayer& newLayer) :
+        entity(newX, newY, newTint, newScale),
+        physicalEntity(newX, newY, newTint, newScale, newWidth, newHeight, newElasticity, newXMomentum, newYMomentum, newMaxSpeed, newGravity, newFriction),
+        gameLayer(newLayer) {}
+
+    unsigned int physicalBlock::type() {
+        return ELEVATORTYPE;
+    }
+
+    void physicalBlock::tickSet() {
+        movingRectangle newRect(oldX, oldY, oldX + width, oldY + height, x, y, x + width, y + height, entity::id);
+        world -> addRectangle(newRect);
+        oldX = x;
+        oldY = y;
+    }
+
+    void physicalBlock::tickGet() {
+        physicalEntity::tickGet();
+    }
+
+    bool physicalBlock::stopColliding() {
+        return finalize();
+    }
+
+    bool physicalBlock::finalize() {
+        return y > world -> getRows() + 100;
+    }
+
+    void physicalBlock::print() {
+        gameLayer::print();
+    }

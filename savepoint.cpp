@@ -42,5 +42,5 @@
     }
 
     void savePoint::print() {
-        theScreen -> draw(x, y, tint, scale, "S", doLighting);
+        theScreen -> draw(x, y, tint, scale, "S", doLighting, doHighlight);
     }

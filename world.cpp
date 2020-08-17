@@ -172,6 +172,13 @@
     }
 
     void collider::print() {
+        //Print out movingRectangle visualizers
+/*        list<movingRectangle>::iterator r = rectangles.begin();
+        while (r != rectangles.end()) {
+            theScreen -> drawBox(r -> oldX1, r -> oldY1, r -> oldX2 - r -> oldX1, r -> oldY2 - r -> oldY1, (Color){255, 0, 0, 128}, 1, false, false);
+            theScreen -> drawBox(r -> newX1, r -> newY1, r -> newX2 - r -> newX1, r -> newY2 - r -> newY1, (Color){0, 255, 0, 128}, 1, false, false);
+            r++;
+        }*/
         list<entity*>::iterator e = entities.begin();
         while (e != entities.end()) {
             (*e) -> print();
@@ -232,8 +239,16 @@
 
 
     //Given a starting position (start) and a movement (d), does an object collide with anything solid?
-    Vector2 collider::go(Vector2 start, Vector2 d, float width, float height, bool& hitX, bool& hitY) {
+    Vector2 collider::go(Vector2 start, Vector2 d, float width, float height, bool& hitX, bool& hitY, float& xMomentum, float& yMomentum, float elasticity, unsigned int id) {
         hitX = hitY = false;
+        //If on top of an elevator block, apply sideways force.
+        for (movingRectangle r : rectangles) {
+            if (r.id != id && start.y == r.oldY1 - height && start.x > r.oldX1 && start.x < r.oldX2) {
+                d.x += (r.newX1 - r.oldX1);
+                d.y += (r.newY1 - r.oldY1);
+            }
+        }
+
         //Determine whether there are any solid tiles in the way
         Vector2 next = start;
         float numSteps = ceil(max(abs(d.x), abs(d.y)));
@@ -243,101 +258,71 @@
         for (int i = 0; i < numSteps; i++) {
             if (!hitX && (isTileSolid(int(next.x + xStep + buf + (width - buf) * (xStep > 0)), int(next.y + buf))
             || isTileSolid(int(next.x + xStep + buf + (width - buf) * (xStep > 0)), int(next.y + height - buf)))) {
-                next.x = floor(next.x + xStep) + width * (xStep < 0);
+                if (xStep > 0) {
+                    next.x = ceil(next.x + xStep) - width;
+                }
+                else {
+                    next.x = ceil(next.x + xStep);
+                }
                 hitX = true;
+                xMomentum = xMomentum * -1 * elasticity;
             }
             else {
                 next.x += xStep;
             }
             if (!hitY && (isTileSolid(int(next.x + buf), int(next.y + yStep + buf + (height - buf) * (yStep > 0)))
             || isTileSolid(int(next.x + width - buf), int(next.y + yStep + buf + (height - buf) * (yStep > 0))))) {
-                next.y = floor(next.y + yStep) + (yStep < 0);
+                if (yStep > 0) {
+                    next.y = ceil(next.y + yStep) - height;
+                }
+                else {
+                    next.y = ceil(next.y + yStep);
+                }
                 hitY = true;
+                yMomentum = yMomentum * -1 * elasticity;
             }
             else {
                 next.y += yStep;
             }
         }
 
+        float slope = (next.x - start.x == 0) ? 0 : (next.y - start.y) / (next.x - start.x);
         for (movingRectangle r : rectangles) {
-            if ((start.x <= r.oldX1 - width) && (next.x > r.newX1 - width)) {
-                //if d.x is 0, then don't divide by 0, value is just start.y.
-                float yIntersect = d.x ? start.y + (r.newX1 - start.x - width) * d.y / d.x : start.y;
-                if (r.newY1 - height < yIntersect && yIntersect < r.newY2) {
-                    next.x = r.newX1 - width;
-                    hitX = true;
+            if (id != r.id) {
+                if ((start.x <= r.oldX1 - width) && (next.x > r.newX1 - width)) {
+                    float yIntersect = start.y + (r.oldX1 - width - start.x) * slope;
+                    if (r.newY1 - height <= yIntersect && yIntersect <= r.newY2) {
+                        xMomentum = xMomentum * -1 * elasticity + min(0.0f, max(r.newX1 - r.oldX1, r.newX1 - (next.x + width)));
+                        next.x = r.newX1 - width;
+                        hitX = true;
+                    }
                 }
-            }
-            if ((start.x >= r.oldX2) && (next.x < r.newX2)) {
-                float yIntersect = d.x ? start.y + (r.newX2 - start.x) * d.y / d.x : start.y;
-                if (r.newY1 - height < yIntersect && yIntersect < r.newY2) {
-                    next.x = r.newX2;
-                    hitX = true;
+                if ((start.x >= r.oldX2) && (next.x < r.newX2)) {
+                    float yIntersect = start.y + (r.oldX2 - start.x) * slope;
+                    if (r.newY1 - height <= yIntersect && yIntersect <= r.newY2) {
+                        xMomentum = xMomentum * -1 * elasticity + max(0.0f, min(r.newX2 - r.oldX2, r.newX2 - next.x));
+                        next.x = r.newX2;
+                        hitX = true;
+                    }
                 }
-            }
-            if ((start.y <= r.oldY1 - height) && (next.y > r.newY1 - height)) {
-                float xIntersect = d.y ? start.x + (r.newY1 - start.y - height) * d.x / d.y : start.x;
-                if (r.newX1 - width < xIntersect && xIntersect < r.newX2) {
-                    next.y = r.newY1 - height;
-                    hitY = true;
+                if ((start.y <= r.oldY1 - height) && (next.y > r.newY1 - height)) {
+                    float xIntersect = start.x + (slope == 0 ? 0 : (r.oldY1 - height - start.y) / slope);
+                    if (r.newX1 - width <= xIntersect && xIntersect <= r.newX2) {
+                        yMomentum = yMomentum * -1 * elasticity;//+ min(0.0f, max(r.newY1 - r.oldY1, r.newY1 - (start.y + height)));
+                        next.y = r.newY1 - height;
+                        hitY = true;
+                    }
                 }
-            }
-            if ((start.y >= r.oldY2) && (next.y < r.newY2)) {
-                float xIntersect = d.y ? start.x + (r.newY2 - start.y) * d.x / d.y : start.x;
-                if (r.newX1 - width < xIntersect && xIntersect < r.newX2) {
-                    next.y = r.newY2;
-                    hitY = true;
+                if ((start.y >= r.oldY2) && (next.y < r.newY2)) {
+                    float xIntersect = start.x + (slope == 0 ? 0 : (r.oldY2 - start.y) / slope);
+                    if (r.newX1 - width <= xIntersect && xIntersect <= r.newX2) {
+                        yMomentum = yMomentum * -1 * elasticity + max(0.0f, min(r.newY2 - r.oldY2, r.newY2 - start.y));
+                        next.y = r.newY2;
+                        hitY = true;
+                    }
                 }
             }
         }
-
-
-/*
-        //For each side of rectangle:
-        //First check if the side is passing by the object (should push object)
-        //If not, check if object would cross side (should stop object)
-        for (movingRectangle rect : rectangles) {
-            //left side
-            if (((next.x <= r.oldX1) != (next.x <= r.newX1)) && r.oldY1 < next.y && next.y < r.oldY2) {
-                next.x = r.newX1;
-            }
-            else if ((start.x <= r.newX1) != (next.x <= r.newX1)) {
-                float yIntersect = start.y + (r.newX1 - start.x) * d.y / d.x;
-                if (r.newY1 < yIntersect && yIntersect < r.newY2) {
-                    next.x = r.newX1;
-                }
-            }
-            //right side
-            if (((next.x >= r.oldX2) != (next.x >= r.newX2)) && r.oldY1 < next.y && next.y < r.oldY2) {
-                next.x = r.newX2;
-            }
-            else if ((start.x >= r.newX2) != (next.x >= r.newX2)) {
-                float yIntersect = start.y + (r.newX2 - start.x) * d.y / d.x;
-                if (r.newY1 < yIntersect && yIntersect < r.newY2) {
-                    next.x = r.newX2;
-                }
-            }
-            //top side
-            if (((next.y <= r.oldY1) != (next.y <= r.newY1)) && r.oldX1 < next.x && next.x < r.oldX2) {
-                next.y = r.newY1;
-            }
-            else if ((start.y <= r.newY1) != (next.y <= r.newY1)) {
-                float xIntersect = start.x + (r.newY1 - start.y) * d.x / d.y;
-                if (r.newX1 < xIntersect && xIntersect < r.newX2) {
-                    next.y = r.newY1;
-                }
-            }
-            //bottom side
-            if (((next.y >= r.oldY2) != (next.y >= r.newY2)) && r.oldX1 < next.x && next.x < r.oldX2) {
-                next.y = r.newY2;
-            }
-            else if ((start.y >= r.newY2) != (next.y >= r.newY2)) {
-                float xIntersect = start.x + (r.newY2 - start.y) * d.x / d.y;
-                if (r.newX1 < xIntersect && xIntersect < r.newX2) {
-                    next.y = r.newY2;
-                }
-            }
-        }*/
         return next;
     }
 
@@ -346,7 +331,7 @@
             return true;
         }
         for (movingRectangle rect : rectangles) {
-            if (checkX > rect.oldX1 && checkX < rect.oldX2 && checkY > rect.oldY1 && checkY < rect.oldY2) {
+            if (checkX > rect.newX1 && checkX < rect.newX2 && checkY > rect.newY1 && checkY < rect.newY2) {
                 return true;
             }
         }

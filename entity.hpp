@@ -16,7 +16,7 @@ class entity {
     protected:
 
     Color tint;
-    bool doLighting = true;
+    bool doLighting = true, doHighlight = false;
     float scale = 1;
 
     public:
@@ -54,7 +54,7 @@ class entity {
 
     //In lieu of adding a new term to 20+ constructors
 
-    void setDoLighting(bool newDoLighting);
+    void setLighting(bool newDoLighting, bool newDoHighlight);
 };
 
 class entityParent {

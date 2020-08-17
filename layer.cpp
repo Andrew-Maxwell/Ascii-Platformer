@@ -61,6 +61,6 @@
     }
 
     void layer::print() {
-        theScreen -> drawLayer(x, y, tint, scale, tex.texture, doLighting);
+        theScreen -> drawLayer(x, y, tint, scale, tex.texture, doLighting, doHighlight);
     }
 

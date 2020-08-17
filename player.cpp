@@ -153,8 +153,13 @@
             }
 
             //Explosions
+            if (IsKeyPressed(KEY_T)) {
+                physicalParticle* p = new physicalParticle(x, y, tint, scale, 'A', 0, 0, 0, 100, gravity, friction, 1000);
+                world -> addParticle(p, zPosition);
+            }
+
             if (in.explode.isPressed()) {
-                explode (60, x, y, tint, scale, 0.4, 0, 600, 0.5, zPosition);
+                explode (60, x, y, tint, scale, 0.4, 0x2022, 600, 0.3, zPosition);
             }
 
             //Death
@@ -315,14 +320,14 @@
             float dX = xInertia + pushedX + xMovement;
             float dY = yInertia + pushedY + yMovement;
             bool hitX, hitY;
-            Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY}, width, height, hitX, hitY);
+            Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY}, width, height, hitX, hitY, xInertia, yInertia, elasticity, id);
             if (hitX) {
-                xInertia *= (-1 * elasticity);
+//                xInertia *= (-1 * elasticity);
                 hit = true;
                 onWall = true;
             }
             if (hitY) {
-                yInertia *= (-1 * elasticity);
+//                yInertia *= (-1 * elasticity);
                 xInertia *= friction;
                 hit = true;
                 if (newPosition.y < y + dY) {
@@ -333,7 +338,8 @@
             y = newPosition.y;
 
             //Allow for being crushed
-            if (world -> isSolid(x + 0.5, y + 0.5)) {
+            if (world -> isSolid(x + width / 2, y + height / 2)) {
+                cout << "Crushed at (" << x << ", " << y << ")\n";
                 health -= 999;
                 damageIndicator(-999, x, y, HURTCOLOR, scale);
             }
@@ -349,10 +355,10 @@
     void player::print() {
         if (!breakDoor && !breakDead) {
             if (hurtTimer > 0 && (hurtTimer / 4) % 2 == 0) {    //Flash if recently taken damage
-                theScreen -> draw(x, y, HURTCOLOR, scale, displayStr, false);
+                theScreen -> draw(x, y, HURTCOLOR, scale, displayStr, false, doHighlight);
             }
             else {
-                theScreen -> draw(x, y, tint, scale, displayStr, doLighting);
+                theScreen -> draw(x, y, tint, scale, displayStr, doLighting, doHighlight);
             }
         }
     }

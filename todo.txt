@@ -19,6 +19,10 @@ Arena:
     Select level(s)
 
 Loose ends:
+- If you stand on the left edge of the elevator and move sideways while it is moving up, you will die.
+- When the elevator is moving downwards, the player sometimes gets left behind, esp. if moving sideways?
+- Figure out how to handle display offets for moving items, e.g. particles which are 0.5x0.5 and it's in the center of the character; will look wrong unless offset by 2px up and to the left.
+- moving blocks interact with physical entities weirdly: No inertia, so particles often get deleted because they're not moving. Also, when a snake runs into a particle the particle pops out on top of the snake!? + particles sticking to back of elevator block
 - Gun changes color after saving
 - Broadcast animation + HUD broadcast indicator blends in with background
 - Joystick aim accuracy is VERY limited. Should probably allow spamming/strafing like Cave Story to compensate.
@@ -71,6 +75,7 @@ Features:
     2 Generic Gun pickups
 2 Generic physicalEntity parameters (density/volume/mass)
 2 Flat mode (everything rendered to one texture) to save on processing power
+3 Enable/disable FPS counter, stats
 
 Ideas:
     - Cyberpunk theme: Parallel digital and physical realms, distinct visual style, distinct puzzle types
@@ -123,10 +128,10 @@ Housekeeping items (may never get to all of these):
 - Split largest files (editables.cpp, player.cpp, editor_main.cpp) into smaller files, or at least improve structure
 
 Bugs:
-- Snakewalls sometimes crush player in front of them
+- physicalEntities (particles specifically) of size != 1.0 bounce forever
+- Player gets teleported to (0, 0) ? in uncertain circumstances
 - Guns change color after saving
 - invalid free() when quitting in CloseWindow()
-- When standing next to a solid block of height 1, explosion particles sometimes fly over it and sometimes don't.
 - Some of the files in "dark" getting loaded as wrong width
 - Water appears weird when player is moving very slowly in the vertical direction
 - If there are two water objects with one above the other, they tend to interfere.

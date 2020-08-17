@@ -63,7 +63,7 @@
 
     void pickup::print() {
         if (!collected) {
-            theScreen -> draw(x, y, tint, scale, toPrint, doLighting);
+            theScreen -> draw(x, y, tint, scale, toPrint, doLighting, doHighlight);
         }
     }
 

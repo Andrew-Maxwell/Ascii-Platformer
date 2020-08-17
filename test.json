@@ -168,7 +168,7 @@
             ],
             "scale": 1.0,
             "channel": 0,
-            "power": -0.03,
+            "power": 0.03,
             "range": 20
         },
         {
@@ -287,7 +287,7 @@
             ],
             "scale": 1.0,
             "range": 20,
-            "power": 0.05
+            "power": -0.05
         },
         {
             "type": "forceField",
@@ -302,6 +302,28 @@
             "scale": 1.0,
             "range": 20,
             "power": -0.05
+        },
+        {
+            "type": "timerRelay",
+            "input": 311,
+            "outputs": [
+                310
+            ],
+            "delay": 300
+        },
+        {
+            "type": "NOTRelay",
+            "input": 310,
+            "outputs": [
+                311
+            ]
+        },
+        {
+            "type": "NOTRelay",
+            "input": 1,
+            "outputs": [
+                300
+            ]
         },
         {
             "type": "snakeWall",
@@ -391,28 +413,6 @@
             "loop": false
         },
         {
-            "type": "timerRelay",
-            "input": 311,
-            "outputs": [
-                310
-            ],
-            "delay": 300
-        },
-        {
-            "type": "NOTRelay",
-            "input": 310,
-            "outputs": [
-                311
-            ]
-        },
-        {
-            "type": "NOTRelay",
-            "input": 1,
-            "outputs": [
-                300
-            ]
-        },
-        {
             "type": "activeWall",
             "x": 16.0,
             "y": 38.0,
@@ -482,6 +482,24 @@
             "reverseChannel": 2,
             "loop": false,
             "fileName": "testelevator.lyr"
+        },
+        {
+            "type": "physicalBlock",
+            "x": 70,
+            "y": 30,
+            "width": 2,
+            "height": 1,
+            "scale": 1.0,
+            "fileName": "testblock.lyr"
+        },
+        {
+            "type": "physicalBlock",
+            "x": 64,
+            "y": 30,
+            "width": 2,
+            "height": 1,
+            "scale": 1.0,
+            "fileName": "testblock.lyr"
         }
     ],
     "defaultOutfit": {

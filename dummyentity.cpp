@@ -25,5 +25,5 @@ using namespace rapidjson;
     bool dummyEntity::finalize() {return --lifetime < 0;}
 
     void dummyEntity::print()  {
-        theScreen -> draw(x, y, tint, scale, toPrint, false);
+        theScreen -> draw(x, y, tint, scale, toPrint, false, false);
     }

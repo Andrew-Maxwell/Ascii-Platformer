@@ -201,6 +201,21 @@
         return (Color){c.r * light.r / 255.0, c.g * light.g / 255.0, c.b * light.b / 255.0, c.a * light.a / 255.0};
     }
 
+    Color screen::highlight(Color c, bool lit) {
+        uint8_t brightness = (c.r + c.g + c.b + c.a) / 4;
+        if (lit) {
+            if (brightness > 127) {
+                return (Color){255, 255, brightness - 127, 255};
+            }
+            else {
+                return (Color){127 + brightness, 127 + brightness, 0, 255};
+            }
+        }
+        else {
+            return (Color){0, 0, brightness / 2, 255};
+        }
+    }
+
     void screen::checkerboardTransition(int amountBlack) {
         int horizontal = 0x2581 + amountBlack;
         int vertical = 0x258f - amountBlack;
@@ -228,6 +243,8 @@
     }
 
     void screen::start(float playerX, float playerY, bool tabScreen) {
+
+        highlightMode = IsKeyDown(KEY_X);
 
         //Update camera; round value to nearest pixel
 
@@ -265,6 +282,9 @@
         if (tabScreen) {
             ClearBackground(UIBACKGROUND);
         }
+        else if (highlightMode) {
+            ClearBackground(BLACK);
+        }
         else {
             ClearBackground(background);
         }
@@ -277,9 +297,12 @@
         EndDrawing();
     }
 
-    void screen::draw(float x, float y, Color tint, float scale, string text, bool doLight) {
+    void screen::draw(float x, float y, Color tint, float scale, string text, bool doLight, bool doHighlight) {
         if (doLight) {
             tint = lighting(tint);
+        }
+        if (highlightMode) {
+            tint = highlight(tint, doHighlight);
         }
         myDrawText(text.c_str(),
             (Vector2){ (screenCols / scale / 2 - cameraX + x) * fontSize * scale,
@@ -291,7 +314,13 @@
         myDrawText(text.c_str(), (Vector2){x * hudFontSize, y * hudFontSize}, hudFontSize, 0, tint);
     }
 
-    void screen::drawWithBackground(float x, float y, Color tint, Color background, float scale, string text, bool doLight) {
+    void screen::drawWithBackground(float x, float y, Color tint, Color background, float scale, string text, bool doLight, bool doHighlight) {
+        if (doLight) {
+            tint = lighting(tint);
+        }
+        if (highlightMode) {
+            tint = highlight(tint, doHighlight);
+        }
         drawBarRight(x, y, background, scale, MeasureTextEx(displayFont, text.c_str(), fontSize * scale, 0).x / float(fontSize * scale), doLight);
         draw(x, y, tint, scale, text, doLight);
     }
@@ -322,9 +351,12 @@
             fontSize, 1, tint);
     }
 
-    void screen::drawLayer(float x, float y, Color tint, float scale, Texture2D& t, bool doLight) {
+    void screen::drawLayer(float x, float y, Color tint, float scale, Texture2D& t, bool doLight, bool doHighlight) {
         if (doLight) {
             tint = lighting(tint);
+        }
+        if (highlightMode) {
+            tint = highlight(tint, doHighlight);
         }
         Rectangle sourceRec = {0.0f, 0.0f, (float)t.width, -1 * (float)t.height};
         Vector2 origin = { (screenCols / scale / 2 - cameraX + x) * fontSize * scale,
@@ -346,9 +378,12 @@
 //Due to character limitations, for down and left, rounds to four pixels.
 /******************************************************************************/
 
-    void screen::drawBarLeft(float x, float y, Color tint, float scale, float length, bool doLight) {
+    void screen::drawBarLeft(float x, float y, Color tint, float scale, float length, bool doLight, bool doHighlight) {
         if (doLight) {
             tint = lighting(tint);
+        }
+        if (highlightMode) {
+            tint = highlight(tint, doHighlight);
         }
         x = roundTo8th(x);
         y = roundTo8th(y);
@@ -364,9 +399,12 @@
         DrawRectangle(xPixel - width, yPixel, width, height, tint);
     }
 
-    void screen::drawBarRight(float x, float y, Color tint, float scale, float length, bool doLight) {
+    void screen::drawBarRight(float x, float y, Color tint, float scale, float length, bool doLight, bool doHighlight) {
         if (doLight) {
             tint = lighting(tint);
+        }
+        if (highlightMode) {
+            tint = highlight(tint, doHighlight);
         }
         x = roundTo8th(x);
         y = roundTo8th(y);
@@ -380,9 +418,12 @@
     }
 
 
-    void screen::drawBarDown(float x, float y, Color tint, float scale, float length, bool doLight) {
+    void screen::drawBarDown(float x, float y, Color tint, float scale, float length, bool doLight, bool doHighlight) {
         if (doLight) {
             tint = lighting(tint);
+        }
+        if (highlightMode) {
+            tint = highlight(tint, doHighlight);
         }
         x = roundTo8th(x);
         y = roundTo8th(y);
@@ -395,9 +436,12 @@
         DrawRectangle(xPixel, yPixel, width, height, tint);
     }
 
-    void screen::drawBarUp(float x, float y, Color tint, float scale, float length, bool doLight) {
+    void screen::drawBarUp(float x, float y, Color tint, float scale, float length, bool doLight, bool doHighlight) {
         if (doLight) {
             tint = lighting(tint);
+        }
+        if (highlightMode) {
+            tint = highlight(tint, doHighlight);
         }
         length = roundTo8th(length);
         double xPixel = (screenCols / scale / 2.0 - cameraX + x) * fontSize * scale;
@@ -408,9 +452,12 @@
         DrawRectangle(xPixel, yPixel - height, width, height, tint);
     }
 
-    void screen::drawBox(float x, float y, float width, float height, Color tint, float scale, bool doLight) {
+    void screen::drawBox(float x, float y, float width, float height, Color tint, float scale, bool doLight, bool doHighlight) {
         if (doLight) {
             tint = lighting(tint);
+        }
+        if (highlightMode) {
+            tint = highlight(tint, doHighlight);
         }
         double xPixel = (screenCols / scale / 2.0 - cameraX + x) * fontSize * scale;
         double yPixel = (screenRows / scale / 2.0 - cameraY + y) * fontSize * scale;
@@ -522,6 +569,10 @@
         moveCameraY = (worldRows > screenRows / playerSizeFactor);
         cameraLagX = screenCols / playerSizeFactor * 3 / 16;
         cameraLagY = screenRows / playerSizeFactor * 3 / 16;
+    }
+
+    void screen::enableHighlight(bool newValue) {
+        highlightMode = newValue;
     }
 
 /******************************************************************************/

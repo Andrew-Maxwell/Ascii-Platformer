@@ -6,11 +6,12 @@
 //applies, more rigorously.
 /******************************************************************************/
 
-    physicalEntity::physicalEntity(float newX, float newY,  Color newTint, float newScale, float newWidth, float newHeight, float elasticity, float newXMomentum,
+    physicalEntity::physicalEntity(float newX, float newY,  Color newTint, float newScale, float newWidth, float newHeight, float newElasticity, float newXMomentum,
         float newYMomentum, float newMaxSpeed, float newGravity, float newFriction) :
         entity(newX, newY, newTint, newScale),
         width(newWidth),
         height(newHeight),
+        elasticity(newElasticity),
         maxSpeed(newMaxSpeed),
         gravity(newGravity),
         friction(newFriction),
@@ -81,13 +82,13 @@
         float dX = xMomentum + pushedX;
         float dY = yMomentum + pushedY;
         bool hitX, hitY;
-        Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY}, width, height, hitX, hitY);
-        if (hitX) { //hit horizontally
-            xMomentum *= (-1 * elasticity);
+        Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY}, width, height, hitX, hitY, xMomentum, yMomentum, elasticity, id);
+        if (hitX) {
+//            xMomentum = xMomentum * (-1 * elasticity);
             hit = true;
         }
-        if (hitY) {  //hit vertically
-            yMomentum *= (-1 * elasticity);
+        if (hitY) { 
+//            yMomentum = yMomentum * (-1 * elasticity);
             xMomentum *= friction;
             hit = true;
             if (newPosition.y < y + dY) {
@@ -118,7 +119,8 @@
         particle(newX, newY, newTint, newScale, newXMomentum, newYMomentum, displayChar, newLifetime),
         dynamicChar(displayChar == 0),
         lifetime(newLifetime) {
-            elasticity = newElasticity;
+            width = 0.5;
+            height = 0.5;
     }
 
     unsigned int physicalParticle::type() {
@@ -136,13 +138,14 @@
     void physicalParticle::tickSet() {}
 
     void physicalParticle::tickGet() {
-        if (world -> isSolid(x + 0.5, y + 0.5)) {
+        physicalEntity::tickGet();
+        //Delete if in a wall, or timed out, or stopped moving, or fell out of level.
+        if (world -> isSolid(x + width / 2, y + height / 2)) {
             shouldDelete = true;
         }
         else if (lifetime-- < 0 || (!isUnderWater && xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01) || y > world -> getRows() + 100) {
             shouldDelete = true;
         }
-        physicalEntity::tickGet();
     }
 
     bool physicalParticle::finalize() {
@@ -157,9 +160,10 @@
                 particle::setDirection();
             }
             else {
-                toPrint[0] = '.';
+                display[0] = '.';
             }
         }
-        theScreen -> draw(x + 0.125, y, tint, scale, toPrint, doLighting);
+//        theScreen -> draw(x, y, tint, scale, display, doLighting, doHighlight);
+        theScreen -> draw(x - 0.25, y - 0.25, tint, scale, display, doLighting, doHighlight);
     }
 

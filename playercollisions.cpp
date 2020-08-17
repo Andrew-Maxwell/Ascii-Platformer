@@ -86,17 +86,6 @@
                 yInertia += col.yVal;
                 break;
             }
-            case SNAKEWALLTYPE: {
-//                xInertia += col.xVal;
-//                yInertia += col.yVal;
-                if (abs(col.xVal) > abs(col.yVal)) {
-                    pushedX += copysign(1, col.xVal);
-                }
-                else {
-                    pushedY += copysign(1, col.yVal);
-                }
-                break;
-            }
             case ELEVATORTYPE: {
                 pushedX += col.xVal;
                 if (col.yVal < maxFallSpeed) {

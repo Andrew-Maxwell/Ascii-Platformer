@@ -70,5 +70,5 @@
     }
 
     void newTestEntity::print() {
-        theScreen -> draw(x, y, tint, scale, "test");
+        theScreen -> draw(x, y, tint, scale, "test", doLighting, doHighlight);
     }

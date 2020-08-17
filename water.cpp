@@ -145,6 +145,6 @@
         for (int i = max(0, (int)(camera.x - x - theScreen -> getScreenCols() / scale / 2.0f));
                 i < min(width, (int)(camera.x - x + theScreen -> getScreenCols() / scale / 2.0f + 1));
                 i++) {
-            theScreen -> drawBarUp(x + i, y + height, tint, scale, height + surface[i], doLighting);
+            theScreen -> drawBarUp(x + i, y + height, tint, scale, height + surface[i], doLighting, doHighlight);
         }
     }

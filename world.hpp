@@ -10,6 +10,10 @@ using namespace rapidjson;
 //(x1, y1) is the upper left corner
 struct movingRectangle {
     float oldX1, oldY1, oldX2, oldY2, newX1, newY1, newX2, newY2;
+    unsigned int id;
+
+    movingRectangle(float a, float b, float c, float d, float e, float f, float g, float h, unsigned int newID) :
+        oldX1(a), oldY1(b), oldX2(c), oldY2(d), newX1(e), newY1(f), newX2(g), newY2(h), id(newID) {}
 };
 
 /******************************************************************************/
@@ -145,7 +149,7 @@ class collider : public layer {
 
     //physical tilemap functions
 
-    Vector2 go(Vector2 pos, Vector2 d, float width, float height, bool& hitX, bool& hitY);
+    Vector2 go(Vector2 pos, Vector2 d, float width, float height, bool& hitX, bool& hitY, float& xMomentum, float& yMomentum, float elasticity, unsigned int id);
 
     bool isSolid(float checkX, float checkY);
 

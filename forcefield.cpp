@@ -94,10 +94,10 @@
 
     void linearField::print() {
         if (isOn) {
-            theScreen -> drawLayer(x, y, onTint, scale, tex.texture, false);
+            theScreen -> drawLayer(x, y, onTint, scale, tex.texture, false, true);
         }
         else {
-            theScreen -> drawLayer(x, y, tint, scale, tex.texture, doLighting);
+            theScreen -> drawLayer(x, y, tint, scale, tex.texture, doLighting, doHighlight);
         }
     }
 
@@ -163,7 +163,7 @@
             else {  //repeller force field
                 p = new particle(x, y, onTint, scale, cos(angle) * power * -40, sin(angle) * power * -40, 0, range / power / -40);
             }
-            p -> setDoLighting(false);
+            p -> setLighting(false, false);
             world -> addEntity(p);
         }
         else {
@@ -178,10 +178,10 @@
 
     void forceField::print() {
         if (isOn) {
-            theScreen -> draw(x, y, onTint, scale, "F", false);
+            theScreen -> draw(x, y, onTint, scale, "F", false, true);
         }
         else {
-            theScreen -> draw(x, y, tint, scale, "F", doLighting);
+            theScreen -> draw(x, y, tint, scale, "F", doLighting, doHighlight);
         }
     }
 

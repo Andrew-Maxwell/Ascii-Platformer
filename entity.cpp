@@ -12,6 +12,7 @@ entity::entity(float newx, float newy, Color newTint, float newScale) {
     id = ++entityCounter;
 }
 
-void entity::setDoLighting(bool newDoLighting) {
+void entity::setLighting(bool newDoLighting, bool newDoHighlight) {
     doLighting = newDoLighting;
+    doHighlight = newDoHighlight;
 }

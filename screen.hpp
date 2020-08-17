@@ -26,6 +26,7 @@ class screen {
     float cameraX, cameraY;
     bool moveCameraX, moveCameraY;
     Font displayFont;
+    bool highlightMode;
 
     public:
 
@@ -64,6 +65,8 @@ class screen {
 
     Color lighting(Color original);
 
+    Color highlight(Color original, bool doHighlight);
+
     //Transition function
 
     void checkerboardTransition(int amountBlack);
@@ -74,11 +77,11 @@ class screen {
 
     void start(bool tabScreen);
 
-    void draw(float x, float y, Color tint, float scale, string text, bool doLight = true);
+    void draw(float x, float y, Color tint, float scale, string text, bool doLight = true, bool highlight = false);
 
     void drawHud(float x, float y, Color tint, string text);
 
-    void drawWithBackground(float x, float y, Color tint, Color background, float scale, string text, bool doLight = true);
+    void drawWithBackground(float x, float y, Color tint, Color background, float scale, string text, bool doLight = true, bool highlight = false);
 
     void drawHudWithBackground(float x, float y, Color tint, Color background, string text);
     //Used by button in the menus
@@ -86,7 +89,7 @@ class screen {
 
     void drawScaleTest(float x, float y, Color tint, string text);
 
-    void drawLayer(float x, float y, Color tint, float scale, Texture2D& t, bool doLight = true);
+    void drawLayer(float x, float y, Color tint, float scale, Texture2D& t, bool doLight = true, bool highlight = false);
 
     void drawHudLayer(float x, float y, Color tint, Texture2D& t);
 
@@ -94,15 +97,15 @@ class screen {
 
     //Bars (world)
 
-    void drawBarLeft(float x, float y, Color tint, float scale, float length, bool doLight = true);
+    void drawBarLeft(float x, float y, Color tint, float scale, float length, bool doLight = true, bool highlight = false);
 
-    void drawBarRight(float x, float y, Color tint, float scale, float length, bool doLight = true);
+    void drawBarRight(float x, float y, Color tint, float scale, float length, bool doLight = true, bool highlight = false);
 
-    void drawBarDown(float x, float y, Color tint, float scale, float length, bool doLight = true);
+    void drawBarDown(float x, float y, Color tint, float scale, float length, bool doLight = true, bool highlight = false);
 
-    void drawBarUp(float x, float y, Color tint, float scale, float length, bool doLight = true);
+    void drawBarUp(float x, float y, Color tint, float scale, float length, bool doLight = true, bool highlight = false);
 
-    void drawBox(float x, float y, float width, float height, Color tint, float scale, bool doLight = true);
+    void drawBox(float x, float y, float width, float height, Color tint, float scale, bool doLight = true, bool highlight = false);
 
     //Bars (HUD)
 
@@ -143,6 +146,8 @@ class screen {
     void tweakGameScale();
 
     int textLength(string text);
+
+    void enableHighlight(bool newValue);
 
 };
 

@@ -46,7 +46,7 @@
 
     void endingGate::print() {
         for (int i = 0; i < height; i++) {
-            theScreen -> draw(x, y + i, tint, scale, toPrint[i], doLighting);
+            theScreen -> draw(x, y + i, tint, scale, toPrint[i], doLighting, doHighlight);
         }
     }
 

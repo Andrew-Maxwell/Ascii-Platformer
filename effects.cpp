@@ -13,7 +13,7 @@
                 float dY = sin(angle);
                 if (!(world -> isSolid(x + dX + 0.5, y + dY + 0.5))) {
                     physicalParticle* p = new physicalParticle(x + dX / 1000, y + dY / 1000, tint, newScale, c, elasticity, dX * speed, dY * speed, 3, GRAVITY, FRICTION, lifespan);
-                    p -> setDoLighting(doLighting);
+                    p -> setLighting(doLighting, false);
                     world -> addParticle(p, zPosition);
                 }
             }
@@ -35,7 +35,7 @@
         }
         for (float angle = 0; angle < 2 * PI; angle += (2 * PI / (distance + 20))) {
             particle* p = new particle(x + cos(angle) * 2, y + sin(angle) * 2, tint, scale, cos(angle) / 3.0, sin(angle) / 3.0, '~', distance * 3, false);
-            p -> setDoLighting(false);
+            p -> setLighting(false, true);
             world -> addEntity(p);
         }
     }
@@ -50,7 +50,7 @@ void damageIndicator(int damage, float x, float y, Color tint, float newScale) {
     string digits = to_string(damage);
     for (int i = 0; i < digits.length(); i++) {
         particle* p = new particle (leftEnd + i, y, tint, newScale, 0, -0.1, digits[i], 60);
-        p -> setDoLighting(false);
+        p -> setLighting(false, true);
         world -> addEntity(p);
     }
 }

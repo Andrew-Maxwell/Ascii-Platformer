@@ -257,13 +257,16 @@ int main(int argc, char** argv) {
                     menu.options(status, config);
                     //Update player configurations
                     for (int i = 0; i < MAXPLAYERS; i++) {
-                        playerConfig updatedConfig = config.getPlayerConfig(i);
+                        playerConfigs[i] = config.getPlayerConfig(i);
                         for (int j = 0; j < players.size(); j++) {
-                            if (players[j] -> configNo == i) {
-                                players[j] -> setColor(updatedConfig.tint);
-                                players[j] -> setInputMap(updatedConfig.in);
+                            if (players[j] -> configNo == playerConfigs[i].configNo) {
+                                players[j] -> outfitNo = playerConfigs[i].playerNo;
+                                players[j] -> playerNo = i;
+                                players[j] -> setColor(playerConfigs[i].tint);
+                                players[j] -> setInputMap(playerConfigs[i].in);
                             }
                         }
+                        cout << endl;
                     }
                     status = pauseStatus; //Return to pause menu after options menu
                 }
