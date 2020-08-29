@@ -15,6 +15,7 @@
         friction = 1.0f;
         health = maxHealth = 8;
         air = maxAir = 600;
+        displayStr = utf8(display);
 
         for (int i = 0; i < 10; i++) {
             channels[i] = bitset<8>("00000000");
@@ -153,11 +154,6 @@
             }
 
             //Explosions
-            if (IsKeyPressed(KEY_T)) {
-                physicalParticle* p = new physicalParticle(x, y, tint, scale, 'A', 0, 0, 0, 100, gravity, friction, 1000);
-                world -> addParticle(p, zPosition);
-            }
-
             if (in.explode.isPressed()) {
                 explode (60, x, y, tint, scale, 0.4, 0x2022, 600, 0.3, zPosition);
             }
@@ -184,7 +180,6 @@
     void player::tickGet() {
 
         if (!breakDoor && !breakDead) {
-
             lastTickUnderWater = isUnderWater;
             isUnderWater = false;
             pushedX = 0;
@@ -199,64 +194,28 @@
             collisions.clear();
 
             //Allow for jumping out of the water
-
             if (lastTickUnderWater && !isUnderWater) {
                 yInertia = yMovement + pushedY;
                 yMovement = 0;
             }
 
-            //Keyboard movement handling
-            if (!isUnderWater) {
-                //Gravity
-                yInertia = min(yInertia + gravity, maxFallSpeed);
-                yMovement = 0;
-                //Jumping
-                if (in.jump.isPressed() || (in.jump.isDown() && autoRejump)) {  //If the jump key is pressed
-                    if (onGround) {                                         //If we're on a surface we can jump from
-                        yInertia  = -1 * jumpSpeed;                                 //then jump, and also reset jump counter
-                        jumpsUsed = jumpCount;
-                        justJumped = true;
-                    }
-                    else if (walljump && onWall) {
-                        yInertia = -1 * jumpSpeed;
-                        jumpsUsed = jumpCount;
-                        justJumped = true;
-                    }
-                    else if (jumpsUsed != 0) {                                //Else, if jumps remaining,
-                        jumpsUsed--;
-                        yInertia = -1 * jumpSpeed;                                 //jump and decrement jump counter
-                        if (in.up.isPressed()) {
-                            justJumped = true;
-                        }
-                    }
+            //Grabbing ladders
+            if (world -> isLadder(x + width / 2.0f, y + height / 2.0f)) {
+                if (in.up.isDown() && !onLadder) {
+                    onLadder = true;
+                    xInertia = yInertia = xMovement = 0;
+                    x = floor(x + width / 2.0f) + 0.5 - width / 2.0f;
+                    ladderHitLeft = in.left.isDown();
+                    ladderHitRight = in.right.isDown();
                 }
-                if (in.jump.isReleased() && yInertia < 0 && justJumped) {
-                    yInertia *= 0.3;
-                    justJumped = false;
-                }
-
-                //Lateral movement
-                if (in.right.isDown()) {
-                    xMovement = speed * in.right.value;
-                    if (xInertia < 0) {
-                        xInertia *= 0.9;
-                    }
-                }
-                else if (in.left.isDown()) {
-                    xMovement = -1 * speed * in.left.value;
-                    if (xInertia > 0) {
-                        xInertia *= 0.9;
-                    }
-                }
-                else {
-                    xMovement = 0;
-                    xInertia *= 0.9;
-                }
-
-                //Air recovery
-                air = min(maxAir, air + AIRRECOVERYRATE);
             }
-            else {  //Is underwater
+            else {
+                onLadder = false;
+            }
+
+            //Keyboard movement handling
+            if (isUnderWater) {
+                onLadder = false;
                 jumpsUsed = jumpCount;
 
                 //Moving underwater
@@ -301,6 +260,96 @@
                     air--;
                 }
             }
+            else if (onLadder) {
+                //Climbing
+                if (in.up.isDown()) {
+                    yMovement = -1 * speed * in.up.value;
+                }
+                else if (in.down.isDown()) {
+                    yMovement = speed * in.down.value;
+                }
+                else {
+                    yMovement = 0;
+                }
+                //Jumping off
+                if (in.right.isDown()) {
+                    if (!ladderHitRight) {
+                        onLadder = false;
+                    }
+                }
+                else {
+                    ladderHitRight = false;
+                }
+                if (in.left.isDown()) {
+                    if (!ladderHitLeft) {
+                        onLadder = false;
+                    }
+                }
+                else {
+                    ladderHitLeft = false;
+                }
+                if (in.jump.id != in.up.id && in.jump.isPressed()) {
+                    onLadder = false;
+                }
+                if (!onLadder || !world -> isLadder(x + width / 2.0f, y + yMovement + height / 2.0f)) {
+                    jumpsUsed = jumpCount;
+                    if (in.down.isDown()) {
+                        yInertia = 0.5 * jumpSpeed;
+                    }
+                    else {
+                        yInertia = -0.5 * jumpSpeed;
+                        justJumped = true;
+                    }
+                }
+
+
+                //Air recovery
+                air = min(maxAir, air + AIRRECOVERYRATE);
+            }
+            else {  //Not underwater
+                yInertia = min(yInertia + gravity, maxFallSpeed);
+                yMovement = 0;
+                //Jumping
+                if (in.jump.isPressed() || (in.jump.isDown() && autoRejump)) {  //If the jump key is pressed
+                    if (onGround || (walljump && onWall)) {
+                        yInertia  = -1 * jumpSpeed;
+                        jumpsUsed = jumpCount;
+                        justJumped = true;
+                    }
+                    else if (jumpsUsed != 0) {                                //Else, if jumps remaining,
+                        jumpsUsed--;
+                        yInertia = -1 * jumpSpeed;                //jump and decrement jump counter
+                        if (in.jump.isPressed()) {
+                            justJumped = true;
+                        }
+                    }
+                }
+                if (in.jump.isReleased() && yInertia < 0 && justJumped && !onLadder) {
+                    yInertia *= 0.3;
+                    justJumped = false;
+                }
+
+                //Lateral movement
+                if (in.right.isDown()) {
+                    xMovement = speed * in.right.value;
+                    if (xInertia < 0) {
+                        xInertia *= 0.9;
+                    }
+                }
+                else if (in.left.isDown()) {
+                    xMovement = -1 * speed * in.left.value;
+                    if (xInertia > 0) {
+                        xInertia *= 0.9;
+                    }
+                }
+                else {
+                    xMovement = 0;
+                    xInertia *= 0.9;
+                }
+
+                //Air recovery
+                air = min(maxAir, air + AIRRECOVERYRATE);
+            }
 
 
             //spikes
@@ -339,7 +388,6 @@
 
             //Allow for being crushed
             if (world -> isSolid(x + width / 2, y + height / 2)) {
-                cout << "Crushed at (" << x << ", " << y << ")\n";
                 health -= 999;
                 damageIndicator(-999, x, y, HURTCOLOR, scale);
             }

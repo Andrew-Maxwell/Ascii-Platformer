@@ -1,5 +1,5 @@
 #include "water.hpp"
-#include "rain.hpp"
+#include "physicalentities.hpp"
 #include "effects.hpp"
 
 /*****************************************************************************/
@@ -102,9 +102,9 @@
                     float xRange = pow(pow(range, 2) - pow(y - otherY, 2), 0.5);
                     if (y > otherY && power > 0) {
                         for (int i = 0; i < power * 40; i++) {
-                            world -> addParticle(new drop(GetRandomValue(colIter -> xVal - xRange, colIter -> xVal + xRange),
+                            world -> addParticle(new physicalParticle(GetRandomValue(colIter -> xVal - xRange, colIter -> xVal + xRange),
                                 y - surface[otherX - x], tint, scale, 0, 0, 0,
-                                power * -5, 100, GRAVITY, FRICTION, 100), zPosition);
+                                power * -5, 100, true, true, true, 0, GRAVITY, FRICTION, 100), zPosition);
                         }
                     }
                 }

@@ -1,11 +1,11 @@
 #include <fstream>
 #include <iostream>
-#include <document.h>
-#include <writer.h>
-#include <stringbuffer.h>
-#include <filewritestream.h>
-#include <filereadstream.h>
-#include <prettywriter.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/filewritestream.h>
+#include <rapidjson/filereadstream.h>
+#include <rapidjson/prettywriter.h>
 
 using namespace std;
 using namespace rapidjson;
@@ -25,10 +25,17 @@ int main(int argc, char** argv) {
     Document::AllocatorType& a = d.GetAllocator();
     string colFileName = levelName + "_collider.lyr";
     d.AddMember("collider", Value().SetString(colFileName.c_str(), colFileName.length(), a), a);
-    d.AddMember("R", Value(0).Move(), a);
-    d.AddMember("G", Value(0).Move(), a);
-    d.AddMember("B", Value(0).Move(), a);
-    d.AddMember("A", Value(0).Move(), a);
+    Value dayLight(kArrayType);
+    for (int i = 0; i < 4; i++) {
+        dayLight.PushBack(Value(255).Move(), a);
+    }
+    Value dayBackground(kArrayType);
+    for (int i = 0; i < 4; i++) {
+        dayBackground.PushBack(Value(255).Move(), a);
+    }
+    d.AddMember("dayLight", dayLight.Move(), a);
+    d.AddMember("dayBackground", dayBackground.Move(), a);
+    d.AddMember("dayLength", Value(18000).Move(), a);
     d.AddMember("fontSize", Value(16).Move(), a);
 
     Value entities;

@@ -243,7 +243,7 @@
         hitX = hitY = false;
         //If on top of an elevator block, apply sideways force.
         for (movingRectangle r : rectangles) {
-            if (r.id != id && start.y == r.oldY1 - height && start.x > r.oldX1 && start.x < r.oldX2) {
+            if (r.id != id && start.y == r.oldY1 - height && start.x > r.oldX1 - width && start.x < r.oldX2) {
                 d.x += (r.newX1 - r.oldX1);
                 d.y += (r.newY1 - r.oldY1);
             }
@@ -259,7 +259,7 @@
             if (!hitX && (isTileSolid(int(next.x + xStep + buf + (width - buf) * (xStep > 0)), int(next.y + buf))
             || isTileSolid(int(next.x + xStep + buf + (width - buf) * (xStep > 0)), int(next.y + height - buf)))) {
                 if (xStep > 0) {
-                    next.x = ceil(next.x + xStep) - width;
+                    next.x = floor(next.x + xStep + width) - width;
                 }
                 else {
                     next.x = ceil(next.x + xStep);
@@ -273,13 +273,16 @@
             if (!hitY && (isTileSolid(int(next.x + buf), int(next.y + yStep + buf + (height - buf) * (yStep > 0)))
             || isTileSolid(int(next.x + width - buf), int(next.y + yStep + buf + (height - buf) * (yStep > 0))))) {
                 if (yStep > 0) {
-                    next.y = ceil(next.y + yStep) - height;
+                    next.y = floor(next.y + yStep + height) - height;
                 }
                 else {
                     next.y = ceil(next.y + yStep);
                 }
                 hitY = true;
                 yMomentum = yMomentum * -1 * elasticity;
+                if (abs(yMomentum) < 0.01) {    //Kludge to prevent many very small bounces when elasticity is high
+                    yMomentum = 0;
+                }
             }
             else {
                 next.y += yStep;
@@ -290,8 +293,8 @@
         for (movingRectangle r : rectangles) {
             if (id != r.id) {
                 if ((start.x <= r.oldX1 - width) && (next.x > r.newX1 - width)) {
-                    float yIntersect = start.y + (r.oldX1 - width - start.x) * slope;
-                    if (r.newY1 - height <= yIntersect && yIntersect <= r.newY2) {
+                    float yIntersect = start.y + (r.oldX1 - start.x - width) * slope;
+                    if (r.newY1 - height < yIntersect && yIntersect < r.newY2) {
                         xMomentum = xMomentum * -1 * elasticity + min(0.0f, max(r.newX1 - r.oldX1, r.newX1 - (next.x + width)));
                         next.x = r.newX1 - width;
                         hitX = true;
@@ -299,7 +302,7 @@
                 }
                 if ((start.x >= r.oldX2) && (next.x < r.newX2)) {
                     float yIntersect = start.y + (r.oldX2 - start.x) * slope;
-                    if (r.newY1 - height <= yIntersect && yIntersect <= r.newY2) {
+                    if (r.newY1 - height < yIntersect && yIntersect < r.newY2) {
                         xMomentum = xMomentum * -1 * elasticity + max(0.0f, min(r.newX2 - r.oldX2, r.newX2 - next.x));
                         next.x = r.newX2;
                         hitX = true;
@@ -307,7 +310,7 @@
                 }
                 if ((start.y <= r.oldY1 - height) && (next.y > r.newY1 - height)) {
                     float xIntersect = start.x + (slope == 0 ? 0 : (r.oldY1 - height - start.y) / slope);
-                    if (r.newX1 - width <= xIntersect && xIntersect <= r.newX2) {
+                    if (r.newX1 - width < xIntersect && xIntersect < r.newX2) {
                         yMomentum = yMomentum * -1 * elasticity;//+ min(0.0f, max(r.newY1 - r.oldY1, r.newY1 - (start.y + height)));
                         next.y = r.newY1 - height;
                         hitY = true;
@@ -315,14 +318,40 @@
                 }
                 if ((start.y >= r.oldY2) && (next.y < r.newY2)) {
                     float xIntersect = start.x + (slope == 0 ? 0 : (r.oldY2 - start.y) / slope);
-                    if (r.newX1 - width <= xIntersect && xIntersect <= r.newX2) {
+                    if (r.newX1 - width < xIntersect && xIntersect < r.newX2) {
                         yMomentum = yMomentum * -1 * elasticity + max(0.0f, min(r.newY2 - r.oldY2, r.newY2 - start.y));
                         next.y = r.newY2;
                         hitY = true;
                     }
                 }
+                //failsafes
+                if (next.x < r.newX1 && next.x + width > r.newX1 && next.y > r.newY1 - height && next.y < r.newY2) {
+                    cout << "in block x1\n";
+                    xMomentum = xMomentum * -1 * elasticity + min(0.0f, max(r.newX1 - r.oldX1, r.newX1 - (next.x + width)));
+                    next.x = r.newX1 - width;
+                    hitX = true;
+                }
+                if (next.x < r.newX2 && next.x + width > r.newX2 && next.y > r.newY1 - height && next.y < r.newY2) {
+                    cout << "In block x2\n";
+                    xMomentum = xMomentum * -1 * elasticity + max(0.0f, min(r.newX2 - r.oldX2, r.newX2 - next.x));
+                    next.x = r.newX2;
+                    hitX = true;
+                }
+                if (next.y < r.newY1 && next.y + height > r.newY1 && next.x > r.newX1 - width && next.x < r.newX2) {
+                    cout << "In block y1\n";
+                    yMomentum = yMomentum * -1 * elasticity;
+                    next.y = r.newY1 - height;
+                    hitY = true;
+                }
+                if (next.y < r.newY2 && next.y + height > r.newY2 && next.x > r.newX1 - width && next.x < r.newX2) {
+                    cout << "In block y2\n";
+                    yMomentum = yMomentum * -1 * elasticity + max(0.0f, min(r.newY2 - r.oldY2, r.newY2 - next.y));
+                    next.y = r.newY2;
+                    hitY = true;
+                }
             }
         }
+
         return next;
     }
 
@@ -341,6 +370,13 @@
     bool collider::isTileSolid(int checkX, int checkY) {
         if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {
             return screen[checkY][checkX] == 's' || screen[checkY][checkX] == '8';
+        }
+        return false;
+    }
+
+    bool collider::isLadder(int checkX, int checkY) {
+        if (checkY >= 0 && checkY < screen.size() && checkX >= 0 && checkX < screen[checkY].size()) {
+            return screen[checkY][checkX] == 'l' || screen[checkY][checkX] == 'L' || screen[checkY][checkX] == 'H';
         }
         return false;
     }
@@ -406,6 +442,9 @@
     bool collider::getChannel(int freq) {
         if (freq >= 0 && freq < 512) {
             return channel[freq] || persistentChannel[freq];
+        }
+        if (freq == -2) {
+            return true;
         }
         return false;
     }

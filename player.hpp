@@ -127,7 +127,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
     inputMap in;
 
     //Formerly part of the physicalEntity inheritance
-    bool onGround, onWall;
+    bool onGround, onWall, onLadder, ladderHitLeft = false, ladderHitRight = false;
     bool hit = false;
     bool isUnderWater = false, lastTickUnderWater = false;
     float elasticity = 0, maxSpeed = 100, gravity, friction, maxFallSpeed = 0.3f;
@@ -136,6 +136,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
     float xMovement = 0, yMovement = 0;
     float pushedX = 0, pushedY = 0;
     float xInertia = 0, yInertia = 0;
+    float jumpInertia = 0;
 
     float nextX = 0, nextY = 0;
 
@@ -154,7 +155,7 @@ class player : virtual public collideable, public entityParent, public hudEntity
     int jumpsUsed;
     bool autoRejump; //Creates a jetpack-like effect
     bool walljump;
-    bool justJumped = false, jumpControl;
+    bool justJumped;
 
     vector<weapon> guns;
     int gunSelect = 0;

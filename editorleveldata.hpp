@@ -13,6 +13,10 @@ class editorLevelData : public levelData {
 
     public:
 
+    void loadPalette(int* palette);
+
+    void savePalette(int* palette);
+
     //Initialize global theScreen and read in editables
 
     void initializeEditor(list<editableLayer*>& layers, Color& background);

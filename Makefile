@@ -25,7 +25,6 @@ GAMESRCS := \
 	player.cpp \
     playeraccessors.cpp \
     playercollisions.cpp \
-	rain.cpp \
 	savepoint.cpp \
 	water.cpp \
     screen.cpp \
@@ -38,7 +37,7 @@ GAMESRCS := \
     configdata.cpp \
     input.cpp \
     logic.cpp \
-    movingwalls.hpp
+    movingwalls.cpp
 
 EDTRSRCS := \
 	meta.cpp \
@@ -89,12 +88,12 @@ CFLAGS := -std=c11
 # C++ flags
 CXXFLAGS := -std=c++11
 # C/C++ flags
-CPPFLAGS := -g -Wall -Wextra -c -I/opt/raylib/src -O3 $(NOWARN)
+CPPFLAGS := -g -Wall -Wextra -c -I/opt/raylib/src -O0 $(NOWARN)
 # linker flags
 ifeq ($(OS),Windows_NT)
-	LDFLAGS :=  -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux -O3 -lraylib -lopengl32 -lgdi32 -lwinmm -Iexternal -lwinpthread -static-libgcc -static-libstdc++ $(NOWARN)
+	LDFLAGS :=  -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux -O0 -lraylib -lopengl32 -lgdi32 -lwinmm -Iexternal -lwinpthread -static-libgcc -static-libstdc++ $(NOWARN)
 else
-	LDFLAGS := -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux  -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -O3 $(NOWARN)
+	LDFLAGS := -Wall -I/opt/raylib/src -L/opt/raylib/release/libs/linux  -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -O0 $(NOWARN)
 endif
 # flags required for dependency generation; passed to compilers
 DEPFLAGS = -MT $@ -MD -MP -MF $(DEPDIR)/$*.Td

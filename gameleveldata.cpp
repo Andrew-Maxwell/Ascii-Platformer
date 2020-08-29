@@ -29,6 +29,27 @@
                 float scale = entity.HasMember("scale") ? entity["scale"].GetFloat() : 1.0;
                 string fileName = entity.HasMember("fileName") ? entity["fileName"].GetString() : "Error: No layer filename specified.";
                 gameLayer * L = new gameLayer(x, y, tint, scale, fileName);
+                if (entity.HasMember("effects")) {
+                    for (SizeType j = 0; j < entity["effects"].Size(); j++) {
+                        const Value& effect = entity["effects"][j];
+                        int channel = effect["channel"].GetInt();
+                        if (effect.HasMember("tint")) {
+                            Color tint = getColor(effect["tint"]);
+                            bool doLighting = effect.HasMember("doLighting") ? effect["doLighting"].GetBool() : true;
+                            bool doHighlight = effect.HasMember("doHighlight") ? effect["doHighlight"].GetBool() : false;
+                            L -> addColorEffect(channel, tint, doLighting, doHighlight);
+                        }
+                        else {  //Movement effect
+                            int type = effect["type"].GetInt();
+                            bool xMovement = effect.HasMember("xMovement") ? effect["xMovement"].GetBool() : false;
+                            bool yMovement = effect.HasMember("yMovement") ? effect["yMovement"].GetBool() : false;
+                            bool zMovement = effect.HasMember("zMovement") ? effect["zMovement"].GetBool() : false;
+                            int period = effect.HasMember("period") ? effect["period"].GetInt() : 1;
+                            float value = effect.HasMember("value") ? effect["value"].GetFloat() : 1;
+                            L -> addMovementEffect(channel, type, xMovement, yMovement, zMovement, period, value);
+                        }
+                    }
+                }
                 L -> setLighting(doLighting, doHighlight);
                 layerCache.push_back(L);
             }
@@ -154,14 +175,65 @@
                 L -> setLighting(doLighting, doHighlight);
                 world -> addCollideable(L);
             }
-            else if (type == "rain") {
-                float dropsPerTick = entity.HasMember("dropsPerTick") ? entity["dropsPerTick"].GetFloat() : 1.0;
-                float xMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat() : 0.0;
-                bool isSnow = entity.HasMember("snow") ? entity["snow"].GetBool() : 0;
-                rain * newRain = new rain(x, y, tint, scale, dropsPerTick, xMomentum, isSnow);
-                newRain -> setLighting(doLighting, doHighlight);
-                world -> addEntity(newRain);
-                newRain -> setZPosition(world -> getZPosition());
+            else if (type == "particleSpawner" || type == "rain" || type == "snow" || type == "smoke") {
+                float width = entity.HasMember("width") ? entity["width"].GetFloat() : 1.0;
+                float height = entity.HasMember("height") ? entity["height"].GetFloat() : 1.0;
+                float depth = entity.HasMember("depth") ? entity["depth"].GetFloat() : 0;
+                int channel = entity.HasMember("channel") ? entity["channel"].GetInt() : -1;
+                vector<int> displayChars;
+                if (entity.HasMember("displayChars")) {
+                    if (entity["displayChars"].IsArray()) {
+                        for (SizeType i = 0; i < entity["displayChars"].Size(); i++) {
+                            displayChars.push_back(entity["displayChars"][i].GetInt());
+                        }
+                    }
+                }
+                int mix = entity.HasMember("mix") ? entity["mix"].GetInt() : 1 << 31;
+                float elasticity = entity.HasMember("elasticity") ? entity["elasticity"].GetFloat() : 0;
+                float xMomentum = entity.HasMember("xMomentum") ? entity["xMomentum"].GetFloat() : 0;
+                float yMomentum = entity.HasMember("yMomentum") ? entity["yMomentum"].GetFloat() : 0;
+                float maxSpeed = entity.HasMember("maxSpeed") ? entity["maxSpeed"].GetFloat() : 100;
+                bool waterDelete = entity.HasMember("waterDelete") ? entity["waterDelete"].GetBool() : false;
+                bool hitDelete = entity.HasMember("hitDelete") ? entity["hitDelete"].GetBool() : false;
+                bool restDelete = entity.HasMember("restDelete") ? entity["restDelete"].GetBool() : false;
+                float wobble = entity.HasMember("wobble") ? entity["wobble"].GetFloat() : 0;
+                float gravity = entity.HasMember("gravity") ? entity["gravity"].GetFloat() : GRAVITY;
+                float friction = entity.HasMember("friction") ? entity["friction"].GetFloat() : FRICTION;
+                float lifetime = entity.HasMember("lifetime") ? entity["lifetime"].GetInt() : 1 << 30;
+                float rate;
+                if (entity.HasMember("density")) {
+                    rate = width * height * entity["density"].GetFloat();
+                }
+                else if (entity.HasMember("rate")) {
+                    rate = entity["rate"].GetFloat();
+                }
+                else {
+                    rate = width * height / 10;
+                }
+                bool fade = entity.HasMember("fade") ? entity["fade"].GetBool() : false;
+                particleSpawner* newSpawner;
+                if (type == "particleSpawner") {
+                    newSpawner = new particleSpawner(x, y, tint, scale, width, height, depth, channel, displayChars, mix, elasticity, xMomentum, yMomentum, maxSpeed, waterDelete, hitDelete, restDelete, wobble, gravity, friction, lifetime, rate, fade);
+                }
+                else if (type == "rain") {
+                    vector<int> rainDisplayChars = {0};
+                    newSpawner = new particleSpawner(-20, -1, tint, scale, (world -> getCols()) / scale, 1, 0, channel, rainDisplayChars, 1 << 31, 0.1, xMomentum, 0.5, 0.5, true, true, true, 0, GRAVITY, 0.7, world -> getRows() * 10, rate, true);
+                }
+                else if (type == "snow") {
+                    vector<int> snowDisplayChars = {'.', '*', 0x00a4, 0x02da, 0x0263c};
+                    newSpawner = new particleSpawner(-20, -1, tint, scale, world -> getCols() + 40, 1, 0, -1, snowDisplayChars, 1 << 31, 0, xMomentum, 0.07, 0.07, true, true, true, 0.05, GRAVITY, 0, world -> getRows() * 50, rate, true);
+                }
+                else if (type == "smoke") {
+                    vector<int> smokeDisplayChars = {'#', 0x15, '*', 0xe3, 0x11c, 0x15d, 0x160, 0x2c7, 0x2dc, 0x3be, 0x2248, 0x2591, 0x2592};
+                    newSpawner = new particleSpawner(x, y, tint, scale, width, height, 0, channel, smokeDisplayChars, 10, 0, xMomentum, yMomentum, 0.07, true, false, false, 0.05, -0.01, 1, 120, rate, true);
+                }
+                else if (type == "leaves") {
+                    vector<int> leafDisplayChars = {'.', ','};
+                    newSpawner = new particleSpawner(x, y, tint, scale, width, height, 0, channel, leafDisplayChars, 25, 0.3, xMomentum, yMomentum, 0.15, false, false, true, 0.15, GRAVITY, FRICTION, lifetime, rate, false);
+                }
+                newSpawner -> setLighting(doLighting, doHighlight);
+                world -> addEntity(newSpawner);
+                newSpawner -> setZPosition(world -> getZPosition());
             }
             else if (type == "water") {
                 int width = entity.HasMember("width") ? entity["width"].GetInt() : 1;
@@ -197,8 +269,7 @@
                 int snakeLength = entity.HasMember("snakeLength") ? entity["snakeLength"].GetInt() : 1;
                 int snakeHead = entity.HasMember("snakeHead") ? entity["snakeHead"].GetInt() : snakeLength;
                 int ticksPerMove = entity.HasMember("ticksPerMove") ? entity["ticksPerMove"].GetInt() : 1;
-                int displayInt = entity.HasMember("display") ? entity["display"].GetInt() : '#';
-                string display(TextToUtf8(&displayInt, 1));
+                string display = entity.HasMember("display") ? utf8(entity["display"].GetInt()) : "#";
                 assert(entity.HasMember("points"));
                 assert(entity["points"].IsArray());
                 snakeWall* newSnakeWall = new snakeWall(x, y, tint, scale, snakeLength, snakeHead, ticksPerMove, loop, forwardChannel, reverseChannel, display);

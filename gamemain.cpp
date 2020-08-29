@@ -38,6 +38,7 @@ int main(int argc, char** argv) {
     gameLevelData level;
     string saveName;
     saveData save;
+    Vector2 savePosition;
     set<int> collectedPickups;
     bool loadedSave = false;
     bool argRoom = argc > 1;    //If room is defined by argument
@@ -218,16 +219,14 @@ int main(int argc, char** argv) {
         else if (status == saveStatus) {
             status = deadStatus;    //Reset the level
             argRoom = false;
-            int whoSaved = 0;
             for (int i = 0; i < players.size(); i++) {
                 if (players[i] -> breakSave) {
-                    whoSaved = i;
                     players[i] -> breakSave = false;
                 }
                 save.writeOutfit(players[i] -> getCurrentOutfit(), players[i] -> outfitNo);
             }
             save.setCollectedPickups(collectedPickups);
-            save.save(players[whoSaved] -> getPosition(), roomName);
+            save.save(savePosition, roomName);
             players.clear();
         }
 
@@ -257,16 +256,19 @@ int main(int argc, char** argv) {
                     menu.options(status, config);
                     //Update player configurations
                     for (int i = 0; i < MAXPLAYERS; i++) {
-                        playerConfigs[i] = config.getPlayerConfig(i);
+                        playerConfig updatedConfig = config.getPlayerConfig(i);
                         for (int j = 0; j < players.size(); j++) {
-                            if (players[j] -> configNo == playerConfigs[i].configNo) {
-                                players[j] -> outfitNo = playerConfigs[i].playerNo;
-                                players[j] -> playerNo = i;
-                                players[j] -> setColor(playerConfigs[i].tint);
-                                players[j] -> setInputMap(playerConfigs[i].in);
+                            if (players[j] -> configNo == i) {
+                                players[j] -> setColor(updatedConfig.tint);
+                                players[j] -> setInputMap(updatedConfig.in);
                             }
                         }
-                        cout << endl;
+                        for (int j = 0; j < playerConfigs.size(); j++) {
+                            if (playerConfigs[j].configNo == i) {
+                                playerConfigs[j].tint = updatedConfig.tint;
+                                playerConfigs[j].in = updatedConfig.in;
+                            }
+                        }
                     }
                     status = pauseStatus; //Return to pause menu after options menu
                 }
@@ -276,7 +278,6 @@ int main(int argc, char** argv) {
                     players[whoInventory] -> setOutfit(o);
                 }
                 else if (status == runStatus) { 
-
                     //start tick timer
 
                     tickStart = chrono::steady_clock::now();
@@ -352,6 +353,9 @@ int main(int argc, char** argv) {
                         }
                         if (players[i] -> breakSave) {
                             anySave = true;
+                            if (transition == -1) {
+                                savePosition = players[i] -> getPosition();
+                            }
                         }
                     }
                     if (players.size() == 0) {

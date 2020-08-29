@@ -13,7 +13,7 @@
         entity(newX, newY, newTint, newScale),
         physicalEntity(newX, newY, newTint, newScale, 0.5, 0.5, newElasticity, newXMomentum, newYMomentum, 
             newMaxSpeed, newGravity, newFriction),
-        particle(newX, newY, newTint, newScale, 0, 0, c, newLifetime),
+        particle(newX, newY, newTint, newScale, 0, 0, utf8(c), newLifetime),
         damage(newDamage),
         dynamicChar(c == 0),
         particleCount(newParticleCount),
@@ -76,10 +76,10 @@
         if (!stuck) {
             physicalEntity::tickSet();
         }
-        if ((physicalEntity::hit && hitWall) || lifetime-- < 0) {   //If hit a wall during physicalParticle::tickSet()
+        if (((hitX || hitY) && hitWall) || lifetime-- < 0) {   //If hit a wall during physicalParticle::tickSet()
             bulletHit = true;
         }
-        if (physicalEntity::hit && sticky) {
+        if ((hitX || hitY) && sticky) {
             stuck = true;
             xMomentum = 0;
             yMomentum = 0;

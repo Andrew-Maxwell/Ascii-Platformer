@@ -13,12 +13,8 @@
         lifetime(newLifetime),
         pickupID(newID),
         touch(newTouch) {
-            toPrint = TextToUtf8(&displayChar, 1);
+            toPrint = utf8(displayChar);
         }
-
-    pickup::~pickup() {
-        free(toPrint);
-    }
 
     bool pickup::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
         if (gotCollision && otherType == PLAYERTYPE && !collected && (otherX <= x + 1 && otherX >= x - 1 && otherY <= y + 1 && otherY >= y - 1) && otherID == playerID) {

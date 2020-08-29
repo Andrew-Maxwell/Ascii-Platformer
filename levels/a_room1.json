@@ -1,0 +1,65 @@
+{
+    "collider": "a_room1_collider.txt",
+    "dayLight": [
+        255,
+        255,
+        255,
+        255
+    ],
+    "dayBackground": [
+        0, 0, 0, 255
+    ],
+    "dayLength": 1440,
+    "fontSize": 16,
+    "entities": [
+        {
+            "type": "player",
+            "x": 24.0,
+            "y": 19.0,
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
+            "scale": 1.0
+        },
+        {
+            "type": "layer",
+            "fileName": "a_room1_collider.txt",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [
+                50,
+                225,
+                150,
+                255
+            ],
+            "scale": 1.0
+        }
+    ],
+    "defaultOutfit": {
+        "name": "test_outfit",
+        "gravity": 0.008,
+        "jumpSpeed": 0.4,
+        "display": 2,
+        "groundSpeed": 0.018,
+        "groundFriction": 0.5,
+        "airSpeed": 0.018,
+        "airFriction": 0.5,
+        "waterSpeed": 0.01,
+        "waterFriction": 0.95,
+        "waterAcceleration": 0.05,
+        "autoRejump": false,
+        "jumpCount": 0,
+        "walljump": true,
+        "health": 16,
+        "maxHealth": 24,
+        "air": 64,
+        "maxAir": 640,
+        "ops": [
+        ],
+        "guns": [
+        ]
+    }
+}

@@ -1,4 +1,5 @@
 #include "movingwalls.hpp"
+#include <iomanip>
 
 /*****************************************************************************/
 //Snakewall
@@ -119,7 +120,7 @@
         height(newHeight),
         channel(newChannel) {
             if (newDisplay != 0) {
-                string oneDisplay = TextToUtf8(&newDisplay, 1);
+                string oneDisplay = utf8(newDisplay);
                 for (int j = 0; j < width; j++) {
                     display += oneDisplay;
                 }
@@ -219,6 +220,7 @@
     void elevator::tickGet() {
         x += move.x;
         y += move.y;
+        gameLayer::tickGet();
     }
 
     bool elevator::finalize() {
@@ -237,21 +239,31 @@
     physicalBlock::physicalBlock(float newX, float newY, Color newTint, float newScale, float newWidth, float newHeight, float newElasticity, float newXMomentum, float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, gameLayer& newLayer) :
         entity(newX, newY, newTint, newScale),
         physicalEntity(newX, newY, newTint, newScale, newWidth, newHeight, newElasticity, newXMomentum, newYMomentum, newMaxSpeed, newGravity, newFriction),
-        gameLayer(newLayer) {}
+        gameLayer(newLayer) {
+        oldX = old2X = x;
+        oldY = old2Y = y;
+    }
 
     unsigned int physicalBlock::type() {
         return ELEVATORTYPE;
     }
 
     void physicalBlock::tickSet() {
-        movingRectangle newRect(oldX, oldY, oldX + width, oldY + height, x, y, x + width, y + height, entity::id);
+        movingRectangle newRect(old2X, old2Y, old2X + width, old2Y + height, oldX, oldY, oldX + width, oldY + height, entity::id);
         world -> addRectangle(newRect);
+        old2X = oldX;
+        old2Y = oldY;
         oldX = x;
         oldY = y;
     }
 
     void physicalBlock::tickGet() {
         physicalEntity::tickGet();
+        gameLayer::tickGet();
+        if (hitY && abs(yMomentum) < 0.05) {
+            yMomentum = 0;
+        }
+        collisions.clear();
     }
 
     bool physicalBlock::stopColliding() {
@@ -263,5 +275,11 @@
     }
 
     void physicalBlock::print() {
+        float newX = x;
+        float newY = y;
+        x = oldX;
+        y = oldY;
         gameLayer::print();
+        x = newX;
+        y = newY;
     }

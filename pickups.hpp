@@ -25,7 +25,7 @@ class pickup : public collideable, public entityParent {
     bool touch;
     int lifetime, pickupID;
     set<int>* collectedPickups;
-    char* toPrint;
+    string toPrint;
     int playerID = 0;
 
     public:
@@ -35,7 +35,6 @@ class pickup : public collideable, public entityParent {
     explicit pickup(float newX, float newY, Color newTint,
                     float newScale, set<int>* newCollectedPickups, int newDisplayChar, int newLifetime, int newID, bool newTouch);
 
-    ~pickup();
 
     bool doesCollide(float otherX, float otherY, int otherType, unsigned int otherID);
 

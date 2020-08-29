@@ -130,7 +130,6 @@ int main(int argc, char** argv) {
     list<editableLayer*> layers;
     editableLayer* layerClipboard = NULL;
     Color background;
-    int fontSize;
     string fileName(argv[1]);
     editorLevelData level;
     level.load(fileName);
@@ -139,6 +138,7 @@ int main(int argc, char** argv) {
     list<editableLayer*>::iterator thisLayer = layers.begin();
     (*thisLayer) -> select();
     cout << "Finished loading.\n";
+    level.loadPalette(palette);
 
     //Main loop
 
@@ -160,12 +160,9 @@ int main(int argc, char** argv) {
                 //Print out all available charFills
 
                 for (int i = 0; i < charFills.size(); i++) {
-                    int codePointToDisplay =  charFills[i] -> display();
-                    char* temp = TextToUtf8(&codePointToDisplay, 1);
                     theScreen -> drawHud(i % (theScreen -> getHudCols() / 2) * 2,
                                          i / (theScreen -> getHudCols() / 2) * 2,
-                                         UIFOREGROUND, string(temp));
-                    free(temp);
+                                         UIFOREGROUND, utf8(charFills[i] -> display()));
                 }
 
                 //Print out currently selected brush
@@ -298,6 +295,7 @@ int main(int argc, char** argv) {
                         mayNeedToSave = true;
                     }
                     if (IsKeyPressed(KEY_S)) {
+                        level.savePalette(palette);
                         level.writeEntities(layers, background);
                         mayNeedToSave = false;
                     }
@@ -582,27 +580,23 @@ int main(int argc, char** argv) {
                 //display brush palette
 
                 for (int i = 0; i < 12; i++) {
-                    int codePointToDisplay = charFills[palette[i + 22 * colliderSelected]] -> get(-1, -1);
-                    char* temp = TextToUtf8(&codePointToDisplay, 1);
+                    string brushIcon = utf8(charFills[palette[i + 22 * colliderSelected]] -> get(-1, -1));
                     if (i == paletteSelection) {
-                        theScreen -> drawHud(i * 2 + 1, 1, (Color){255, 0, 0, 255}, temp);
+                        theScreen -> drawHud(i * 2 + 1, 1, (Color){255, 0, 0, 255}, brushIcon);
                     }
                     else {
-                        theScreen -> drawHud(i * 2 + 1, 1, (Color){255, 255, 255, 255}, temp);
+                        theScreen -> drawHud(i * 2 + 1, 1, (Color){255, 255, 255, 255}, brushIcon);
                     }
-                    free(temp);
                 }
 
                 for (int i = 12; i < 22; i++) {
-                    int codePointToDisplay = charFills[palette[i + 22 * colliderSelected]] -> get(-1, -1);
-                    char* temp = TextToUtf8(&codePointToDisplay, 1);
+                    string brushIcon = utf8(charFills[palette[i + 22 * colliderSelected]] -> get(-1, -1));
                     if (i == paletteSelection) {
-                        theScreen -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 0, 0, 255}, temp);
+                        theScreen -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 0, 0, 255}, brushIcon);
                     }
                     else {
-                        theScreen -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 255, 255, 255}, temp);
+                        theScreen -> drawHud(1 + (i - 12) * 2, 3, (Color){255, 255, 255, 255}, brushIcon);
                     }
-                    free(temp);
                 }
 
                 //display cursor markers
@@ -618,6 +612,7 @@ int main(int argc, char** argv) {
             theScreen -> drawHud(1, 1, UIFOREGROUND, "You didn't save the level. Do you want to save? Y/S or N/ESC.");
             EndDrawing();
             if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_S)) {
+                level.savePalette(palette);
                 level.writeEntities(layers, background);
                 mayNeedToSave = false;
             }

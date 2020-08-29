@@ -1,0 +1,248 @@
+{
+    "collider": "eiffel_collider.lyr",
+    "dayLight": [
+        255,
+        255,
+        255,
+        255
+    ],
+    "dayBackground": [
+        128,
+        207,
+        123,
+        60
+    ],
+    "dayLength": 18000,
+    "fontSize": 16,
+    "entities": [
+        {
+            "type": "layer",
+            "fileName": "eiffel_layer0.lyr",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [
+                255,
+                200,
+                100,
+                255
+            ],
+            "scale": 1.0
+        },
+        {
+            "type": "layer",
+            "fileName": "eiffel_layer1.lyr",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [
+                0,
+                255,
+                0,
+                255
+            ],
+            "scale": 1.0
+        },
+        {
+            "type": "layer",
+            "fileName": "eiffel_layer2.lyr",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [
+                242,
+                180,
+                99,
+                255
+            ],
+            "scale": 1.0
+        },
+        {
+            "type": "layer",
+            "fileName": "eiffel_layer3.lyr",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [
+                255,
+                200,
+                150,
+                255
+            ],
+            "scale": 1.0
+        },
+        {
+            "type": "layer",
+            "fileName": "eiffel_layer4.lyr",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "scale": 1.0
+        },
+        {
+            "type": "elevator",
+            "x": 0.0,
+            "y": 379.5,
+            "tint": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "width": 6,
+            "height": 3,
+            "scale": 1.0,
+            "forwardChannel": -2,
+            "points": [
+                {
+                    "x": 0,
+                    "y": 379.5
+                },
+                {
+                    "x": 200,
+                    "y": 379.5
+                }
+            ],
+            "loop": true,
+            "fileName": "eiffel_car.lyr",
+            "speed": 0.19
+        },
+        {
+            "type": "elevator",
+            "x": 0.0,
+            "y": 374.5,
+            "tint": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "width": 6,
+            "height": 3,
+            "scale": 1.0,
+            "points": [
+                {
+                    "x": 0,
+                    "y": 374.5
+                },
+                {
+                    "x": 200,
+                    "y": 374.5
+                }
+            ],
+            "forwardChannel": -2,
+            "loop": true,
+            "fileName": "eiffel_car.lyr",
+            "speed": 0.15
+        },
+        {
+            "type": "elevator",
+            "x": 0.0,
+            "y": 369.5,
+            "tint": [
+                0,
+                0,
+                0,
+                255
+            ],
+            "width": 6,
+            "height": 3,
+            "scale": 1.0,
+            "forwardChannel": -2,
+            "points": [
+                {
+                    "x": 0,
+                    "y": 369.5
+                },
+                {
+                    "x": 200,
+                    "y": 369.5
+                }
+            ],
+            "loop": true,
+            "fileName": "eiffel_car.lyr",
+            "speed": 0.1
+        },
+        {
+            "type": "player",
+            "x": 11.0,
+            "y": 387.0,
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
+            "scale": 1.0
+        }
+    ],
+    "defaultOutfit": {
+        "name": "test_outfit",
+        "gravity": 0.01,
+        "jumpSpeed": 0.2,
+        "display": 2,
+        "groundSpeed": 0.018,
+        "groundFriction": 0.5,
+        "airSpeed": 0.018,
+        "airFriction": 0.5,
+        "waterSpeed": 0.01,
+        "waterFriction": 0.95,
+        "waterAcceleration": 0.05,
+        "autoRejump": false,
+        "jumpCount": 0,
+        "walljump": true,
+        "health": 16,
+        "maxHealth": 24,
+        "air": 64,
+        "maxAir": 640,
+        "ops": [],
+        "guns": []
+    },
+    "editorPalette": [
+        682,
+        747,
+        767,
+        928,
+        771,
+        772,
+        773,
+        774,
+        775,
+        776,
+        777,
+        778,
+        779,
+        856,
+        32,
+        803,
+        576,
+        784,
+        785,
+        786,
+        787,
+        788,
+        115,
+        46,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        83,
+        72,
+        46,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57
+    ]
+}

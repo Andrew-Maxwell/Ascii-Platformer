@@ -15,51 +15,52 @@
         height(newHeight),
         onTint(newOnTint)
     {
-        int arrowChar;
-        if (xPower > 0) {
-            if (yPower > 0) {
-                arrowChar = 0x2198;
+        if (tint.a != 0) {
+            int arrowChar;
+            if (xPower > 0) {
+                if (yPower > 0) {
+                    arrowChar = 0x2198;
+                }
+                else if (yPower < 0) {
+                    arrowChar = 0x2197;
+                }
+                else {
+                    arrowChar = 0x2192;
+                }
             }
-            else if (yPower < 0) {
-                arrowChar = 0x2197;
+            else if (xPower < 0) {
+                if (yPower > 0) {
+                    arrowChar = 0x2199;
+                }
+                else if (yPower < 0) {
+                    arrowChar = 0x2196;
+                }
+                else {
+                    arrowChar = 0x2190;
+                }
             }
-            else {
-                arrowChar = 0x2192;
+            else { //xPower == 0
+                if (yPower > 0) {
+                    arrowChar = 0x2193;
+                }
+                else if (yPower < 0) {
+                    arrowChar = 0x2191;
+                }
+                else {
+                    arrowChar = '?';
+                }
             }
+            string arrow = utf8(arrowChar);
+            tex = LoadRenderTexture(width * 8, height * 8);
+            BeginTextureMode(tex);
+            ClearBackground((Color){0, 0, 0, 0});
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    theScreen -> myDrawText(arrow.c_str(), (Vector2){j * 8, i * 8}, 8, 0, (Color){255, 255, 255, 255});
+                }
+            }
+            EndTextureMode();
         }
-        else if (xPower < 0) {
-            if (yPower > 0) {
-                arrowChar = 0x2199;
-            }
-            else if (yPower < 0) {
-                arrowChar = 0x2196;
-            }
-            else {
-                arrowChar = 0x2190;
-            }
-        }
-        else { //xPower == 0
-            if (yPower > 0) {
-                arrowChar = 0x2193;
-            }
-            else if (yPower < 0) {
-                arrowChar = 0x2191;
-            }
-            else {
-                arrowChar = '?';
-            }
-        }
-        char* arrowUnicode = TextToUtf8(&arrowChar, 1);
-        tex = LoadRenderTexture(width * 8, height * 8);
-        BeginTextureMode(tex);
-        ClearBackground((Color){0, 0, 0, 0});
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                theScreen -> myDrawText(arrowUnicode, (Vector2){j * 8, i * 8}, 8, 0, (Color){255, 255, 255, 255});
-            }
-        }
-        EndTextureMode();
-        free(arrowUnicode);
     }
 
     linearField::~linearField() {

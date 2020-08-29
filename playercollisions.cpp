@@ -80,8 +80,9 @@
                 break;
             }
             case FORCEFIELDTYPE: {
-                jumpControl = false;
-                justJumped = false;
+                if (col.yVal < 0) {
+                    justJumped = false;
+                }
                 xInertia += col.xVal;
                 yInertia += col.yVal;
                 break;

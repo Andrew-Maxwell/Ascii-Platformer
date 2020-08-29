@@ -80,8 +80,7 @@
 #define PARTICLETYPE  8
 #define PHYSICALENTITYTYPE 9
 #define PHYSICALPARTICLETYPE 10
-#define RAINTYPE 11
-#define DROPTYPE 12
+#define PARTICLESPAWNERTYPE 11
 #define DUMMYENTITYTYPE 13
 #define GAMELAYERTYPE 14
 #define ENEMYTYPE 15
@@ -138,7 +137,9 @@ float roundTo8th(float x);
 
 int cMod(int a, int b);
 
-string findFile(string fileName);
+//Modified from CodepointToUtf8
+
+string utf8(int charIndex);
 
 /******************************************************************************/
 //getLevelIFStream() and getLevelFileP()
@@ -149,5 +150,9 @@ string findFile(string fileName);
 ifstream getLevelIFStream(string& fileName);
 
 FILE* getLevelFileP(string& fileName);
+
+//Used by particle
+
+Rectangle getCharRectangle(int charIndex);
 
 #endif //META_HPP

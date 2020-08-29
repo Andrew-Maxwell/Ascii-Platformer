@@ -26,7 +26,7 @@ class screen {
     float cameraX, cameraY;
     bool moveCameraX, moveCameraY;
     Font displayFont;
-    bool highlightMode;
+    bool highlightMode = false;
 
     public:
 
@@ -35,6 +35,8 @@ class screen {
     void setParams(int newWorldRows, int newWorldCols, int newGameFontSize, int newHudFontSize, float newPlayerSizeFactor, int newDayLength);
 
     Color getColor();
+
+    Color getColor(int index) {return getColor();}
 
     void setColor(Color newColor);
 
@@ -162,6 +164,10 @@ class editableCanvas : public screen {
     explicit editableCanvas();
 
     void changeLighting();
+
+    void setColor(Color newColor);
+
+    Color getColor(int index);
 
     void moveCamera();
 

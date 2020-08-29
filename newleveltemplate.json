@@ -1,0 +1,124 @@
+{
+    "collider": "test_collider.txt",
+    "dayLight": [
+        255,
+        255,
+        255,
+        255
+    ],
+    "nightLight": [
+        100,
+        100,
+        150,
+        255
+    ],
+    "dayBackground": [
+        4,
+        119,
+        152,
+        67
+    ],
+    "nightBackground": [
+        0,
+        0,
+        0,
+        255
+    ],
+    "dayLength": 18000,
+    "fontSize": 16,
+    "entities": [
+        {
+            "type": "player",
+            "x": 0,
+            "y": 0,
+            "tint": [
+                255,
+                0,
+                0,
+                255
+            ],
+            "scale": 1.0
+        },
+        {
+            "type": "layer",
+            "fileName": "test_collider.txt",
+            "x": 0.0,
+            "y": 0.0,
+            "tint": [
+                0,
+                255,
+                0,
+                255
+            ],
+            "scale": 1.0
+        }
+   ],
+    "defaultOutfit": {
+        "name": "test_outfit",
+        "gravity": 0.01,
+        "jumpSpeed": 0.2,
+        "display": 2,
+        "groundSpeed": 0.018,
+        "groundFriction": 0.5,
+        "airSpeed": 0.018,
+        "airFriction": 0.5,
+        "waterSpeed": 0.01,
+        "waterFriction": 0.95,
+        "waterAcceleration": 0.05,
+        "autoRejump": false,
+        "jumpCount": 0,
+        "walljump": true,
+        "health": 16,
+        "maxHealth": 24,
+        "air": 64,
+        "maxAir": 640,
+        "ops": [],
+        "guns": []
+    },
+    "editorPalette": [
+        3,
+        768,
+        769,
+        770,
+        771,
+        772,
+        773,
+        774,
+        775,
+        776,
+        777,
+        778,
+        779,
+        780,
+        781,
+        782,
+        783,
+        784,
+        785,
+        786,
+        787,
+        788,
+        115,
+        46,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57
+    ]
+}

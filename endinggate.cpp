@@ -33,7 +33,7 @@
 
     void endingGate::tickSet() {
         if (GetRandomValue(0, 10) == 0) {
-            world -> addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, scale, 0, -0.01, '*', (height - 1.5) * 100), zPosition);
+            world -> addEntity(new particle( x + GetRandomValue(0, 10 * width) / 10.0, y + height - 1.5, tint, scale, 0, -0.01, "*", (height - 1.5) * 100), zPosition);
         }
     }
 

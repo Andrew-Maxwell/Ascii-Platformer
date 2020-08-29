@@ -222,8 +222,7 @@ using namespace rapidjson;
                 newGun.lastFired = -1 * newGun.cooldown;
                 if (gunData.HasMember("display")) {
                     if (gunData["display"].IsInt()) {
-                        int displayInt = gunData["display"].GetInt();
-                        newGun.display = string(TextToUtf8(&displayInt, 1));
+                        newGun.display = utf8(gunData["display"].GetInt());
                     }
                     else {
                         newGun.display = gunData["display"].GetString();
@@ -316,7 +315,7 @@ using namespace rapidjson;
                     }
                     newOp.operands.push_back(operands[j].GetInt());
                 }
-                newOp.display = string(TextToUtf8(&displayChar, 1));
+                newOp.display = utf8(displayChar);
                 toReturn.ops.push_back(newOp);
             }
         }

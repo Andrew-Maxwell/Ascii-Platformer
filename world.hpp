@@ -155,6 +155,8 @@ class collider : public layer {
 
     bool isTileSolid(int checkX, int checkY);
 
+    bool isLadder(int checkX, int checkY);
+
     void setSolid(int x, int y, char solid);
     
     int getPlayerDamage(int checkX, int checkY);

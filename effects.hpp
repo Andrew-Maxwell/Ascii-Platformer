@@ -1,7 +1,7 @@
 #ifndef EFFECTS_HPP
 #define EFFECTS_HPP
 
-#include "rain.hpp" //for drop
+#include "particles.hpp"
 #include "entity.hpp"
 #include "world.hpp"
 #include "meta.hpp"

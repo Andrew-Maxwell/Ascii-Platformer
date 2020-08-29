@@ -13,7 +13,6 @@
 #include "particles.hpp"
 #include "pickups.hpp"
 #include "player.hpp"
-#include "rain.hpp"
 #include "savepoint.hpp"
 #include "water.hpp"
 #include "screen.hpp"

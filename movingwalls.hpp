@@ -114,7 +114,7 @@ class elevator : virtual public gameLayer {
 
 class physicalBlock : public physicalEntity, virtual public gameLayer {
 
-    float oldX, oldY;
+    float oldX, oldY, old2X, old2Y;
 
     public:
 

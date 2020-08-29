@@ -10,6 +10,7 @@ Core gameplay elements:
             - Wall climber (possibly ONLY wall-climbing, no jumping) (autorejump + low jump power + infinite walljumps)
             - Extreme multijumping?
             - Rocket jumps/swinging
+            - Completely unable to move, must rely entirely on environment to move you
     - Combat (with a puzzle-solving bent)
         - Bullet Hell style?
         - Similar to Cave Story/Noita
@@ -19,10 +20,14 @@ Arena:
     Select level(s)
 
 Loose ends:
-- If you stand on the left edge of the elevator and move sideways while it is moving up, you will die.
-- When the elevator is moving downwards, the player sometimes gets left behind, esp. if moving sideways?
-- Figure out how to handle display offets for moving items, e.g. particles which are 0.5x0.5 and it's in the center of the character; will look wrong unless offset by 2px up and to the left.
-- moving blocks interact with physical entities weirdly: No inertia, so particles often get deleted because they're not moving. Also, when a snake runs into a particle the particle pops out on top of the snake!? + particles sticking to back of elevator block
+- editor segfaulting on eiffel.json
+- Elevator texture reloaded over and over
+- Editor changes background color randomly
+- Newlevel doesn't create valid level files
+- Can't change background color in editor anymore since variable lighting was introduced
+- Add map and highlight buttons (configurable)
+- reversing snakewall leaves invisible blocks in path
+- gameLayer z scaling still works weird
 - Gun changes color after saving
 - Broadcast animation + HUD broadcast indicator blends in with background
 - Joystick aim accuracy is VERY limited. Should probably allow spamming/strafing like Cave Story to compensate.
@@ -30,48 +35,48 @@ Loose ends:
 - Allow reordering of players or changing default player config
 
 Features:
-1 Puzzle elements:
-    1 Color changing/other effect layers
-    1 Transmitter effect
-    2 Variable size channels (4, 8, 16 bit)
-1 Story elements:
-    1 persistent plot variables.
-    2 Separate global- and outfit- scope? (e.g. beating boss = global scope, key = outfit scope)
-    2 An inventory. Can probably be purely cosmetic.
-    1 Doors that can be locked or unlocked depending on plot variables from either scope.
-        1 More generally, want entity state to depend on plot variables. 
-    1 Potential implementation: Global- and outfit- scope implemented as a set of ints, similar to the system for keeping track of which pickups have been collected already. They are stored in the save but           loaded into the collider and can be accessed the same way as broadcast codes.
-    2 NPCS and bosses which can modify plot variables.
-    1 Dialog
-    2 Inventory
+1 Transmitter effect
+1 persistent plot variables.
+1 Doors that can be locked or unlocked depending on plot variables from either scope.
+    1 More generally, want entity state to depend on plot variables. 
+1 Potential implementation: Global- and outfit- scope implemented as a set of ints, similar to the system for keeping track of which pickups have been collected already. They are stored in the save but           loaded into the collider and can be accessed the same way as broadcast codes.
+1 Dialog
 1 Sound effects
 1 Music: see http://dig.ccmixter.org for free music, or contact noise, or try to make your own!
+2 Figure out how ladders should work
+2 Inventory
+2 Variable size channels (4, 8, 16 bit)
+2 Separate global- and outfit- scope? (e.g. beating boss = global scope, key = outfit scope)
+2 An inventory. Can probably be purely cosmetic.
+2 NPCS and bosses which can modify plot variables.
 2 Variable refresh rate
 2 Map system: Use render test code on the collider
 2 Visual effects:
-    2 leaf physicalParticles that fly eratically
-    2 Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
-        original.
-    2 Lightning bolt, fire (spreads via embers), huge fireballs
-    2 Wave and rocket guns
-    2 Explosions of sparks
-    2 Dust/debris falling from the ceiling (to go with shaking layer effect)
-    2 Plumes of steam/smoke particles
-    2 Algae/foliage particles (can move, but return elastically to original position.)
-        Trees: Generate pseudo-randomly based on location/size/level file name/whatever. elasticity of each particle depends on distance from trunk point
-    2 Glass panes that explode into tons and tons of tiny shards
+2 leaf physicalParticles that fly eratically
+2 Digital corruption visual effect; layer turns into random characters suddenly, gradually resolves back into
+    original.
+2 Lightning bolt, fire (spreads via embers), huge fireballs
+2 Wave and rocket guns
+2 Explosions of sparks
+2 Dust/debris falling from the ceiling (to go with shaking layer effect)
+2 Plumes of steam/smoke particles
+2 Algae/foliage particles (can move, but return elastically to original position.)
+    Trees: Generate pseudo-randomly based on location/size/level file name/whatever. elasticity of each particle depends on distance from trunk point
+2 Glass panes that explode into tons and tons of tiny shards
 2 Rotary forcefields!
-3 physical solid blocks?
-? Multi-thread processing for water and particles
-? Editor misc:
-    3 Display, allow changing palette selection (don't ignore number keys) in tab screen
-    3 Add aB layer indicator which shows all of the layers and which one is selected
-    3 Fix the default palette
-    3 Need to be able to correspond entities in the file to entities in the editor more easily.
+3 Level editor: Display, allow changing palette selection (don't ignore number keys) in tab screen
+3 Level editor: Add a layer indicator which shows all of the layers and which one is selected
+3 Level editor: Fix the default palette
+3 Level editor: Need to be able to correspond entities in the file to entities in the editor more easily.
 
 2 Combat elements:
-    - Gun/turret enemies
-    - Fast-moving enemies
+    - Determine line of sight using world::go.
+    - Stationary guns (fire a customizeable bullet in a parabolic arc when they have line of sight; range of firing angles can also be customized
+    - Enemies that jump towards you in a parabolic arc when they have line of sight
+    - Drone enemies that fly towards you, bouncing off walls: deal damage when they are within (say) 10 tiles, but if they touch you they die. So they try to remain exactly 10 tiles away.
+    - Other drone enemies that fly far away and snipe from above
+    - Fish enemies, using particle::setDirection, that jump out of water at you (like RW leeches), do small amounts of damage individually.
+    - Underwater grabby enemies, similar to RW wormgrass.
     2 Generic Gun pickups
 2 Generic physicalEntity parameters (density/volume/mass)
 2 Flat mode (everything rendered to one texture) to save on processing power
@@ -98,6 +103,10 @@ Ideas:
         network to teach you how to use it. Later he disappears, and you need to travel deeper into the abandoned
         city to find him...
     - Level where you're really bouncy, elasticity = 1.05 or something like that, but there are pools of water around and you need to use them to stop...
+    - Level where you have several physicalBlocks that only move in the X direction, must manipulate them using forcefields in order to provide platforms to jump past obstacles (similar to that one marbleblastgold level where there's a single moving platform and you have to stay on it)
+    - Levels similar to Cave Story labyrinth levels.
+    - Level where you have a single small room with four exits, but three exits are always blocked by a snake.
+    - Level called "the shaft" where you have to fall through obstacles, moving platforms, etc. safely, but you have to move a certain speed, because there are zap drones behind you.
 
 inspiration/vague visual ideas:
     - Giant drum machine like washing machine
@@ -109,34 +118,26 @@ inspiration/vague visual ideas:
     - Trippy level where you have to run up and down flashing neon signs where turned on = solid    
 
 Housekeeping items (may never get to all of these):
+- Create functions to clean up loading entities from JSON; pass function the Value& and the default value.
 - Rewrite player::apply to be less confusing; maybe stop using bitsets, just use uint8_ts
 - Docs, including "lessons learned"
 - Replace x, y with Vector2 everywhere
 - Create configure() functions rather than having 10-argument constructors/standardize constructor argument order
 - Cap line lengths
 - change everything from camelCase to PascalCase - use Perl to identify variable names using declarations? what about scoping?
-- rename scale to Scale
 - make layer use char[][] for mild performance benefits
-- Convert rain to a generic random particle spawner that can spawn particles within a given box area
 - Come up with better names for everything
-- Several items which should be done together:
-    - Rewrite save system as JSON
-    - Rewrite player to not use so many fixed-size arrays
-    - Create gun and op objects in player, instead of having a bunch of arrays
-    - Guns and ops stored in player; pickups just unlock them.
-        - Op data can be passed to player in readEntities() in game_main.cpp
 - Split largest files (editables.cpp, player.cpp, editor_main.cpp) into smaller files, or at least improve structure
 
 Bugs:
-- physicalEntities (particles specifically) of size != 1.0 bounce forever
+- Window close signal ignored in menu
 - Player gets teleported to (0, 0) ? in uncertain circumstances
-- Guns change color after saving
+- Guns change color after saving?
 - invalid free() when quitting in CloseWindow()
-- Some of the files in "dark" getting loaded as wrong width
+- Some of the files in "dark" getting loaded as wrong width?
 - Water appears weird when player is moving very slowly in the vertical direction
 - If there are two water objects with one above the other, they tend to interfere.
 - Particles don't appear right next to walls
-- Player vibrates when standing on a surface
 
 Idea: Setting is a floating colony in the atmosphere of a gas giant. Modeled after a truly massive blimp?
 

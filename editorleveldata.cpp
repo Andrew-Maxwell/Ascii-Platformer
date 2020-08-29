@@ -5,6 +5,27 @@
 //editorLevelData: Used to load level data for use by the editor code
 /******************************************************************************/
 
+    void editorLevelData::loadPalette(int* palette) {
+        if (json.HasMember("editorPalette")) {
+            for (SizeType i = 0; i < 44; i++) {
+                palette[i] = json["editorPalette"][i].GetInt();
+            }
+        }
+    }
+
+    void editorLevelData::savePalette(int* palette) {
+        if (json.HasMember("editorPalette")) {
+            json["editorPalette"].Clear();
+        }
+        else {
+            Value newPalette(kArrayType);
+            json.AddMember("editorPalette", newPalette.Move(), json.GetAllocator());
+        }
+        for (int i = 0; i < 44; i++) {
+            json["editorPalette"].PushBack(Value(palette[i]).Move(), json.GetAllocator());
+        }
+    }
+
     void editorLevelData::initializeEditor(list<editableLayer*>& layers, Color& background) {
 
         //Read level background color
@@ -100,6 +121,19 @@
             saveIter++;
         }
         cout << "Finished saving layers.\n";
+
+        if (json.HasMember("dayBackground")) {
+            setColor(json["dayBackground"], theScreen -> getColor(0));
+        }
+        if (json.HasMember("dawnBackground")) {
+            setColor(json["dawnBackground"], theScreen -> getColor(1));
+        }
+        if (json.HasMember("nightBackground")) {
+            setColor(json["nightBackground"], theScreen -> getColor(2));
+        }
+        if (json.HasMember("sunsetBackground")) {
+            setColor(json["sunsetBackground"], theScreen -> getColor(3));
+        }
 
         //Save entity metadata (to json)
         

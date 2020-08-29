@@ -42,7 +42,7 @@
     void physicalEntity::tickSet() {}
 
     void physicalEntity::tickGet() {
-        hit = false;
+        hitX = hitY = false;
         float pushedX = 0, pushedY = 0;
         lastTickUnderWater = isUnderWater;
         isUnderWater = false;
@@ -73,24 +73,25 @@
             yMomentum += gravity;
         }
 
-        float momentumMagnitude = pow(pow(xMomentum, 2) + pow(yMomentum, 2), 0.5);
-        if (momentumMagnitude > maxSpeed) {
-            xMomentum *= maxSpeed / momentumMagnitude;
-            yMomentum *= maxSpeed / momentumMagnitude;
+        if (abs(xMomentum) > maxSpeed) {
+            xMomentum *= (maxSpeed / abs(xMomentum) + 4.0) / 5.0;
+        }
+        if (abs(yMomentum) > maxSpeed) {
+            yMomentum *= (maxSpeed / abs(yMomentum) + 4.0) / 5.0;
         }
 
+/*
+        xMomentum = min(xMomentum, maxSpeed);
+        xMomentum = max(xMomentum, -1 * maxSpeed);
+        yMomentum = min(yMomentum, maxSpeed);
+        yMomentum = max(yMomentum, -1 * maxSpeed);
+*/
         float dX = xMomentum + pushedX;
         float dY = yMomentum + pushedY;
-        bool hitX, hitY;
         Vector2 newPosition = world -> go((Vector2){x, y}, (Vector2){dX, dY}, width, height, hitX, hitY, xMomentum, yMomentum, elasticity, id);
-        if (hitX) {
-//            xMomentum = xMomentum * (-1 * elasticity);
-            hit = true;
-        }
         if (hitY) { 
 //            yMomentum = yMomentum * (-1 * elasticity);
             xMomentum *= friction;
-            hit = true;
             if (newPosition.y < y + dY) {
                 onGround = true;
             }
@@ -106,64 +107,4 @@
 
     void physicalEntity::print() {}
 
-
-/******************************************************************************/
-//physicalParticle
-//A physicalEntity with some particle characteristics
-/******************************************************************************/
-
-    physicalParticle::physicalParticle( float newX, float newY, Color newTint, float newScale, int displayChar, float newElasticity, float newXMomentum,
-        float newYMomentum, float newMaxSpeed, float newGravity, float newFriction, int newLifetime) :
-        entity(newX, newY, newTint, newScale),
-        physicalEntity(newX, newY, newTint, newScale, 0.5, 0.5, newElasticity, newXMomentum, newYMomentum, newMaxSpeed, newGravity, newFriction),
-        particle(newX, newY, newTint, newScale, newXMomentum, newYMomentum, displayChar, newLifetime),
-        dynamicChar(displayChar == 0),
-        lifetime(newLifetime) {
-            width = 0.5;
-            height = 0.5;
-    }
-
-    unsigned int physicalParticle::type() {
-        return PHYSICALPARTICLETYPE;
-    }
-
-    bool physicalParticle::doesCollide(float otherX, float otherY, int otherType, unsigned int otherID) {
-        return false;
-    }
-
-    bool physicalParticle::stopColliding() {
-        return shouldDelete;
-    }
-
-    void physicalParticle::tickSet() {}
-
-    void physicalParticle::tickGet() {
-        physicalEntity::tickGet();
-        //Delete if in a wall, or timed out, or stopped moving, or fell out of level.
-        if (world -> isSolid(x + width / 2, y + height / 2)) {
-            shouldDelete = true;
-        }
-        else if (lifetime-- < 0 || (!isUnderWater && xMomentum < 0.01 && xMomentum > -0.01 && yMomentum < 0.01 && yMomentum > -0.01) || y > world -> getRows() + 100) {
-            shouldDelete = true;
-        }
-    }
-
-    bool physicalParticle::finalize() {
-        return shouldDelete;
-    }
-
-    void physicalParticle::print() {
-        if (dynamicChar) {
-            if (abs(xMomentum) + abs(yMomentum) > 0.5) {
-                xSpeed = xMomentum;
-                ySpeed = yMomentum;
-                particle::setDirection();
-            }
-            else {
-                display[0] = '.';
-            }
-        }
-//        theScreen -> draw(x, y, tint, scale, display, doLighting, doHighlight);
-        theScreen -> draw(x - 0.25, y - 0.25, tint, scale, display, doLighting, doHighlight);
-    }
 

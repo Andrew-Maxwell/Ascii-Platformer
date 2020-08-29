@@ -298,31 +298,37 @@
     }
 
     void screen::draw(float x, float y, Color tint, float scale, string text, bool doLight, bool doHighlight) {
-        if (doLight) {
-            tint = lighting(tint);
+        if (tint.a != 0) {
+            if (doLight) {
+                tint = lighting(tint);
+            }
+            if (highlightMode) {
+                tint = highlight(tint, doHighlight);
+            }
+            myDrawText(text.c_str(),
+                (Vector2){ (screenCols / scale / 2 - cameraX + x) * fontSize * scale,
+                (screenRows / scale / 2 - cameraY + y) * fontSize * scale },
+                fontSize * scale, 0, tint);
         }
-        if (highlightMode) {
-            tint = highlight(tint, doHighlight);
-        }
-        myDrawText(text.c_str(),
-            (Vector2){ (screenCols / scale / 2 - cameraX + x) * fontSize * scale,
-            (screenRows / scale / 2 - cameraY + y) * fontSize * scale },
-            fontSize * scale, 0, tint);
     }
 
     void screen::drawHud(float x, float y, Color tint, string text) {
-        myDrawText(text.c_str(), (Vector2){x * hudFontSize, y * hudFontSize}, hudFontSize, 0, tint);
+        if (tint.a != 0) {
+            myDrawText(text.c_str(), (Vector2){x * hudFontSize, y * hudFontSize}, hudFontSize, 0, tint);
+        }
     }
 
     void screen::drawWithBackground(float x, float y, Color tint, Color background, float scale, string text, bool doLight, bool doHighlight) {
-        if (doLight) {
-            tint = lighting(tint);
+        if (tint.a != 0) {
+            if (doLight) {
+                tint = lighting(tint);
+            }
+            if (highlightMode) {
+                tint = highlight(tint, doHighlight);
+            }
+            drawBarRight(x, y, background, scale, MeasureTextEx(displayFont, text.c_str(), fontSize * scale, 0).x / float(fontSize * scale), doLight);
+            draw(x, y, tint, scale, text, doLight);
         }
-        if (highlightMode) {
-            tint = highlight(tint, doHighlight);
-        }
-        drawBarRight(x, y, background, scale, MeasureTextEx(displayFont, text.c_str(), fontSize * scale, 0).x / float(fontSize * scale), doLight);
-        draw(x, y, tint, scale, text, doLight);
     }
 
     void screen::drawHudWithBackground(float x, float y, Color tint, Color background, string text) {
@@ -604,6 +610,43 @@
                 background = dawnBackground;
                 break;
             }
+        }
+    }
+
+    void editableCanvas::setColor(Color newColor) {
+        background = newColor;
+        switch (lightingSelection % 4) {
+            case 0: {
+                dayBackground = newColor;
+                break;
+            }
+            case 1: {
+                sunsetBackground = newColor;
+                break;
+            }
+            case 2: {
+                nightBackground = newColor;
+                break;
+            }
+            case 3: {
+                dawnBackground = newColor;
+                break;
+            }
+        }
+    }
+
+    Color editableCanvas::getColor(int index) {
+        switch (index) {
+            case 0:
+                return dayBackground;
+            case 1:
+                return sunsetBackground;
+            case 2:
+                return nightBackground;
+            case 3:
+                return dawnBackground;
+            default:
+                return dayBackground;
         }
     }
 

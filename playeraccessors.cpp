@@ -54,7 +54,7 @@
     void player::setOutfit(outfit newOutfit) {
         outfitName = newOutfit.name;
         display = newOutfit.display;
-        displayStr = string(TextToUtf8(&display, 1));
+        displayStr = utf8(display);
         health = newOutfit.health;
         maxHealth = newOutfit.maxHealth;
         hurtTimer = -10000000;
